@@ -1,0 +1,12 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: rhizan-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - rhizan_mongo_data:/data/db
+
+volumes:
+  rhizan_mongo_data:
