@@ -1,7 +1,12 @@
 # RHIZAN Hub 🚀
 
-> **Internal Operations & Workspace Platform for RHIZAN**  
+> **Internal Operations & Workspace Platform for [Rhizan Technologies](https://www.rhizantech.com)**  
 > *"Everyone knows what they need to do, what they are working on, what is happening with clients/projects, and what the team has accomplished."*
+
+[![Rhizan Technologies](https://img.shields.io/badge/Rhizan-Technologies-0d9488?style=flat-square)](https://www.rhizantech.com)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Express](https://img.shields.io/badge/Express-Backend-gray?style=flat-square&logo=express)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-emerald?style=flat-square&logo=mongodb)](https://www.mongodb.com/)
 
 ---
 
