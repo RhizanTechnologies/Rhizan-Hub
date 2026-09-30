@@ -136,6 +136,15 @@ export const Sidebar: React.FC = () => {
             </button>
           ))}
         </div>
+
+        {/* Footer System Status */}
+        <div className="mt-3 pt-2.5 border-t border-[#1f1f1f] flex items-center justify-between text-[10px] text-neutral-500">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></span>
+            v1.0.0 • Systems Active
+          </span>
+          <span>© 2026 Rhizan</span>
+        </div>
       </div>
     </aside>
   );
