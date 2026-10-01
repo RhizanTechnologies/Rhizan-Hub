@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { Project } from '../models/Project';
 import { Task } from '../models/Task';
+import { Client } from '../models/Client';
 import { Activity } from '../models/Activity';
 import { AuthRequest } from '../middlewares/auth';
 
@@ -8,6 +9,7 @@ export const getProjects = async (req: AuthRequest, res: Response): Promise<void
   try {
     const projects = await Project.find()
       .populate('members', 'name email title avatar status')
+      .populate('clientId', 'name contactPerson email phone status')
       .sort({ updatedAt: -1 });
 
     // Attach task counts to each project
@@ -39,10 +41,9 @@ export const getProjects = async (req: AuthRequest, res: Response): Promise<void
 export const getProjectById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const project = await Project.findById(id).populate(
-      'members',
-      'name email title avatar status'
-    );
+    const project = await Project.findById(id)
+      .populate('members', 'name email title avatar status')
+      .populate('clientId', 'name contactPerson email phone status');
 
     if (!project) {
       res.status(404).json({ message: 'Project not found' });
@@ -61,18 +62,45 @@ export const getProjectById = async (req: AuthRequest, res: Response): Promise<v
 
 export const createProject = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { name, clientName, description, members, status, deadline, budget, notes } = req.body;
+    const {
+      name,
+      clientName,
+      clientId,
+      description,
+      members,
+      status,
+      deadline,
+      budget,
+      notes,
+      links,
+    } = req.body;
+
+    let resolvedClientName = clientName || 'Internal';
+    if (clientId) {
+      const client = await Client.findById(clientId);
+      if (client) {
+        resolvedClientName = client.name;
+      }
+    }
 
     const project = await Project.create({
       name,
-      clientName: clientName || 'Internal',
+      clientName: resolvedClientName,
+      clientId: clientId || undefined,
       description: description || '',
       members: members || [],
       status: status || 'IN_PROGRESS',
       deadline,
       budget,
       notes,
+      links: links || [],
     });
+
+    if (clientId) {
+      await Client.findByIdAndUpdate(clientId, {
+        $addToSet: { projects: project._id },
+      });
+    }
 
     if (req.user) {
       await Activity.create({
@@ -84,10 +112,9 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
       });
     }
 
-    const populated = await Project.findById(project._id).populate(
-      'members',
-      'name email title avatar'
-    );
+    const populated = await Project.findById(project._id)
+      .populate('members', 'name email title avatar')
+      .populate('clientId', 'name contactPerson email phone status');
 
     res.status(201).json(populated);
   } catch (error: any) {
@@ -98,15 +125,33 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
 export const updateProject = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const project = await Project.findByIdAndUpdate(id, req.body, { new: true }).populate(
-      'members',
-      'name email title avatar'
-    );
+    const existing = await Project.findById(id);
 
-    if (!project) {
+    if (!existing) {
       res.status(404).json({ message: 'Project not found' });
       return;
     }
+
+    // If client link changed
+    if (req.body.clientId && req.body.clientId !== existing.clientId?.toString()) {
+      if (existing.clientId) {
+        await Client.findByIdAndUpdate(existing.clientId, {
+          $pull: { projects: id },
+        });
+      }
+      await Client.findByIdAndUpdate(req.body.clientId, {
+        $addToSet: { projects: id },
+      });
+
+      const newClient = await Client.findById(req.body.clientId);
+      if (newClient) {
+        req.body.clientName = newClient.name;
+      }
+    }
+
+    const project = await Project.findByIdAndUpdate(id, req.body, { new: true })
+      .populate('members', 'name email title avatar')
+      .populate('clientId', 'name contactPerson email phone status');
 
     if (req.user) {
       await Activity.create({
@@ -114,7 +159,7 @@ export const updateProject = async (req: AuthRequest, res: Response): Promise<vo
         userName: req.user.name,
         action: 'updated project',
         entityType: 'PROJECT',
-        entityTitle: project.name,
+        entityTitle: project?.name || 'Project',
       });
     }
 
@@ -133,6 +178,9 @@ export const deleteProject = async (req: AuthRequest, res: Response): Promise<vo
       res.status(404).json({ message: 'Project not found' });
       return;
     }
+
+    // Unlink from Client
+    await Client.updateMany({ projects: id }, { $pull: { projects: id } });
 
     res.json({ message: 'Project deleted successfully', id });
   } catch (error: any) {

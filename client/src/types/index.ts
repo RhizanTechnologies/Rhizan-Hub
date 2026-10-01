@@ -48,10 +48,42 @@ export interface Task {
   updatedAt: string;
 }
 
+export interface ResourceLink {
+  _id?: string;
+  id?: string;
+  title: string;
+  url: string;
+  category?: 'CONTRACT' | 'DESIGN' | 'GITHUB' | 'DRIVE' | 'DOCS' | 'LIVE' | 'INVOICE' | 'OTHER' | string;
+}
+
+export interface ClientMeeting {
+  _id?: string;
+  id?: string;
+  title: string;
+  date: string;
+  time?: string;
+  linkOrLocation?: string;
+  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+  notes?: string;
+}
+
+export interface ClientPayment {
+  _id?: string;
+  id?: string;
+  invoiceNumber?: string;
+  title: string;
+  amount: number;
+  dueDate?: string;
+  paidDate?: string;
+  status: 'PAID' | 'PENDING' | 'OVERDUE';
+  notes?: string;
+}
+
 export interface Project {
   _id: string;
   name: string;
   clientName: string;
+  clientId?: string | Client;
   description: string;
   members: User[];
   status: 'PLANNING' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED';
@@ -62,6 +94,7 @@ export interface Project {
   totalTasks?: number;
   completedTasks?: number;
   notes?: string;
+  links?: ResourceLink[];
   createdAt: string;
   updatedAt: string;
 }
@@ -87,6 +120,12 @@ export interface Client {
   nextFollowUpDate?: string;
   notes: string;
   dealValue?: number;
+  paidAmount?: number;
+  currency?: string;
+  projects?: Project[];
+  meetings?: ClientMeeting[];
+  payments?: ClientPayment[];
+  links?: ResourceLink[];
   createdAt: string;
   updatedAt: string;
 }

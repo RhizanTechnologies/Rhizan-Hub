@@ -1,8 +1,16 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
+export interface IProjectResourceLink {
+  _id?: Types.ObjectId;
+  title: string;
+  url: string;
+  category?: string; // GITHUB, FIGMA, LIVE, STAGING, DOCS, DRIVE, OTHER
+}
+
 export interface IProject extends Document {
   name: string;
   clientName: string;
+  clientId?: Types.ObjectId;
   description: string;
   members: Types.ObjectId[];
   status: 'PLANNING' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED';
@@ -11,14 +19,25 @@ export interface IProject extends Document {
   deadline?: Date;
   budget?: number;
   notes?: string;
+  links: IProjectResourceLink[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const ProjectResourceLinkSchema = new Schema<IProjectResourceLink>(
+  {
+    title: { type: String, required: true, trim: true },
+    url: { type: String, required: true, trim: true },
+    category: { type: String, default: 'OTHER' },
+  },
+  { timestamps: true }
+);
 
 const ProjectSchema = new Schema<IProject>(
   {
     name: { type: String, required: true, trim: true },
     clientName: { type: String, default: 'Internal' },
+    clientId: { type: Schema.Types.ObjectId, ref: 'Client' },
     description: { type: String, default: '' },
     members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     status: {
@@ -31,6 +50,7 @@ const ProjectSchema = new Schema<IProject>(
     deadline: { type: Date },
     budget: { type: Number },
     notes: { type: String, default: '' },
+    links: [ProjectResourceLinkSchema],
   },
   { timestamps: true }
 );
