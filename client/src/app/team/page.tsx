@@ -58,6 +58,8 @@ export default function TeamPage() {
     name: string;
     email: string;
     tempoPass: string;
+    emailSent?: boolean;
+    emailMessage?: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -171,6 +173,7 @@ export default function TeamPage() {
         user: any;
         temporaryPassword: string;
         emailSent: boolean;
+        emailMessage?: string;
       }>('/team/invite', {
         method: 'POST',
         body: JSON.stringify({
@@ -188,6 +191,8 @@ export default function TeamPage() {
         name: inviteName,
         email: inviteEmail,
         tempoPass: res.temporaryPassword || tempoPassword,
+        emailSent: res.emailSent,
+        emailMessage: res.emailMessage,
       });
 
       setIsInviteOpen(false);
@@ -506,15 +511,27 @@ export default function TeamPage() {
       >
         {createdInvite && (
           <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-xs font-bold text-white">Invitation Credentials Ready</h4>
-                <p className="text-[11px] text-neutral-300 mt-0.5">
-                  Share these temporary credentials with <span className="font-semibold text-white">{createdInvite.name}</span>. Upon first login, they will be forced to change their password.
-                </p>
+            {createdInvite.emailSent ? (
+              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3">
+                <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-white">Invitation Email Delivered!</h4>
+                  <p className="text-[11px] text-emerald-300 mt-0.5">
+                    An email with the temporary login password and link was automatically sent to <span className="font-semibold text-white">{createdInvite.email}</span>.
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="p-3.5 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-white">Invitation Created</h4>
+                  <p className="text-[11px] text-neutral-300 mt-0.5">
+                    {createdInvite.emailMessage || 'Invitation created. To send emails automatically, configure Gmail or Resend in server/.env.'}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="p-3.5 rounded-xl bg-[#161616] border border-[#262626] space-y-2.5 font-mono text-xs">
               <div>

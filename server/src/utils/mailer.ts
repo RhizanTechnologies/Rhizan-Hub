@@ -13,12 +13,8 @@ export const sendInvitationEmail = async ({
   temporaryPassword,
   invitedBy = 'Rhizan Technologies',
 }: SendInvitationParams): Promise<{ sent: boolean; message: string }> => {
-  const host = process.env.SMTP_HOST;
-  const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const from = process.env.EMAIL_FROM || '"RHIZAN Hub" <no-reply@rhizan.com>';
   const loginUrl = `${process.env.CLIENT_URL || 'http://localhost:3001'}/login`;
+  const fromEmail = process.env.EMAIL_FROM || 'RHIZAN Hub <onboarding@resend.dev>';
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -35,68 +31,107 @@ export const sendInvitationEmail = async ({
         .cred-item { font-size: 13px; margin: 6px 0; color: #d4d4d4; }
         .cred-item strong { color: #14b8a6; }
         .btn { display: inline-block; background-color: #0d9488; color: #ffffff !important; text-decoration: none; padding: 12px 24px; font-size: 14px; font-weight: 600; border-radius: 8px; margin: 16px 0; text-align: center; }
-        .footer { font-size: 12px; color: #737373; margin-top: 24px; border-top: 1px solid #262626; pt: 16px; }
+        .footer { font-size: 12px; color: #737373; margin-top: 24px; border-top: 1px solid #262626; padding-top: 16px; }
       </style>
     </head>
     <body>
       <div class="card">
         <div class="logo-badge">RHIZAN HUB</div>
         <h1>Welcome to RHIZAN Hub, ${name}!</h1>
-        <p>You have been invited by ${invitedBy} to join the RHIZAN Hub internal operations workspace.</p>
+        <p>You have been invited by <strong>${invitedBy}</strong> to join the RHIZAN Hub workspace.</p>
         
         <div class="cred-box">
-          <div class="cred-item"><strong>Email:</strong> ${to}</div>
+          <div class="cred-item"><strong>Work Email:</strong> ${to}</div>
           <div class="cred-item"><strong>Temporary Password:</strong> ${temporaryPassword}</div>
         </div>
 
-        <p>⚠️ <strong>Security Requirement:</strong> For your security, you will be prompted to change your temporary password immediately upon your first login.</p>
+        <p>⚠️ <strong>Security Notice:</strong> Upon your first sign in, you will be prompted to set your new permanent password before entering the platform.</p>
 
         <a href="${loginUrl}" class="btn">Sign In to RHIZAN Hub</a>
 
         <div class="footer">
-          If you did not expect this invitation, you can safely ignore this email.<br/>
-          Rhizan Technologies • Internal Workspace
+          Rhizan Technologies • Internal Workspace Management
         </div>
       </div>
     </body>
     </html>
   `;
 
-  if (host && user && pass) {
+  // 1. Try Resend API if RESEND_API_KEY is configured
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (resendApiKey) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: fromEmail,
+          to: [to],
+          subject: 'You have been invited to RHIZAN Hub',
+          html: htmlContent,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Resend API error');
+      }
+
+      console.log(`✉️ Email successfully delivered to ${to} via Resend (ID: ${data.id})`);
+      return { sent: true, message: `Email invitation dispatched to ${to} via Resend.` };
+    } catch (err: any) {
+      console.error('❌ Resend email delivery failed:', err.message);
+      return { sent: false, message: `Resend error: ${err.message}` };
+    }
+  }
+
+  // 2. Try Gmail or Standard SMTP
+  const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER;
+  const emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS;
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 465;
+
+  if (emailUser && emailPass) {
     try {
       const transporter = nodemailer.createTransport({
         host,
         port,
         secure: port === 465,
-        auth: { user, pass },
+        auth: {
+          user: emailUser,
+          pass: emailPass.replace(/\s+/g, ''), // Strip spaces if copied from Google App Password
+        },
       });
 
       await transporter.sendMail({
-        from,
+        from: process.env.EMAIL_FROM || `"RHIZAN Hub" <${emailUser}>`,
         to,
-        subject: 'Invitation to join RHIZAN Hub',
+        subject: 'You have been invited to RHIZAN Hub',
         html: htmlContent,
       });
 
-      console.log(`✉️ Email invitation successfully dispatched to ${to}`);
-      return { sent: true, message: 'Invitation email sent successfully.' };
+      console.log(`✉️ Email successfully delivered to ${to} via SMTP`);
+      return { sent: true, message: `Email invitation dispatched to ${to}` };
     } catch (err: any) {
-      console.error(`Failed to send email via SMTP:`, err.message);
-      return { sent: false, message: `SMTP error: ${err.message}` };
+      console.error('❌ SMTP email delivery failed:', err.message);
+      return { sent: false, message: `SMTP delivery failed: ${err.message}` };
     }
   }
 
-  // If no SMTP configured, log simulated email to console
+  // 3. Fallback: log to console with clear guidance
   console.log(`\n========================================`);
-  console.log(`📨 [SIMULATED EMAIL INVITATION]`);
+  console.log(`📨 [INVITATION READY TO SEND]`);
   console.log(`To: ${to}`);
-  console.log(`Name: ${name}`);
   console.log(`Temporary Password: ${temporaryPassword}`);
   console.log(`Login URL: ${loginUrl}`);
+  console.log(`⚠️ To send real emails automatically, add RESEND_API_KEY or EMAIL_USER/EMAIL_PASS in server/.env`);
   console.log(`========================================\n`);
 
   return {
     sent: false,
-    message: 'Invitation generated. SMTP is not configured, credentials displayed for manual sharing.',
+    message: 'Invitation created. To send emails automatically, please configure your Gmail App Password or Resend API key in server/.env.',
   };
 };
