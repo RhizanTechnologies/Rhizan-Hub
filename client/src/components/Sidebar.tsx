@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   ExternalLink,
   LogOut,
+  Compass,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -23,8 +24,9 @@ const navItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Projects', href: '/projects', icon: FolderKanban },
+  { name: 'Clients', href: '/clients', icon: Building2 },
+  { name: 'Outreach & Leads', href: '/approaches', icon: Compass },
   { name: 'Team', href: '/team', icon: Users },
-  { name: 'Clients & CRM', href: '/clients', icon: Building2 },
   { name: 'Time Tracking', href: '/time', icon: Clock },
 ];
 

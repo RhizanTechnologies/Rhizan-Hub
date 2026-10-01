@@ -25,9 +25,12 @@ import {
   Building2,
   Clock,
 } from 'lucide-react';
+import { PriorityBadge } from '@/components/Badge';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
@@ -287,7 +290,7 @@ export default function ProjectsPage() {
             return (
               <div
                 key={project._id}
-                onClick={() => openProjectDetail(project)}
+                onClick={() => router.push(`/projects/${project._id}`)}
                 className="bg-[#121212] border border-[#222222] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-xl hover:shadow-teal-950/20 group flex flex-col justify-between"
               >
                 <div>

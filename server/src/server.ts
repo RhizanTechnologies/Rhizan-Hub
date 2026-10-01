@@ -14,6 +14,7 @@ import clientRoutes from './routes/clientRoutes';
 import timeRoutes from './routes/timeRoutes';
 import teamRoutes from './routes/teamRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
+import approachRoutes from './routes/approachRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -51,6 +52,7 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/time', timeRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/approaches', approachRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

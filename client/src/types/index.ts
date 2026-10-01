@@ -130,6 +130,29 @@ export interface Client {
   updatedAt: string;
 }
 
+export type ApproachStatus =
+  | 'PROSPECT'
+  | 'CONTACTED'
+  | 'PITCHED'
+  | 'IN_DISCUSSION'
+  | 'DEAL_WON'
+  | 'NOT_INTERESTED';
+
+export interface Approach {
+  _id: string;
+  businessName: string;
+  niche: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  location?: string;
+  status: ApproachStatus;
+  notes?: string;
+  convertedClientId?: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TimeEntry {
   _id: string;
   user: User;

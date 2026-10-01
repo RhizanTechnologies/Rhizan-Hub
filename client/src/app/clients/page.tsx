@@ -5,6 +5,7 @@ import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
 import { Client, ClientStatus, Project, ClientMeeting, ClientPayment, ResourceLink } from '@/types';
 import { apiFetch } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 import {
   Phone,
   Mail,
@@ -39,6 +40,7 @@ const PIPELINE_STAGES: { id: ClientStatus; label: string; accent: string }[] = [
 ];
 
 export default function ClientsPage() {
+  const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -376,7 +378,7 @@ export default function ClientsPage() {
               return (
                 <div
                   key={client._id}
-                  onClick={() => setSelectedClient(client)}
+                  onClick={() => router.push(`/clients/${client._id}`)}
                   className="bg-[#121212] border border-[#222222] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-xl hover:shadow-teal-950/20 group flex flex-col justify-between"
                 >
                   <div>
@@ -497,7 +499,7 @@ export default function ClientsPage() {
                     {stageClients.map((client) => (
                       <div
                         key={client._id}
-                        onClick={() => setSelectedClient(client)}
+                        onClick={() => router.push(`/clients/${client._id}`)}
                         className="p-3 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-[#242424] hover:border-teal-500/40 cursor-pointer transition shadow-sm space-y-2"
                       >
                         <div className="font-heading text-xs font-bold text-white truncate">
