@@ -9,6 +9,7 @@ export interface IUser extends Document {
   weeklyCapacityHours: number;
   status: 'ACTIVE' | 'AWAY' | 'OFFLINE';
   avatar?: string;
+  mustChangePassword?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +24,7 @@ const UserSchema = new Schema<IUser>(
     weeklyCapacityHours: { type: Number, default: 40 },
     status: { type: String, enum: ['ACTIVE', 'AWAY', 'OFFLINE'], default: 'ACTIVE' },
     avatar: { type: String, default: '' },
+    mustChangePassword: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

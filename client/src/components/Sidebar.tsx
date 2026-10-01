@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ShieldCheck,
   ExternalLink,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -29,7 +30,7 @@ const navItems = [
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const { user, quickSwitch } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <aside className="w-64 bg-[#0d0d0d] text-neutral-200 border-r border-[#222222] flex flex-col h-screen sticky top-0 select-none">
@@ -116,26 +117,18 @@ export const Sidebar: React.FC = () => {
         </div>
 
         <div className="p-2.5 rounded-xl bg-[#181818] border border-[#262626] mb-2">
-          <div className="text-xs font-semibold text-white">{user?.name || 'Abdulaziz'}</div>
-          <div className="text-[11px] text-neutral-400 truncate">{user?.title || 'Development'}</div>
+          <div className="text-xs font-semibold text-white">{user?.name || 'Rhizan Member'}</div>
+          <div className="text-[11px] text-neutral-400 truncate">{user?.title || user?.email || 'Operations'}</div>
         </div>
 
-        {/* Quick Switch Buttons for the 3 Rhizan Members */}
-        <div className="grid grid-cols-3 gap-1">
-          {['Abdulaziz', 'Nebiyu', 'Sadam'].map((member) => (
-            <button
-              key={member}
-              onClick={() => quickSwitch(member)}
-              className={`py-1 text-[10px] font-medium rounded-lg border transition ${
-                user?.name === member
-                  ? 'bg-teal-600 text-white border-teal-500'
-                  : 'bg-[#181818] text-neutral-400 border-[#262626] hover:text-white hover:bg-[#222222]'
-              }`}
-            >
-              {member}
-            </button>
-          ))}
-        </div>
+        {/* Sign Out Button */}
+        <button
+          onClick={logout}
+          className="w-full py-1.5 px-3 rounded-lg bg-[#161616] hover:bg-[#202020] text-neutral-400 hover:text-rose-400 border border-[#262626] text-[11px] font-medium flex items-center justify-center gap-1.5 transition"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Sign Out</span>
+        </button>
 
         {/* Footer System Status */}
         <div className="mt-3 pt-2.5 border-t border-[#1f1f1f] flex items-center justify-between text-[10px] text-neutral-500">

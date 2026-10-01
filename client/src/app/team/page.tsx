@@ -2,11 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
+import { Modal } from '@/components/Modal';
 import { apiFetch } from '@/lib/api';
 import {
   Clock,
   CheckSquare,
   Mail,
+  UserPlus,
+  Copy,
+  Check,
+  KeyRound,
+  RefreshCw,
+  Sparkles,
+  ShieldAlert,
 } from 'lucide-react';
 import { PriorityBadge } from '@/components/Badge';
 
@@ -34,7 +42,26 @@ export default function TeamPage() {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Exact data from user's specification Section 2
+  // Invite modal state
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [inviteName, setInviteName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<'MEMBER' | 'ADMIN'>('MEMBER');
+  const [inviteTitle, setInviteTitle] = useState('Development');
+  const [inviteCapacity, setInviteCapacity] = useState('40');
+  const [tempoPassword, setTempoPassword] = useState('');
+  const [isInviting, setIsInviting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
+  // Success modal state
+  const [createdInvite, setCreatedInvite] = useState<{
+    name: string;
+    email: string;
+    tempoPass: string;
+  } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  // Initial fallback team data
   const initialTeam: TeamMember[] = [
     {
       id: '1',
@@ -89,29 +116,108 @@ export default function TeamPage() {
     },
   ];
 
-  useEffect(() => {
-    async function loadTeam() {
-      try {
-        const data = await apiFetch<TeamMember[]>('/team');
-        if (data && data.length > 0) {
-          setTeam(data);
-        } else {
-          setTeam(initialTeam);
-        }
-      } catch {
+  const loadTeam = async () => {
+    try {
+      const data = await apiFetch<TeamMember[]>('/team');
+      if (data && data.length > 0) {
+        setTeam(data);
+      } else {
         setTeam(initialTeam);
-      } finally {
-        setLoading(false);
       }
+    } catch {
+      setTeam(initialTeam);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadTeam();
   }, []);
+
+  const generateRandomPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `Rhizan@${code}`;
+  };
+
+  const handleOpenInvite = () => {
+    setTempoPassword(generateRandomPassword());
+    setInviteName('');
+    setInviteEmail('');
+    setInviteTitle('Development');
+    setInviteRole('MEMBER');
+    setInviteCapacity('40');
+    setInviteError(null);
+    setIsInviteOpen(true);
+  };
+
+  const handleSendInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteName || !inviteEmail || !tempoPassword) {
+      setInviteError('Please complete all required fields.');
+      return;
+    }
+
+    try {
+      setIsInviting(true);
+      setInviteError(null);
+
+      const res = await apiFetch<{
+        message: string;
+        user: any;
+        temporaryPassword: string;
+        emailSent: boolean;
+      }>('/team/invite', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: inviteName,
+          email: inviteEmail,
+          role: inviteRole,
+          title: inviteTitle,
+          weeklyCapacityHours: parseInt(inviteCapacity, 10) || 40,
+          customTemporaryPassword: tempoPassword,
+        }),
+      });
+
+      // Save for success popup
+      setCreatedInvite({
+        name: inviteName,
+        email: inviteEmail,
+        tempoPass: res.temporaryPassword || tempoPassword,
+      });
+
+      setIsInviteOpen(false);
+      // Reload team list
+      await loadTeam();
+    } catch (err: any) {
+      setInviteError(err.message || 'Failed to send invite.');
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  const handleCopyCredentials = () => {
+    if (!createdInvite) return;
+    const loginUrl = `${window.location.origin}/login`;
+    const text = `RHIZAN Hub Invitation\n\nHello ${createdInvite.name},\nYou have been invited to RHIZAN Hub.\n\nLogin URL: ${loginUrl}\nEmail: ${createdInvite.email}\nTemporary Password: ${createdInvite.tempoPass}\n\nNote: You will be asked to change your password immediately upon your first sign in.`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
   return (
     <div className="flex-1 flex flex-col min-h-screen">
       <Header
         title="Team Directory"
         subtitle="Current responsibilities, active projects, and workload across RHIZAN"
+        actionButton={{
+          label: 'Invite Member',
+          onClick: handleOpenInvite,
+        }}
       />
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
@@ -120,7 +226,7 @@ export default function TeamPage() {
           {team.map((member) => {
             const capacityPercent = Math.min(
               100,
-              Math.round((member.thisWeekHours / member.weeklyCapacityHours) * 100)
+              Math.round((member.thisWeekHours / (member.weeklyCapacityHours || 40)) * 100)
             );
 
             return (
@@ -158,7 +264,7 @@ export default function TeamPage() {
                         <CheckSquare className="w-3 h-3 text-teal-400" /> Active Tasks
                       </span>
                       <div className="font-heading text-base font-bold text-white mt-0.5">
-                        {member.activeTaskCount}
+                        {member.activeTaskCount ?? member.tasks?.length ?? 0}
                       </div>
                     </div>
 
@@ -167,7 +273,7 @@ export default function TeamPage() {
                         <Clock className="w-3 h-3 text-emerald-400" /> This Week
                       </span>
                       <div className="font-heading text-base font-bold text-teal-400 mt-0.5">
-                        {member.thisWeekHours}h
+                        {member.thisWeekHours ?? 0}h
                       </div>
                     </div>
                   </div>
@@ -175,7 +281,7 @@ export default function TeamPage() {
                   {/* Hours Capacity Bar */}
                   <div className="space-y-1.5 mb-5">
                     <div className="flex items-center justify-between text-[11px] text-neutral-400">
-                      <span>Weekly Capacity ({member.weeklyCapacityHours}h)</span>
+                      <span>Weekly Capacity ({member.weeklyCapacityHours || 40}h)</span>
                       <span className="font-semibold text-neutral-200">{capacityPercent}%</span>
                     </div>
                     <div className="w-full bg-[#262626] h-2 rounded-full overflow-hidden">
@@ -192,37 +298,47 @@ export default function TeamPage() {
                       Active Projects
                     </span>
                     <div className="flex flex-wrap gap-1.5">
-                      {member.activeProjects.map((p, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 rounded-lg bg-[#181818] border border-[#262626] text-xs text-neutral-300 font-medium"
-                        >
-                          {p}
-                        </span>
-                      ))}
+                      {(member.activeProjects || []).length > 0 ? (
+                        member.activeProjects.map((p, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2 py-1 rounded-lg bg-[#181818] border border-[#262626] text-xs text-neutral-300 font-medium"
+                          >
+                            {p}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-neutral-500 italic">No assigned projects</span>
+                      )}
                     </div>
                   </div>
 
                   {/* Current Tasks List */}
                   <div>
                     <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block mb-2">
-                      Assigned Work ({member.tasks.length})
+                      Assigned Work ({(member.tasks || []).length})
                     </span>
                     <div className="space-y-2">
-                      {member.tasks.map((task) => (
-                        <div
-                          key={task.id}
-                          className="p-2.5 rounded-lg bg-[#181818] border border-[#262626] text-xs"
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium text-neutral-200 truncate pr-2">
-                              {task.title}
-                            </span>
-                            <PriorityBadge priority={task.priority} />
+                      {(member.tasks || []).length > 0 ? (
+                        member.tasks.map((task) => (
+                          <div
+                            key={task.id}
+                            className="p-2.5 rounded-lg bg-[#181818] border border-[#262626] text-xs"
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-medium text-neutral-200 truncate pr-2">
+                                {task.title}
+                              </span>
+                              <PriorityBadge priority={task.priority} />
+                            </div>
+                            <div className="text-[10px] text-neutral-500">{task.projectName}</div>
                           </div>
-                          <div className="text-[10px] text-neutral-500">{task.projectName}</div>
+                        ))
+                      ) : (
+                        <div className="text-xs text-neutral-500 italic p-2 bg-[#181818] rounded-lg border border-[#262626]">
+                          No pending tasks
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>
@@ -237,6 +353,215 @@ export default function TeamPage() {
           })}
         </div>
       </div>
+
+      {/* Invite Member Modal */}
+      <Modal
+        isOpen={isInviteOpen}
+        onClose={() => setIsInviteOpen(false)}
+        title="Invite New Team Member"
+      >
+        <form onSubmit={handleSendInvite} className="space-y-4">
+          {inviteError && (
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>{inviteError}</span>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Full Name
+            </label>
+            <input
+              type="text"
+              value={inviteName}
+              onChange={(e) => setInviteName(e.target.value)}
+              placeholder="e.g. Ahmed Yasin"
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Work Email
+            </label>
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="e.g. ahmed@rhizan.com"
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Department / Role Title
+              </label>
+              <input
+                type="text"
+                value={inviteTitle}
+                onChange={(e) => setInviteTitle(e.target.value)}
+                placeholder="e.g. Development"
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                System Role
+              </label>
+              <select
+                value={inviteRole}
+                onChange={(e) => setInviteRole(e.target.value as any)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+              >
+                <option value="MEMBER">Member</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Weekly Capacity (Hours)
+            </label>
+            <input
+              type="number"
+              value={inviteCapacity}
+              onChange={(e) => setInviteCapacity(e.target.value)}
+              min="10"
+              max="80"
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+            />
+          </div>
+
+          {/* Temporary Password Field */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium text-neutral-300">
+                Temporary Password
+              </label>
+              <button
+                type="button"
+                onClick={() => setTempoPassword(generateRandomPassword())}
+                className="text-[11px] text-teal-400 hover:text-teal-300 flex items-center gap-1 transition"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Regenerate</span>
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                value={tempoPassword}
+                onChange={(e) => setTempoPassword(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-teal-300 font-mono tracking-wide outline-none transition"
+              />
+            </div>
+            <p className="text-[11px] text-neutral-500 mt-1">
+              The member will be strictly prompted to set their permanent password on their first login.
+            </p>
+          </div>
+
+          <div className="pt-2 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsInviteOpen(false)}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#1a1a1a] transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isInviting}
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30 flex items-center gap-2 transition disabled:opacity-50"
+            >
+              {isInviting ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Inviting...</span>
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Create Invitation</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Invitation Credentials Ready Modal */}
+      <Modal
+        isOpen={Boolean(createdInvite)}
+        onClose={() => setCreatedInvite(null)}
+        title="Member Invitation Created"
+      >
+        {createdInvite && (
+          <div className="space-y-4">
+            <div className="p-3.5 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-xs font-bold text-white">Invitation Credentials Ready</h4>
+                <p className="text-[11px] text-neutral-300 mt-0.5">
+                  Share these temporary credentials with <span className="font-semibold text-white">{createdInvite.name}</span>. Upon first login, they will be forced to change their password.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#161616] border border-[#262626] space-y-2.5 font-mono text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-sans text-neutral-500 block">Login URL</span>
+                <span className="text-neutral-200 text-xs">
+                  {typeof window !== 'undefined' ? `${window.location.origin}/login` : '/login'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-sans text-neutral-500 block">Work Email</span>
+                <span className="text-teal-400 text-xs font-semibold">{createdInvite.email}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-sans text-neutral-500 block">Temporary Password</span>
+                <span className="text-emerald-400 text-xs font-bold tracking-wider">{createdInvite.tempoPass}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleCopyCredentials}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30 flex items-center justify-center gap-2 transition"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-300" />
+                    <span>Copied to Clipboard!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Copy Invitation Details</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreatedInvite(null)}
+                className="py-2.5 px-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#222222] text-neutral-300 text-xs font-medium transition"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

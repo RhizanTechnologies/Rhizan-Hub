@@ -8,6 +8,7 @@ export interface User {
   weeklyCapacityHours: number;
   status: 'ACTIVE' | 'AWAY' | 'OFFLINE';
   avatar?: string;
+  mustChangePassword?: boolean;
 }
 
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE';

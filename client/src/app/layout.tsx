@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
-import { Sidebar } from '@/components/Sidebar';
+import { AppShell } from '@/components/AppShell';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
@@ -23,12 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} ${outfit.variable} bg-[#0a0a0a] text-neutral-100 min-h-screen antialiased flex`}>
+      <body className={`${inter.className} ${outfit.variable} bg-[#0a0a0a] text-neutral-100 min-h-screen antialiased`}>
         <AuthProvider>
-          <Sidebar />
-          <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#0a0a0a]">
+          <AppShell>
             {children}
-          </div>
+          </AppShell>
         </AuthProvider>
       </body>
     </html>
