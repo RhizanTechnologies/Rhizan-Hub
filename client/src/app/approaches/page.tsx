@@ -726,24 +726,14 @@ export default function ApproachesPage() {
                         </div>
                       </td>
 
-                      {/* Outreach Status with Quick Switcher */}
-                      <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
-                        <div className="relative inline-block">
-                          <select
-                            value={appr.status}
-                            onChange={(e) =>
-                              handleQuickStatusChange(appr, e.target.value as ApproachStatus)
-                            }
-                            className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border outline-none cursor-pointer ${statusConf.color}`}
-                          >
-                            <option value="PROSPECT">Prospect</option>
-                            <option value="CONTACTED">Contacted</option>
-                            <option value="PITCHED">Pitched / Demo</option>
-                            <option value="IN_DISCUSSION">In Discussion</option>
-                            <option value="DEAL_WON">Deal Won (Client)</option>
-                            <option value="NOT_INTERESTED">Not Interested</option>
-                          </select>
-                        </div>
+                      {/* Outreach Status Badge */}
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-[10px] uppercase font-bold px-2.5 py-1 rounded-full border ${statusConf.color}`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${statusConf.dot}`} />
+                          {statusConf.label}
+                        </span>
                       </td>
 
                       {/* Last Contact Date */}
