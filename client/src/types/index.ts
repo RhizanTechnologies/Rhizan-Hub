@@ -70,6 +70,8 @@ export interface ClientMeeting {
 export interface ClientPayment {
   _id?: string;
   id?: string;
+  projectId?: string;
+  projectName?: string;
   invoiceNumber?: string;
   title: string;
   amount: number;

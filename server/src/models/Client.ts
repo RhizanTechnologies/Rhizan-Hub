@@ -21,6 +21,8 @@ export interface IClientMeeting {
 export interface IClientPayment {
   _id?: Types.ObjectId;
   invoiceNumber?: string;
+  projectId?: Types.ObjectId;
+  projectName?: string;
   title: string;
   amount: number;
   dueDate?: Date;
@@ -77,6 +79,8 @@ const ClientMeetingSchema = new Schema<IClientMeeting>(
 const ClientPaymentSchema = new Schema<IClientPayment>(
   {
     invoiceNumber: { type: String, default: '' },
+    projectId: { type: Schema.Types.ObjectId, ref: 'Project' },
+    projectName: { type: String, default: '' },
     title: { type: String, required: true, trim: true },
     amount: { type: Number, required: true, min: 0 },
     dueDate: { type: Date },

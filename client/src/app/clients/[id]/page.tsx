@@ -54,6 +54,7 @@ export default function ClientDetailPage() {
 
   const [isAddingPayment, setIsAddingPayment] = useState(false);
   const [paymentTitle, setPaymentTitle] = useState('');
+  const [paymentProjectId, setPaymentProjectId] = useState('');
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentInvoice, setPaymentInvoice] = useState('');
   const [paymentDueDate, setPaymentDueDate] = useState('');
@@ -234,9 +235,12 @@ export default function ClientDetailPage() {
     if (!client || !paymentTitle.trim() || !paymentAmount) return;
 
     const amountNum = parseFloat(paymentAmount) || 0;
+    const selectedProj = (client.projects || []).find((p) => p._id === paymentProjectId);
     const newP: ClientPayment = {
       title: paymentTitle.trim(),
       amount: amountNum,
+      projectId: paymentProjectId || undefined,
+      projectName: selectedProj ? selectedProj.name : undefined,
       invoiceNumber: paymentInvoice.trim(),
       dueDate: paymentDueDate || undefined,
       paidDate: paymentStatus === 'PAID' ? new Date().toISOString() : undefined,
@@ -259,6 +263,7 @@ export default function ClientDetailPage() {
       setClient(updated);
       setIsAddingPayment(false);
       setPaymentTitle('');
+      setPaymentProjectId('');
       setPaymentAmount('');
       setPaymentInvoice('');
       setPaymentDueDate('');
@@ -565,7 +570,17 @@ export default function ClientDetailPage() {
                     </div>
 
                     <div className="flex items-center justify-between text-xs pt-1 text-neutral-400">
-                      <span>Project Price: <strong className="text-teal-300 font-mono">{currencySymbol}{proj.budget ? proj.budget.toLocaleString() : '0'}</strong></span>
+                      <div>
+                        <span>Project Price: <strong className="text-teal-300 font-mono">{currencySymbol}{proj.budget ? proj.budget.toLocaleString() : '0'}</strong></span>
+                        {proj.budget ? (
+                          <span className="text-[11px] text-emerald-400 ml-2 font-mono">
+                            (Paid: {currencySymbol}{(client.payments || [])
+                              .filter((p) => p.projectId === proj._id && p.status === 'PAID')
+                              .reduce((sum, p) => sum + (p.amount || 0), 0)
+                              .toLocaleString()})
+                          </span>
+                        ) : null}
+                      </div>
                       <Link
                         href={`/projects/${proj._id}`}
                         className="text-teal-400 hover:underline flex items-center gap-1 font-medium"
@@ -743,36 +758,73 @@ export default function ClientDetailPage() {
                     required
                     className="md:col-span-2 w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
                   />
-                  <input
-                    type="number"
-                    placeholder="Amount ($)"
-                    value={paymentAmount}
-                    onChange={(e) => setPaymentAmount(e.target.value)}
-                    required
-                    className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Invoice Number (e.g. INV-2026-001)"
-                    value={paymentInvoice}
-                    onChange={(e) => setPaymentInvoice(e.target.value)}
-                    className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                  />
-                  <select
-                    value={paymentStatus}
-                    onChange={(e) => setPaymentStatus(e.target.value as any)}
-                    className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                  >
-                    <option value="PENDING">Pending</option>
-                    <option value="PAID">Paid / Received</option>
-                    <option value="OVERDUE">Overdue</option>
-                  </select>
-                  <input
-                    type="date"
-                    value={paymentDueDate}
-                    onChange={(e) => setPaymentDueDate(e.target.value)}
-                    className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                  />
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                      Select Project
+                    </label>
+                    <select
+                      value={paymentProjectId}
+                      onChange={(e) => setPaymentProjectId(e.target.value)}
+                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    >
+                      <option value="">General Client Milestone (All Projects)</option>
+                      {connectedProjects.map((p) => (
+                        <option key={p._id} value={p._id}>
+                          {p.name} ({currencySymbol}{(p.budget || 0).toLocaleString()})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                      Milestone Amount ({currencySymbol.trim()}) *
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 2500"
+                      value={paymentAmount}
+                      onChange={(e) => setPaymentAmount(e.target.value)}
+                      required
+                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                      Invoice Number
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. INV-2026-001"
+                      value={paymentInvoice}
+                      onChange={(e) => setPaymentInvoice(e.target.value)}
+                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                      Payment Status
+                    </label>
+                    <select
+                      value={paymentStatus}
+                      onChange={(e) => setPaymentStatus(e.target.value as any)}
+                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    >
+                      <option value="PENDING">Pending</option>
+                      <option value="PAID">Paid / Received</option>
+                      <option value="OVERDUE">Overdue</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                      Target Due Date
+                    </label>
+                    <input
+                      type="date"
+                      value={paymentDueDate}
+                      onChange={(e) => setPaymentDueDate(e.target.value)}
+                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    />
+                  </div>
                 </div>
                 <div className="flex justify-end gap-2 pt-1">
                   <button
@@ -802,6 +854,12 @@ export default function ClientDetailPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-heading text-xs font-bold text-white">{p.title}</span>
+                        {p.projectName && (
+                          <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20 flex items-center gap-1">
+                            <FolderKanban className="w-3 h-3 text-teal-400" />
+                            {p.projectName}
+                          </span>
+                        )}
                         {p.invoiceNumber && (
                           <span className="text-[10px] text-neutral-500 font-mono">#{p.invoiceNumber}</span>
                         )}
@@ -813,7 +871,7 @@ export default function ClientDetailPage() {
 
                     <div className="flex items-center gap-3">
                       <span className="font-mono text-sm font-bold text-white">
-                        ${(p.amount || 0).toLocaleString()}
+                        {currencySymbol}{(p.amount || 0).toLocaleString()}
                       </span>
                       <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
                         p.status === 'PAID'
@@ -830,7 +888,7 @@ export default function ClientDetailPage() {
               </div>
             ) : (
               <p className="text-xs text-neutral-500 italic p-8 text-center bg-[#121212] rounded-2xl border border-[#222222]">
-                No payment milestones recorded yet.
+                No payment milestones recorded yet. Click &apos;Record Payment Milestone&apos; above.
               </p>
             )}
           </div>
