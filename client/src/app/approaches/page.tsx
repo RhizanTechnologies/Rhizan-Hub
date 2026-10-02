@@ -610,7 +610,7 @@ export default function ApproachesPage() {
               </span>
             </div>
             <span className="text-[11px] text-neutral-500 hidden sm:inline">
-              Click any business name to open full history & log notes
+              Click any row to view full details, history & actions
             </span>
           </div>
 
@@ -625,41 +625,36 @@ export default function ApproachesPage() {
                   <th className="py-3 px-4">Contact Info</th>
                   <th className="py-3 px-4">Outreach Status</th>
                   <th className="py-3 px-4">Last Contact Date</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1c1c1c]">
                 {filteredApproaches.map((appr) => {
                   const statusConf = STATUS_CONFIG[appr.status] || STATUS_CONFIG.PROSPECT;
-                  const isDealWon = appr.status === 'DEAL_WON';
-                  const isConverting = convertingId === appr._id;
                   const cleanPhone = formatCleanPhone(appr.phone);
 
                   return (
                     <tr
                       key={appr._id}
-                      className="hover:bg-[#161616] transition group"
+                      onClick={() => router.push(`/approaches/${appr._id}`)}
+                      className="hover:bg-[#181818] transition group cursor-pointer"
                     >
-                      {/* Business Name (Clickable to Detail Page) */}
+                      {/* Business Name */}
                       <td className="py-3.5 px-4 font-semibold text-white">
-                        <Link
-                          href={`/approaches/${appr._id}`}
-                          className="flex items-center gap-2.5 hover:text-teal-400 transition"
-                        >
-                          <div className="w-8 h-8 rounded-xl bg-[#202020] border border-[#2a2a2a] text-teal-400 font-bold flex items-center justify-center shrink-0">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-[#202020] group-hover:bg-teal-500/15 group-hover:border-teal-500/30 border border-[#2a2a2a] text-teal-400 font-bold flex items-center justify-center shrink-0 transition">
                             {appr.businessName.charAt(0).toUpperCase()}
                           </div>
-                          <div className="truncate max-w-[170px]">
-                            <span className="block truncate font-heading font-medium text-white hover:text-teal-400">
+                          <div className="truncate max-w-[190px]">
+                            <span className="block truncate font-heading font-medium text-white group-hover:text-teal-400 transition">
                               {appr.businessName}
                             </span>
                             {appr.contactHistory && appr.contactHistory.length > 0 && (
                               <span className="text-[10px] text-neutral-500 font-normal">
-                                {appr.contactHistory.length} interactions
+                                {appr.contactHistory.length} interaction{appr.contactHistory.length > 1 ? 's' : ''}
                               </span>
                             )}
                           </div>
-                        </Link>
+                        </div>
                       </td>
 
                       {/* Contact Person */}
@@ -692,7 +687,7 @@ export default function ApproachesPage() {
                       </td>
 
                       {/* Contact Info (WhatsApp & Phone & Email) */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
                         <div className="space-y-1">
                           {appr.phone ? (
                             <div className="flex items-center gap-1.5 text-neutral-300">
@@ -732,7 +727,7 @@ export default function ApproachesPage() {
                       </td>
 
                       {/* Outreach Status with Quick Switcher */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
                         <div className="relative inline-block">
                           <select
                             value={appr.status}
@@ -779,83 +774,13 @@ export default function ApproachesPage() {
                           </span>
                         )}
                       </td>
-
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* View Detail Page */}
-                          <Link
-                            href={`/approaches/${appr._id}`}
-                            className="p-1.5 rounded-lg bg-[#1a1a1a] hover:bg-[#252525] text-neutral-300 hover:text-white transition"
-                            title="Open Detail Page & Interaction Log"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </Link>
-
-                          {/* Quick Log Contact */}
-                          <button
-                            type="button"
-                            onClick={() => openQuickLogModal(appr)}
-                            className="p-1.5 rounded-lg bg-teal-600/10 hover:bg-teal-600/20 text-teal-400 hover:text-teal-300 border border-teal-500/20 transition"
-                            title="Quick Log Call / Note"
-                          >
-                            <Phone className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Convert Deal Won */}
-                          {isDealWon ? (
-                            <Link
-                              href={
-                                appr.convertedClientId
-                                  ? `/clients/${typeof appr.convertedClientId === 'object' ? appr.convertedClientId._id : appr.convertedClientId}`
-                                  : '/clients'
-                              }
-                              className="px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1 transition"
-                            >
-                              <span>Client</span>
-                              <ExternalLink className="w-3 h-3" />
-                            </Link>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => handleConvertToClient(appr)}
-                              disabled={isConverting}
-                              className="px-2 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-[10px] font-semibold flex items-center gap-1 transition shadow-sm disabled:opacity-50"
-                              title="Convert to Official Client"
-                            >
-                              <Sparkles className="w-3.5 h-3.5" />
-                              <span>{isConverting ? '...' : 'Won'}</span>
-                            </button>
-                          )}
-
-                          {/* Edit */}
-                          <button
-                            type="button"
-                            onClick={() => openEditModal(appr)}
-                            className="p-1.5 rounded-lg hover:bg-[#222222] text-neutral-400 hover:text-white transition"
-                            title="Edit"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Delete */}
-                          <button
-                            type="button"
-                            onClick={() => setApproachToDelete(appr)}
-                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   );
                 })}
 
                 {filteredApproaches.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-neutral-500">
+                    <td colSpan={7} className="py-12 text-center text-neutral-500">
                       <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
                       <p className="text-xs">No outreach targets found matching your filter.</p>
                       <button
