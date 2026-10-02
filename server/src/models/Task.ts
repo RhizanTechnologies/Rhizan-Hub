@@ -3,6 +3,12 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE';
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
+export interface ISubtask {
+  _id?: Types.ObjectId;
+  title: string;
+  completed: boolean;
+}
+
 export interface IComment {
   _id?: Types.ObjectId;
   author: Types.ObjectId;
@@ -19,12 +25,21 @@ export interface ITask extends Document {
   status: TaskStatus;
   dueDate?: Date;
   createdBy?: Types.ObjectId;
+  subtasks: ISubtask[];
   comments: IComment[];
   estimatedHours?: number;
   actualHours?: number;
   createdAt: Date;
   updatedAt: Date;
 }
+
+const SubtaskSchema = new Schema<ISubtask>(
+  {
+    title: { type: String, required: true, trim: true },
+    completed: { type: Boolean, default: false },
+  },
+  { _id: true, timestamps: false }
+);
 
 const CommentSchema = new Schema<IComment>(
   {
@@ -53,6 +68,7 @@ const TaskSchema = new Schema<ITask>(
     },
     dueDate: { type: Date },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    subtasks: [SubtaskSchema],
     comments: [CommentSchema],
     estimatedHours: { type: Number, default: 0 },
     actualHours: { type: Number, default: 0 },

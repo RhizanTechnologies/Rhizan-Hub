@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
-import { Project, Client, User, ResourceLink, Task, ProjectMilestone, ProjectDeliverable } from '@/types';
+import { Project, Client, User, ResourceLink, Task, TaskStatus, ProjectMilestone, ProjectDeliverable } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
   ArrowLeft,
@@ -278,6 +278,18 @@ export default function ProjectDetailPage() {
       setTaskDueDate('');
     } catch (err: any) {
       alert(err.message || 'Failed to create task for project');
+    }
+  };
+
+  const handleTaskStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    setTasks((prev) => prev.map((t) => (t._id === taskId ? { ...t, status: newStatus } : t)));
+    try {
+      await apiFetch(`/tasks/${taskId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch (err) {
+      console.error('Failed to update task status', err);
     }
   };
 
@@ -1522,14 +1534,30 @@ export default function ProjectDetailPage() {
                         </div>
 
                         <div className="flex items-center gap-2.5">
+                          {t.subtasks && t.subtasks.length > 0 && (
+                            <span className="text-[10px] text-teal-400 font-mono font-medium px-2 py-0.5 rounded bg-teal-500/10 border border-teal-500/20">
+                              ✓ {t.subtasks.filter((s) => s.completed).length}/{t.subtasks.length} subtasks
+                            </span>
+                          )}
                           <PriorityBadge priority={t.priority} />
-                          <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
-                            t.status === 'DONE'
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                              : 'bg-teal-500/10 text-teal-400 border-teal-500/20'
-                          }`}>
-                            {t.status}
-                          </span>
+                          <select
+                            value={t.status}
+                            onChange={(e) => handleTaskStatusChange(t._id, e.target.value as TaskStatus)}
+                            className={`text-[10px] font-bold uppercase px-2 py-1 rounded-lg border outline-none cursor-pointer ${
+                              t.status === 'DONE'
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                : t.status === 'IN_PROGRESS'
+                                ? 'bg-teal-500/10 text-teal-400 border-teal-500/30'
+                                : t.status === 'REVIEW'
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                : 'bg-[#181818] text-neutral-300 border-[#333333]'
+                            }`}
+                          >
+                            <option value="TODO">To Do</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="REVIEW">Review</option>
+                            <option value="DONE">Done</option>
+                          </select>
                         </div>
                       </div>
                     ))

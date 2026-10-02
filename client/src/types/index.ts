@@ -27,6 +27,13 @@ export interface TaskComment {
   createdAt: string;
 }
 
+export interface TaskSubtask {
+  _id?: string;
+  id?: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface Task {
   _id: string;
   title: string;
@@ -41,6 +48,7 @@ export interface Task {
   priority: TaskPriority;
   status: TaskStatus;
   dueDate?: string;
+  subtasks?: TaskSubtask[];
   comments: TaskComment[];
   estimatedHours?: number;
   actualHours?: number;

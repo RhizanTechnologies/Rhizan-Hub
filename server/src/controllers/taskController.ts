@@ -5,19 +5,48 @@ import { AuthRequest } from '../middlewares/auth';
 
 export const getTasks = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { status, project, assignedTo } = req.query;
+    const { status, project, assignedTo, dueDate, dateFilter } = req.query;
     const filter: any = {};
 
-    if (status) filter.status = status;
-    if (project) filter.project = project;
-    if (assignedTo) filter.assignedTo = assignedTo;
+    if (status && status !== 'ALL') filter.status = status;
+    if (project && project !== 'ALL') filter.project = project;
+    if (assignedTo && assignedTo !== 'ALL') filter.assignedTo = assignedTo;
+
+    if (dueDate) {
+      const start = new Date(dueDate as string);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(dueDate as string);
+      end.setHours(23, 59, 59, 999);
+      filter.dueDate = { $gte: start, $lte: end };
+    } else if (dateFilter) {
+      const now = new Date();
+      if (dateFilter === 'TODAY') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        filter.dueDate = { $gte: start, $lte: end };
+      } else if (dateFilter === 'TOMORROW') {
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const start = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0, 0);
+        const end = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 23, 59, 59, 999);
+        filter.dueDate = { $gte: start, $lte: end };
+      } else if (dateFilter === 'THIS_WEEK') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 23, 59, 59, 999);
+        filter.dueDate = { $gte: start, $lte: end };
+      } else if (dateFilter === 'OVERDUE') {
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        filter.dueDate = { $lt: startOfDay };
+        filter.status = { $ne: 'DONE' };
+      }
+    }
 
     const tasks = await Task.find(filter)
       .populate('assignedTo', 'name email title avatar')
       .populate('project', 'name clientName status')
       .populate('createdBy', 'name email')
       .populate('comments.author', 'name email avatar')
-      .sort({ createdAt: -1 });
+      .sort({ dueDate: 1, createdAt: -1 });
 
     res.json(tasks);
   } catch (error: any) {
@@ -27,7 +56,7 @@ export const getTasks = async (req: AuthRequest, res: Response): Promise<void> =
 
 export const createTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { title, description, assignedTo, project, priority, status, dueDate, estimatedHours } = req.body;
+    const { title, description, assignedTo, project, priority, status, dueDate, estimatedHours, subtasks } = req.body;
 
     const task = await Task.create({
       title,
@@ -37,6 +66,7 @@ export const createTask = async (req: AuthRequest, res: Response): Promise<void>
       priority: priority || 'MEDIUM',
       status: status || 'TODO',
       dueDate,
+      subtasks: Array.isArray(subtasks) ? subtasks : [],
       estimatedHours: estimatedHours || 0,
       createdBy: req.user?.id,
     });
