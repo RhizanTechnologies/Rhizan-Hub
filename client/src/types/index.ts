@@ -87,7 +87,10 @@ export interface Project {
   clientName: string;
   clientId?: string | Client;
   description: string;
+  lead?: User;
   members: User[];
+  techStack?: string[];
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   status: 'PLANNING' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED';
   progress: number;
   startDate?: string;

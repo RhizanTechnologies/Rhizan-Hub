@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
-import { Client, Project, ClientMeeting, ClientPayment, ResourceLink } from '@/types';
+import { Client, Project, ClientMeeting, ClientPayment, ResourceLink, User } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
   ArrowLeft,
@@ -79,8 +79,10 @@ export default function ClientDetailPage() {
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
 
   // Create Project state
+  const [teamMembers, setTeamMembers] = useState<User[]>([]);
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectLeadId, setNewProjectLeadId] = useState('');
   const [newProjectBudget, setNewProjectBudget] = useState('');
   const [newProjectDeadline, setNewProjectDeadline] = useState('');
   const [newProjectStatus, setNewProjectStatus] = useState<'PLANNING' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED'>('IN_PROGRESS');
@@ -90,9 +92,10 @@ export default function ClientDetailPage() {
   const loadClient = async () => {
     try {
       setLoading(true);
-      const [clientData, projectsData] = await Promise.all([
+      const [clientData, projectsData, teamData] = await Promise.all([
         apiFetch<Client>(`/clients/${clientId}`),
         apiFetch<Project[]>('/projects'),
+        apiFetch<any[]>('/team'),
       ]);
 
       if (clientData) {
@@ -111,6 +114,20 @@ export default function ClientDetailPage() {
       }
       if (projectsData) {
         setAvailableProjects(projectsData);
+      }
+      if (teamData) {
+        setTeamMembers(
+          teamData.map((m) => ({
+            id: m.id,
+            _id: m.id,
+            name: m.name,
+            email: m.email,
+            role: m.role,
+            title: m.title,
+            weeklyCapacityHours: m.weeklyCapacityHours || 40,
+            status: m.status || 'ACTIVE',
+          }))
+        );
       }
     } catch (err: any) {
       console.error('Failed to load client details:', err);
@@ -167,6 +184,7 @@ export default function ClientDetailPage() {
           name: newProjectName.trim(),
           clientId: client._id,
           clientName: client.name,
+          lead: newProjectLeadId || undefined,
           budget: parseFloat(newProjectBudget) || 0,
           status: newProjectStatus,
           deadline: newProjectDeadline || undefined,
@@ -176,6 +194,7 @@ export default function ClientDetailPage() {
 
       setIsCreateProjectModalOpen(false);
       setNewProjectName('');
+      setNewProjectLeadId('');
       setNewProjectBudget('');
       setNewProjectDeadline('');
       setNewProjectDescription('');
@@ -547,9 +566,16 @@ export default function ClientDetailPage() {
                   >
                     <div>
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-heading font-bold text-sm text-white">
-                          {proj.name}
-                        </h4>
+                        <div>
+                          <h4 className="font-heading font-bold text-sm text-white">
+                            {proj.name}
+                          </h4>
+                          {proj.lead && (
+                            <span className="text-[10px] text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-medium inline-flex items-center gap-1 mt-1">
+                              Lead: {proj.lead.name}
+                            </span>
+                          )}
+                        </div>
                         <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
                           {proj.status.replace('_', ' ')}
                         </span>
@@ -1067,6 +1093,24 @@ export default function ClientDetailPage() {
                 <option value="COMPLETED">Completed</option>
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Project Lead (Lead Developer / Tech Lead)
+            </label>
+            <select
+              value={newProjectLeadId}
+              onChange={(e) => setNewProjectLeadId(e.target.value)}
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            >
+              <option value="">-- Select Project Lead (Optional) --</option>
+              {teamMembers.map((m) => (
+                <option key={m.id || m._id} value={m.id || m._id}>
+                  {m.name} ({m.title || 'Developer'})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

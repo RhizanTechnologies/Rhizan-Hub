@@ -12,7 +12,10 @@ export interface IProject extends Document {
   clientName: string;
   clientId?: Types.ObjectId;
   description: string;
+  lead?: Types.ObjectId;
   members: Types.ObjectId[];
+  techStack?: string[];
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   status: 'PLANNING' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED';
   progress: number; // 0 to 100
   startDate?: Date;
@@ -39,7 +42,14 @@ const ProjectSchema = new Schema<IProject>(
     clientName: { type: String, default: 'Internal' },
     clientId: { type: Schema.Types.ObjectId, ref: 'Client' },
     description: { type: String, default: '' },
+    lead: { type: Schema.Types.ObjectId, ref: 'User' },
     members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    techStack: [{ type: String, trim: true }],
+    priority: {
+      type: String,
+      enum: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'],
+      default: 'MEDIUM',
+    },
     status: {
       type: String,
       enum: ['PLANNING', 'IN_PROGRESS', 'REVIEW', 'COMPLETED'],

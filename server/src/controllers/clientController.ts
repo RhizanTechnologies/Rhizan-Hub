@@ -28,7 +28,10 @@ export const getClientById = async (req: AuthRequest, res: Response): Promise<vo
     const { id } = req.params;
     const client = await Client.findById(id)
       .populate('assignedTo', 'name email title avatar')
-      .populate('projects', 'name status progress deadline budget description members');
+      .populate({
+        path: 'projects',
+        populate: { path: 'lead', select: 'name email title avatar' },
+      });
 
     if (!client) {
       res.status(404).json({ message: 'Client not found' });
@@ -103,7 +106,10 @@ export const createClient = async (req: AuthRequest, res: Response): Promise<voi
 
     const populated = await Client.findById(client._id)
       .populate('assignedTo', 'name email title avatar')
-      .populate('projects', 'name status progress deadline budget');
+      .populate({
+        path: 'projects',
+        populate: { path: 'lead', select: 'name email title avatar' },
+      });
 
     res.status(201).json(populated);
   } catch (error: any) {
@@ -124,7 +130,10 @@ export const updateClient = async (req: AuthRequest, res: Response): Promise<voi
     const oldStatus = existing.status;
     const updated = await Client.findByIdAndUpdate(id, req.body, { new: true })
       .populate('assignedTo', 'name email title avatar')
-      .populate('projects', 'name status progress deadline budget');
+      .populate({
+        path: 'projects',
+        populate: { path: 'lead', select: 'name email title avatar' },
+      });
 
     // If projects were updated, sync with Project collection
     if (req.body.projects && Array.isArray(req.body.projects)) {

@@ -8,6 +8,7 @@ import { AuthRequest } from '../middlewares/auth';
 export const getProjects = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const projects = await Project.find()
+      .populate('lead', 'name email title avatar status')
       .populate('members', 'name email title avatar status')
       .populate('clientId', 'name contactPerson email phone status')
       .sort({ updatedAt: -1 });
@@ -42,6 +43,7 @@ export const getProjectById = async (req: AuthRequest, res: Response): Promise<v
   try {
     const { id } = req.params;
     const project = await Project.findById(id)
+      .populate('lead', 'name email title avatar status')
       .populate('members', 'name email title avatar status')
       .populate('clientId', 'name contactPerson email phone status');
 
@@ -67,7 +69,10 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
       clientName,
       clientId,
       description,
+      lead,
       members,
+      techStack,
+      priority,
       status,
       deadline,
       budget,
@@ -83,12 +88,21 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
       }
     }
 
+    // Ensure lead is also included in members list if provided
+    let resolvedMembers = Array.isArray(members) ? [...members] : [];
+    if (lead && !resolvedMembers.some((m: any) => m.toString() === lead.toString())) {
+      resolvedMembers.push(lead);
+    }
+
     const project = await Project.create({
       name,
       clientName: resolvedClientName,
       clientId: clientId || undefined,
       description: description || '',
-      members: members || [],
+      lead: lead || undefined,
+      members: resolvedMembers,
+      techStack: Array.isArray(techStack) ? techStack : [],
+      priority: priority || 'MEDIUM',
       status: status || 'IN_PROGRESS',
       deadline,
       budget,
@@ -113,6 +127,7 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
     }
 
     const populated = await Project.findById(project._id)
+      .populate('lead', 'name email title avatar')
       .populate('members', 'name email title avatar')
       .populate('clientId', 'name contactPerson email phone status');
 
@@ -149,7 +164,15 @@ export const updateProject = async (req: AuthRequest, res: Response): Promise<vo
       }
     }
 
+    // Ensure lead is in members if both are passed
+    if (req.body.lead && Array.isArray(req.body.members)) {
+      if (!req.body.members.some((m: any) => m.toString() === req.body.lead.toString())) {
+        req.body.members.push(req.body.lead);
+      }
+    }
+
     const project = await Project.findByIdAndUpdate(id, req.body, { new: true })
+      .populate('lead', 'name email title avatar')
       .populate('members', 'name email title avatar')
       .populate('clientId', 'name contactPerson email phone status');
 

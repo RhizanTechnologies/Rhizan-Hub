@@ -57,6 +57,9 @@ export default function ProjectsPage() {
   const [formClientId, setFormClientId] = useState('');
   const [formClientName, setFormClientName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [formLeadId, setFormLeadId] = useState('');
+  const [formTechStack, setFormTechStack] = useState('');
+  const [formPriority, setFormPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'>('MEDIUM');
   const [formBudget, setFormBudget] = useState('');
   const [formDeadline, setFormDeadline] = useState('');
   const [formStatus, setFormStatus] = useState<'PLANNING' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED'>('IN_PROGRESS');
@@ -123,6 +126,9 @@ export default function ProjectsPage() {
     setFormClientId('');
     setFormClientName('');
     setFormDescription('');
+    setFormLeadId('');
+    setFormTechStack('');
+    setFormPriority('MEDIUM');
     setFormBudget('');
     setFormDeadline('');
     setFormStatus('IN_PROGRESS');
@@ -136,6 +142,9 @@ export default function ProjectsPage() {
     setFormClientId(typeof project.clientId === 'object' ? (project.clientId as any)?._id : project.clientId || '');
     setFormClientName(project.clientName || '');
     setFormDescription(project.description || '');
+    setFormLeadId(typeof project.lead === 'object' ? (project.lead as any)?._id : project.lead || '');
+    setFormTechStack((project.techStack || []).join(', '));
+    setFormPriority(project.priority || 'MEDIUM');
     setFormBudget(project.budget?.toString() || '');
     setFormDeadline(project.deadline ? new Date(project.deadline).toISOString().split('T')[0] : '');
     setFormStatus(project.status);
@@ -159,6 +168,9 @@ export default function ProjectsPage() {
       clientId: formClientId || undefined,
       clientName: selectedClientName,
       description: formDescription.trim(),
+      lead: formLeadId || undefined,
+      techStack: formTechStack.split(',').map((s) => s.trim()).filter(Boolean),
+      priority: formPriority,
       budget: parseFloat(formBudget) || 0,
       deadline: formDeadline ? new Date(formDeadline).toISOString() : undefined,
       status: formStatus,
@@ -309,22 +321,51 @@ export default function ProjectsPage() {
                       </div>
                     </div>
 
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase border ${
-                        project.status === 'COMPLETED'
-                          ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-                          : project.status === 'REVIEW'
-                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                          : 'bg-teal-500/10 text-teal-400 border-teal-500/20'
-                      }`}
-                    >
-                      {project.status.replace('_', ' ')}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase border ${
+                          project.status === 'COMPLETED'
+                            ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                            : project.status === 'REVIEW'
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                            : 'bg-teal-500/10 text-teal-400 border-teal-500/20'
+                        }`}
+                      >
+                        {project.status.replace('_', ' ')}
+                      </span>
+                      {project.priority && (
+                        <PriorityBadge priority={project.priority} />
+                      )}
+                    </div>
                   </div>
 
-                  <p className="text-xs text-neutral-400 line-clamp-2 mb-4 leading-relaxed">
+                  {/* Project Lead */}
+                  {project.lead && (
+                    <div className="flex items-center gap-2 mb-3 px-2.5 py-1 rounded-xl bg-[#161616] border border-[#262626] w-fit">
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-teal-500 text-black font-extrabold text-[9px] flex items-center justify-center">
+                        {project.lead.name?.charAt(0) || 'L'}
+                      </div>
+                      <div className="text-[11px] leading-tight">
+                        <span className="text-[9px] uppercase font-bold text-amber-400 mr-1">Project Lead:</span>
+                        <strong className="text-white font-medium">{project.lead.name}</strong>
+                      </div>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-neutral-400 line-clamp-2 mb-3 leading-relaxed">
                     {project.description || 'No description provided.'}
                   </p>
+
+                  {/* Tech Stack Pills */}
+                  {project.techStack && project.techStack.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {project.techStack.map((tech, idx) => (
+                        <span key={idx} className="text-[10px] px-2 py-0.5 rounded-md bg-[#181818] text-neutral-300 border border-[#262626]">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Multiple Links Pills (Quick access directly on card) */}
                   {links.length > 0 && (
@@ -701,6 +742,55 @@ export default function ProjectsPage() {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Project Lead (Lead Developer / Tech Lead)
+              </label>
+              <select
+                value={formLeadId}
+                onChange={(e) => setFormLeadId(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+              >
+                <option value="">-- Choose Project Lead (Optional) --</option>
+                {teamMembers.map((m) => (
+                  <option key={m.id || m._id} value={m.id || m._id}>
+                    {m.name} ({m.title || 'Developer'})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Project Priority
+              </label>
+              <select
+                value={formPriority}
+                onChange={(e) => setFormPriority(e.target.value as any)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+              >
+                <option value="LOW">Low Priority</option>
+                <option value="MEDIUM">Medium Priority</option>
+                <option value="HIGH">High Priority</option>
+                <option value="URGENT">Urgent Priority</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Tech Stack (Comma-separated)
+            </label>
+            <input
+              type="text"
+              value={formTechStack}
+              onChange={(e) => setFormTechStack(e.target.value)}
+              placeholder="e.g. Next.js, Node.js, PostgreSQL, Tailwind CSS"
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+            />
+          </div>
+
           <div>
             <label className="block text-xs font-medium text-neutral-300 mb-1">
               Project Description
@@ -708,7 +798,7 @@ export default function ProjectsPage() {
             <textarea
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
-              placeholder="Describe deliverables, core features, or technical stack..."
+              placeholder="Describe deliverables, core features, or technical goals..."
               rows={2}
               className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
             />

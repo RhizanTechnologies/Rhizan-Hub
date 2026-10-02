@@ -65,6 +65,9 @@ export default function ProjectDetailPage() {
   const [formClientId, setFormClientId] = useState('');
   const [formClientName, setFormClientName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [formLeadId, setFormLeadId] = useState('');
+  const [formTechStack, setFormTechStack] = useState('');
+  const [formPriority, setFormPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'>('MEDIUM');
   const [formBudget, setFormBudget] = useState('');
   const [formDeadline, setFormDeadline] = useState('');
   const [formStatus, setFormStatus] = useState<any>('IN_PROGRESS');
@@ -92,6 +95,13 @@ export default function ProjectDetailPage() {
         );
         setFormClientName(projData.project.clientName || '');
         setFormDescription(projData.project.description || '');
+        setFormLeadId(
+          typeof projData.project.lead === 'object'
+            ? (projData.project.lead as any)?._id
+            : projData.project.lead || ''
+        );
+        setFormTechStack((projData.project.techStack || []).join(', '));
+        setFormPriority(projData.project.priority || 'MEDIUM');
         setFormBudget(projData.project.budget?.toString() || '');
         setFormDeadline(
           projData.project.deadline
@@ -149,6 +159,9 @@ export default function ProjectDetailPage() {
           clientId: formClientId || undefined,
           clientName: selectedClientName,
           description: formDescription.trim(),
+          lead: formLeadId || undefined,
+          techStack: formTechStack.split(',').map((s) => s.trim()).filter(Boolean),
+          priority: formPriority,
           budget: parseFloat(formBudget) || 0,
           deadline: formDeadline ? new Date(formDeadline).toISOString() : undefined,
           status: formStatus,
@@ -324,14 +337,31 @@ export default function ProjectDetailPage() {
         <div className="p-6 rounded-3xl bg-[#111111] border border-[#222222] shadow-xl space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="font-heading font-extrabold text-2xl text-white tracking-tight">
                   {project.name}
                 </h1>
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/30">
                   {project.status.replace('_', ' ')}
                 </span>
+                {project.priority && (
+                  <PriorityBadge priority={project.priority} />
+                )}
               </div>
+
+              {/* Project Lead Card */}
+              {project.lead && (
+                <div className="flex items-center gap-2.5 mt-2 px-3 py-1.5 rounded-2xl bg-[#161616] border border-amber-500/25 w-fit">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-500 to-teal-500 text-black font-extrabold text-[10px] flex items-center justify-center shadow-sm">
+                    {project.lead.name?.charAt(0) || 'L'}
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-[9px] uppercase font-bold text-amber-400 mr-1.5">Project Lead:</span>
+                    <strong className="text-white">{project.lead.name}</strong>
+                    <span className="text-neutral-400 text-[11px] ml-1">({project.lead.title || 'Developer'})</span>
+                  </div>
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
                 <div className="flex items-center gap-1 text-neutral-300">
@@ -357,6 +387,17 @@ export default function ProjectDetailPage() {
                   <span>• Budget: <strong className="text-emerald-400">${project.budget.toLocaleString()}</strong></span>
                 )}
               </div>
+
+              {/* Tech Stack Pills */}
+              {project.techStack && project.techStack.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  {project.techStack.map((tech, idx) => (
+                    <span key={idx} className="text-[11px] px-2.5 py-0.5 rounded-lg bg-[#181818] text-teal-300 border border-[#2a2a2a] font-mono">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Actions */}
@@ -556,23 +597,41 @@ export default function ProjectDetailPage() {
               </div>
 
               <div className="space-y-2">
-                {assignedDevs.map((dev: any, idx) => (
-                  <div
-                    key={dev._id || idx}
-                    className="p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-xs flex items-center justify-center">
-                        {dev.name?.charAt(0) || 'U'}
+                {assignedDevs.map((dev: any, idx) => {
+                  const isLead = (project.lead?._id || project.lead?.id) === (dev._id || dev.id);
+                  return (
+                    <div
+                      key={dev._id || idx}
+                      className={`p-3 rounded-xl border flex items-center justify-between ${
+                        isLead
+                          ? 'bg-[#181818] border-amber-500/30 shadow-sm'
+                          : 'bg-[#161616] border-[#262626]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                          isLead
+                            ? 'bg-gradient-to-tr from-amber-500 to-amber-300 text-black font-extrabold shadow-sm'
+                            : 'bg-gradient-to-tr from-teal-500 to-emerald-600 text-white'
+                        }`}>
+                          {dev.name?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-white">{dev.name}</span>
+                            {isLead && (
+                              <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                Project Lead
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-teal-400">{dev.title || 'Developer'}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-xs font-semibold text-white">{dev.name}</div>
-                        <div className="text-[11px] text-teal-400">{dev.title || 'Developer'}</div>
-                      </div>
+                      <span className="text-[10px] text-neutral-500">{dev.email}</span>
                     </div>
-                    <span className="text-[10px] text-neutral-500">{dev.email}</span>
-                  </div>
-                ))}
+                  );
+                })}
                 {assignedDevs.length === 0 && (
                   <p className="text-xs text-neutral-500 italic p-3 text-center">No developers assigned yet.</p>
                 )}
@@ -784,6 +843,52 @@ export default function ProjectDetailPage() {
                 <option value="COMPLETED">Completed</option>
               </select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Project Lead (Lead Developer / Tech Lead)
+              </label>
+              <select
+                value={formLeadId}
+                onChange={(e) => setFormLeadId(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                <option value="">-- Choose Project Lead (Optional) --</option>
+                {teamMembers.map((m) => (
+                  <option key={m.id || m._id} value={m.id || m._id}>
+                    {m.name} ({m.title || 'Developer'})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
+              <select
+                value={formPriority}
+                onChange={(e) => setFormPriority(e.target.value as any)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                <option value="LOW">Low Priority</option>
+                <option value="MEDIUM">Medium Priority</option>
+                <option value="HIGH">High Priority</option>
+                <option value="URGENT">Urgent Priority</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Tech Stack (Comma-separated)
+            </label>
+            <input
+              type="text"
+              value={formTechStack}
+              onChange={(e) => setFormTechStack(e.target.value)}
+              placeholder="e.g. Next.js, Node.js, PostgreSQL, Tailwind CSS"
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
