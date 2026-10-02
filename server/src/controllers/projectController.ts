@@ -78,6 +78,7 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
       budget,
       notes,
       links,
+      milestones,
     } = req.body;
 
     let resolvedClientName = clientName || 'Internal';
@@ -108,6 +109,7 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
       budget,
       notes,
       links: links || [],
+      milestones: milestones || [],
     });
 
     if (clientId) {

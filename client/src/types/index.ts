@@ -81,6 +81,24 @@ export interface ClientPayment {
   notes?: string;
 }
 
+export interface ProjectDeliverable {
+  _id?: string;
+  id?: string;
+  title: string;
+  completed: boolean;
+}
+
+export interface ProjectMilestone {
+  _id?: string;
+  id?: string;
+  title: string;
+  description?: string;
+  dueDate?: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  deliverables?: ProjectDeliverable[];
+  completedAt?: string;
+}
+
 export interface Project {
   _id: string;
   name: string;
@@ -100,6 +118,7 @@ export interface Project {
   completedTasks?: number;
   notes?: string;
   links?: ResourceLink[];
+  milestones?: ProjectMilestone[];
   createdAt: string;
   updatedAt: string;
 }

@@ -7,6 +7,22 @@ export interface IProjectResourceLink {
   category?: string; // GITHUB, FIGMA, LIVE, STAGING, DOCS, DRIVE, OTHER
 }
 
+export interface IProjectDeliverable {
+  _id?: Types.ObjectId;
+  title: string;
+  completed: boolean;
+}
+
+export interface IProjectMilestone {
+  _id?: Types.ObjectId;
+  title: string;
+  description?: string;
+  dueDate?: Date;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  deliverables?: IProjectDeliverable[];
+  completedAt?: Date;
+}
+
 export interface IProject extends Document {
   name: string;
   clientName: string;
@@ -23,6 +39,7 @@ export interface IProject extends Document {
   budget?: number;
   notes?: string;
   links: IProjectResourceLink[];
+  milestones: IProjectMilestone[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +49,30 @@ const ProjectResourceLinkSchema = new Schema<IProjectResourceLink>(
     title: { type: String, required: true, trim: true },
     url: { type: String, required: true, trim: true },
     category: { type: String, default: 'OTHER' },
+  },
+  { timestamps: true }
+);
+
+const ProjectDeliverableSchema = new Schema<IProjectDeliverable>(
+  {
+    title: { type: String, required: true, trim: true },
+    completed: { type: Boolean, default: false },
+  },
+  { timestamps: false }
+);
+
+const ProjectMilestoneSchema = new Schema<IProjectMilestone>(
+  {
+    title: { type: String, required: true, trim: true },
+    description: { type: String, default: '' },
+    dueDate: { type: Date },
+    status: {
+      type: String,
+      enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+      default: 'PENDING',
+    },
+    deliverables: [ProjectDeliverableSchema],
+    completedAt: { type: Date },
   },
   { timestamps: true }
 );
@@ -61,6 +102,7 @@ const ProjectSchema = new Schema<IProject>(
     budget: { type: Number },
     notes: { type: String, default: '' },
     links: [ProjectResourceLinkSchema],
+    milestones: [ProjectMilestoneSchema],
   },
   { timestamps: true }
 );
