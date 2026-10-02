@@ -56,6 +56,45 @@ export interface Task {
   updatedAt: string;
 }
 
+export interface TimeEntry {
+  _id: string;
+  id?: string;
+  user: User;
+  project: {
+    _id: string;
+    name: string;
+    clientName?: string;
+  };
+  task?: {
+    _id: string;
+    title: string;
+  };
+  description: string;
+  date: string;
+  startTime?: string;
+  endTime?: string;
+  hours: number;
+  minutes: number;
+  billable?: boolean;
+  tag?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WeeklyTeamMemberSummary {
+  user: {
+    id: string;
+    name: string;
+    title?: string;
+    capacity?: number;
+  };
+  totalHours: number;
+  projectBreakdown: {
+    projectName: string;
+    hours: number;
+  }[];
+}
+
 export interface ResourceLink {
   _id?: string;
   id?: string;
