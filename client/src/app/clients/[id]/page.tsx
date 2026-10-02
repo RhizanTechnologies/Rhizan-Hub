@@ -73,8 +73,18 @@ export default function ClientDetailPage() {
   const [formService, setFormService] = useState('');
   const [formDealValue, setFormDealValue] = useState('');
   const [formPaidAmount, setFormPaidAmount] = useState('');
+  const [formCurrency, setFormCurrency] = useState('USD');
   const [formNotes, setFormNotes] = useState('');
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
+
+  // Create Project state
+  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectBudget, setNewProjectBudget] = useState('');
+  const [newProjectDeadline, setNewProjectDeadline] = useState('');
+  const [newProjectStatus, setNewProjectStatus] = useState<'PLANNING' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED'>('IN_PROGRESS');
+  const [newProjectDescription, setNewProjectDescription] = useState('');
+  const [creatingProject, setCreatingProject] = useState(false);
 
   const loadClient = async () => {
     try {
@@ -94,6 +104,7 @@ export default function ClientDetailPage() {
         setFormService(clientData.serviceInterested || '');
         setFormDealValue(clientData.dealValue?.toString() || '');
         setFormPaidAmount(clientData.paidAmount?.toString() || '');
+        setFormCurrency(clientData.currency || 'USD');
         setFormNotes(clientData.notes || '');
         setSelectedProjectIds((clientData.projects || []).map((p) => p._id));
       }
@@ -129,6 +140,7 @@ export default function ClientDetailPage() {
           serviceInterested: formService.trim(),
           dealValue: parseFloat(formDealValue) || 0,
           paidAmount: parseFloat(formPaidAmount) || 0,
+          currency: formCurrency,
           notes: formNotes.trim(),
           projects: selectedProjectIds,
         }),
@@ -139,6 +151,38 @@ export default function ClientDetailPage() {
       await loadClient();
     } catch (err: any) {
       alert(err.message || 'Failed to update client');
+    }
+  };
+
+  const handleCreateProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProjectName.trim() || !client) return;
+
+    try {
+      setCreatingProject(true);
+      await apiFetch<Project>('/projects', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newProjectName.trim(),
+          clientId: client._id,
+          clientName: client.name,
+          budget: parseFloat(newProjectBudget) || 0,
+          status: newProjectStatus,
+          deadline: newProjectDeadline || undefined,
+          description: newProjectDescription.trim(),
+        }),
+      });
+
+      setIsCreateProjectModalOpen(false);
+      setNewProjectName('');
+      setNewProjectBudget('');
+      setNewProjectDeadline('');
+      setNewProjectDescription('');
+      await loadClient();
+    } catch (err: any) {
+      alert(err.message || 'Failed to create project');
+    } finally {
+      setCreatingProject(false);
     }
   };
 
@@ -292,11 +336,16 @@ export default function ClientDetailPage() {
     );
   }
 
-  const dealVal = client.dealValue || 0;
+  const connectedProjects = client.projects || [];
+  const totalProjectsBudget = connectedProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
+  const dealVal = (typeof client.dealValue === 'number' && client.dealValue > 0)
+    ? client.dealValue
+    : totalProjectsBudget;
+  const isBudgetFromProjects = (!client.dealValue || client.dealValue === 0) && totalProjectsBudget > 0;
   const paidVal = client.paidAmount || 0;
   const balance = Math.max(0, dealVal - paidVal);
   const paidPercent = dealVal > 0 ? Math.min(100, Math.round((paidVal / dealVal) * 100)) : 0;
-  const connectedProjects = client.projects || [];
+  const currencySymbol = client.currency === 'ETB' ? 'ETB ' : (client.currency === 'EUR' ? '€' : (client.currency === 'GBP' ? '£' : '$'));
 
   return (
     <div className="flex-1 flex flex-col min-h-screen">
@@ -387,15 +436,32 @@ export default function ClientDetailPage() {
         {/* Financial Metrics Strip */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222]">
-            <span className="text-[11px] text-neutral-400 uppercase font-semibold block">Total Contract / Deal Value</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-neutral-400 uppercase font-semibold block">Total Contract / Deal Value</span>
+              {isBudgetFromProjects && (
+                <span className="text-[10px] text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20 font-medium">
+                  {connectedProjects.length} Projects Total
+                </span>
+              )}
+            </div>
             <span className="text-xl font-bold font-mono text-white mt-1 block">
-              ${dealVal.toLocaleString()}
+              {currencySymbol}{dealVal.toLocaleString()}
             </span>
+            {connectedProjects.length > 0 && (
+              <div className="text-[11px] text-neutral-400 mt-2 pt-2 border-t border-[#1e1e1e] flex flex-wrap gap-x-2 gap-y-0.5">
+                {connectedProjects.map((p, idx) => (
+                  <span key={p._id} className="text-neutral-400">
+                    <span className="text-neutral-300 font-medium">{p.name}</span>: <span className="text-teal-400 font-mono">{currencySymbol}{(p.budget || 0).toLocaleString()}</span>
+                    {idx < connectedProjects.length - 1 ? ' • ' : ''}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222]">
             <span className="text-[11px] text-emerald-400 uppercase font-semibold block">Paid So Far</span>
             <span className="text-xl font-bold font-mono text-emerald-400 mt-1 block">
-              ${paidVal.toLocaleString()} ({paidPercent}%)
+              {currencySymbol}{paidVal.toLocaleString()} ({paidPercent}%)
             </span>
             <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden mt-2">
               <div className="bg-emerald-400 h-full rounded-full" style={{ width: `${paidPercent}%` }} />
@@ -404,7 +470,7 @@ export default function ClientDetailPage() {
           <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222]">
             <span className="text-[11px] text-amber-400 uppercase font-semibold block">Outstanding Balance</span>
             <span className="text-xl font-bold font-mono text-amber-400 mt-1 block">
-              ${balance.toLocaleString()}
+              {currencySymbol}{balance.toLocaleString()}
             </span>
           </div>
         </div>
@@ -438,23 +504,33 @@ export default function ClientDetailPage() {
         {/* TAB 1: CONNECTED PROJECTS (1 Client can have 2 or more projects) */}
         {activeTab === 'PROJECTS' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="font-heading text-sm font-bold text-white">
                   Active Projects for {client.name}
                 </h3>
                 <p className="text-xs text-neutral-400">
-                  Clients can run multiple simultaneous software projects with RHIZAN.
+                  Clients can run multiple simultaneous projects with RHIZAN, each with its own budget/pricing.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-medium flex items-center gap-1.5 transition"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Link / Assign Project</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="px-3.5 py-1.5 rounded-xl border border-[#262626] bg-[#181818] hover:bg-[#222222] text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
+                >
+                  <FolderKanban className="w-3.5 h-3.5 text-teal-400" />
+                  <span>Link Existing</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateProjectModalOpen(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-medium flex items-center gap-1.5 transition shadow-sm shadow-teal-900/30"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Create Project</span>
+                </button>
+              </div>
             </div>
 
             {connectedProjects.length > 0 ? (
@@ -489,7 +565,7 @@ export default function ClientDetailPage() {
                     </div>
 
                     <div className="flex items-center justify-between text-xs pt-1 text-neutral-400">
-                      <span>Budget: ${proj.budget ? proj.budget.toLocaleString() : 'N/A'}</span>
+                      <span>Project Price: <strong className="text-teal-300 font-mono">{currencySymbol}{proj.budget ? proj.budget.toLocaleString() : '0'}</strong></span>
                       <Link
                         href={`/projects/${proj._id}`}
                         className="text-teal-400 hover:underline flex items-center gap-1 font-medium"
@@ -505,14 +581,23 @@ export default function ClientDetailPage() {
               <div className="p-8 rounded-2xl bg-[#121212] border border-dashed border-[#262626] text-center space-y-2">
                 <FolderKanban className="w-10 h-10 text-neutral-600 mx-auto" />
                 <h4 className="text-xs font-bold text-white">No Projects Connected</h4>
-                <p className="text-xs text-neutral-400">Link an existing project or create one for this client.</p>
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="mt-2 text-xs text-teal-400 hover:underline font-semibold"
-                >
-                  Link Projects Now →
-                </button>
+                <p className="text-xs text-neutral-400">Create a new project with its own price or link an existing one.</p>
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateProjectModalOpen(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-medium"
+                  >
+                    + Create Project
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="text-xs text-teal-400 hover:underline font-semibold"
+                  >
+                    Link Existing →
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -878,6 +963,94 @@ export default function ClientDetailPage() {
         )}
       </div>
 
+      {/* CREATE NEW PROJECT MODAL */}
+      <Modal
+        isOpen={isCreateProjectModalOpen}
+        onClose={() => setIsCreateProjectModalOpen(false)}
+        title={`Create New Project for ${client.name}`}
+      >
+        <form onSubmit={handleCreateProject} className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Project Name *</label>
+            <input
+              type="text"
+              placeholder="e.g. Mobile App V2, Loyalty Portal"
+              value={newProjectName}
+              onChange={(e) => setNewProjectName(e.target.value)}
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Project Price / Budget ({currencySymbol.trim()}) *
+              </label>
+              <input
+                type="number"
+                placeholder="e.g. 3500"
+                value={newProjectBudget}
+                onChange={(e) => setNewProjectBudget(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
+              <select
+                value={newProjectStatus}
+                onChange={(e) => setNewProjectStatus(e.target.value as any)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                <option value="PLANNING">Planning</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="REVIEW">Under Review</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Target Deadline</label>
+            <input
+              type="date"
+              value={newProjectDeadline}
+              onChange={(e) => setNewProjectDeadline(e.target.value)}
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Description / Deliverables Scope</label>
+            <textarea
+              value={newProjectDescription}
+              onChange={(e) => setNewProjectDescription(e.target.value)}
+              rows={3}
+              placeholder="Key project goals, specifications, or deliverables..."
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsCreateProjectModalOpen(false)}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={creatingProject}
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white font-medium text-xs shadow-md shadow-teal-900/30 flex items-center gap-1.5"
+            >
+              {creatingProject ? 'Creating...' : '+ Create & Link Project'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
       {/* EDIT CLIENT MODAL */}
       <Modal
         isOpen={isEditModalOpen}
@@ -942,18 +1115,44 @@ export default function ClientDetailPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Deal Value ($)</label>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Currency</label>
+              <select
+                value={formCurrency}
+                onChange={(e) => setFormCurrency(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                <option value="USD">USD ($)</option>
+                <option value="ETB">ETB (ETB)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+              </select>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-medium text-neutral-300">Deal Value</label>
+                {totalProjectsBudget > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setFormDealValue(totalProjectsBudget.toString())}
+                    className="text-[10px] text-teal-400 hover:underline"
+                    title="Copy sum of all project budgets"
+                  >
+                    Sum ({totalProjectsBudget.toLocaleString()})
+                  </button>
+                )}
+              </div>
               <input
                 type="number"
                 value={formDealValue}
                 onChange={(e) => setFormDealValue(e.target.value)}
+                placeholder={totalProjectsBudget > 0 ? `Projects: ${totalProjectsBudget}` : '0'}
                 className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Paid Amount ($)</label>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Paid Amount</label>
               <input
                 type="number"
                 value={formPaidAmount}
@@ -972,21 +1171,28 @@ export default function ClientDetailPage() {
               {availableProjects.map((p) => {
                 const isSelected = selectedProjectIds.includes(p._id);
                 return (
-                  <label key={p._id} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#202020] cursor-pointer text-xs">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => {
-                        if (isSelected) {
-                          setSelectedProjectIds(selectedProjectIds.filter((id) => id !== p._id));
-                        } else {
-                          setSelectedProjectIds([...selectedProjectIds, p._id]);
-                        }
-                      }}
-                      className="accent-teal-500"
-                    />
-                    <span className="text-white font-medium">{p.name}</span>
-                    <span className="text-[10px] text-neutral-500">({p.status})</span>
+                  <label key={p._id} className="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#202020] cursor-pointer text-xs">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          if (isSelected) {
+                            setSelectedProjectIds(selectedProjectIds.filter((id) => id !== p._id));
+                          } else {
+                            setSelectedProjectIds([...selectedProjectIds, p._id]);
+                          }
+                        }}
+                        className="accent-teal-500"
+                      />
+                      <span className="text-white font-medium">{p.name}</span>
+                      <span className="text-[10px] text-neutral-500">({p.status})</span>
+                    </div>
+                    {p.budget ? (
+                      <span className="font-mono text-teal-400 text-[11px] font-semibold">
+                        {currencySymbol}{p.budget.toLocaleString()}
+                      </span>
+                    ) : null}
                   </label>
                 );
               })}
