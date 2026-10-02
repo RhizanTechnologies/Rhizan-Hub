@@ -200,16 +200,36 @@ export const convertToClient = async (req: AuthRequest, res: Response): Promise<
       return;
     }
 
-    // Create Official Client
+    const {
+      name,
+      contactPerson,
+      phone,
+      email,
+      status,
+      serviceInterested,
+      assignedTo,
+      dealValue,
+      paidAmount,
+      currency,
+      notes,
+    } = req.body || {};
+
+    // Create Official Client with provided data and smart fallbacks
     const client = await Client.create({
-      name: approach.businessName,
-      contactPerson: approach.contactPerson || '',
-      phone: approach.phone || '',
-      email: approach.email || '',
-      status: 'ACTIVE',
-      serviceInterested: approach.niche,
-      notes: approach.notes || `Converted from outreach approach. Location: ${approach.location || 'N/A'}`,
-      assignedTo: req.user?.id,
+      name: name?.trim() || approach.businessName,
+      contactPerson: contactPerson !== undefined ? contactPerson.trim() : (approach.contactPerson || ''),
+      phone: phone !== undefined ? phone.trim() : (approach.phone || ''),
+      email: email !== undefined ? email.trim() : (approach.email || ''),
+      status: status || 'ACTIVE',
+      serviceInterested: serviceInterested?.trim() || approach.niche || 'Custom Software',
+      assignedTo: assignedTo || req.user?.id,
+      dealValue: dealValue !== undefined ? Number(dealValue) || 0 : 0,
+      paidAmount: paidAmount !== undefined ? Number(paidAmount) || 0 : 0,
+      currency: currency || 'ETB',
+      notes:
+        notes !== undefined && notes !== null
+          ? notes.trim()
+          : (approach.notes || `Converted from outreach approach. Location: ${approach.location || 'N/A'}`),
     });
 
     approach.status = 'DEAL_WON';
@@ -220,7 +240,7 @@ export const convertToClient = async (req: AuthRequest, res: Response): Promise<
       await Activity.create({
         user: req.user.id,
         userName: req.user.name,
-        action: `converted approach to active client`,
+        action: `converted approach to active client ($${client.dealValue} ${client.currency})`,
         entityType: 'CLIENT',
         entityTitle: client.name,
       });

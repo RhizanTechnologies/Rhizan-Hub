@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
-import { Approach, ApproachStatus, ContactChannel, Niche } from '@/types';
+import { Approach, ApproachStatus, ContactChannel, Niche, User } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
   ArrowLeft,
@@ -26,6 +26,7 @@ import {
   AlertCircle,
   Tag,
   ChevronDown,
+  DollarSign,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -90,13 +91,28 @@ export default function ApproachDetailPage() {
 
   const [approach, setApproach] = useState<Approach | null>(null);
   const [niches, setNiches] = useState<Niche[]>([]);
+  const [teamMembers, setTeamMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modals & form state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
   const [converting, setConverting] = useState(false);
+
+  // Convert to Client Form State
+  const [convertName, setConvertName] = useState('');
+  const [convertContactPerson, setConvertContactPerson] = useState('');
+  const [convertPhone, setConvertPhone] = useState('');
+  const [convertEmail, setConvertEmail] = useState('');
+  const [convertService, setConvertService] = useState('');
+  const [convertDealValue, setConvertDealValue] = useState('');
+  const [convertPaidAmount, setConvertPaidAmount] = useState('0');
+  const [convertCurrency, setConvertCurrency] = useState('ETB');
+  const [convertAssignedTo, setConvertAssignedTo] = useState('');
+  const [convertStatus, setConvertStatus] = useState<string>('ACTIVE');
+  const [convertNotes, setConvertNotes] = useState('');
 
   // Edit form state
   const [formBusinessName, setFormBusinessName] = useState('');
@@ -119,11 +135,13 @@ export default function ApproachDetailPage() {
   const loadApproach = async () => {
     try {
       setLoading(true);
-      const [data, nichesData] = await Promise.all([
+      const [data, nichesData, teamData] = await Promise.all([
         apiFetch<Approach>(`/approaches/${approachId}`),
         apiFetch<Niche[]>('/niches'),
+        apiFetch<User[]>('/team'),
       ]);
       if (nichesData) setNiches(nichesData);
+      if (teamData) setTeamMembers(teamData);
       if (data) {
         setApproach(data);
         setFormBusinessName(data.businessName);
@@ -224,15 +242,56 @@ export default function ApproachDetailPage() {
     }
   };
 
-  const handleConvertToClient = async () => {
+  const openConvertModal = () => {
     if (!approach) return;
+    setConvertName(approach.businessName);
+    setConvertContactPerson(approach.contactPerson || '');
+    setConvertPhone(approach.phone || '');
+    setConvertEmail(approach.email || '');
+    setConvertService(approach.niche || 'Custom Software');
+    setConvertDealValue('');
+    setConvertPaidAmount('0');
+    setConvertCurrency('ETB');
+    setConvertAssignedTo(teamMembers[0]?._id || '');
+    setConvertStatus('ACTIVE');
+    setConvertNotes(
+      approach.notes
+        ? `${approach.notes}${approach.location ? `\nLocation: ${approach.location}` : ''}`
+        : (approach.location ? `Location: ${approach.location}` : '')
+    );
+    setIsConvertModalOpen(true);
+  };
+
+  const handleConfirmConvert = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!approach || !convertName.trim()) return;
+
     try {
       setConverting(true);
+      const payload = {
+        name: convertName.trim(),
+        contactPerson: convertContactPerson.trim(),
+        phone: convertPhone.trim(),
+        email: convertEmail.trim(),
+        serviceInterested: convertService.trim(),
+        dealValue: convertDealValue ? Number(convertDealValue) : 0,
+        paidAmount: convertPaidAmount ? Number(convertPaidAmount) : 0,
+        currency: convertCurrency,
+        assignedTo: convertAssignedTo || undefined,
+        status: convertStatus,
+        notes: convertNotes.trim(),
+      };
+
       const res = await apiFetch<{ message: string; client: any; approach: Approach }>(
         `/approaches/${approach._id}/convert`,
-        { method: 'POST' }
+        {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        }
       );
+
       setApproach(res.approach);
+      setIsConvertModalOpen(false);
       router.push(`/clients/${res.client._id}`);
     } catch (err: any) {
       alert(err.message || 'Failed to convert to client');
@@ -357,12 +416,12 @@ export default function ApproachDetailPage() {
               </Link>
             ) : (
               <button
-                onClick={handleConvertToClient}
+                onClick={openConvertModal}
                 disabled={converting}
                 className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm disabled:opacity-50"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>{converting ? 'Converting...' : 'Deal Won → Make Client'}</span>
+                <span>Deal Won → Make Client</span>
               </button>
             )}
 
@@ -683,12 +742,12 @@ export default function ApproachDetailPage() {
               </div>
             ) : (
               <button
-                onClick={handleConvertToClient}
+                onClick={openConvertModal}
                 disabled={converting}
                 className="w-full py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-md shadow-teal-900/30 disabled:opacity-50"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>{converting ? 'Converting...' : 'Deal Won → Convert to Client'}</span>
+                <span>Deal Won → Convert to Client</span>
               </button>
             )}
           </div>
@@ -972,6 +1031,204 @@ export default function ApproachDetailPage() {
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* CONVERT TO CLIENT MODAL */}
+      <Modal
+        isOpen={isConvertModalOpen}
+        onClose={() => setIsConvertModalOpen(false)}
+        title="Deal Won: Convert to Official Client"
+      >
+        <form onSubmit={handleConfirmConvert} className="space-y-4">
+          <p className="text-xs text-neutral-400">
+            Finalize deal terms and client profile to onboard this business into Rhizan Hub for projects, meetings, and invoice tracking.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Client / Company Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={convertName}
+                onChange={(e) => setConvertName(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Contact Person
+              </label>
+              <input
+                type="text"
+                value={convertContactPerson}
+                onChange={(e) => setConvertContactPerson(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                value={convertPhone}
+                onChange={(e) => setConvertPhone(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={convertEmail}
+                onChange={(e) => setConvertEmail(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Service / Deliverable Interested *
+              </label>
+              <input
+                type="text"
+                required
+                value={convertService}
+                onChange={(e) => setConvertService(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Assign Account Lead / Manager
+              </label>
+              <select
+                value={convertAssignedTo}
+                onChange={(e) => setConvertAssignedTo(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              >
+                <option value="">Unassigned</option>
+                {teamMembers.map((m) => (
+                  <option key={m._id} value={m._id}>
+                    {m.name} ({m.role})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Deal Value & Financials Box */}
+          <div className="p-3.5 bg-[#161616] border border-[#262626] rounded-2xl space-y-3">
+            <div className="flex items-center gap-1.5">
+              <DollarSign className="w-3.5 h-3.5 text-teal-400" />
+              <span className="text-[11px] font-semibold text-teal-400 uppercase tracking-wider block">
+                Contract & Financial Agreement
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                  Total Deal Value
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 150000"
+                  value={convertDealValue}
+                  onChange={(e) => setConvertDealValue(e.target.value)}
+                  className="w-full bg-[#1a1a1a] border border-[#333333] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                  Advance / Deposit Paid
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 50000"
+                  value={convertPaidAmount}
+                  onChange={(e) => setConvertPaidAmount(e.target.value)}
+                  className="w-full bg-[#1a1a1a] border border-[#333333] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                  Currency
+                </label>
+                <select
+                  value={convertCurrency}
+                  onChange={(e) => setConvertCurrency(e.target.value)}
+                  className="w-full bg-[#1a1a1a] border border-[#333333] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                >
+                  <option value="ETB">ETB (Birr)</option>
+                  <option value="USD">USD ($)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Client Pipeline Status
+            </label>
+            <select
+              value={convertStatus}
+              onChange={(e) => setConvertStatus(e.target.value)}
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+            >
+              <option value="ACTIVE">Active Client (Contract signed)</option>
+              <option value="PROPOSAL">Proposal (Awaiting final signoff)</option>
+              <option value="MEETING">Meeting Stage</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Contract & Onboarding Notes
+            </label>
+            <textarea
+              rows={3}
+              value={convertNotes}
+              onChange={(e) => setConvertNotes(e.target.value)}
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setIsConvertModalOpen(false)}
+              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={converting}
+              className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold transition shadow-md shadow-teal-900/30 flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{converting ? 'Creating Client...' : 'Confirm & Onboard Client'}</span>
+            </button>
+          </div>
+        </form>
       </Modal>
     </div>
   );
