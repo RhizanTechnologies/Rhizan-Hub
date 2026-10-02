@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
-import { Approach, ApproachStatus, ContactChannel } from '@/types';
+import { Approach, ApproachStatus, ContactChannel, Niche } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
   ArrowLeft,
@@ -89,6 +89,7 @@ export default function ApproachDetailPage() {
   const approachId = params?.id as string;
 
   const [approach, setApproach] = useState<Approach | null>(null);
+  const [niches, setNiches] = useState<Niche[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modals & form state
@@ -118,7 +119,11 @@ export default function ApproachDetailPage() {
   const loadApproach = async () => {
     try {
       setLoading(true);
-      const data = await apiFetch<Approach>(`/approaches/${approachId}`);
+      const [data, nichesData] = await Promise.all([
+        apiFetch<Approach>(`/approaches/${approachId}`),
+        apiFetch<Niche[]>('/niches'),
+      ]);
+      if (nichesData) setNiches(nichesData);
       if (data) {
         setApproach(data);
         setFormBusinessName(data.businessName);
@@ -823,13 +828,20 @@ export default function ApproachDetailPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Niche / Category *
               </label>
-              <input
-                type="text"
-                required
+              <select
                 value={formNiche}
                 onChange={(e) => setFormNiche(e.target.value)}
                 className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              />
+              >
+                {niches.map((n) => (
+                  <option key={n._id} value={n.name}>
+                    {n.name}
+                  </option>
+                ))}
+                {niches.every((n) => n.name !== formNiche) && formNiche && (
+                  <option value={formNiche}>{formNiche}</option>
+                )}
+              </select>
             </div>
 
             <div>

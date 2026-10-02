@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
-import { Approach, ApproachStatus, ContactChannel } from '@/types';
+import { Approach, ApproachStatus, ContactChannel, Niche } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
   Building2,
@@ -27,6 +27,9 @@ import {
   Target,
   Users,
   Eye,
+  Settings2,
+  Check,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -63,17 +66,6 @@ const STATUS_CONFIG: Record<ApproachStatus, { label: string; color: string; dot:
   },
 };
 
-const BASE_DEFAULT_NICHES = [
-  'Bakery & Cafe',
-  'Retail & Supermarket',
-  'Logistics & Fleet',
-  'Restaurant & Bistro',
-  'Printing & Publishing',
-  'Healthcare & Clinic',
-  'Real Estate & Property',
-  'Hospitality & Hotel',
-];
-
 function formatCleanPhone(raw?: string): string {
   if (!raw) return '';
   return raw.replace(/[^0-9+]/g, '');
@@ -82,6 +74,7 @@ function formatCleanPhone(raw?: string): string {
 export default function ApproachesPage() {
   const router = useRouter();
   const [approaches, setApproaches] = useState<Approach[]>([]);
+  const [niches, setNiches] = useState<Niche[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
@@ -95,6 +88,14 @@ export default function ApproachesPage() {
   const [approachToDelete, setApproachToDelete] = useState<Approach | null>(null);
   const [convertingId, setConvertingId] = useState<string | null>(null);
 
+  // Manage Niches Modal State
+  const [isNicheModalOpen, setIsNicheModalOpen] = useState(false);
+  const [editingNiche, setEditingNiche] = useState<Niche | null>(null);
+  const [nicheNameInput, setNicheNameInput] = useState('');
+  const [nicheDescInput, setNicheDescInput] = useState('');
+  const [nicheToDelete, setNicheToDelete] = useState<Niche | null>(null);
+  const [savingNiche, setSavingNiche] = useState(false);
+
   // Quick Log Modal
   const [quickLogTarget, setQuickLogTarget] = useState<Approach | null>(null);
   const [quickChannel, setQuickChannel] = useState<ContactChannel>('CALL');
@@ -106,9 +107,9 @@ export default function ApproachesPage() {
 
   // Form Fields
   const [businessName, setBusinessName] = useState('');
-  const [niche, setNiche] = useState('Bakery & Cafe');
-  const [customNiche, setCustomNiche] = useState('');
-  const [isCustomNiche, setIsCustomNiche] = useState(false);
+  const [niche, setNiche] = useState('');
+  const [inlineNewNiche, setInlineNewNiche] = useState(false);
+  const [inlineNicheName, setInlineNicheName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -118,30 +119,34 @@ export default function ApproachesPage() {
   const [nextFollowUpDate, setNextFollowUpDate] = useState('');
   const [notes, setNotes] = useState('');
 
-  const loadApproaches = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await apiFetch<Approach[]>('/approaches');
-      if (data) setApproaches(data);
+      const [approachesData, nichesData] = await Promise.all([
+        apiFetch<Approach[]>('/approaches'),
+        apiFetch<Niche[]>('/niches'),
+      ]);
+      if (approachesData) setApproaches(approachesData);
+      if (nichesData) setNiches(nichesData);
     } catch (err) {
-      console.error('Failed to load approaches:', err);
+      console.error('Failed to load outreach data:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadApproaches();
+    loadData();
   }, []);
 
-  // Compute all unique niches available
-  const availableNiches = useMemo(() => {
-    const list = new Set<string>(BASE_DEFAULT_NICHES);
-    approaches.forEach((a) => {
-      if (a.niche && a.niche.trim()) list.add(a.niche.trim());
-    });
-    return Array.from(list).sort();
-  }, [approaches]);
+  const refreshNiches = async () => {
+    try {
+      const data = await apiFetch<Niche[]>('/niches');
+      if (data) setNiches(data);
+    } catch (err) {
+      console.error('Failed to refresh niches:', err);
+    }
+  };
 
   // Metric computations
   const metrics = useMemo(() => {
@@ -165,10 +170,9 @@ export default function ApproachesPage() {
   const openCreateModal = () => {
     setEditingApproach(null);
     setBusinessName('');
-    const defaultN = selectedNiche !== 'All Niches' ? selectedNiche : availableNiches[0] || 'Bakery & Cafe';
-    setNiche(defaultN);
-    setCustomNiche('');
-    setIsCustomNiche(false);
+    setNiche(selectedNiche !== 'All Niches' ? selectedNiche : (niches[0]?.name || 'General'));
+    setInlineNewNiche(false);
+    setInlineNicheName('');
     setContactPerson('');
     setPhone('');
     setEmail('');
@@ -183,15 +187,9 @@ export default function ApproachesPage() {
   const openEditModal = (appr: Approach) => {
     setEditingApproach(appr);
     setBusinessName(appr.businessName);
-    const existingNiche = appr.niche || 'General';
-    if (availableNiches.includes(existingNiche)) {
-      setNiche(existingNiche);
-      setIsCustomNiche(false);
-    } else {
-      setNiche('__custom__');
-      setCustomNiche(existingNiche);
-      setIsCustomNiche(true);
-    }
+    setNiche(appr.niche || (niches[0]?.name || 'General'));
+    setInlineNewNiche(false);
+    setInlineNicheName('');
     setContactPerson(appr.contactPerson || '');
     setPhone(appr.phone || '');
     setEmail(appr.email || '');
@@ -203,17 +201,45 @@ export default function ApproachesPage() {
     setIsModalOpen(true);
   };
 
+  // Create inline new niche right inside the approach form
+  const handleCreateInlineNiche = async () => {
+    if (!inlineNicheName.trim()) return;
+    try {
+      const created = await apiFetch<Niche>('/niches', {
+        method: 'POST',
+        body: JSON.stringify({ name: inlineNicheName.trim() }),
+      });
+      setNiches((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+      setNiche(created.name);
+      setInlineNewNiche(false);
+      setInlineNicheName('');
+    } catch (err: any) {
+      alert(err.message || 'Failed to create niche');
+    }
+  };
+
   const handleSaveApproach = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!businessName.trim()) return;
 
-    const finalNiche = isCustomNiche
-      ? customNiche.trim() || 'General'
-      : niche;
+    let finalNiche = niche;
+    if (inlineNewNiche && inlineNicheName.trim()) {
+      try {
+        const created = await apiFetch<Niche>('/niches', {
+          method: 'POST',
+          body: JSON.stringify({ name: inlineNicheName.trim() }),
+        });
+        setNiches((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+        finalNiche = created.name;
+      } catch (err: any) {
+        // if duplicate, use the name
+        finalNiche = inlineNicheName.trim();
+      }
+    }
 
     const payload = {
       businessName: businessName.trim(),
-      niche: finalNiche,
+      niche: finalNiche || 'General',
       contactPerson: contactPerson.trim(),
       phone: phone.trim(),
       email: email.trim(),
@@ -250,7 +276,9 @@ export default function ApproachesPage() {
         method: 'PUT',
         body: JSON.stringify({ status: newStatus }),
       });
-      setApproaches((prev) => prev.map((a) => (a._id === appr._id ? { ...a, status: updated.status } : a)));
+      setApproaches((prev) =>
+        prev.map((a) => (a._id === appr._id ? { ...a, status: updated.status } : a))
+      );
     } catch (err: any) {
       alert(err.message || 'Failed to update status');
     }
@@ -284,6 +312,7 @@ export default function ApproachesPage() {
     }
   };
 
+  // Quick Log Modal handlers
   const openQuickLogModal = (appr: Approach) => {
     setQuickLogTarget(appr);
     setQuickChannel('CALL');
@@ -321,6 +350,83 @@ export default function ApproachesPage() {
       alert(err.message || 'Failed to log contact interaction');
     } finally {
       setSubmittingQuickLog(false);
+    }
+  };
+
+  // Manage Niches Handlers
+  const openManageNichesModal = () => {
+    setEditingNiche(null);
+    setNicheNameInput('');
+    setNicheDescInput('');
+    setNicheToDelete(null);
+    setIsNicheModalOpen(true);
+  };
+
+  const handleSaveNiche = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nicheNameInput.trim()) return;
+
+    try {
+      setSavingNiche(true);
+      if (editingNiche) {
+        const updated = await apiFetch<Niche>(`/niches/${editingNiche._id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            name: nicheNameInput.trim(),
+            description: nicheDescInput.trim(),
+          }),
+        });
+        setNiches((prev) =>
+          prev
+            .map((n) => (n._id === updated._id ? updated : n))
+            .sort((a, b) => a.name.localeCompare(b.name))
+        );
+        // Refresh approaches in case name changed
+        const freshApproaches = await apiFetch<Approach[]>('/approaches');
+        if (freshApproaches) setApproaches(freshApproaches);
+        setEditingNiche(null);
+      } else {
+        const created = await apiFetch<Niche>('/niches', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: nicheNameInput.trim(),
+            description: nicheDescInput.trim(),
+          }),
+        });
+        setNiches((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+      }
+      setNicheNameInput('');
+      setNicheDescInput('');
+    } catch (err: any) {
+      alert(err.message || 'Failed to save niche');
+    } finally {
+      setSavingNiche(false);
+    }
+  };
+
+  const handleEditNicheClick = (n: Niche) => {
+    setEditingNiche(n);
+    setNicheNameInput(n.name);
+    setNicheDescInput(n.description || '');
+  };
+
+  const cancelEditNiche = () => {
+    setEditingNiche(null);
+    setNicheNameInput('');
+    setNicheDescInput('');
+  };
+
+  const handleDeleteNicheConfirm = async () => {
+    if (!nicheToDelete) return;
+    try {
+      await apiFetch(`/niches/${nicheToDelete._id}`, { method: 'DELETE' });
+      setNiches((prev) => prev.filter((n) => n._id !== nicheToDelete._id));
+      if (selectedNiche === nicheToDelete.name) {
+        setSelectedNiche('All Niches');
+      }
+      setNicheToDelete(null);
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete niche');
     }
   };
 
@@ -409,41 +515,53 @@ export default function ApproachesPage() {
           </div>
         </div>
 
-        {/* CONTROLS: NICHE FILTER & SEARCH BAR */}
+        {/* CONTROLS: NICHE FILTER, MANAGE NICHES & SEARCH BAR */}
         <div className="space-y-3">
           {/* Niche Filter Pills Bar */}
-          <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 flex-1">
+              <button
+                onClick={() => setSelectedNiche('All Niches')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                  selectedNiche === 'All Niches'
+                    ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                    : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#222222]'
+                }`}
+              >
+                All Niches ({approaches.length})
+              </button>
+              {niches.map((n) => {
+                const count = approaches.filter((a) => a.niche === n.name).length;
+                return (
+                  <button
+                    key={n._id}
+                    onClick={() => setSelectedNiche(n.name)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 ${
+                      selectedNiche === n.name
+                        ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                        : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#222222]'
+                    }`}
+                  >
+                    <span>{n.name}</span>
+                    {count > 0 && (
+                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/40 text-neutral-300">
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Manage Niches Trigger Button */}
             <button
-              onClick={() => setSelectedNiche('All Niches')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
-                selectedNiche === 'All Niches'
-                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#222222]'
-              }`}
+              onClick={openManageNichesModal}
+              className="px-3 py-1.5 rounded-xl bg-[#141414] hover:bg-[#1f1f1f] text-neutral-300 hover:text-white border border-[#222222] text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
+              title="Add, edit or delete industry niches"
             >
-              All Niches ({approaches.length})
+              <Settings2 className="w-3.5 h-3.5 text-teal-400" />
+              <span>Manage Niches</span>
             </button>
-            {availableNiches.map((n) => {
-              const count = approaches.filter((a) => a.niche === n).length;
-              return (
-                <button
-                  key={n}
-                  onClick={() => setSelectedNiche(n)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 ${
-                    selectedNiche === n
-                      ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                      : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#222222]'
-                  }`}
-                >
-                  <span>{n}</span>
-                  {count > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/40 text-neutral-300">
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
           </div>
 
           {/* Search & Status Filters */}
@@ -633,7 +751,7 @@ export default function ApproachesPage() {
                         </div>
                       </td>
 
-                      {/* Last Contact Date (In place of Notes) */}
+                      {/* Last Contact Date */}
                       <td className="py-3.5 px-4">
                         {appr.lastContactDate ? (
                           <div className="space-y-0.5">
@@ -705,7 +823,7 @@ export default function ApproachesPage() {
                               className="px-2 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-[10px] font-semibold flex items-center gap-1 transition shadow-sm disabled:opacity-50"
                               title="Convert to Official Client"
                             >
-                              <Sparkles className="w-3 h-3" />
+                              <Sparkles className="w-3.5 h-3.5" />
                               <span>{isConverting ? '...' : 'Won'}</span>
                             </button>
                           )}
@@ -779,38 +897,51 @@ export default function ApproachesPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
-                Niche / Category *
-              </label>
-              <select
-                value={isCustomNiche ? '__custom__' : niche}
-                onChange={(e) => {
-                  if (e.target.value === '__custom__') {
-                    setIsCustomNiche(true);
-                  } else {
-                    setIsCustomNiche(false);
-                    setNiche(e.target.value);
-                  }
-                }}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                {availableNiches.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-                <option value="__custom__">+ Add Custom Niche...</option>
-              </select>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-medium text-neutral-300">
+                  Niche / Category *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setInlineNewNiche(!inlineNewNiche)}
+                  className="text-[10px] text-teal-400 hover:underline"
+                >
+                  {inlineNewNiche ? 'Select Existing' : '+ New Niche'}
+                </button>
+              </div>
 
-              {isCustomNiche && (
-                <input
-                  type="text"
-                  required
-                  placeholder="Enter new niche name"
-                  value={customNiche}
-                  onChange={(e) => setCustomNiche(e.target.value)}
-                  className="w-full mt-2 bg-[#181818] border border-teal-500/50 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                />
+              {inlineNewNiche ? (
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter new niche..."
+                    value={inlineNicheName}
+                    onChange={(e) => setInlineNicheName(e.target.value)}
+                    className="flex-1 bg-[#181818] border border-teal-500/50 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateInlineNiche}
+                    className="px-2.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold"
+                    title="Save Niche to Backend"
+                  >
+                    Add
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={niche}
+                  onChange={(e) => setNiche(e.target.value)}
+                  className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                >
+                  {niches.map((n) => (
+                    <option key={n._id} value={n.name}>
+                      {n.name}
+                    </option>
+                  ))}
+                  {niches.length === 0 && <option value="General">General</option>}
+                </select>
               )}
             </div>
 
@@ -944,6 +1075,168 @@ export default function ApproachesPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* MANAGE NICHES MODAL */}
+      <Modal
+        isOpen={isNicheModalOpen}
+        onClose={() => setIsNicheModalOpen(false)}
+        title="Manage Industry Niches & Categories"
+      >
+        <div className="space-y-5">
+          {/* Add / Edit Form */}
+          <form onSubmit={handleSaveNiche} className="bg-[#161616] border border-[#262626] rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-white">
+                {editingNiche ? `Edit Niche: ${editingNiche.name}` : '+ Add New Niche'}
+              </span>
+              {editingNiche && (
+                <button
+                  type="button"
+                  onClick={cancelEditNiche}
+                  className="text-[11px] text-neutral-400 hover:text-white"
+                >
+                  Cancel Edit
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                  Niche Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Pharmacy & Drugstore"
+                  value={nicheNameInput}
+                  onChange={(e) => setNicheNameInput(e.target.value)}
+                  className="w-full bg-[#1a1a1a] border border-[#333333] rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                  Description (optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Retail pharmacies and medicine distributors"
+                  value={nicheDescInput}
+                  onChange={(e) => setNicheDescInput(e.target.value)}
+                  className="w-full bg-[#1a1a1a] border border-[#333333] rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <button
+                type="submit"
+                disabled={savingNiche}
+                className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold transition disabled:opacity-50"
+              >
+                {savingNiche ? 'Saving...' : editingNiche ? 'Update Niche' : 'Add Niche'}
+              </button>
+            </div>
+          </form>
+
+          {/* List of Niches */}
+          <div className="space-y-2">
+            <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+              Current Niches ({niches.length})
+            </span>
+
+            <div className="max-h-64 overflow-y-auto divide-y divide-[#1f1f1f] border border-[#222222] rounded-2xl bg-[#141414]">
+              {niches.map((n) => {
+                const targetCount = approaches.filter((a) => a.niche === n.name).length;
+                return (
+                  <div
+                    key={n._id}
+                    className="p-3 flex items-center justify-between hover:bg-[#181818] transition gap-3"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-white">{n.name}</span>
+                        <span className="text-[10px] px-2 py-0.2 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-mono">
+                          {targetCount} targets
+                        </span>
+                      </div>
+                      {n.description && (
+                        <p className="text-[11px] text-neutral-400 mt-0.5">{n.description}</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleEditNicheClick(n)}
+                        className="p-1.5 rounded-lg hover:bg-[#262626] text-neutral-400 hover:text-white transition"
+                        title="Edit Niche"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNicheToDelete(n)}
+                        className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                        title="Delete Niche"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {niches.length === 0 && (
+                <div className="p-6 text-center text-xs text-neutral-500">
+                  No niches found. Add one above!
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setIsNicheModalOpen(false)}
+              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* DELETE NICHE CONFIRM MODAL */}
+      <Modal
+        isOpen={Boolean(nicheToDelete)}
+        onClose={() => setNicheToDelete(null)}
+        title="Delete Niche"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-neutral-300">
+            Are you sure you want to delete the niche <strong className="text-white">{nicheToDelete?.name}</strong>?
+            Any existing targets with this niche will remain unchanged.
+          </p>
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setNicheToDelete(null)}
+              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteNicheConfirm}
+              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition shadow-md shadow-rose-900/30"
+            >
+              Delete Niche
+            </button>
+          </div>
+        </div>
       </Modal>
 
       {/* QUICK LOG CONTACT MODAL */}

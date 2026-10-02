@@ -130,6 +130,15 @@ export interface Client {
   updatedAt: string;
 }
 
+export interface Niche {
+  _id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export type ApproachStatus =
   | 'PROSPECT'
   | 'CONTACTED'
