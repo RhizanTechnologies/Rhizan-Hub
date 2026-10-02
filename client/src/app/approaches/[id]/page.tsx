@@ -343,18 +343,18 @@ export default function ApproachDetailPage() {
   return (
     <div className="flex-1 flex flex-col min-h-screen pb-16">
       {/* Top Navigation Bar */}
-      <div className="border-b border-[#222222] bg-[#0c0c0c] px-6 py-4">
+      <div className="border-b border-[#222222] bg-[#0c0c0c] px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
               href="/approaches"
-              className="p-2 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] text-neutral-400 hover:text-white border border-[#222222] transition"
+              className="p-2 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] text-neutral-400 hover:text-white border border-[#222222] transition shrink-0"
               title="Back to All Approaches"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <div>
-              <div className="flex items-center gap-2.5">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                 <h1 className="text-xl font-heading font-bold text-white tracking-tight">
                   {approach.businessName}
                 </h1>
@@ -445,7 +445,7 @@ export default function ApproachDetailPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="p-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
         {/* Left 2 Cols: Interaction History & Timeline */}
         <div className="lg:col-span-2 space-y-6">
           {/* Quick Status Bar */}

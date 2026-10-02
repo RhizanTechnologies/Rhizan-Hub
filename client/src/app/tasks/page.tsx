@@ -51,6 +51,7 @@ export default function TasksPage() {
   // Modals state
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [mobileColumn, setMobileColumn] = useState<'ALL' | TaskStatus>('ALL');
 
   // New task form state
   const [title, setTitle] = useState('');
@@ -429,7 +430,7 @@ export default function TasksPage() {
         }}
       />
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-4">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-4">
         {/* Productivity Control & Filtering Ribbon */}
         <div className="p-4 bg-[#121212] border border-[#222222] rounded-3xl space-y-3 shadow-md">
           {/* Top Row: Personal Scope Switcher + Search + Projects */}
@@ -511,7 +512,7 @@ export default function TasksPage() {
 
           {/* Bottom Row: Date Filter Pills */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-[#1e1e1e]">
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
               <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1 mr-1">
                 <CalendarDays className="w-3.5 h-3.5 text-teal-400" />
                 Filter Date:
@@ -618,14 +619,53 @@ export default function TasksPage() {
           </div>
         </div>
 
+        {/* Mobile Column Tab Switcher */}
+        <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
+          <button
+            type="button"
+            onClick={() => setMobileColumn('ALL')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+              mobileColumn === 'ALL'
+                ? 'bg-teal-600 text-white shadow-sm'
+                : 'bg-[#181818] text-neutral-400 border border-[#262626]'
+            }`}
+          >
+            All Columns ({filteredTasks.length})
+          </button>
+          {COLUMNS.map((col) => {
+            const count = filteredTasks.filter((t) => t.status === col.id).length;
+            const isSelected = mobileColumn === col.id;
+            return (
+              <button
+                key={col.id}
+                type="button"
+                onClick={() => setMobileColumn(col.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition ${
+                  isSelected
+                    ? 'bg-teal-600 text-white shadow-sm'
+                    : 'bg-[#181818] text-neutral-400 border border-[#262626]'
+                }`}
+              >
+                <span>{col.label}</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/40 font-bold">
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Kanban Board Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {COLUMNS.map((col) => {
+            const isHiddenOnMobile = mobileColumn !== 'ALL' && mobileColumn !== col.id;
             const colTasks = filteredTasks.filter((t) => t.status === col.id);
             return (
               <div
                 key={col.id}
-                className="bg-[#111111] border border-[#222222] rounded-3xl p-3.5 flex flex-col min-h-[580px] shadow-sm"
+                className={`${
+                  isHiddenOnMobile ? 'hidden md:flex' : 'flex'
+                } bg-[#111111] border border-[#222222] rounded-3xl p-3.5 flex-col min-h-[460px] md:min-h-[580px] shadow-sm`}
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#222222]">

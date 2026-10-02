@@ -189,9 +189,9 @@ export default function DashboardPage() {
         subtitle={`Welcome back, ${user?.name || 'Abdulaziz'} 👋`}
       />
 
-      <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+      <main className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
         {/* Top KPIs Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-3.5">
           <StatCard
             label="Total Tasks"
             value={currentData.stats.totalTasks}
@@ -378,19 +378,19 @@ export default function DashboardPage() {
               {currentData.recentActivities.map((act) => (
                 <div
                   key={act._id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-[#181818] border border-[#262626] text-xs"
+                  className="flex items-center justify-between p-3 rounded-xl bg-[#181818] border border-[#262626] text-xs gap-2"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xs shrink-0">
                       {act.userName.charAt(0)}
                     </div>
-                    <div>
+                    <div className="truncate">
                       <span className="font-semibold text-white">{act.userName}</span>{' '}
                       <span className="text-neutral-400">{act.action}</span>{' '}
                       <span className="font-medium text-neutral-200">"{act.entityTitle}"</span>
                     </div>
                   </div>
-                  <span className="text-[11px] text-neutral-500 shrink-0 ml-2">
+                  <span className="text-[10px] sm:text-[11px] text-neutral-500 shrink-0">
                     {act.createdAt}
                   </span>
                 </div>

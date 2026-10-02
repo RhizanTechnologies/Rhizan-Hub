@@ -294,9 +294,9 @@ export default function ProjectsPage() {
         }}
       />
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {projects.map((project) => {
             const links = project.links || [];
             return (

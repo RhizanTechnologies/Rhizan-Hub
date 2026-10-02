@@ -489,53 +489,53 @@ export default function TimeTrackingPage() {
         </div>
       )}
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* Navigation Switcher: Personal Tracker vs Team Timesheet */}
-        <div className="flex items-center justify-between border-b border-[#222222] pb-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setViewTab('TRACKER')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
+              className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
                 viewTab === 'TRACKER'
                   ? 'bg-teal-500/10 text-teal-300 border border-teal-500/30 shadow-sm'
                   : 'text-neutral-400 hover:text-white hover:bg-[#181818] border border-transparent'
               }`}
             >
               <Clock className="w-4 h-4 text-teal-400" />
-              <span>Personal Time Tracker</span>
+              <span>Personal Tracker</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#222222] text-neutral-300">
-                {entries.length} logs
+                {entries.length}
               </span>
             </button>
 
             <button
               type="button"
               onClick={() => setViewTab('TEAM_TIMESHEET')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
+              className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
                 viewTab === 'TEAM_TIMESHEET'
                   ? 'bg-teal-500/10 text-teal-300 border border-teal-500/30 shadow-sm'
                   : 'text-neutral-400 hover:text-white hover:bg-[#181818] border border-transparent'
               }`}
             >
               <Users className="w-4 h-4 text-teal-400" />
-              <span>Team Weekly Timesheet</span>
+              <span>Team Timesheet</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#222222] text-neutral-300">
-                {weeklySummaries.length} members
+                {weeklySummaries.length}
               </span>
             </button>
           </div>
 
           {/* Quick Metrics Pills */}
-          <div className="hidden sm:flex items-center gap-4 text-xs font-mono">
+          <div className="flex items-center gap-3 sm:gap-4 text-xs font-mono">
             <div className="flex items-center gap-1.5">
               <span className="text-neutral-400">Today:</span>
               <span className="font-bold text-amber-300">{hoursToday}h {minutesToday}m</span>
             </div>
-            <div className="flex items-center gap-1.5 border-l border-[#262626] pl-4">
+            <div className="flex items-center gap-1.5 border-l border-[#262626] pl-3 sm:pl-4">
               <span className="text-neutral-400">Week:</span>
               <span className="font-bold text-teal-400">{hoursThisWeek}h</span>
-              <span className="text-neutral-500 text-[11px]">/ {targetWeeklyHours}h ({capacityPercent}%)</span>
+              <span className="text-neutral-500 text-[11px] hidden xs:inline">/ {targetWeeklyHours}h ({capacityPercent}%)</span>
             </div>
           </div>
         </div>
@@ -644,7 +644,7 @@ export default function TimeTrackingPage() {
                 </div>
 
                 {/* Action Column: Digital Timer & Start/Stop OR Manual Input */}
-                <div className="lg:col-span-2 flex items-center justify-end gap-2.5">
+                <div className="lg:col-span-2 flex items-center justify-between sm:justify-end gap-3 pt-1 lg:pt-0">
                   {entryMode === 'TIMER' ? (
                     <>
                       {/* Big Digital Stopwatch */}
@@ -659,7 +659,7 @@ export default function TimeTrackingPage() {
                         <button
                           type="button"
                           onClick={stopTimer}
-                          className="px-5 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-rose-950/40"
+                          className="px-4 sm:px-5 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-lg shadow-rose-950/40"
                         >
                           <Square className="w-3.5 h-3.5 fill-white" />
                           <span>STOP</span>
@@ -668,7 +668,7 @@ export default function TimeTrackingPage() {
                         <button
                           type="button"
                           onClick={startTimer}
-                          className="px-5 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-teal-950/40"
+                          className="px-4 sm:px-5 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-lg shadow-teal-950/40"
                         >
                           <Play className="w-3.5 h-3.5 fill-white" />
                           <span>START</span>
@@ -789,7 +789,7 @@ export default function TimeTrackingPage() {
                 </select>
 
                 {/* Date Range Filter */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-1 no-scrollbar">
                   {(['ALL', 'TODAY', 'YESTERDAY', 'THIS_WEEK', 'THIS_MONTH'] as const).map((mode) => (
                     <button
                       key={mode}

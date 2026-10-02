@@ -382,7 +382,7 @@ export default function ClientDetailPage() {
         }}
       />
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* Back Link Breadcrumb */}
         <div>
           <Link
@@ -395,15 +395,15 @@ export default function ClientDetailPage() {
         </div>
 
         {/* Client Hero Card */}
-        <div className="p-6 rounded-3xl bg-[#111111] border border-[#222222] shadow-xl space-y-5">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#111111] border border-[#222222] shadow-xl space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-heading font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-teal-900/30">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+              <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-heading font-extrabold text-xl sm:text-2xl flex items-center justify-center shadow-lg shadow-teal-900/30 shrink-0">
                 {client.name.charAt(0)}
               </div>
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <h1 className="font-heading font-extrabold text-xl text-white tracking-tight">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <h1 className="font-heading font-extrabold text-lg sm:text-xl text-white tracking-tight truncate">
                     {client.name}
                   </h1>
                   <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/30">
@@ -417,7 +417,7 @@ export default function ClientDetailPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
@@ -500,7 +500,7 @@ export default function ClientDetailPage() {
         </div>
 
         {/* Detailed Sections Tabs */}
-        <div className="flex items-center gap-2 border-b border-[#222222] pb-3">
+        <div className="flex items-center gap-2 border-b border-[#222222] pb-3 overflow-x-auto max-w-full no-scrollbar whitespace-nowrap">
           {[
             { id: 'PROJECTS', label: `Connected Projects (${connectedProjects.length})`, icon: FolderKanban },
             { id: 'MEETINGS', label: `Meeting Schedules (${(client.meetings || []).length})`, icon: Calendar },

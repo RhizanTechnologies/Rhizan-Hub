@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { Sidebar } from '@/components/Sidebar';
+import { SidebarProvider } from '@/context/SidebarContext';
 
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, token, isLoading } = useAuth();
@@ -74,11 +75,13 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   // Authenticated workspace
   return (
-    <div className="flex min-h-screen w-full bg-[#0a0a0a]">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#0a0a0a]">
-        {children}
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-[#0a0a0a]">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#0a0a0a]">
+          {children}
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };

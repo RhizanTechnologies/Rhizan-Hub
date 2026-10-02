@@ -573,7 +573,7 @@ export default function ProjectDetailPage() {
         }}
       />
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* Back Link Breadcrumb */}
         <div>
           <Link
@@ -586,11 +586,11 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Project Header Banner */}
-        <div className="p-6 rounded-3xl bg-[#111111] border border-[#222222] shadow-xl space-y-5">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#111111] border border-[#222222] shadow-xl space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="font-heading font-extrabold text-2xl text-white tracking-tight">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-white tracking-tight">
                   {project.name}
                 </h1>
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/30">
@@ -823,12 +823,12 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center justify-between border-b border-[#222222] pb-3">
+        <div className="flex items-center justify-between border-b border-[#222222] pb-3 overflow-x-auto max-w-full no-scrollbar whitespace-nowrap">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveTab('MILESTONES')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
                 activeTab === 'MILESTONES'
                   ? 'bg-teal-500/10 text-teal-300 border border-teal-500/30 shadow-sm'
                   : 'text-neutral-400 hover:text-white hover:bg-[#181818] border border-transparent'

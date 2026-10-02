@@ -455,9 +455,9 @@ export default function ApproachesPage() {
         }}
       />
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* TOP STAT METRIC CARDS */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
@@ -518,8 +518,8 @@ export default function ApproachesPage() {
         {/* CONTROLS: NICHE FILTER, MANAGE NICHES & SEARCH BAR */}
         <div className="space-y-3">
           {/* Niche Filter Pills Bar */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 flex-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar flex-1">
               <button
                 onClick={() => setSelectedNiche('All Niches')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${

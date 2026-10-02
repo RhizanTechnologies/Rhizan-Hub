@@ -331,13 +331,13 @@ export default function ClientsPage() {
         }}
       />
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* Navigation Switcher */}
-        <div className="flex items-center justify-between border-b border-[#222222] pb-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-4">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setActiveTab('ACCOUNTS')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
                 activeTab === 'ACCOUNTS'
                   ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
                   : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#262626]'

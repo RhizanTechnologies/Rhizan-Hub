@@ -55,7 +55,7 @@ export default function ChangePasswordPage() {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-teal-500/10 rounded-full blur-[130px] pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-[#111111]/90 backdrop-blur-xl border border-[#222222] rounded-3xl p-8 shadow-2xl shadow-black/80">
+        <div className="bg-[#111111]/90 backdrop-blur-xl border border-[#222222] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80">
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6">
             <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-400 flex items-center justify-center shadow-lg shadow-teal-900/20 mb-3">

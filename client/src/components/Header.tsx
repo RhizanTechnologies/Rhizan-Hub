@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Clock, Plus, LogOut, ChevronDown, UserCheck } from 'lucide-react';
+import { useSidebar } from '@/context/SidebarContext';
+import { Clock, Plus, LogOut, ChevronDown, Menu } from 'lucide-react';
 import Link from 'next/link';
 
 interface HeaderProps {
@@ -20,6 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   actionButton,
 }) => {
   const { user, logout } = useAuth();
+  const { toggle } = useSidebar();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -34,47 +36,65 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="h-16 border-b border-[#222222] bg-[#0d0d0d]/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
-      <div>
-        <h1 className="font-heading text-base font-bold text-white tracking-tight flex items-center gap-2">
-          {title}
-        </h1>
-        {subtitle && <p className="text-xs text-neutral-400">{subtitle}</p>}
+    <header className="h-16 border-b border-[#222222] bg-[#0d0d0d]/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+      <div className="flex items-center gap-3 min-w-0">
+        {/* Mobile Hamburger Menu Toggle */}
+        <button
+          onClick={toggle}
+          type="button"
+          className="lg:hidden p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-[#1a1a1a] border border-[#222222] transition shrink-0"
+          aria-label="Open sidebar navigation"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
+        <div className="min-w-0">
+          <h1 className="font-heading text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-2 truncate">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="text-[11px] sm:text-xs text-neutral-400 truncate hidden xs:block">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* Quick Log Time Link */}
         <Link
           href="/time"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-xs font-medium text-neutral-300 transition"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-xs font-medium text-neutral-300 transition"
+          title="Track & Log Time"
         >
-          <Clock className="w-3.5 h-3.5 text-teal-400" />
-          <span>Log Time</span>
+          <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+          <span className="hidden sm:inline">Log Time</span>
         </Link>
 
         {/* Dynamic Action Button */}
         {actionButton && (
           <button
             onClick={actionButton.onClick}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-medium text-white shadow-md shadow-teal-900/30 transition"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-medium text-white shadow-md shadow-teal-900/30 transition shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>{actionButton.label}</span>
+            <span className="hidden sm:inline">{actionButton.label}</span>
+            <span className="sm:hidden">New</span>
           </button>
         )}
 
         {/* User Status Avatar & Dropdown */}
-        <div className="relative pl-3 border-l border-[#222222]" ref={menuRef}>
+        <div className="relative pl-2 sm:pl-3 border-l border-[#222222]" ref={menuRef}>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-[#181818] transition text-left"
+            className="flex items-center gap-2 sm:gap-2.5 p-1 rounded-xl hover:bg-[#181818] transition text-left"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-inner">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
               {user?.name?.charAt(0) || 'A'}
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
               <div className="text-xs font-medium text-white leading-none flex items-center gap-1">
-                <span>{user?.name || 'Member'}</span>
+                <span className="truncate max-w-[100px]">{user?.name || 'Member'}</span>
                 <ChevronDown className="w-3 h-3 text-neutral-400" />
               </div>
               <div className="text-[10px] text-teal-400 font-medium flex items-center gap-1 mt-0.5">

@@ -54,7 +54,7 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10">
         {/* Main Brand Card */}
-        <div className="bg-[#111111]/90 backdrop-blur-xl border border-[#222222] rounded-3xl p-8 shadow-2xl shadow-black/80">
+        <div className="bg-[#111111]/90 backdrop-blur-xl border border-[#222222] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80">
           {/* Header Brand Info */}
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-14 h-14 rounded-2xl bg-white p-2.5 flex items-center justify-center shadow-xl shadow-teal-500/20 mb-4 transition-transform hover:scale-105">
