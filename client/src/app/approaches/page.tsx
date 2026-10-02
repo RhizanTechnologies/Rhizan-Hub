@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
-import { Approach, ApproachStatus } from '@/types';
+import { Approach, ApproachStatus, ContactChannel } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
   Building2,
@@ -14,41 +14,80 @@ import {
   Plus,
   Trash2,
   Edit2,
-  ArrowRight,
-  Filter,
   Search,
   Sparkles,
   Tag,
   CheckCircle2,
   ExternalLink,
+  MessageCircle,
+  Calendar,
+  Clock,
+  AlertCircle,
+  TrendingUp,
+  Target,
+  Users,
+  Eye,
 } from 'lucide-react';
 import Link from 'next/link';
 
-const STATUS_CONFIG: Record<ApproachStatus, { label: string; color: string }> = {
-  PROSPECT: { label: 'Prospect', color: 'bg-neutral-800 text-neutral-300 border-neutral-700' },
-  CONTACTED: { label: 'Contacted', color: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
-  PITCHED: { label: 'Pitched / Demo Sent', color: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
-  IN_DISCUSSION: { label: 'In Discussion', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
-  DEAL_WON: { label: 'Deal Won (Client)', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
-  NOT_INTERESTED: { label: 'Not Interested', color: 'bg-rose-500/10 text-rose-400 border-rose-500/30' },
+const STATUS_CONFIG: Record<ApproachStatus, { label: string; color: string; dot: string }> = {
+  PROSPECT: {
+    label: 'Prospect',
+    color: 'bg-neutral-800 text-neutral-300 border-neutral-700',
+    dot: 'bg-neutral-400',
+  },
+  CONTACTED: {
+    label: 'Contacted',
+    color: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    dot: 'bg-blue-400',
+  },
+  PITCHED: {
+    label: 'Pitched / Demo',
+    color: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    dot: 'bg-purple-400',
+  },
+  IN_DISCUSSION: {
+    label: 'In Discussion',
+    color: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    dot: 'bg-amber-400',
+  },
+  DEAL_WON: {
+    label: 'Deal Won (Client)',
+    color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    dot: 'bg-emerald-400',
+  },
+  NOT_INTERESTED: {
+    label: 'Not Interested',
+    color: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
+    dot: 'bg-rose-400',
+  },
 };
 
-const DEFAULT_NICHES = [
-  'All Niches',
+const BASE_DEFAULT_NICHES = [
   'Bakery & Cafe',
   'Retail & Supermarket',
   'Logistics & Fleet',
   'Restaurant & Bistro',
   'Printing & Publishing',
   'Healthcare & Clinic',
+  'Real Estate & Property',
+  'Hospitality & Hotel',
 ];
+
+function formatCleanPhone(raw?: string): string {
+  if (!raw) return '';
+  return raw.replace(/[^0-9+]/g, '');
+}
 
 export default function ApproachesPage() {
   const router = useRouter();
   const [approaches, setApproaches] = useState<Approach[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNiche, setSelectedNiche] = useState('All Niches');
+  const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
 
   // Modals
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -56,14 +95,27 @@ export default function ApproachesPage() {
   const [approachToDelete, setApproachToDelete] = useState<Approach | null>(null);
   const [convertingId, setConvertingId] = useState<string | null>(null);
 
+  // Quick Log Modal
+  const [quickLogTarget, setQuickLogTarget] = useState<Approach | null>(null);
+  const [quickChannel, setQuickChannel] = useState<ContactChannel>('CALL');
+  const [quickDate, setQuickDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [quickNotes, setQuickNotes] = useState('');
+  const [quickNextFollowUp, setQuickNextFollowUp] = useState('');
+  const [quickUpdateStatus, setQuickUpdateStatus] = useState<ApproachStatus | ''>('');
+  const [submittingQuickLog, setSubmittingQuickLog] = useState(false);
+
   // Form Fields
   const [businessName, setBusinessName] = useState('');
   const [niche, setNiche] = useState('Bakery & Cafe');
+  const [customNiche, setCustomNiche] = useState('');
+  const [isCustomNiche, setIsCustomNiche] = useState(false);
   const [contactPerson, setContactPerson] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [location, setLocation] = useState('');
   const [status, setStatus] = useState<ApproachStatus>('PROSPECT');
+  const [lastContactDate, setLastContactDate] = useState('');
+  const [nextFollowUpDate, setNextFollowUpDate] = useState('');
   const [notes, setNotes] = useState('');
 
   const loadApproaches = async () => {
@@ -82,15 +134,48 @@ export default function ApproachesPage() {
     loadApproaches();
   }, []);
 
+  // Compute all unique niches available
+  const availableNiches = useMemo(() => {
+    const list = new Set<string>(BASE_DEFAULT_NICHES);
+    approaches.forEach((a) => {
+      if (a.niche && a.niche.trim()) list.add(a.niche.trim());
+    });
+    return Array.from(list).sort();
+  }, [approaches]);
+
+  // Metric computations
+  const metrics = useMemo(() => {
+    const total = approaches.length;
+    const inProgress = approaches.filter((a) =>
+      ['CONTACTED', 'PITCHED', 'IN_DISCUSSION'].includes(a.status)
+    ).length;
+    const dealsWon = approaches.filter((a) => a.status === 'DEAL_WON').length;
+    const needsFollowUp = approaches.filter((a) => {
+      if (a.status === 'DEAL_WON' || a.status === 'NOT_INTERESTED') return false;
+      if (!a.lastContactDate) return true;
+      if (a.nextFollowUpDate) {
+        return new Date(a.nextFollowUpDate) <= new Date();
+      }
+      return false;
+    }).length;
+
+    return { total, inProgress, dealsWon, needsFollowUp };
+  }, [approaches]);
+
   const openCreateModal = () => {
     setEditingApproach(null);
     setBusinessName('');
-    setNiche(selectedNiche !== 'All Niches' ? selectedNiche : 'Bakery & Cafe');
+    const defaultN = selectedNiche !== 'All Niches' ? selectedNiche : availableNiches[0] || 'Bakery & Cafe';
+    setNiche(defaultN);
+    setCustomNiche('');
+    setIsCustomNiche(false);
     setContactPerson('');
     setPhone('');
     setEmail('');
     setLocation('');
     setStatus('PROSPECT');
+    setLastContactDate('');
+    setNextFollowUpDate('');
     setNotes('');
     setIsModalOpen(true);
   };
@@ -98,12 +183,22 @@ export default function ApproachesPage() {
   const openEditModal = (appr: Approach) => {
     setEditingApproach(appr);
     setBusinessName(appr.businessName);
-    setNiche(appr.niche || 'General');
+    const existingNiche = appr.niche || 'General';
+    if (availableNiches.includes(existingNiche)) {
+      setNiche(existingNiche);
+      setIsCustomNiche(false);
+    } else {
+      setNiche('__custom__');
+      setCustomNiche(existingNiche);
+      setIsCustomNiche(true);
+    }
     setContactPerson(appr.contactPerson || '');
     setPhone(appr.phone || '');
     setEmail(appr.email || '');
     setLocation(appr.location || '');
     setStatus(appr.status);
+    setLastContactDate(appr.lastContactDate ? appr.lastContactDate.split('T')[0] : '');
+    setNextFollowUpDate(appr.nextFollowUpDate ? appr.nextFollowUpDate.split('T')[0] : '');
     setNotes(appr.notes || '');
     setIsModalOpen(true);
   };
@@ -112,14 +207,20 @@ export default function ApproachesPage() {
     e.preventDefault();
     if (!businessName.trim()) return;
 
+    const finalNiche = isCustomNiche
+      ? customNiche.trim() || 'General'
+      : niche;
+
     const payload = {
       businessName: businessName.trim(),
-      niche: niche.trim(),
+      niche: finalNiche,
       contactPerson: contactPerson.trim(),
       phone: phone.trim(),
       email: email.trim(),
       location: location.trim(),
       status,
+      lastContactDate: lastContactDate ? new Date(lastContactDate).toISOString() : undefined,
+      nextFollowUpDate: nextFollowUpDate ? new Date(nextFollowUpDate).toISOString() : undefined,
       notes: notes.trim(),
     };
 
@@ -143,6 +244,18 @@ export default function ApproachesPage() {
     }
   };
 
+  const handleQuickStatusChange = async (appr: Approach, newStatus: ApproachStatus) => {
+    try {
+      const updated = await apiFetch<Approach>(`/approaches/${appr._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus }),
+      });
+      setApproaches((prev) => prev.map((a) => (a._id === appr._id ? { ...a, status: updated.status } : a)));
+    } catch (err: any) {
+      alert(err.message || 'Failed to update status');
+    }
+  };
+
   const handleDelete = async () => {
     if (!approachToDelete) return;
     try {
@@ -154,7 +267,6 @@ export default function ApproachesPage() {
     }
   };
 
-  // Convert an approach into an Official Client!
   const handleConvertToClient = async (approach: Approach) => {
     try {
       setConvertingId(approach._id);
@@ -164,7 +276,6 @@ export default function ApproachesPage() {
       );
 
       setApproaches((prev) => prev.map((a) => (a._id === approach._id ? res.approach : a)));
-      // Route immediately to the client's dedicated detail page!
       router.push(`/clients/${res.client._id}`);
     } catch (err: any) {
       alert(err.message || 'Failed to convert to client');
@@ -173,85 +284,229 @@ export default function ApproachesPage() {
     }
   };
 
+  const openQuickLogModal = (appr: Approach) => {
+    setQuickLogTarget(appr);
+    setQuickChannel('CALL');
+    setQuickDate(new Date().toISOString().split('T')[0]);
+    setQuickNotes('');
+    setQuickNextFollowUp('');
+    setQuickUpdateStatus('');
+  };
+
+  const handleSaveQuickLog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickLogTarget || !quickNotes.trim()) return;
+
+    try {
+      setSubmittingQuickLog(true);
+      const payload: any = {
+        channel: quickChannel,
+        date: quickDate || new Date().toISOString(),
+        notes: quickNotes.trim(),
+        nextFollowUpDate: quickNextFollowUp || undefined,
+      };
+
+      if (quickUpdateStatus) {
+        payload.status = quickUpdateStatus;
+      }
+
+      const updated = await apiFetch<Approach>(`/approaches/${quickLogTarget._id}/contact`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+
+      setApproaches((prev) => prev.map((a) => (a._id === updated._id ? updated : a)));
+      setQuickLogTarget(null);
+    } catch (err: any) {
+      alert(err.message || 'Failed to log contact interaction');
+    } finally {
+      setSubmittingQuickLog(false);
+    }
+  };
+
   // Filter list
   const filteredApproaches = approaches.filter((a) => {
     const matchesNiche = selectedNiche === 'All Niches' || a.niche === selectedNiche;
+    const matchesStatus = selectedStatus === 'ALL' || a.status === selectedStatus;
+    const query = searchQuery.toLowerCase();
     const matchesSearch =
-      a.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (a.location && a.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (a.contactPerson && a.contactPerson.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesNiche && matchesSearch;
+      a.businessName.toLowerCase().includes(query) ||
+      (a.location && a.location.toLowerCase().includes(query)) ||
+      (a.contactPerson && a.contactPerson.toLowerCase().includes(query)) ||
+      (a.notes && a.notes.toLowerCase().includes(query));
+
+    return matchesNiche && matchesStatus && matchesSearch;
   });
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen">
+    <div className="flex-1 flex flex-col min-h-screen pb-16">
       <Header
         title="Business Outreach & Approaches"
-        subtitle="Target businesses approached by selected niche/category before deal closing"
+        subtitle="Track targeted leads, contact history, and turn outreach prospects into paying clients"
         actionButton={{
-          label: 'Add Approach Target',
+          label: 'Add Outreach Target',
           onClick: openCreateModal,
         }}
       />
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
-        {/* Niche Filter Pills Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
-            {DEFAULT_NICHES.map((n) => (
-              <button
-                key={n}
-                onClick={() => setSelectedNiche(n)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition ${
-                  selectedNiche === n
-                    ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                    : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#222222]'
-                }`}
-              >
-                {n}
-              </button>
-            ))}
+        {/* TOP STAT METRIC CARDS */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+                Total Outreach Targets
+              </span>
+              <span className="text-2xl font-bold font-heading text-white mt-1 block">
+                {metrics.total}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center border border-teal-500/20">
+              <Target className="w-5 h-5" />
+            </div>
           </div>
 
-          {/* Search Input */}
-          <div className="relative w-full md:w-64">
-            <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search business or location..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#141414] border border-[#262626] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
-            />
+          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+                Active Discussions
+              </span>
+              <span className="text-2xl font-bold font-heading text-amber-400 mt-1 block">
+                {metrics.inProgress}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+                Deals Won (Clients)
+              </span>
+              <span className="text-2xl font-bold font-heading text-emerald-400 mt-1 block">
+                {metrics.dealsWon}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+              <Sparkles className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+                Needs Follow-Up / Contact
+              </span>
+              <span className="text-2xl font-bold font-heading text-rose-400 mt-1 block">
+                {metrics.needsFollowUp}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20">
+              <AlertCircle className="w-5 h-5" />
+            </div>
           </div>
         </div>
 
-        {/* Approaches Table */}
+        {/* CONTROLS: NICHE FILTER & SEARCH BAR */}
+        <div className="space-y-3">
+          {/* Niche Filter Pills Bar */}
+          <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
+            <button
+              onClick={() => setSelectedNiche('All Niches')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                selectedNiche === 'All Niches'
+                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#222222]'
+              }`}
+            >
+              All Niches ({approaches.length})
+            </button>
+            {availableNiches.map((n) => {
+              const count = approaches.filter((a) => a.niche === n).length;
+              return (
+                <button
+                  key={n}
+                  onClick={() => setSelectedNiche(n)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 ${
+                    selectedNiche === n
+                      ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                      : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#222222]'
+                  }`}
+                >
+                  <span>{n}</span>
+                  {count > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/40 text-neutral-300">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search & Status Filters */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            {/* Status Filter */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-neutral-400 font-medium">Status:</span>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="bg-[#141414] border border-[#262626] rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-teal-500"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="PROSPECT">Prospect</option>
+                <option value="CONTACTED">Contacted</option>
+                <option value="PITCHED">Pitched / Demo Sent</option>
+                <option value="IN_DISCUSSION">In Discussion</option>
+                <option value="DEAL_WON">Deal Won (Client)</option>
+                <option value="NOT_INTERESTED">Not Interested</option>
+              </select>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-72">
+              <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search business, contact, or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#141414] border border-[#262626] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* APPROACHES TABLE */}
         <div className="bg-[#111111] border border-[#222222] rounded-3xl overflow-hidden shadow-xl">
           <div className="p-4 border-b border-[#222222] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-heading text-xs font-bold text-white uppercase tracking-wider">
-                Approached Businesses Table
+                Approached Businesses Pipeline
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1a1a1a] text-neutral-400 border border-[#282828] font-mono">
                 {filteredApproaches.length} targets
               </span>
             </div>
-            <span className="text-[11px] text-neutral-500">
-              When a business agrees to deal with us, click &quot;Convert to Client&quot;
+            <span className="text-[11px] text-neutral-500 hidden sm:inline">
+              Click any business name to open full history & log notes
             </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#1f1f1f] bg-[#141414]/60 text-[11px] text-neutral-400 font-medium">
+                <tr className="border-b border-[#1f1f1f] bg-[#141414]/80 text-[11px] text-neutral-400 font-semibold uppercase tracking-wider">
                   <th className="py-3 px-4">Business Name</th>
+                  <th className="py-3 px-4">Contact Person</th>
                   <th className="py-3 px-4">Niche / Category</th>
                   <th className="py-3 px-4">Location</th>
                   <th className="py-3 px-4">Contact Info</th>
                   <th className="py-3 px-4">Outreach Status</th>
-                  <th className="py-3 px-4">Notes</th>
+                  <th className="py-3 px-4">Last Contact Date</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -260,23 +515,45 @@ export default function ApproachesPage() {
                   const statusConf = STATUS_CONFIG[appr.status] || STATUS_CONFIG.PROSPECT;
                   const isDealWon = appr.status === 'DEAL_WON';
                   const isConverting = convertingId === appr._id;
+                  const cleanPhone = formatCleanPhone(appr.phone);
 
                   return (
                     <tr
                       key={appr._id}
                       className="hover:bg-[#161616] transition group"
                     >
-                      {/* Name */}
+                      {/* Business Name (Clickable to Detail Page) */}
                       <td className="py-3.5 px-4 font-semibold text-white">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-[#202020] text-teal-400 font-bold flex items-center justify-center shrink-0">
-                            {appr.businessName.charAt(0)}
+                        <Link
+                          href={`/approaches/${appr._id}`}
+                          className="flex items-center gap-2.5 hover:text-teal-400 transition"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-[#202020] border border-[#2a2a2a] text-teal-400 font-bold flex items-center justify-center shrink-0">
+                            {appr.businessName.charAt(0).toUpperCase()}
                           </div>
-                          <span className="truncate max-w-[160px]">{appr.businessName}</span>
-                        </div>
+                          <div className="truncate max-w-[170px]">
+                            <span className="block truncate font-heading font-medium text-white hover:text-teal-400">
+                              {appr.businessName}
+                            </span>
+                            {appr.contactHistory && appr.contactHistory.length > 0 && (
+                              <span className="text-[10px] text-neutral-500 font-normal">
+                                {appr.contactHistory.length} interactions
+                              </span>
+                            )}
+                          </div>
+                        </Link>
                       </td>
 
-                      {/* Niche */}
+                      {/* Contact Person */}
+                      <td className="py-3.5 px-4 text-neutral-300 font-medium">
+                        {appr.contactPerson ? (
+                          <span>{appr.contactPerson}</span>
+                        ) : (
+                          <span className="text-neutral-600">—</span>
+                        )}
+                      </td>
+
+                      {/* Niche / Category */}
                       <td className="py-3.5 px-4">
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-medium">
                           <Tag className="w-2.5 h-2.5" />
@@ -296,41 +573,128 @@ export default function ApproachesPage() {
                         )}
                       </td>
 
-                      {/* Contact */}
+                      {/* Contact Info (WhatsApp & Phone & Email) */}
                       <td className="py-3.5 px-4">
-                        <div className="space-y-0.5">
-                          {appr.contactPerson && (
-                            <div className="text-neutral-200 font-medium">{appr.contactPerson}</div>
-                          )}
-                          {appr.phone && (
-                            <div className="text-[11px] text-neutral-400 flex items-center gap-1">
-                              <Phone className="w-3 h-3 text-neutral-500" /> {appr.phone}
+                        <div className="space-y-1">
+                          {appr.phone ? (
+                            <div className="flex items-center gap-1.5 text-neutral-300">
+                              <span className="font-mono text-[11px]">{appr.phone}</span>
+                              <a
+                                href={`tel:${cleanPhone}`}
+                                className="p-0.5 rounded text-neutral-400 hover:text-white"
+                                title="Call"
+                              >
+                                <Phone className="w-3 h-3" />
+                              </a>
+                              {cleanPhone && (
+                                <a
+                                  href={`https://wa.me/${cleanPhone.replace('+', '')}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="px-1.5 py-0.2 rounded bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-[9px] font-semibold flex items-center gap-0.5"
+                                  title="WhatsApp"
+                                >
+                                  <MessageCircle className="w-2.5 h-2.5" />
+                                  <span>WA</span>
+                                </a>
+                              )}
                             </div>
+                          ) : (
+                            <span className="text-neutral-600">—</span>
+                          )}
+                          {appr.email && (
+                            <a
+                              href={`mailto:${appr.email}`}
+                              className="text-[11px] text-neutral-400 hover:text-teal-400 flex items-center gap-1"
+                            >
+                              <Mail className="w-2.5 h-2.5" /> {appr.email}
+                            </a>
                           )}
                         </div>
                       </td>
 
-                      {/* Status */}
+                      {/* Outreach Status with Quick Switcher */}
                       <td className="py-3.5 px-4">
-                        <span className={`inline-block text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${statusConf.color}`}>
-                          {statusConf.label}
-                        </span>
+                        <div className="relative inline-block">
+                          <select
+                            value={appr.status}
+                            onChange={(e) =>
+                              handleQuickStatusChange(appr, e.target.value as ApproachStatus)
+                            }
+                            className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border outline-none cursor-pointer ${statusConf.color}`}
+                          >
+                            <option value="PROSPECT">Prospect</option>
+                            <option value="CONTACTED">Contacted</option>
+                            <option value="PITCHED">Pitched / Demo</option>
+                            <option value="IN_DISCUSSION">In Discussion</option>
+                            <option value="DEAL_WON">Deal Won (Client)</option>
+                            <option value="NOT_INTERESTED">Not Interested</option>
+                          </select>
+                        </div>
                       </td>
 
-                      {/* Notes */}
-                      <td className="py-3.5 px-4 text-neutral-400 max-w-[200px] truncate">
-                        {appr.notes || '—'}
+                      {/* Last Contact Date (In place of Notes) */}
+                      <td className="py-3.5 px-4">
+                        {appr.lastContactDate ? (
+                          <div className="space-y-0.5">
+                            <span className="text-neutral-200 font-medium flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-neutral-500" />
+                              {new Date(appr.lastContactDate).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </span>
+                            {appr.nextFollowUpDate && (
+                              <span className="text-[10px] text-amber-400 flex items-center gap-1">
+                                Follow-up:{' '}
+                                {new Date(appr.nextFollowUpDate).toLocaleDateString(undefined, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-amber-500/80 font-medium text-[11px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                            Never Contacted
+                          </span>
+                        )}
                       </td>
 
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          {/* View Detail Page */}
+                          <Link
+                            href={`/approaches/${appr._id}`}
+                            className="p-1.5 rounded-lg bg-[#1a1a1a] hover:bg-[#252525] text-neutral-300 hover:text-white transition"
+                            title="Open Detail Page & Interaction Log"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </Link>
+
+                          {/* Quick Log Contact */}
+                          <button
+                            type="button"
+                            onClick={() => openQuickLogModal(appr)}
+                            className="p-1.5 rounded-lg bg-teal-600/10 hover:bg-teal-600/20 text-teal-400 hover:text-teal-300 border border-teal-500/20 transition"
+                            title="Quick Log Call / Note"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* Convert Deal Won */}
                           {isDealWon ? (
                             <Link
-                              href={appr.convertedClientId ? `/clients/${typeof appr.convertedClientId === 'object' ? appr.convertedClientId._id : appr.convertedClientId}` : '/clients'}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1 transition"
+                              href={
+                                appr.convertedClientId
+                                  ? `/clients/${typeof appr.convertedClientId === 'object' ? appr.convertedClientId._id : appr.convertedClientId}`
+                                  : '/clients'
+                              }
+                              className="px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1 transition"
                             >
-                              <span>Official Client</span>
+                              <span>Client</span>
                               <ExternalLink className="w-3 h-3" />
                             </Link>
                           ) : (
@@ -338,14 +702,15 @@ export default function ApproachesPage() {
                               type="button"
                               onClick={() => handleConvertToClient(appr)}
                               disabled={isConverting}
-                              className="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-[10px] font-semibold flex items-center gap-1 transition shadow-sm disabled:opacity-50"
-                              title="Deal Closed: Convert to Client"
+                              className="px-2 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-[10px] font-semibold flex items-center gap-1 transition shadow-sm disabled:opacity-50"
+                              title="Convert to Official Client"
                             >
                               <Sparkles className="w-3 h-3" />
-                              <span>{isConverting ? 'Converting...' : 'Deal Won → Client'}</span>
+                              <span>{isConverting ? '...' : 'Won'}</span>
                             </button>
                           )}
 
+                          {/* Edit */}
                           <button
                             type="button"
                             onClick={() => openEditModal(appr)}
@@ -354,6 +719,8 @@ export default function ApproachesPage() {
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
+
+                          {/* Delete */}
                           <button
                             type="button"
                             onClick={() => setApproachToDelete(appr)}
@@ -370,7 +737,7 @@ export default function ApproachesPage() {
 
                 {filteredApproaches.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-neutral-500">
+                    <td colSpan={8} className="py-12 text-center text-neutral-500">
                       <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
                       <p className="text-xs">No outreach targets found matching your filter.</p>
                       <button
@@ -398,69 +765,98 @@ export default function ApproachesPage() {
         <form onSubmit={handleSaveApproach} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-neutral-300 mb-1">
-              Business / Company Name *
+              Business Name *
             </label>
             <input
               type="text"
+              required
+              placeholder="e.g. Mama Bakery & Pastry"
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
-              placeholder="e.g. Enrico Pastry or Meda Supermarket"
-              required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                Target Niche / Category
+                Niche / Category *
               </label>
-              <input
-                type="text"
-                value={niche}
-                onChange={(e) => setNiche(e.target.value)}
-                placeholder="e.g. Bakery & Cafe"
-                required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              />
+              <select
+                value={isCustomNiche ? '__custom__' : niche}
+                onChange={(e) => {
+                  if (e.target.value === '__custom__') {
+                    setIsCustomNiche(true);
+                  } else {
+                    setIsCustomNiche(false);
+                    setNiche(e.target.value);
+                  }
+                }}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              >
+                {availableNiches.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+                <option value="__custom__">+ Add Custom Niche...</option>
+              </select>
+
+              {isCustomNiche && (
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter new niche name"
+                  value={customNiche}
+                  onChange={(e) => setCustomNiche(e.target.value)}
+                  className="w-full mt-2 bg-[#181818] border border-teal-500/50 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                />
+              )}
             </div>
+
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                Location / Neighborhood
+                Outreach Status
               </label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. Bole Medhanialem or Piazza"
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              />
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as ApproachStatus)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              >
+                <option value="PROSPECT">Prospect</option>
+                <option value="CONTACTED">Contacted</option>
+                <option value="PITCHED">Pitched / Demo Sent</option>
+                <option value="IN_DISCUSSION">In Discussion</option>
+                <option value="DEAL_WON">Deal Won (Client)</option>
+                <option value="NOT_INTERESTED">Not Interested</option>
+              </select>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                Contact Person / Owner
+                Contact Person
               </label>
               <input
                 type="text"
+                placeholder="e.g. Ato Dawit (Manager)"
                 value={contactPerson}
                 onChange={(e) => setContactPerson(e.target.value)}
-                placeholder="e.g. Abebe K."
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
               />
             </div>
+
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Phone Number
               </label>
               <input
                 type="text"
+                placeholder="e.g. +251 911 234567"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+251 91 123 4567"
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
               />
             </div>
           </div>
@@ -472,86 +868,214 @@ export default function ApproachesPage() {
               </label>
               <input
                 type="email"
+                placeholder="e.g. info@business.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="info@business.com"
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
               />
             </div>
+
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                Outreach Status
+                Location
               </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="PROSPECT">Prospect (Not yet contacted)</option>
-                <option value="CONTACTED">Contacted (Phone / Email)</option>
-                <option value="PITCHED">Pitched / Proposal Sent</option>
-                <option value="IN_DISCUSSION">In Discussion / Meeting</option>
-                <option value="DEAL_WON">Deal Won (Client)</option>
-                <option value="NOT_INTERESTED">Not Interested</option>
-              </select>
+              <input
+                type="text"
+                placeholder="e.g. Bole, Addis Ababa"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Last Contact Date (optional)
+              </label>
+              <input
+                type="date"
+                value={lastContactDate}
+                onChange={(e) => setLastContactDate(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Next Follow-Up Date (optional)
+              </label>
+              <input
+                type="date"
+                value={nextFollowUpDate}
+                onChange={(e) => setNextFollowUpDate(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-neutral-300 mb-1">
-              Notes & Pitch Angles
+              Notes & What to Remember
             </label>
             <textarea
+              rows={3}
+              placeholder="e.g. Wants POS and multi-store inventory. Budget around 150k ETB. Prefers WhatsApp communication."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Pain points observed, current manual registers, potential budget, best time to call..."
-              rows={2}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30"
+              className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold transition shadow-md shadow-teal-900/30"
             >
-              {editingApproach ? 'Save Changes' : 'Add Target Business'}
+              {editingApproach ? 'Save Changes' : 'Create Outreach Target'}
             </button>
           </div>
         </form>
       </Modal>
 
-      {/* DELETE CONFIRMATION */}
+      {/* QUICK LOG CONTACT MODAL */}
+      <Modal
+        isOpen={Boolean(quickLogTarget)}
+        onClose={() => setQuickLogTarget(null)}
+        title={`Quick Log Contact: ${quickLogTarget?.businessName || ''}`}
+      >
+        <form onSubmit={handleSaveQuickLog} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Channel / Method
+              </label>
+              <select
+                value={quickChannel}
+                onChange={(e) => setQuickChannel(e.target.value as ContactChannel)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              >
+                <option value="CALL">Phone Call</option>
+                <option value="WHATSAPP">WhatsApp</option>
+                <option value="EMAIL">Email</option>
+                <option value="MEETING">In-Person Meeting</option>
+                <option value="OTHER">Other / Social Media</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Contact Date
+              </label>
+              <input
+                type="date"
+                required
+                value={quickDate}
+                onChange={(e) => setQuickDate(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Notes / What the client mentioned to remember *
+            </label>
+            <textarea
+              required
+              rows={3}
+              placeholder="e.g. Called owner, they want a demo next Tuesday. Follow up on Monday."
+              value={quickNotes}
+              onChange={(e) => setQuickNotes(e.target.value)}
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Next Follow-up Date (optional)
+              </label>
+              <input
+                type="date"
+                value={quickNextFollowUp}
+                onChange={(e) => setQuickNextFollowUp(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Update Status To
+              </label>
+              <select
+                value={quickUpdateStatus}
+                onChange={(e) => setQuickUpdateStatus(e.target.value as any)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              >
+                <option value="">Keep current ({quickLogTarget?.status})</option>
+                <option value="CONTACTED">Contacted</option>
+                <option value="PITCHED">Pitched / Demo Sent</option>
+                <option value="IN_DISCUSSION">In Discussion</option>
+                <option value="DEAL_WON">Deal Won</option>
+                <option value="NOT_INTERESTED">Not Interested</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setQuickLogTarget(null)}
+              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submittingQuickLog}
+              className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold transition shadow-md shadow-teal-900/30 disabled:opacity-50"
+            >
+              {submittingQuickLog ? 'Saving...' : 'Save Interaction'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* DELETE CONFIRMATION MODAL */}
       <Modal
         isOpen={Boolean(approachToDelete)}
         onClose={() => setApproachToDelete(null)}
         title="Delete Outreach Target"
       >
         <div className="space-y-4">
-          <p className="text-xs text-neutral-300 leading-relaxed">
-            Are you sure you want to remove <strong className="text-white">{approachToDelete?.businessName}</strong> from the outreach list?
+          <p className="text-xs text-neutral-300">
+            Are you sure you want to delete{' '}
+            <strong className="text-white">{approachToDelete?.businessName}</strong>?
+            This will remove all associated interaction history.
           </p>
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
             <button
               type="button"
               onClick={() => setApproachToDelete(null)}
-              className="px-4 py-2 rounded-xl text-xs text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-md shadow-rose-950/30"
+              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition shadow-md shadow-rose-900/30"
             >
-              Yes, Delete
+              Delete Target
             </button>
           </div>
         </div>

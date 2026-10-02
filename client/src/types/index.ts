@@ -138,6 +138,23 @@ export type ApproachStatus =
   | 'DEAL_WON'
   | 'NOT_INTERESTED';
 
+export type ContactChannel = 'CALL' | 'WHATSAPP' | 'EMAIL' | 'MEETING' | 'OTHER';
+
+export interface ContactInteraction {
+  _id?: string;
+  date: string;
+  channel: ContactChannel;
+  notes: string;
+  nextFollowUpDate?: string;
+  loggedBy?: {
+    _id: string;
+    name: string;
+    avatar?: string;
+    role?: string;
+  };
+  createdAt?: string;
+}
+
 export interface Approach {
   _id: string;
   businessName: string;
@@ -148,6 +165,9 @@ export interface Approach {
   location?: string;
   status: ApproachStatus;
   notes?: string;
+  lastContactDate?: string;
+  nextFollowUpDate?: string;
+  contactHistory?: ContactInteraction[];
   convertedClientId?: any;
   createdAt: string;
   updatedAt: string;

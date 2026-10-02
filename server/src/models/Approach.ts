@@ -8,6 +8,18 @@ export type ApproachStatus =
   | 'DEAL_WON'
   | 'NOT_INTERESTED';
 
+export type ContactChannel = 'CALL' | 'WHATSAPP' | 'EMAIL' | 'MEETING' | 'OTHER';
+
+export interface IContactHistory {
+  _id?: Types.ObjectId;
+  date: Date;
+  channel: ContactChannel;
+  notes: string;
+  nextFollowUpDate?: Date;
+  loggedBy?: Types.ObjectId;
+  createdAt?: Date;
+}
+
 export interface IApproach extends Document {
   businessName: string;
   niche: string;
@@ -17,10 +29,28 @@ export interface IApproach extends Document {
   location?: string;
   status: ApproachStatus;
   notes?: string;
+  lastContactDate?: Date;
+  nextFollowUpDate?: Date;
+  contactHistory: IContactHistory[];
   convertedClientId?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
+
+const ContactHistorySchema = new Schema(
+  {
+    date: { type: Date, required: true, default: Date.now },
+    channel: {
+      type: String,
+      enum: ['CALL', 'WHATSAPP', 'EMAIL', 'MEETING', 'OTHER'],
+      default: 'CALL',
+    },
+    notes: { type: String, required: true, trim: true },
+    nextFollowUpDate: { type: Date },
+    loggedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  },
+  { timestamps: true }
+);
 
 const ApproachSchema = new Schema<IApproach>(
   {
@@ -36,9 +66,13 @@ const ApproachSchema = new Schema<IApproach>(
       default: 'PROSPECT',
     },
     notes: { type: String, default: '' },
+    lastContactDate: { type: Date },
+    nextFollowUpDate: { type: Date },
+    contactHistory: [ContactHistorySchema],
     convertedClientId: { type: Schema.Types.ObjectId, ref: 'Client' },
   },
   { timestamps: true }
 );
 
 export const Approach = mongoose.model<IApproach>('Approach', ApproachSchema);
+
