@@ -64,12 +64,48 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
     );
   }
 
-  // Auth pages (login, change password) - full screen, no workspace sidebar
-  if (isAuthRoute || !token || !user || user.mustChangePassword) {
+  // Unauthenticated user
+  if (!token || !user) {
+    if (pathname === '/login') {
+      return (
+        <main className="min-h-screen w-full bg-[#0a0a0a] text-neutral-100 flex flex-col">
+          {children}
+        </main>
+      );
+    }
+
+    // Redirecting to login, do not mount protected children
     return (
-      <main className="min-h-screen w-full bg-[#0a0a0a] text-neutral-100 flex flex-col">
-        {children}
-      </main>
+      <div className="min-h-screen w-full bg-[#0a0a0a] flex flex-col items-center justify-center">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
+          <span className="text-xs font-heading font-medium tracking-wider text-neutral-400 uppercase">
+            Redirecting to login...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged in user must change password
+  if (user.mustChangePassword) {
+    if (pathname === '/change-password') {
+      return (
+        <main className="min-h-screen w-full bg-[#0a0a0a] text-neutral-100 flex flex-col">
+          {children}
+        </main>
+      );
+    }
+
+    return (
+      <div className="min-h-screen w-full bg-[#0a0a0a] flex flex-col items-center justify-center">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
+          <span className="text-xs font-heading font-medium tracking-wider text-neutral-400 uppercase">
+            Redirecting to password setup...
+          </span>
+        </div>
+      </div>
     );
   }
 

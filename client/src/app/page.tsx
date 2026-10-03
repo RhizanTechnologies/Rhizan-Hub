@@ -628,7 +628,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-[9px] flex items-center justify-center">
-                        {s.userName.charAt(0)}
+                        {s.userName?.charAt(0) || 'U'}
                       </div>
                       <div>
                         <span className="font-bold text-white block">{s.userName}</span>
@@ -1201,7 +1201,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-teal-600/20 text-teal-300 font-bold text-xs flex items-center justify-center border border-teal-500/30">
-                        {member.name.charAt(0)}
+                        {member.name?.charAt(0) || 'M'}
                       </div>
                       <div>
                         <div className="text-xs font-bold text-white group-hover:text-teal-300 transition">
@@ -1250,7 +1250,7 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-7 h-7 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xs shrink-0">
-                        {act.userName.charAt(0)}
+                        {act.userName?.charAt(0) || 'U'}
                       </div>
                       <div className="truncate">
                         <span className="font-semibold text-white">{act.userName}</span>{' '}
