@@ -1,8 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { Header } from '@/components/Header';
+import { StatCard } from '@/components/StatCard';
 import { Modal } from '@/components/Modal';
+import { PriorityBadge } from '@/components/Badge';
 import { apiFetch } from '@/lib/api';
 import {
   Clock,
@@ -11,12 +14,26 @@ import {
   UserPlus,
   Copy,
   Check,
-  KeyRound,
   RefreshCw,
   Sparkles,
   ShieldAlert,
+  ChevronDown,
+  ArrowUpRight,
+  Search,
+  Users,
+  Briefcase,
+  Flame,
+  ArrowRight,
+  Layers,
 } from 'lucide-react';
-import { PriorityBadge } from '@/components/Badge';
+
+interface ActiveProjectItem {
+  id?: string;
+  _id?: string;
+  name: string;
+  status?: string;
+  clientName?: string;
+}
 
 interface TeamMember {
   id: string;
@@ -34,7 +51,7 @@ interface TeamMember {
     priority: any;
     projectName: string;
   }>;
-  activeProjects: string[];
+  activeProjects: Array<string | ActiveProjectItem>;
   thisWeekHours: number;
 }
 
@@ -42,13 +59,20 @@ export default function TeamPage() {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Search & Filter
+  const [searchQuery, setSearchQuery] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('ALL');
+
+  // Expanded Tasks State (per member id)
+  const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
+
   // Invite modal state
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'MEMBER' | 'ADMIN'>('MEMBER');
   const [inviteTitle, setInviteTitle] = useState('Development');
-  const [inviteCapacity, setInviteCapacity] = useState('40');
+  const [inviteCapacity, setInviteCapacity] = useState('48');
   const [tempoPassword, setTempoPassword] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
@@ -63,7 +87,7 @@ export default function TeamPage() {
   } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Initial fallback team data
+  // Initial fallback team data (48h weekly capacity: 6 days x 8h)
   const initialTeam: TeamMember[] = [
     {
       id: '1',
@@ -72,10 +96,13 @@ export default function TeamPage() {
       role: 'ADMIN',
       title: 'Development & Engineering',
       status: 'ACTIVE',
-      weeklyCapacityHours: 40,
+      weeklyCapacityHours: 48,
       activeTaskCount: 4,
       thisWeekHours: 27,
-      activeProjects: ['Bakery ERP', 'RHIZAN Website'],
+      activeProjects: [
+        { id: '1', name: 'Bakery ERP' },
+        { id: '2', name: 'RHIZAN Website' },
+      ],
       tasks: [
         { id: '1', title: 'Fix ERP login authentication', status: 'TODO', priority: 'HIGH', projectName: 'Bakery ERP' },
         { id: '2', title: 'Deploy backend to production VPS', status: 'IN_PROGRESS', priority: 'URGENT', projectName: 'Bakery ERP' },
@@ -90,10 +117,13 @@ export default function TeamPage() {
       role: 'MEMBER',
       title: 'Business & Client Outreach',
       status: 'ACTIVE',
-      weeklyCapacityHours: 40,
+      weeklyCapacityHours: 48,
       activeTaskCount: 6,
       thisWeekHours: 24,
-      activeProjects: ['Client Acquisition Q4', 'Bakery ERP'],
+      activeProjects: [
+        { id: '3', name: 'Client Acquisition Q4' },
+        { id: '1', name: 'Bakery ERP' },
+      ],
       tasks: [
         { id: '5', title: 'Follow up with ABC Bakery on invoice', status: 'TODO', priority: 'HIGH', projectName: 'Bakery ERP' },
         { id: '6', title: 'Client pitch presentation for XYZ Bistro', status: 'IN_PROGRESS', priority: 'MEDIUM', projectName: 'Client Acquisition' },
@@ -107,10 +137,13 @@ export default function TeamPage() {
       role: 'MEMBER',
       title: 'Operations & Product QA',
       status: 'ACTIVE',
-      weeklyCapacityHours: 40,
+      weeklyCapacityHours: 48,
       activeTaskCount: 3,
       thisWeekHours: 21,
-      activeProjects: ['RHIZAN Website', 'Bakery ERP'],
+      activeProjects: [
+        { id: '2', name: 'RHIZAN Website' },
+        { id: '1', name: 'Bakery ERP' },
+      ],
       tasks: [
         { id: '8', title: 'Update portfolio case studies', status: 'REVIEW', priority: 'MEDIUM', projectName: 'RHIZAN Website' },
         { id: '9', title: 'QA test inventory calculation edge cases', status: 'IN_PROGRESS', priority: 'HIGH', projectName: 'Bakery ERP' },
@@ -152,7 +185,7 @@ export default function TeamPage() {
     setInviteEmail('');
     setInviteTitle('Development');
     setInviteRole('MEMBER');
-    setInviteCapacity('40');
+    setInviteCapacity('48');
     setInviteError(null);
     setIsInviteOpen(true);
   };
@@ -181,12 +214,11 @@ export default function TeamPage() {
           email: inviteEmail,
           role: inviteRole,
           title: inviteTitle,
-          weeklyCapacityHours: parseInt(inviteCapacity, 10) || 40,
+          weeklyCapacityHours: parseInt(inviteCapacity, 10) || 48,
           customTemporaryPassword: tempoPassword,
         }),
       });
 
-      // Save for success popup
       setCreatedInvite({
         name: inviteName,
         email: inviteEmail,
@@ -196,7 +228,6 @@ export default function TeamPage() {
       });
 
       setIsInviteOpen(false);
-      // Reload team list
       await loadTeam();
     } catch (err: any) {
       setInviteError(err.message || 'Failed to send invite.');
@@ -214,52 +245,191 @@ export default function TeamPage() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const toggleExpanded = (memberId: string) => {
+    setExpandedTasks((prev) => ({
+      ...prev,
+      [memberId]: !prev[memberId],
+    }));
+  };
+
+  // Helper to normalize project info
+  const getProjectInfo = (p: string | ActiveProjectItem) => {
+    if (typeof p === 'string') {
+      return { id: '', name: p };
+    }
+    return {
+      id: p.id || p._id || '',
+      name: p.name || 'Project',
+      clientName: p.clientName,
+    };
+  };
+
+  // Department tabs
+  const departments = useMemo(() => {
+    const set = new Set<string>();
+    team.forEach((m) => {
+      if (m.title) set.add(m.title);
+    });
+    return ['ALL', ...Array.from(set)];
+  }, [team]);
+
+  // Filtered members
+  const filteredTeam = useMemo(() => {
+    return team.filter((member) => {
+      const matchesSearch =
+        member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (member.title && member.title.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      const matchesDept =
+        departmentFilter === 'ALL' || member.title?.toLowerCase() === departmentFilter.toLowerCase();
+
+      return matchesSearch && matchesDept;
+    });
+  }, [team, searchQuery, departmentFilter]);
+
+  // Top Aggregates
+  const totalCapacityHours = team.reduce((acc, m) => acc + (m.weeklyCapacityHours || 48), 0);
+  const totalHoursLoggedThisWeek = team.reduce((acc, m) => acc + (m.thisWeekHours || 0), 0);
+  const totalActiveTasks = team.reduce((acc, m) => acc + (m.tasks?.length || m.activeTaskCount || 0), 0);
+  const teamUtilizationPercent =
+    totalCapacityHours > 0 ? Math.round((totalHoursLoggedThisWeek / totalCapacityHours) * 100) : 0;
+
   return (
     <div className="flex-1 flex flex-col min-h-screen">
       <Header
         title="Team Directory"
-        subtitle="Current responsibilities, active projects, and workload across RHIZAN"
+        subtitle="Manage member responsibilities, active projects, 48h weekly capacity, and performance"
         actionButton={{
           label: 'Invite Member',
           onClick: handleOpenInvite,
         }}
       />
 
-      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-6">
+        {/* KPI Summary Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label="Total Team Members"
+            value={team.length}
+            subtitle="Active collaborators"
+            icon={Users}
+            variant="default"
+          />
+          <StatCard
+            label="Total Weekly Capacity"
+            value={`${totalCapacityHours}h`}
+            subtitle="48h baseline (6d × 8h)"
+            icon={Clock}
+            variant="teal"
+          />
+          <StatCard
+            label="Logged This Week"
+            value={`${Math.round(totalHoursLoggedThisWeek * 10) / 10}h`}
+            subtitle="Recorded time entries"
+            icon={Flame}
+            variant="success"
+          />
+          <StatCard
+            label="Team Utilization"
+            value={`${teamUtilizationPercent}%`}
+            subtitle={`${totalActiveTasks} active tasks total`}
+            icon={Briefcase}
+            variant={teamUtilizationPercent > 90 ? 'warning' : 'default'}
+          />
+        </div>
+
+        {/* Search & Department Filters */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-[#121212] border border-[#222222] rounded-2xl">
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search team members by name, email, or role..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#181818] border border-[#262626] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+            />
+          </div>
+
+          {/* Department Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+            {departments.map((dept) => {
+              const active = departmentFilter === dept;
+              return (
+                <button
+                  key={dept}
+                  type="button"
+                  onClick={() => setDepartmentFilter(dept)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${
+                    active
+                      ? 'bg-teal-500/15 text-teal-400 border border-teal-500/30'
+                      : 'bg-[#181818] text-neutral-400 border border-[#262626] hover:text-white hover:bg-[#202020]'
+                  }`}
+                >
+                  {dept === 'ALL' ? 'All Roles' : dept}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Team Members Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-          {team.map((member) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+          {filteredTeam.map((member) => {
+            const capacityLimit = member.weeklyCapacityHours || 48;
             const capacityPercent = Math.min(
               100,
-              Math.round((member.thisWeekHours / (member.weeklyCapacityHours || 40)) * 100)
+              Math.round(((member.thisWeekHours || 0) / capacityLimit) * 100)
             );
+            const isExpanded = !!expandedTasks[member.id];
+            const tasksList = member.tasks || [];
+            const visibleTasks = isExpanded ? tasksList : tasksList.slice(0, 2);
+            const hasMoreTasks = tasksList.length > 2;
+
+            // Load indicator badge
+            const getLoadStatus = () => {
+              if (capacityPercent >= 90) return { label: 'High Load', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' };
+              if (capacityPercent >= 50) return { label: 'Optimal', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' };
+              return { label: 'Available', color: 'text-teal-400 bg-teal-500/10 border-teal-500/20' };
+            };
+            const loadStatus = getLoadStatus();
 
             return (
               <div
                 key={member.id}
-                className="p-5 rounded-2xl bg-[#121212] border border-[#222222] hover:border-[#333333] transition flex flex-col justify-between shadow-sm"
+                className="p-5 rounded-2xl bg-[#121212] border border-[#222222] hover:border-teal-500/30 transition-all flex flex-col justify-between shadow-sm group"
               >
                 <div>
                   {/* Member Profile Header */}
                   <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-base flex items-center justify-center shadow-lg shadow-teal-900/20 font-heading">
+                    <Link
+                      href={`/team/${member.id}`}
+                      className="flex items-center gap-3 group/profile focus:outline-none"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-base flex items-center justify-center shadow-lg shadow-teal-900/20 font-heading group-hover/profile:scale-105 transition-transform">
                         {member.name.charAt(0)}
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h3 className="font-heading text-base font-bold text-white">{member.name}</h3>
+                          <h3 className="font-heading text-base font-bold text-white group-hover/profile:text-teal-300 transition-colors">
+                            {member.name}
+                          </h3>
                           {member.role === 'ADMIN' && (
                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">
                               Admin
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-teal-400 font-medium">{member.title}</p>
+                        <p className="text-xs text-neutral-400 font-medium">{member.title}</p>
                       </div>
-                    </div>
+                    </Link>
 
-                    <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-pulse mt-1" />
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${loadStatus.color}`}
+                    >
+                      {loadStatus.label}
+                    </span>
                   </div>
 
                   {/* Summary Metric Stats */}
@@ -269,7 +439,7 @@ export default function TeamPage() {
                         <CheckSquare className="w-3 h-3 text-teal-400" /> Active Tasks
                       </span>
                       <div className="font-heading text-base font-bold text-white mt-0.5">
-                        {member.activeTaskCount ?? member.tasks?.length ?? 0}
+                        {tasksList.length}
                       </div>
                     </div>
 
@@ -283,10 +453,10 @@ export default function TeamPage() {
                     </div>
                   </div>
 
-                  {/* Hours Capacity Bar */}
+                  {/* Hours Capacity Bar (48h baseline) */}
                   <div className="space-y-1.5 mb-5">
                     <div className="flex items-center justify-between text-[11px] text-neutral-400">
-                      <span>Weekly Capacity ({member.weeklyCapacityHours || 40}h)</span>
+                      <span>Weekly Capacity ({capacityLimit}h)</span>
                       <span className="font-semibold text-neutral-200">{capacityPercent}%</span>
                     </div>
                     <div className="w-full bg-[#262626] h-2 rounded-full overflow-hidden">
@@ -297,50 +467,94 @@ export default function TeamPage() {
                     </div>
                   </div>
 
-                  {/* Active Projects */}
+                  {/* Active Projects (Clickable links to each project) */}
                   <div className="mb-4">
                     <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1.5">
                       Active Projects
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {(member.activeProjects || []).length > 0 ? (
-                        member.activeProjects.map((p, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-1 rounded-lg bg-[#181818] border border-[#262626] text-xs text-neutral-300 font-medium"
-                          >
-                            {p}
-                          </span>
-                        ))
+                        member.activeProjects.map((p, idx) => {
+                          const proj = getProjectInfo(p);
+                          if (proj.id) {
+                            return (
+                              <Link
+                                key={idx}
+                                href={`/projects/${proj.id}`}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#181818] hover:bg-[#202020] border border-[#262626] hover:border-teal-500/50 text-xs text-neutral-300 hover:text-teal-300 font-medium transition group/p"
+                              >
+                                <span>{proj.name}</span>
+                                <ArrowUpRight className="w-3 h-3 opacity-50 group-hover/p:opacity-100 group-hover/p:translate-x-0.5 group-hover/p:-translate-y-0.5 transition" />
+                              </Link>
+                            );
+                          }
+                          return (
+                            <span
+                              key={idx}
+                              className="px-2.5 py-1 rounded-lg bg-[#181818] border border-[#262626] text-xs text-neutral-300 font-medium"
+                            >
+                              {proj.name}
+                            </span>
+                          );
+                        })
                       ) : (
                         <span className="text-xs text-neutral-500 italic">No assigned projects</span>
                       )}
                     </div>
                   </div>
 
-                  {/* Current Tasks List */}
-                  <div>
-                    <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block mb-2">
-                      Assigned Work ({(member.tasks || []).length})
-                    </span>
+                  {/* Assigned Work (Shows 2 tasks initially, then expandable) */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
+                        Assigned Work ({tasksList.length})
+                      </span>
+                    </div>
+
                     <div className="space-y-2">
-                      {(member.tasks || []).length > 0 ? (
-                        member.tasks.map((task) => (
-                          <div
-                            key={task.id}
-                            className="p-2.5 rounded-lg bg-[#181818] border border-[#262626] text-xs"
-                          >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-medium text-neutral-200 truncate pr-2">
-                                {task.title}
-                              </span>
-                              <PriorityBadge priority={task.priority} />
+                      {tasksList.length > 0 ? (
+                        <>
+                          {visibleTasks.map((task) => (
+                            <div
+                              key={task.id}
+                              className="p-2.5 rounded-lg bg-[#181818] border border-[#262626] text-xs hover:border-[#333333] transition"
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="font-medium text-neutral-200 truncate pr-2">
+                                  {task.title}
+                                </span>
+                                <PriorityBadge priority={task.priority} />
+                              </div>
+                              <div className="flex items-center justify-between text-[10px] text-neutral-500">
+                                <span>{task.projectName}</span>
+                                <span className="uppercase text-[9px] px-1.5 py-0.5 rounded bg-[#202020] text-neutral-400">
+                                  {task.status.replace('_', ' ')}
+                                </span>
+                              </div>
                             </div>
-                            <div className="text-[10px] text-neutral-500">{task.projectName}</div>
-                          </div>
-                        ))
+                          ))}
+
+                          {hasMoreTasks && (
+                            <button
+                              type="button"
+                              onClick={() => toggleExpanded(member.id)}
+                              className="w-full py-1.5 px-3 rounded-lg bg-[#181818] hover:bg-[#202020] border border-[#262626] hover:border-teal-500/40 text-[11px] font-medium text-teal-400 hover:text-teal-300 flex items-center justify-center gap-1.5 transition"
+                            >
+                              <span>
+                                {isExpanded
+                                  ? 'Show less'
+                                  : `+ Show ${tasksList.length - 2} more tasks`}
+                              </span>
+                              <ChevronDown
+                                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                                  isExpanded ? 'rotate-180' : ''
+                                }`}
+                              />
+                            </button>
+                          )}
+                        </>
                       ) : (
-                        <div className="text-xs text-neutral-500 italic p-2 bg-[#181818] rounded-lg border border-[#262626]">
+                        <div className="text-xs text-neutral-500 italic p-2.5 bg-[#181818] rounded-lg border border-[#262626]">
                           No pending tasks
                         </div>
                       )}
@@ -348,15 +562,45 @@ export default function TeamPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 mt-4 border-t border-[#222222] text-center">
-                  <span className="text-xs text-neutral-400 flex items-center justify-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-neutral-500" /> {member.email}
-                  </span>
+                {/* Footer with detail page link and email */}
+                <div className="pt-3.5 border-t border-[#222222] space-y-2.5">
+                  <Link
+                    href={`/team/${member.id}`}
+                    className="w-full py-2 px-3 rounded-xl bg-[#181818] hover:bg-teal-500/10 border border-[#262626] hover:border-teal-500/40 text-xs font-medium text-neutral-300 hover:text-teal-300 flex items-center justify-center gap-1.5 transition group/btn"
+                  >
+                    <span>View Member Profile & Workload</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <div className="text-center">
+                    <span className="text-[11px] text-neutral-500 flex items-center justify-center gap-1.5 hover:text-neutral-400 transition">
+                      <Mail className="w-3 h-3 text-neutral-500" /> {member.email}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
+
+        {filteredTeam.length === 0 && (
+          <div className="text-center py-16 bg-[#121212] border border-[#222222] rounded-2xl">
+            <Users className="w-10 h-10 text-neutral-600 mx-auto mb-3" />
+            <h3 className="text-sm font-semibold text-white">No team members match your filter</h3>
+            <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
+              Try adjusting your search query or clear the department filter to view all members.
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setDepartmentFilter('ALL');
+              }}
+              className="mt-4 px-4 py-1.5 rounded-xl bg-[#181818] border border-[#262626] text-xs text-teal-400 hover:text-teal-300 transition"
+            >
+              Reset Filters
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Invite Member Modal */}
@@ -432,9 +676,12 @@ export default function TeamPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
-              Weekly Capacity (Hours)
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium text-neutral-300">
+                Weekly Capacity (Hours)
+              </label>
+              <span className="text-[10px] text-teal-400">RHIZAN Standard: 48h (6d × 8h)</span>
+            </div>
             <input
               type="number"
               value={inviteCapacity}
