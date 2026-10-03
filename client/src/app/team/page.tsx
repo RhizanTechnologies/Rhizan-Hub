@@ -100,6 +100,9 @@ export default function TeamPage() {
     emailMessage?: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedPass, setCopiedPass] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedTemp, setCopiedTemp] = useState(false);
   const [showBackupCreds, setShowBackupCreds] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -834,14 +837,30 @@ export default function TeamPage() {
               <label className="text-xs font-medium text-neutral-300">
                 Temporary Password
               </label>
-              <button
-                type="button"
-                onClick={() => setTempoPassword(generateRandomPassword())}
-                className="text-[11px] text-teal-400 hover:text-teal-300 flex items-center gap-1 transition"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>Regenerate</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(tempoPassword);
+                    setCopiedTemp(true);
+                    setTimeout(() => setCopiedTemp(false), 2000);
+                  }}
+                  className="text-[11px] text-teal-400 hover:text-teal-300 flex items-center gap-1 transition"
+                  title="Copy password"
+                >
+                  {copiedTemp ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedTemp ? 'Copied' : 'Copy'}</span>
+                </button>
+                <span className="text-neutral-600">•</span>
+                <button
+                  type="button"
+                  onClick={() => setTempoPassword(generateRandomPassword())}
+                  className="text-[11px] text-teal-400 hover:text-teal-300 flex items-center gap-1 transition"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Regenerate</span>
+                </button>
+              </div>
             </div>
             <div className="relative">
               <input
@@ -925,20 +944,73 @@ export default function TeamPage() {
 
             {/* If email failed OR if user toggled backup details */}
             {(!createdInvite.emailSent || showBackupCreds) && (
-              <div className="p-3.5 rounded-xl bg-[#161616] border border-[#262626] space-y-2.5 font-mono text-xs">
+              <div className="p-4 rounded-xl bg-[#161616] border border-[#262626] space-y-3 font-mono text-xs">
+                {/* Auto-Fill Login Link with Copy Button */}
                 <div>
-                  <span className="text-[10px] uppercase font-sans text-neutral-500 block">Login URL</span>
-                  <span className="text-neutral-200 text-xs">
-                    {typeof window !== 'undefined' ? `${window.location.origin}/login` : '/login'}
-                  </span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] uppercase font-sans text-neutral-400 font-semibold flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-teal-400" />
+                      Auto-Fill Login URL
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const link = `${window.location.origin}/login?email=${encodeURIComponent(createdInvite.email)}&temp=${encodeURIComponent(createdInvite.tempoPass)}`;
+                        navigator.clipboard.writeText(link);
+                        setCopiedLink(true);
+                        setTimeout(() => setCopiedLink(false), 2000);
+                      }}
+                      className="text-[11px] text-teal-400 hover:text-teal-300 font-sans flex items-center gap-1 transition"
+                    >
+                      {copiedLink ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedLink ? 'Copied Link' : 'Copy Auto-fill Link'}</span>
+                    </button>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#111111] border border-[#222222] text-neutral-300 text-[11px] truncate">
+                    {typeof window !== 'undefined'
+                      ? `${window.location.origin}/login?email=${encodeURIComponent(createdInvite.email)}&temp=${encodeURIComponent(createdInvite.tempoPass)}`
+                      : '/login'}
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-sans text-neutral-500 block">Work Email</span>
-                  <span className="text-teal-400 text-xs font-semibold">{createdInvite.email}</span>
+
+                {/* Work Email */}
+                <div className="flex items-center justify-between pt-1">
+                  <div>
+                    <span className="text-[10px] uppercase font-sans text-neutral-500 block">Work Email</span>
+                    <span className="text-teal-400 text-xs font-semibold">{createdInvite.email}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(createdInvite.email);
+                      setToastMessage({ type: 'success', text: 'Email copied to clipboard' });
+                      setTimeout(() => setToastMessage(null), 2000);
+                    }}
+                    className="p-1.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] border border-[#333333] text-neutral-400 hover:text-white transition"
+                    title="Copy Email"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </button>
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-sans text-neutral-500 block">Temporary Password</span>
-                  <span className="text-emerald-400 text-xs font-bold tracking-wider">{createdInvite.tempoPass}</span>
+
+                {/* Temporary Password with Direct Copy Button */}
+                <div className="flex items-center justify-between pt-1 border-t border-[#222222]">
+                  <div>
+                    <span className="text-[10px] uppercase font-sans text-neutral-500 block">Temporary Password</span>
+                    <span className="text-emerald-400 text-xs font-bold tracking-wider">{createdInvite.tempoPass}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(createdInvite.tempoPass);
+                      setCopiedPass(true);
+                      setTimeout(() => setCopiedPass(false), 2000);
+                    }}
+                    className="py-1 px-2.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] border border-[#333333] text-[11px] text-teal-400 hover:text-teal-300 font-sans flex items-center gap-1.5 transition"
+                  >
+                    {copiedPass ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedPass ? 'Copied' : 'Copy Password'}</span>
+                  </button>
                 </div>
               </div>
             )}

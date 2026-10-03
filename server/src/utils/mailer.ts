@@ -23,6 +23,7 @@ export const sendInvitationEmail = async ({
       ? 'https://rhizan-hub.vercel.app'
       : 'http://localhost:3001');
   const loginUrl = `${clientBaseUrl}/login`;
+  const autoFillLoginUrl = `${clientBaseUrl}/login?email=${encodeURIComponent(to)}&temp=${encodeURIComponent(temporaryPassword)}`;
 
   const emailUser = process.env.SMTP_USER || process.env.EMAIL_USER;
   const emailPass = process.env.SMTP_PASSWORD || process.env.SMTP_PASS || process.env.EMAIL_PASS;
@@ -49,7 +50,7 @@ export const sendInvitationEmail = async ({
         h1 { font-size: 22px; font-weight: 700; color: #ffffff; margin-top: 0; margin-bottom: 8px; }
         p { font-size: 14px; line-height: 1.6; color: #a3a3a3; margin: 12px 0; }
         .cred-box { background: #1a1a1a; border: 1px dashed #333333; border-radius: 10px; padding: 16px; margin: 24px 0; }
-        .cred-item { font-size: 13px; margin: 6px 0; color: #d4d4d4; }
+        .cred-item { font-size: 13px; margin: 8px 0; color: #d4d4d4; }
         .cred-item strong { color: #14b8a6; }
         .btn { display: inline-block; background-color: #0d9488; color: #ffffff !important; text-decoration: none; padding: 12px 24px; font-size: 14px; font-weight: 600; border-radius: 8px; margin: 16px 0; text-align: center; }
         .footer { font-size: 12px; color: #737373; margin-top: 24px; border-top: 1px solid #262626; padding-top: 16px; }
@@ -63,12 +64,17 @@ export const sendInvitationEmail = async ({
         
         <div class="cred-box">
           <div class="cred-item"><strong>Work Email:</strong> ${to}</div>
-          <div class="cred-item"><strong>Temporary Password:</strong> ${temporaryPassword}</div>
+          <div class="cred-item"><strong>Temporary Password:</strong> <span style="font-family: monospace; background: #222222; border: 1px solid #333333; color: #14b8a6; padding: 2px 8px; border-radius: 4px; font-weight: bold; letter-spacing: 1px;">${temporaryPassword}</span></div>
         </div>
 
         <p>⚠️ <strong>Security Notice:</strong> Upon your first sign in, you will be prompted to set your new permanent password before entering the platform.</p>
 
-        <a href="${loginUrl}" class="btn">Sign In to RHIZAN Hub</a>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${autoFillLoginUrl}" class="btn">👉 Sign In to RHIZAN Hub (Auto-fill Password)</a>
+        </div>
+        <p style="font-size: 11px; color: #737373; text-align: center; margin-top: -6px;">
+          Clicking the button above will open the portal with your email and temporary password automatically filled in.
+        </p>
 
         <div class="footer">
           Rhizan Technologies • Internal Workspace Management

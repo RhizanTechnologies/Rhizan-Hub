@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -15,6 +16,26 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isPreFilled, setIsPreFilled] = useState(false);
+
+  // Pre-fill email and temporary password if redirected from invitation email or copy link
+  useEffect(() => {
+    const emailParam = searchParams.get('email');
+    const tempParam =
+      searchParams.get('temp') ||
+      searchParams.get('code') ||
+      searchParams.get('password');
+
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+    if (tempParam) {
+      setPassword(tempParam);
+    }
+    if (emailParam || tempParam) {
+      setIsPreFilled(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +92,16 @@ export default function LoginPage() {
             <p className="text-xs text-neutral-400">Internal Operations & Team Management</p>
           </div>
 
+          {/* Invitation auto-fill notice */}
+          {isPreFilled && (
+            <div className="mb-5 p-3.5 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs flex items-center gap-2.5 animate-fade-in">
+              <Sparkles className="w-4 h-4 text-teal-400 shrink-0" />
+              <span>
+                Your temporary invitation credentials have been automatically filled! Click <strong>Sign In</strong> below to continue.
+              </span>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
             <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2.5 animate-shake">
@@ -93,7 +124,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@rhizan.com"
                   required
-                  autoFocus
+                  autoFocus={!isPreFilled}
                   className="w-full bg-[#171717] border border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 outline-none transition"
                 />
               </div>
@@ -111,7 +142,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password or temporary code"
                   required
-                  className="w-full bg-[#171717] border border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-neutral-500 outline-none transition"
+                  className="w-full bg-[#171717] border border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-neutral-500 outline-none transition font-mono tracking-wide"
                 />
                 <button
                   type="button"
@@ -150,5 +181,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen w-full flex items-center justify-center bg-[#080808]">
+          <div className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-400 rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
