@@ -23,6 +23,7 @@ import {
   User as UserIcon,
   ChevronDown,
   Sparkles,
+  GripVertical,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -40,16 +41,21 @@ export default function TasksPage() {
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Drag and Drop state
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dragOverColumnId, setDragOverColumnId] = useState<TaskStatus | null>(null);
+
   // Filters
   const [dateFilter, setDateFilter] = useState<'ALL' | 'TODAY' | 'TOMORROW' | 'THIS_WEEK' | 'OVERDUE' | 'CUSTOM'>('ALL');
   const [customDate, setCustomDate] = useState<string>('');
   const [projectFilter, setProjectFilter] = useState<string>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [personalOnly, setPersonalOnly] = useState<boolean>(true); // Focused on individual/personal use by default
+  const [assigneeFilter, setAssigneeFilter] = useState<string>('MY_TASKS'); // Default: Personal My Tasks
 
   // Modals state
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
+  const [newTaskStatus, setNewTaskStatus] = useState<TaskStatus>('TODO');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [mobileColumn, setMobileColumn] = useState<'ALL' | TaskStatus>('ALL');
 
@@ -125,6 +131,47 @@ export default function TasksPage() {
       });
     } catch (err) {
       console.error('Failed to update status', err);
+    }
+  };
+
+  // Open New Task Modal pre-assigned to a specific column/status
+  const openNewTaskForColumn = (status: TaskStatus) => {
+    setNewTaskStatus(status);
+    setIsNewTaskOpen(true);
+  };
+
+  // Handle Drag & Drop Task between Kanban columns
+  const handleDropToColumn = async (targetStatus: TaskStatus) => {
+    if (!draggedTaskId) return;
+    const task = tasks.find((t) => t._id === draggedTaskId);
+    if (!task || task.status === targetStatus) {
+      setDraggedTaskId(null);
+      setDragOverColumnId(null);
+      return;
+    }
+
+    const currentId = draggedTaskId;
+
+    // Optimistic UI state update
+    setTasks((prev) =>
+      prev.map((t) => (t._id === currentId ? { ...t, status: targetStatus } : t))
+    );
+
+    if (selectedTask?._id === currentId) {
+      setSelectedTask({ ...selectedTask, status: targetStatus });
+    }
+
+    setDraggedTaskId(null);
+    setDragOverColumnId(null);
+
+    try {
+      await apiFetch(`/tasks/${currentId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: targetStatus }),
+      });
+    } catch (err) {
+      console.error('Failed to move task via drag-and-drop:', err);
+      loadData();
     }
   };
 
@@ -265,7 +312,7 @@ export default function TasksPage() {
           title: title.trim(),
           description: description.trim(),
           priority,
-          status: 'TODO',
+          status: newTaskStatus || 'TODO',
           project: selectedProjectId || undefined,
           assignedTo: selectedAssignedToId || undefined,
           dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
@@ -357,13 +404,29 @@ export default function TasksPage() {
 
   // Filter Tasks Engine
   const filteredTasks = tasks.filter((task) => {
-    // 1. Personal Only filter (Individual View)
-    if (personalOnly && user) {
-      const isMyTask =
-        task.assignedTo?._id === (user as any).id ||
-        task.assignedTo?.email?.toLowerCase() === user.email?.toLowerCase() ||
-        task.assignedTo?.name?.toLowerCase() === user.name?.toLowerCase();
-      if (!isMyTask) return false;
+    // 1. Assignee / Person Filter (Dropdown)
+    if (assigneeFilter === 'MY_TASKS') {
+      if (user) {
+        const isMyTask =
+          task.assignedTo?._id === (user as any).id ||
+          (task.assignedTo as any)?.id === (user as any).id ||
+          task.assignedTo?.email?.toLowerCase() === user.email?.toLowerCase() ||
+          task.assignedTo?.name?.toLowerCase() === user.name?.toLowerCase();
+        if (!isMyTask) return false;
+      }
+    } else if (assigneeFilter !== 'ALL') {
+      const assignedId = task.assignedTo?._id || (task.assignedTo as any)?.id;
+      const assignedEmail = task.assignedTo?.email?.toLowerCase();
+      const assignedName = task.assignedTo?.name?.toLowerCase();
+      const targetMember = teamMembers.find(
+        (m) => (m as any).id === assigneeFilter || (m as any)._id === assigneeFilter
+      );
+      const isTarget =
+        assignedId === assigneeFilter ||
+        (targetMember &&
+          (assignedEmail === targetMember.email?.toLowerCase() ||
+            assignedName === targetMember.name?.toLowerCase()));
+      if (!isTarget) return false;
     }
 
     // 2. Project Filter
@@ -435,32 +498,28 @@ export default function TasksPage() {
         <div className="p-4 bg-[#121212] border border-[#222222] rounded-3xl space-y-3 shadow-md">
           {/* Top Row: Personal Scope Switcher + Search + Projects */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            {/* Personal Mode Toggle */}
+            {/* Assignee / Person Filter Dropdown */}
             <div className="flex items-center gap-2">
-              <div className="p-1 rounded-xl bg-[#181818] border border-[#282828] flex items-center">
-                <button
-                  type="button"
-                  onClick={() => setPersonalOnly(true)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
-                    personalOnly
-                      ? 'bg-teal-600 text-white shadow-sm'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
+              <div className="relative">
+                <select
+                  value={assigneeFilter}
+                  onChange={(e) => setAssigneeFilter(e.target.value)}
+                  className="bg-[#181818] border border-[#282828] text-white text-xs font-medium rounded-xl px-3 py-2 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none min-w-[200px]"
                 >
-                  <UserIcon className="w-3.5 h-3.5" />
-                  <span>My Tasks (Personal)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPersonalOnly(false)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
-                    !personalOnly
-                      ? 'bg-teal-600 text-white shadow-sm'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  <span>All Team Tasks</span>
-                </button>
+                  <option value="MY_TASKS">👤 My Tasks (Personal)</option>
+                  <option value="ALL">👥 All Team Tasks</option>
+                  <optgroup label="Select Specific Person">
+                    {teamMembers.map((m) => {
+                      const mId = (m as any).id || (m as any)._id;
+                      return (
+                        <option key={mId} value={mId}>
+                          👤 {m.name} ({m.title || m.role})
+                        </option>
+                      );
+                    })}
+                  </optgroup>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
               {/* Project Filter Dropdown */}
@@ -614,7 +673,11 @@ export default function TasksPage() {
 
             <div className="text-xs text-neutral-400">
               Showing <strong className="text-white font-mono">{filteredTasks.length}</strong> tasks
-              {personalOnly ? ' for you' : ' in workspace'}
+              {assigneeFilter === 'MY_TASKS'
+                ? ' for you'
+                : assigneeFilter === 'ALL'
+                ? ' across team'
+                : ` for ${teamMembers.find((m) => (m as any).id === assigneeFilter || (m as any)._id === assigneeFilter)?.name || 'selected member'}`}
             </div>
           </div>
         </div>
@@ -660,12 +723,36 @@ export default function TasksPage() {
           {COLUMNS.map((col) => {
             const isHiddenOnMobile = mobileColumn !== 'ALL' && mobileColumn !== col.id;
             const colTasks = filteredTasks.filter((t) => t.status === col.id);
+            const colEstimatedHours = colTasks.reduce((sum, t) => sum + (t.estimatedHours || 0), 0);
+            const isColumnTarget = dragOverColumnId === col.id;
+
             return (
               <div
                 key={col.id}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  if (dragOverColumnId !== col.id) {
+                    setDragOverColumnId(col.id);
+                  }
+                }}
+                onDragLeave={(e) => {
+                  if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                  if (dragOverColumnId === col.id) {
+                    setDragOverColumnId(null);
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  handleDropToColumn(col.id);
+                }}
                 className={`${
                   isHiddenOnMobile ? 'hidden md:flex' : 'flex'
-                } bg-[#111111] border border-[#222222] rounded-3xl p-3.5 flex-col min-h-[460px] md:min-h-[580px] shadow-sm`}
+                } bg-[#111111] border ${
+                  isColumnTarget
+                    ? 'border-teal-500 bg-teal-950/20 shadow-lg shadow-teal-950/40 ring-2 ring-teal-500/30'
+                    : 'border-[#222222]'
+                } rounded-3xl p-3.5 flex-col min-h-[460px] md:min-h-[580px] shadow-sm transition-all duration-200`}
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#222222]">
@@ -676,8 +763,30 @@ export default function TasksPage() {
                     <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#1c1c1c] text-neutral-400 font-semibold border border-[#2a2a2a]">
                       {colTasks.length}
                     </span>
+                    {colEstimatedHours > 0 && (
+                      <span className="text-[10px] font-mono text-neutral-500">
+                        • {colEstimatedHours}h est
+                      </span>
+                    )}
                   </div>
+
+                  {/* Quick Add Button to Column */}
+                  <button
+                    type="button"
+                    title={`Add task to ${col.label}`}
+                    onClick={() => openNewTaskForColumn(col.id)}
+                    className="w-6 h-6 rounded-lg bg-[#181818] hover:bg-teal-600 text-neutral-400 hover:text-white flex items-center justify-center transition text-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
                 </div>
+
+                {/* Drop Indicator placeholder when dragging over column */}
+                {isColumnTarget && draggedTaskId && (
+                  <div className="p-3 mb-3 rounded-2xl border-2 border-dashed border-teal-500/70 bg-teal-500/10 text-center text-xs text-teal-300 font-medium animate-pulse">
+                    Drop task here to move to {col.label}
+                  </div>
+                )}
 
                 {/* Task Cards List */}
                 <div className="space-y-3 flex-1 overflow-y-auto">
@@ -685,16 +794,36 @@ export default function TasksPage() {
                     const dateInfo = formatTaskDueDate(task.dueDate);
                     const subtasks = task.subtasks || [];
                     const completedSubtasks = subtasks.filter((s) => s.completed).length;
+                    const isDraggingThis = draggedTaskId === task._id;
 
                     return (
                       <div
                         key={task._id}
+                        draggable={true}
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/plain', task._id);
+                          e.dataTransfer.effectAllowed = 'move';
+                          setDraggedTaskId(task._id);
+                        }}
+                        onDragEnd={() => {
+                          setDraggedTaskId(null);
+                          setDragOverColumnId(null);
+                        }}
                         onClick={() => setSelectedTask(task)}
-                        className="p-3.5 rounded-2xl bg-[#161616] border border-[#242424] hover:border-teal-500/40 transition cursor-pointer shadow-sm group select-none space-y-2.5"
+                        className={`p-3.5 rounded-2xl bg-[#161616] border ${
+                          isDraggingThis
+                            ? 'opacity-40 border-dashed border-teal-500 scale-[0.98]'
+                            : dateInfo?.isOverdue
+                            ? 'border-rose-500/30 hover:border-rose-500/60'
+                            : 'border-[#242424] hover:border-teal-500/40'
+                        } transition-all cursor-grab active:cursor-grabbing shadow-sm group select-none space-y-2.5`}
                       >
-                        {/* Top Badges: Priority + Due Date */}
+                        {/* Top Badges: Priority + Due Date + Drag Grip */}
                         <div className="flex items-center justify-between gap-1.5">
-                          <PriorityBadge priority={task.priority} />
+                          <div className="flex items-center gap-1.5">
+                            <GripVertical className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400 opacity-60 group-hover:opacity-100 transition shrink-0" />
+                            <PriorityBadge priority={task.priority} />
+                          </div>
 
                           {dateInfo && (
                             <span
@@ -787,8 +916,8 @@ export default function TasksPage() {
                           </div>
                         )}
 
-                        {/* Interactive Status Dropdown & Estimated Hours */}
-                        <div className="flex items-center justify-between pt-2.5 border-t border-[#222222]">
+                        {/* Interactive Status Dropdown, Assignee Avatar & Estimated Hours */}
+                        <div className="flex items-center justify-between pt-2.5 border-t border-[#222222] gap-2">
                           {/* Status Dropdown Selector */}
                           <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                             <select
@@ -812,6 +941,21 @@ export default function TasksPage() {
                           </div>
 
                           <div className="flex items-center gap-2 text-neutral-400 text-[11px]">
+                            {/* Assignee Avatar */}
+                            {task.assignedTo ? (
+                              <div
+                                title={`Assigned to ${task.assignedTo.name || 'Member'}`}
+                                className="flex items-center gap-1 bg-[#1a1a1a] border border-[#2a2a2a] px-1.5 py-0.5 rounded-md"
+                              >
+                                <div className="w-3.5 h-3.5 rounded-full bg-teal-600 text-white font-bold text-[8px] flex items-center justify-center">
+                                  {task.assignedTo.name?.charAt(0) || 'U'}
+                                </div>
+                                <span className="text-[10px] text-neutral-300 truncate max-w-[65px]">
+                                  {task.assignedTo.name}
+                                </span>
+                              </div>
+                            ) : null}
+
                             {task.estimatedHours ? (
                               <span className="text-[10px] font-mono text-neutral-400 flex items-center gap-0.5">
                                 <Clock className="w-2.5 h-2.5 text-teal-400" />
