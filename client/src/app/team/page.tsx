@@ -25,6 +25,7 @@ import {
   Flame,
   ArrowRight,
   Layers,
+  Send,
 } from 'lucide-react';
 
 interface ActiveProjectItem {
@@ -42,6 +43,7 @@ interface TeamMember {
   role: string;
   title: string;
   status: string;
+  mustChangePassword?: boolean;
   weeklyCapacityHours: number;
   activeTaskCount: number;
   tasks: Array<{
@@ -79,6 +81,7 @@ export default function TeamPage() {
 
   // Success modal state
   const [createdInvite, setCreatedInvite] = useState<{
+    userId?: string;
     name: string;
     email: string;
     tempoPass: string;
@@ -86,6 +89,9 @@ export default function TeamPage() {
     emailMessage?: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showBackupCreds, setShowBackupCreds] = useState(false);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Initial fallback team data (48h weekly capacity: 6 days x 8h)
   const initialTeam: TeamMember[] = [
@@ -220,12 +226,14 @@ export default function TeamPage() {
       });
 
       setCreatedInvite({
+        userId: res.user?.id || res.user?._id,
         name: inviteName,
         email: inviteEmail,
         tempoPass: res.temporaryPassword || tempoPassword,
         emailSent: res.emailSent,
         emailMessage: res.emailMessage,
       });
+      setShowBackupCreds(false);
 
       setIsInviteOpen(false);
       await loadTeam();
@@ -233,6 +241,42 @@ export default function TeamPage() {
       setInviteError(err.message || 'Failed to send invite.');
     } finally {
       setIsInviting(false);
+    }
+  };
+
+  const handleResendInvite = async (memberId: string, memberEmail: string) => {
+    try {
+      setResendingId(memberId);
+      const res = await apiFetch<{
+        message: string;
+        emailSent: boolean;
+        emailMessage?: string;
+        temporaryPassword?: string;
+      }>(`/team/${memberId}/resend-invite`, {
+        method: 'POST',
+      });
+
+      if (res.emailSent) {
+        setToastMessage({
+          type: 'success',
+          text: `Invitation email delivered directly to ${memberEmail}!`,
+        });
+      } else {
+        setToastMessage({
+          type: 'error',
+          text: res.emailMessage || 'Failed to send email. Check SMTP setup in Vercel.',
+        });
+      }
+      setTimeout(() => setToastMessage(null), 6000);
+      await loadTeam();
+    } catch (err: any) {
+      setToastMessage({
+        type: 'error',
+        text: err.message || 'Failed to resend invite.',
+      });
+      setTimeout(() => setToastMessage(null), 6000);
+    } finally {
+      setResendingId(null);
     }
   };
 
@@ -564,6 +608,33 @@ export default function TeamPage() {
 
                 {/* Footer with detail page link and email */}
                 <div className="pt-3.5 border-t border-[#222222] space-y-2.5">
+                  {member.mustChangePassword && (
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-teal-500/5 border border-teal-500/20 text-xs">
+                      <span className="text-[11px] text-teal-300 font-medium flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                        <span>Invitation Pending</span>
+                      </span>
+                      <button
+                        type="button"
+                        disabled={resendingId === member.id}
+                        onClick={() => handleResendInvite(member.id, member.email)}
+                        className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-600/90 hover:bg-teal-500 text-white font-medium flex items-center gap-1.5 transition shadow-sm disabled:opacity-50"
+                      >
+                        {resendingId === member.id ? (
+                          <>
+                            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Sending...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-3 h-3" />
+                            <span>Resend Email</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
                   <Link
                     href={`/team/${member.id}`}
                     className="w-full py-2 px-3 rounded-xl bg-[#181818] hover:bg-teal-500/10 border border-[#262626] hover:border-teal-500/40 text-xs font-medium text-neutral-300 hover:text-teal-300 flex items-center justify-center gap-1.5 transition group/btn"
@@ -750,82 +821,147 @@ export default function TeamPage() {
         </form>
       </Modal>
 
-      {/* Invitation Credentials Ready Modal */}
+      {/* Invitation Status Modal */}
       <Modal
         isOpen={Boolean(createdInvite)}
         onClose={() => setCreatedInvite(null)}
-        title="Member Invitation Created"
+        title={createdInvite?.emailSent ? 'Invitation Dispatched' : 'Invitation Notice'}
       >
         {createdInvite && (
           <div className="space-y-4">
             {createdInvite.emailSent ? (
-              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3">
-                <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 mx-auto flex items-center justify-center shadow-lg shadow-emerald-950/40">
+                  <Check className="w-6 h-6" />
+                </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white">Invitation Email Delivered!</h4>
-                  <p className="text-[11px] text-emerald-300 mt-0.5">
-                    An email with the temporary login password and link was automatically sent to <span className="font-semibold text-white">{createdInvite.email}</span>.
+                  <h4 className="text-sm font-bold text-white">Invitation Email Dispatched!</h4>
+                  <p className="text-xs text-emerald-300/90 mt-1 max-w-sm mx-auto leading-relaxed">
+                    An email has been automatically sent to{' '}
+                    <span className="font-semibold text-white underline underline-offset-2">{createdInvite.email}</span>.
+                    The team member can open their inbox to retrieve their temporary credentials and sign in.
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="p-3.5 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-start gap-3">
-                <Sparkles className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
+              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-left space-y-2">
+                <div className="flex items-center gap-2 text-rose-300 font-semibold text-xs">
+                  <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>Automatic Email Delivery Failed</span>
+                </div>
+                <p className="text-[11px] text-rose-200/80 leading-relaxed">
+                  {createdInvite.emailMessage || 'Failed to dispatch email via SMTP.'}
+                </p>
+                <p className="text-[11px] text-neutral-400 pt-1">
+                  💡 Make sure the SMTP environment variables are added to your Vercel Project Settings and you have triggered a <strong>Redeploy</strong>.
+                </p>
+              </div>
+            )}
+
+            {/* If email failed OR if user toggled backup details */}
+            {(!createdInvite.emailSent || showBackupCreds) && (
+              <div className="p-3.5 rounded-xl bg-[#161616] border border-[#262626] space-y-2.5 font-mono text-xs">
                 <div>
-                  <h4 className="text-xs font-bold text-white">Invitation Created</h4>
-                  <p className="text-[11px] text-neutral-300 mt-0.5">
-                    {createdInvite.emailMessage || 'Invitation created. To send emails automatically, configure SMTP credentials in server/.env.'}
-                  </p>
+                  <span className="text-[10px] uppercase font-sans text-neutral-500 block">Login URL</span>
+                  <span className="text-neutral-200 text-xs">
+                    {typeof window !== 'undefined' ? `${window.location.origin}/login` : '/login'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-sans text-neutral-500 block">Work Email</span>
+                  <span className="text-teal-400 text-xs font-semibold">{createdInvite.email}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-sans text-neutral-500 block">Temporary Password</span>
+                  <span className="text-emerald-400 text-xs font-bold tracking-wider">{createdInvite.tempoPass}</span>
                 </div>
               </div>
             )}
 
-            <div className="p-3.5 rounded-xl bg-[#161616] border border-[#262626] space-y-2.5 font-mono text-xs">
-              <div>
-                <span className="text-[10px] uppercase font-sans text-neutral-500 block">Login URL</span>
-                <span className="text-neutral-200 text-xs">
-                  {typeof window !== 'undefined' ? `${window.location.origin}/login` : '/login'}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase font-sans text-neutral-500 block">Work Email</span>
-                <span className="text-teal-400 text-xs font-semibold">{createdInvite.email}</span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase font-sans text-neutral-500 block">Temporary Password</span>
-                <span className="text-emerald-400 text-xs font-bold tracking-wider">{createdInvite.tempoPass}</span>
-              </div>
-            </div>
+            {/* Action buttons */}
+            <div className="space-y-2 pt-2">
+              {createdInvite.emailSent ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setCreatedInvite(null)}
+                    className="w-full py-2.5 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30 flex items-center justify-center gap-2 transition"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Done</span>
+                  </button>
 
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                type="button"
-                onClick={handleCopyCredentials}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30 flex items-center justify-center gap-2 transition"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-300" />
-                    <span>Copied to Clipboard!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>Copy Invitation Details</span>
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setCreatedInvite(null)}
-                className="py-2.5 px-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#222222] text-neutral-300 text-xs font-medium transition"
-              >
-                Done
-              </button>
+                  <div className="text-center pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowBackupCreds(!showBackupCreds)}
+                      className="text-[11px] text-neutral-500 hover:text-neutral-400 transition"
+                    >
+                      {showBackupCreds ? 'Hide backup credentials' : 'View temporary credentials (backup only)'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {createdInvite.userId && (
+                    <button
+                      type="button"
+                      disabled={resendingId === createdInvite.userId}
+                      onClick={() => handleResendInvite(createdInvite.userId!, createdInvite.email)}
+                      className="flex-1 py-2.5 px-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50"
+                    >
+                      {resendingId === createdInvite.userId ? (
+                        <>
+                          <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Retrying...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Retry Sending Email</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleCopyCredentials}
+                    className="py-2.5 px-3 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#222222] text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreatedInvite(null)}
+                    className="py-2.5 px-3 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#222222] text-neutral-300 text-xs font-medium transition"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
       </Modal>
+
+      {/* Floating Notification Toast */}
+      {toastMessage && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 p-4 rounded-2xl border shadow-2xl flex items-center gap-3 backdrop-blur-xl animate-fade-in ${
+            toastMessage.type === 'success'
+              ? 'bg-[#10241e]/95 border-emerald-500/40 text-emerald-200'
+              : 'bg-[#291417]/95 border-rose-500/40 text-rose-200'
+          }`}
+        >
+          {toastMessage.type === 'success' ? (
+            <Check className="w-5 h-5 text-emerald-400 shrink-0" />
+          ) : (
+            <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0" />
+          )}
+          <span className="text-xs font-medium">{toastMessage.text}</span>
+        </div>
+      )}
     </div>
   );
 }

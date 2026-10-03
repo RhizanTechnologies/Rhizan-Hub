@@ -261,3 +261,42 @@ export const inviteMember = async (req: AuthRequest, res: Response): Promise<voi
     res.status(500).json({ message: 'Failed to invite team member', error: error.message });
   }
 };
+
+export const resendInvite = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(404).json({ message: 'Team member not found' });
+      return;
+    }
+
+    if (!user.mustChangePassword) {
+      res.status(400).json({ message: 'This member has already logged in and activated their account.' });
+      return;
+    }
+
+    const tempoPassword = `Rhizan@${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(tempoPassword, salt);
+    await user.save();
+
+    const emailResult = await sendInvitationEmail({
+      to: user.email,
+      name: user.name,
+      temporaryPassword: tempoPassword,
+      invitedBy: req.user?.name || 'Rhizan Admin',
+    });
+
+    res.json({
+      message: emailResult.sent
+        ? `Invitation email successfully dispatched to ${user.email}`
+        : `Email delivery failed: ${emailResult.message}`,
+      emailSent: emailResult.sent,
+      emailMessage: emailResult.message,
+      temporaryPassword: tempoPassword,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to resend invitation', error: error.message });
+  }
+};

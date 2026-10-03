@@ -49,6 +49,7 @@ export const getTeam = async (req: AuthRequest, res: Response): Promise<void> =>
           role: user.role,
           title: user.title,
           status: user.status,
+          mustChangePassword: Boolean(user.mustChangePassword),
           weeklyCapacityHours: user.weeklyCapacityHours === 40 ? 48 : (user.weeklyCapacityHours || 48),
           activeTaskCount: activeTasks.length,
           tasks: activeTasks.map((t) => ({
