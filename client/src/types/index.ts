@@ -334,3 +334,75 @@ export interface DashboardSummary {
   recentActivities: Activity[];
   upcomingDeadlines: Task[];
 }
+
+export interface WeeklyReportData {
+  weekRange: {
+    start: string;
+    end: string;
+    label: string;
+  };
+  summary: {
+    totalTeamHours: number;
+    expectedCapacityTotal: number;
+    capacityUtilization: number;
+    billableHours: number;
+    nonBillableHours: number;
+    billablePercentage: number;
+    tasksCompletedCount: number;
+    activeProjectsCount: number;
+    newApproachesCount: number;
+    dealsWonCount: number;
+    overdueCount: number;
+  };
+  teamPerformance: Array<{
+    id: string;
+    name: string;
+    role: string;
+    avatar?: string;
+    hoursLogged: number;
+    targetHours: number;
+    utilizationPercent: number;
+    billableHours: number;
+    dailyHours: Array<{
+      day: string;
+      date: string;
+      hours: number;
+    }>;
+    topProjects: Array<{
+      name: string;
+      hours: number;
+    }>;
+  }>;
+  projectDeliverables: Array<{
+    id: string;
+    name: string;
+    clientName: string;
+    status: string;
+    progress: number;
+    weeklyHours: number;
+    totalTasks: number;
+    doneTasks: number;
+    completedThisWeek: Array<{
+      _id: string;
+      title: string;
+      priority: string;
+      assignedTo?: any;
+    }>;
+    inProgressTasks: Array<{
+      _id: string;
+      title: string;
+      priority: string;
+      assignedTo?: any;
+    }>;
+    deadline?: string;
+  }>;
+  completedTasksThisWeek: Task[];
+  plannedNextWeek: Task[];
+  overdueTasks: Task[];
+  businessDevelopment: {
+    newApproachesCount: number;
+    dealsWonCount: number;
+    totalActiveApproaches: number;
+    recentApproaches: Approach[];
+  };
+}

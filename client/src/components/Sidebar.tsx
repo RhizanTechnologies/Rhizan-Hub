@@ -18,6 +18,7 @@ import {
   LogOut,
   Compass,
   X,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
@@ -30,6 +31,7 @@ const navItems = [
   { name: 'Outreach & Leads', href: '/approaches', icon: Compass },
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Time Tracking', href: '/time', icon: Clock },
+  { name: 'Weekly Report', href: '/reports/weekly', icon: FileText },
 ];
 
 export const Sidebar: React.FC = () => {

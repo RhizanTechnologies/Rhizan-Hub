@@ -16,6 +16,7 @@ import teamRoutes from './routes/teamRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import approachRoutes from './routes/approachRoutes';
 import nicheRoutes from './routes/nicheRoutes';
+import reportRoutes from './routes/reportRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -55,6 +56,7 @@ app.use('/api/team', teamRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/approaches', approachRoutes);
 app.use('/api/niches', nicheRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
