@@ -22,10 +22,20 @@ import standupRoutes from './routes/standupRoutes';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+// Connect to MongoDB on startup
 connectDB();
 
-// Middleware
+// Middleware: ensure database connection is ready for serverless requests
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error('Error ensuring DB connection:', err);
+  }
+  next();
+});
+
+// Middleware: CORS
 const allowedOrigins = [
   process.env.CLIENT_URL,
   'http://localhost:3001',
@@ -35,8 +45,8 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl) or in allowed list
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (mobile apps, server-to-server) or in whitelist, or vercel preview/prod domains
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
         callback(null, true);
       } else {
         callback(null, true); // Permissive in dev
@@ -45,6 +55,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
 
 // Routes
@@ -61,15 +72,31 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/standups', standupRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     app: 'Rhizan Hub API',
     timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Rhizan Hub Server running on port ${PORT}`);
-  console.log(`📡 API Health: http://localhost:${PORT}/api/health`);
+// Root fallback
+app.get('/', (_req, res) => {
+  res.json({
+    name: 'Rhizan Hub API',
+    status: 'online',
+    version: '1.0.0',
+    documentation: '/api/health',
+  });
 });
+
+// Start listener only in non-serverless environments (local dev or VPS container)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Rhizan Hub Server running on port ${PORT}`);
+    console.log(`📡 API Health: http://localhost:${PORT}/api/health`);
+  });
+}
+
+export default app;
