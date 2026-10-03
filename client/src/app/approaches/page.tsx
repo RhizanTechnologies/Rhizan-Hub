@@ -679,7 +679,6 @@ export default function ApproachesPage() {
                 <tr className="border-b border-[#1f1f1f] bg-[#141414]/80 text-[11px] text-neutral-400 font-semibold uppercase tracking-wider">
                   <th className="py-3 px-4">Business Name</th>
                   <th className="py-3 px-4">Contact Person & Lead Owner</th>
-                  <th className="py-3 px-4">Niche / Category</th>
                   <th className="py-3 px-4">Location</th>
                   <th className="py-3 px-4">Contact Info</th>
                   <th className="py-3 px-4">Outreach Status</th>
@@ -697,21 +696,27 @@ export default function ApproachesPage() {
                       onClick={() => router.push(`/approaches/${appr._id}`)}
                       className="hover:bg-[#181818] transition group cursor-pointer"
                     >
-                      {/* Business Name */}
+                      {/* Business Name & Niche */}
                       <td className="py-3.5 px-4 font-semibold text-white">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-xl bg-[#202020] group-hover:bg-teal-500/15 group-hover:border-teal-500/30 border border-[#2a2a2a] text-teal-400 font-bold flex items-center justify-center shrink-0 transition">
                             {appr.businessName.charAt(0).toUpperCase()}
                           </div>
-                          <div className="truncate max-w-[190px]">
+                          <div className="min-w-0 max-w-[210px]">
                             <span className="block truncate font-heading font-medium text-white group-hover:text-teal-400 transition">
                               {appr.businessName}
                             </span>
-                            {appr.contactHistory && appr.contactHistory.length > 0 && (
-                              <span className="text-[10px] text-neutral-500 font-normal">
-                                {appr.contactHistory.length} interaction{appr.contactHistory.length > 1 ? 's' : ''}
+                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-medium shrink-0">
+                                <Tag className="w-2.5 h-2.5" />
+                                {appr.niche}
                               </span>
-                            )}
+                              {appr.contactHistory && appr.contactHistory.length > 0 && (
+                                <span className="text-[10px] text-neutral-500 font-normal text-[10px]">
+                                  • {appr.contactHistory.length} log{appr.contactHistory.length > 1 ? 's' : ''}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -734,14 +739,6 @@ export default function ApproachesPage() {
                             <span className="text-neutral-500 italic text-[11px]">Open (Unassigned)</span>
                           )}
                         </div>
-                      </td>
-
-                      {/* Niche / Category */}
-                      <td className="py-3.5 px-4">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-medium">
-                          <Tag className="w-2.5 h-2.5" />
-                          {appr.niche}
-                        </span>
                       </td>
 
                       {/* Location */}
@@ -840,7 +837,7 @@ export default function ApproachesPage() {
 
                 {filteredApproaches.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-neutral-500">
+                    <td colSpan={6} className="py-12 text-center text-neutral-500">
                       <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
                       <p className="text-xs">No outreach targets found matching your filter.</p>
                       <button
