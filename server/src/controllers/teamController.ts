@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import { User } from '../models/User';
 import { Task } from '../models/Task';
 import { Project } from '../models/Project';
@@ -25,7 +26,7 @@ export const getTeam = async (req: AuthRequest, res: Response): Promise<void> =>
 
         // Find projects where member is assigned or is lead
         const memberProjects = await Project.find({
-          $or: [{ members: user._id }, { projectLead: user._id }],
+          $or: [{ members: user._id }, { lead: user._id }],
           status: { $in: ['IN_PROGRESS', 'PLANNING'] },
         }).select('_id name status clientName');
 
@@ -77,6 +78,12 @@ export const getTeam = async (req: AuthRequest, res: Response): Promise<void> =>
 export const getTeamMemberDetails = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+
+    if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id)) {
+      res.status(404).json({ message: 'Team member not found' });
+      return;
+    }
+
     const user = await User.findById(id).select('-password');
     if (!user) {
       res.status(404).json({ message: 'Team member not found' });
@@ -91,10 +98,10 @@ export const getTeamMemberDetails = async (req: AuthRequest, res: Response): Pro
 
     // 1. Projects
     const projects = await Project.find({
-      $or: [{ members: user._id }, { projectLead: user._id }],
+      $or: [{ members: user._id }, { lead: user._id }],
     })
-      .select('name description status priority deadline clientName budget projectLead techStack')
-      .populate('projectLead', 'name email');
+      .select('name description status priority deadline clientName budget lead techStack')
+      .populate('lead', 'name email');
 
     // 2. Tasks
     const tasks = await Task.find({ assignedTo: user._id })

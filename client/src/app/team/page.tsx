@@ -90,7 +90,7 @@ export default function TeamPage() {
   // Initial fallback team data (48h weekly capacity: 6 days x 8h)
   const initialTeam: TeamMember[] = [
     {
-      id: '1',
+      id: '6abe3781770efbb9b5a4c96c',
       name: 'Abdulaziz',
       email: 'abdulaziz@rhizan.com',
       role: 'ADMIN',
@@ -98,10 +98,10 @@ export default function TeamPage() {
       status: 'ACTIVE',
       weeklyCapacityHours: 48,
       activeTaskCount: 4,
-      thisWeekHours: 27,
+      thisWeekHours: 27.1,
       activeProjects: [
-        { id: '1', name: 'Bakery ERP' },
-        { id: '2', name: 'RHIZAN Website' },
+        { id: '6abe3781770efbb9b5a4c972', name: 'Bakery ERP' },
+        { id: '6abe3781770efbb9b5a4c974', name: 'RHIZAN Website' },
       ],
       tasks: [
         { id: '1', title: 'Fix ERP login authentication', status: 'TODO', priority: 'HIGH', projectName: 'Bakery ERP' },
@@ -111,7 +111,7 @@ export default function TeamPage() {
       ],
     },
     {
-      id: '2',
+      id: '6abe3781770efbb9b5a4c96e',
       name: 'Nebiyu',
       email: 'nebiyu@rhizan.com',
       role: 'MEMBER',
@@ -121,8 +121,8 @@ export default function TeamPage() {
       activeTaskCount: 6,
       thisWeekHours: 24,
       activeProjects: [
-        { id: '3', name: 'Client Acquisition Q4' },
-        { id: '1', name: 'Bakery ERP' },
+        { id: '6abe3781770efbb9b5a4c976', name: 'Client Acquisition Q4' },
+        { id: '6abe3781770efbb9b5a4c972', name: 'Bakery ERP' },
       ],
       tasks: [
         { id: '5', title: 'Follow up with ABC Bakery on invoice', status: 'TODO', priority: 'HIGH', projectName: 'Bakery ERP' },
@@ -131,7 +131,7 @@ export default function TeamPage() {
       ],
     },
     {
-      id: '3',
+      id: '6abe3781770efbb9b5a4c970',
       name: 'Sadam',
       email: 'sadam@rhizan.com',
       role: 'MEMBER',
@@ -141,8 +141,8 @@ export default function TeamPage() {
       activeTaskCount: 3,
       thisWeekHours: 21,
       activeProjects: [
-        { id: '2', name: 'RHIZAN Website' },
-        { id: '1', name: 'Bakery ERP' },
+        { id: '6abe3781770efbb9b5a4c974', name: 'RHIZAN Website' },
+        { id: '6abe3781770efbb9b5a4c972', name: 'Bakery ERP' },
       ],
       tasks: [
         { id: '8', title: 'Update portfolio case studies', status: 'REVIEW', priority: 'MEDIUM', projectName: 'RHIZAN Website' },
