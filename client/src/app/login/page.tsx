@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -75,17 +75,6 @@ export default function LoginPage() {
               </span>
             </div>
             <p className="text-xs text-neutral-400">Internal Operations & Team Management</p>
-          </div>
-
-          {/* Invitation Notice Banner */}
-          <div className="mb-6 p-3 rounded-xl bg-teal-500/5 border border-teal-500/20 text-xs text-neutral-300 flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
-            <div>
-              <span className="text-teal-300 font-semibold">New Team Member?</span>
-              <p className="text-[11px] text-neutral-400 mt-0.5 leading-relaxed">
-                Log in with the temporary password received in your invitation. You will be prompted to choose a permanent password on your first sign in.
-              </p>
-            </div>
           </div>
 
           {/* Error Message */}
