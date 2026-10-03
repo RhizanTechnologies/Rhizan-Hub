@@ -27,7 +27,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       password: hashedPassword,
       role: role || 'MEMBER',
       title: title || 'Team Member',
-      weeklyCapacityHours: weeklyCapacityHours || 40,
+      weeklyCapacityHours: weeklyCapacityHours || 48,
       mustChangePassword: false,
     });
 
@@ -227,7 +227,7 @@ export const inviteMember = async (req: AuthRequest, res: Response): Promise<voi
       password: hashedPassword,
       role: role === 'ADMIN' ? 'ADMIN' : 'MEMBER',
       title: title?.trim() || 'Team Member',
-      weeklyCapacityHours: Number(weeklyCapacityHours) || 40,
+      weeklyCapacityHours: Number(weeklyCapacityHours) || 48,
       status: 'ACTIVE',
       mustChangePassword: true,
     });

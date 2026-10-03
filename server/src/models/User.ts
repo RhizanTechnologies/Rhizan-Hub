@@ -21,7 +21,7 @@ const UserSchema = new Schema<IUser>(
     password: { type: String, required: true },
     role: { type: String, enum: ['ADMIN', 'MEMBER'], default: 'MEMBER' },
     title: { type: String, default: 'Team Member' },
-    weeklyCapacityHours: { type: Number, default: 40 },
+    weeklyCapacityHours: { type: Number, default: 48 },
     status: { type: String, enum: ['ACTIVE', 'AWAY', 'OFFLINE'], default: 'ACTIVE' },
     avatar: { type: String, default: '' },
     mustChangePassword: { type: Boolean, default: false },

@@ -567,13 +567,15 @@ export default function TimeTrackingPage() {
   const totalMinutesToday = todayEntries.reduce((sum, e) => sum + (e.hours * 60 + e.minutes), 0);
   const hoursToday = Math.floor(totalMinutesToday / 60);
   const minutesToday = totalMinutesToday % 60;
+  const targetDailyHours = 8;
+  const targetDailyMinutes = targetDailyHours * 60; // 480 mins
+  const dailyPercent = Math.min(100, Math.round((totalMinutesToday / targetDailyMinutes) * 100));
 
-  // Weekly hours logged by current user
+  // Weekly hours logged by current user (default 48h = 6 days x 8h)
   const now = new Date();
   const day = now.getDay();
   const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
-  const startOfWeek = new Date(now.setDate(diffToMonday));
-  startOfWeek.setHours(0, 0, 0, 0);
+  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), diffToMonday, 0, 0, 0, 0);
 
   const thisWeekEntries = entries.filter((e) => {
     const d = new Date(e.date);
@@ -581,7 +583,7 @@ export default function TimeTrackingPage() {
   });
   const totalMinutesThisWeek = thisWeekEntries.reduce((sum, e) => sum + (e.hours * 60 + e.minutes), 0);
   const hoursThisWeek = Math.round((totalMinutesThisWeek / 60) * 10) / 10;
-  const targetWeeklyHours = (user as any)?.weeklyCapacityHours || 40;
+  const targetWeeklyHours = (user as any)?.weeklyCapacityHours === 40 ? 48 : ((user as any)?.weeklyCapacityHours || 48);
   const capacityPercent = Math.min(100, Math.round((hoursThisWeek / targetWeeklyHours) * 100));
 
   return (
@@ -637,15 +639,41 @@ export default function TimeTrackingPage() {
           </div>
 
           {/* Quick Metrics Pills */}
-          <div className="flex items-center gap-3 sm:gap-4 text-xs font-mono">
-            <div className="flex items-center gap-1.5">
-              <span className="text-neutral-400">Today:</span>
-              <span className="font-bold text-amber-300">{hoursToday}h {minutesToday}m</span>
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs font-mono">
+            {/* Daily tracked metric with percentage and visual progress bar */}
+            <div className="flex items-center gap-2 bg-[#141414] px-2.5 sm:px-3 py-1.5 rounded-xl border border-[#242424] shadow-sm">
+              <div className="flex items-center gap-1.5">
+                <span className="text-neutral-400">Today:</span>
+                <span className="font-bold text-amber-300">{hoursToday}h {minutesToday}m</span>
+                <span className="text-neutral-500 text-[11px]">/ 8h</span>
+                <span className="text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.2 rounded text-[10px]">
+                  {dailyPercent}%
+                </span>
+              </div>
+              <div className="w-12 sm:w-16 bg-[#202020] h-1.5 rounded-full overflow-hidden hidden xs:block">
+                <div
+                  className="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${dailyPercent}%` }}
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 border-l border-[#262626] pl-3 sm:pl-4">
-              <span className="text-neutral-400">Week:</span>
-              <span className="font-bold text-teal-400">{hoursThisWeek}h</span>
-              <span className="text-neutral-500 text-[11px] hidden xs:inline">/ {targetWeeklyHours}h ({capacityPercent}%)</span>
+
+            {/* Weekly tracked metric with capacity percentage and progress bar */}
+            <div className="flex items-center gap-2 bg-[#141414] px-2.5 sm:px-3 py-1.5 rounded-xl border border-[#242424] shadow-sm">
+              <div className="flex items-center gap-1.5">
+                <span className="text-neutral-400">Week:</span>
+                <span className="font-bold text-teal-400">{hoursThisWeek}h</span>
+                <span className="text-neutral-500 text-[11px]">/ {targetWeeklyHours}h</span>
+                <span className="text-teal-300 font-bold bg-teal-500/10 border border-teal-500/20 px-1.5 py-0.2 rounded text-[10px]">
+                  {capacityPercent}%
+                </span>
+              </div>
+              <div className="w-12 sm:w-16 bg-[#202020] h-1.5 rounded-full overflow-hidden hidden xs:block">
+                <div
+                  className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${capacityPercent}%` }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -964,6 +992,10 @@ export default function TimeTrackingPage() {
                           <span className="font-mono text-sm font-bold text-teal-400">
                             {formatDurationText(dayHours, dayMins)}
                           </span>
+                          <span className="text-[10px] text-neutral-500 font-mono hidden sm:inline">/ 8h</span>
+                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.2 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                            {Math.min(100, Math.round((dayGroup.totalMinutes / 480) * 100))}%
+                          </span>
                         </div>
                       </div>
 
@@ -1121,7 +1153,7 @@ export default function TimeTrackingPage() {
                   )}
 
                   <div className="text-xs text-neutral-400 font-mono hidden md:block border-l border-[#262626] pl-3">
-                    Target: <strong className="text-teal-400">40h / member</strong>
+                    Target: <strong className="text-teal-400">48h / member</strong> <span className="text-neutral-500 text-[11px]">(6 days × 8h)</span>
                   </div>
                 </div>
               </div>
@@ -1129,7 +1161,7 @@ export default function TimeTrackingPage() {
               {/* Team Members Timesheet Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                 {weeklySummaries.map((summary) => {
-                  const target = summary.user.capacity || 40;
+                  const target = summary.user.capacity === 40 ? 48 : (summary.user.capacity || 48);
                   const pct = Math.min(100, Math.round((summary.totalHours / target) * 100));
 
                   return (
@@ -1256,7 +1288,11 @@ export default function TimeTrackingPage() {
                   <div className="border-l border-[#262626] pl-3">
                     <span className="text-[10px] uppercase font-bold text-neutral-400 block">Capacity</span>
                     <span className="text-xs font-mono text-teal-300">
-                      {Math.min(100, Math.round((selectedMemberForDetails.totalHours / (selectedMemberForDetails.user.capacity || 40)) * 100))}% of {selectedMemberForDetails.user.capacity || 40}h
+                      {(() => {
+                        const target = selectedMemberForDetails.user.capacity === 40 ? 48 : (selectedMemberForDetails.user.capacity || 48);
+                        const pct = Math.min(100, Math.round((selectedMemberForDetails.totalHours / target) * 100));
+                        return `${pct}% of ${target}h`;
+                      })()}
                     </span>
                   </div>
                 </div>

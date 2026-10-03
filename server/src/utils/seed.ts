@@ -38,7 +38,7 @@ const seedDatabase = async () => {
       password: passwordHash,
       role: 'ADMIN',
       title: 'Development',
-      weeklyCapacityHours: 40,
+      weeklyCapacityHours: 48,
       status: 'ACTIVE',
     });
 
@@ -48,7 +48,7 @@ const seedDatabase = async () => {
       password: passwordHash,
       role: 'MEMBER',
       title: 'Business / Client',
-      weeklyCapacityHours: 40,
+      weeklyCapacityHours: 48,
       status: 'ACTIVE',
     });
 
@@ -58,7 +58,7 @@ const seedDatabase = async () => {
       password: passwordHash,
       role: 'MEMBER',
       title: 'Operations / Product',
-      weeklyCapacityHours: 40,
+      weeklyCapacityHours: 48,
       status: 'ACTIVE',
     });
 

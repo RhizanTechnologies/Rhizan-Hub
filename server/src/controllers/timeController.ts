@@ -182,7 +182,7 @@ export const getWeeklySummary = async (req: AuthRequest, res: Response): Promise
           name: user.name,
           email: user.email,
           title: user.title,
-          capacity: user.weeklyCapacityHours,
+          capacity: user.weeklyCapacityHours === 40 ? 48 : (user.weeklyCapacityHours || 48),
         },
         totalHours,
         projectBreakdown,
