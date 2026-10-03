@@ -44,3 +44,11 @@ select, option {
   background-color: #181818;
   color: #f5f5f5;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

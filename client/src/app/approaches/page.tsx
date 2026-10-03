@@ -32,6 +32,10 @@ import {
   X,
   User as UserIcon,
   ChevronDown,
+  XCircle,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -87,6 +91,17 @@ export default function ApproachesPage() {
   const [selectedNiche, setSelectedNiche] = useState('All Niches');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedOwner, setSelectedOwner] = useState<string>('ALL');
+  const [nicheDisplayMode, setNicheDisplayMode] = useState<'tabs' | 'dropdown'>('tabs');
+  const tabsRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollTabs = (direction: 'left' | 'right') => {
+    if (tabsRef.current) {
+      tabsRef.current.scrollBy({
+        left: direction === 'left' ? -220 : 220,
+        behavior: 'smooth',
+      });
+    }
+  };
 
   // Modals
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -164,6 +179,7 @@ export default function ApproachesPage() {
       ['CONTACTED', 'PITCHED', 'IN_DISCUSSION'].includes(a.status)
     ).length;
     const dealsWon = approaches.filter((a) => a.status === 'DEAL_WON').length;
+    const notInterested = approaches.filter((a) => a.status === 'NOT_INTERESTED').length;
     const needsFollowUp = approaches.filter((a) => {
       if (a.status === 'DEAL_WON' || a.status === 'NOT_INTERESTED') return false;
       if (!a.lastContactDate) return true;
@@ -173,7 +189,7 @@ export default function ApproachesPage() {
       return false;
     }).length;
 
-    return { total, inProgress, dealsWon, needsFollowUp };
+    return { total, inProgress, dealsWon, notInterested, needsFollowUp };
   }, [approaches]);
 
   const openCreateModal = () => {
@@ -495,7 +511,7 @@ export default function ApproachesPage() {
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* TOP STAT METRIC CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
@@ -505,7 +521,7 @@ export default function ApproachesPage() {
                 {metrics.total}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center border border-teal-500/20">
+            <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center border border-teal-500/20 shrink-0">
               <Target className="w-5 h-5" />
             </div>
           </div>
@@ -519,7 +535,7 @@ export default function ApproachesPage() {
                 {metrics.inProgress}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 shrink-0">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
@@ -533,7 +549,7 @@ export default function ApproachesPage() {
                 {metrics.dealsWon}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
           </div>
@@ -541,13 +557,27 @@ export default function ApproachesPage() {
           <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
-                Needs Follow-Up / Contact
+                Not Interested
               </span>
               <span className="text-2xl font-bold font-heading text-rose-400 mt-1 block">
+                {metrics.notInterested}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20 shrink-0">
+              <XCircle className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between col-span-2 sm:col-span-1">
+            <div>
+              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+                Needs Follow-Up
+              </span>
+              <span className="text-2xl font-bold font-heading text-orange-400 mt-1 block">
                 {metrics.needsFollowUp}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center border border-orange-500/20 shrink-0">
               <AlertCircle className="w-5 h-5" />
             </div>
           </div>
@@ -555,51 +585,122 @@ export default function ApproachesPage() {
 
         {/* CONTROLS: NICHE FILTER, MANAGE NICHES & SEARCH BAR */}
         <div className="space-y-3">
-          {/* Niche Filter Pills Bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar flex-1">
-              <button
-                onClick={() => setSelectedNiche('All Niches')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
-                  selectedNiche === 'All Niches'
-                    ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                    : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#222222]'
-                }`}
-              >
-                All Niches ({approaches.length})
-              </button>
-              {niches.map((n) => {
-                const count = approaches.filter((a) => a.niche === n.name).length;
-                return (
+          {/* Niche Filter Bar (Scrollable Tabs or Dropdown) */}
+          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-sm">
+            {nicheDisplayMode === 'tabs' ? (
+              <div className="flex items-center gap-1.5 min-w-0 flex-1 relative">
+                {/* Scroll Left Button */}
+                <button
+                  type="button"
+                  onClick={() => scrollTabs('left')}
+                  className="w-7 h-7 rounded-lg bg-[#161616] hover:bg-[#222222] text-neutral-400 hover:text-white flex items-center justify-center shrink-0 border border-[#262626] transition shadow-sm"
+                  title="Scroll left"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                {/* Horizontal Scrollable Tabs */}
+                <div
+                  ref={tabsRef}
+                  className="flex items-center gap-1.5 overflow-x-auto scroll-smooth flex-nowrap no-scrollbar py-0.5 px-0.5 flex-1"
+                >
                   <button
-                    key={n._id}
-                    onClick={() => setSelectedNiche(n.name)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 ${
-                      selectedNiche === n.name
+                    onClick={() => setSelectedNiche('All Niches')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 whitespace-nowrap transition ${
+                      selectedNiche === 'All Niches'
                         ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                        : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#222222]'
+                        : 'bg-[#161616] text-neutral-400 hover:text-white border border-[#242424]'
                     }`}
                   >
-                    <span>{n.name}</span>
-                    {count > 0 && (
-                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/40 text-neutral-300">
-                        {count}
-                      </span>
-                    )}
+                    All Niches ({approaches.length})
                   </button>
-                );
-              })}
-            </div>
+                  {niches.map((n) => {
+                    const count = approaches.filter((a) => a.niche === n.name).length;
+                    return (
+                      <button
+                        key={n._id}
+                        onClick={() => setSelectedNiche(n.name)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-medium shrink-0 whitespace-nowrap transition flex items-center gap-1.5 ${
+                          selectedNiche === n.name
+                            ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                            : 'bg-[#161616] text-neutral-400 hover:text-white border border-[#242424]'
+                        }`}
+                      >
+                        <span>{n.name}</span>
+                        {count > 0 && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
+                              selectedNiche === n.name
+                                ? 'bg-black/30 text-white'
+                                : 'bg-[#222222] text-neutral-400'
+                            }`}
+                          >
+                            {count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
 
-            {/* Manage Niches Trigger Button */}
-            <button
-              onClick={openManageNichesModal}
-              className="px-3 py-1.5 rounded-xl bg-[#141414] hover:bg-[#1f1f1f] text-neutral-300 hover:text-white border border-[#222222] text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
-              title="Add, edit or delete industry niches"
-            >
-              <Settings2 className="w-3.5 h-3.5 text-teal-400" />
-              <span>Manage Niches</span>
-            </button>
+                {/* Scroll Right Button */}
+                <button
+                  type="button"
+                  onClick={() => scrollTabs('right')}
+                  className="w-7 h-7 rounded-lg bg-[#161616] hover:bg-[#222222] text-neutral-400 hover:text-white flex items-center justify-center shrink-0 border border-[#262626] transition shadow-sm"
+                  title="Scroll right"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              /* Dropdown Mode */
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <Tag className="w-4 h-4 text-teal-400 shrink-0 ml-1" />
+                <span className="text-xs text-neutral-400 font-medium shrink-0">Filter by Niche:</span>
+                <select
+                  value={selectedNiche}
+                  onChange={(e) => setSelectedNiche(e.target.value)}
+                  className="bg-[#161616] border border-[#262626] rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-teal-500 cursor-pointer w-full max-w-xs"
+                >
+                  <option value="All Niches">All Niches ({approaches.length})</option>
+                  {niches.map((n) => {
+                    const count = approaches.filter((a) => a.niche === n.name).length;
+                    return (
+                      <option key={n._id} value={n.name}>
+                        {n.name} {count > 0 ? `(${count})` : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
+
+            {/* Actions: View Mode Switch & Manage Niches */}
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+              {/* Toggle Mode Button */}
+              <button
+                type="button"
+                onClick={() => setNicheDisplayMode((prev) => (prev === 'tabs' ? 'dropdown' : 'tabs'))}
+                className="px-2.5 py-1.5 rounded-xl bg-[#161616] hover:bg-[#222222] text-neutral-400 hover:text-white border border-[#262626] text-xs font-medium flex items-center gap-1.5 transition"
+                title={nicheDisplayMode === 'tabs' ? 'Switch to dropdown view' : 'Switch to scrollable tabs view'}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-teal-400" />
+                <span className="hidden sm:inline">
+                  {nicheDisplayMode === 'tabs' ? 'Dropdown View' : 'Tabs View'}
+                </span>
+              </button>
+
+              {/* Manage Niches Trigger Button */}
+              <button
+                onClick={openManageNichesModal}
+                className="px-3 py-1.5 rounded-xl bg-[#161616] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#262626] text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
+                title="Add, edit or delete industry niches"
+              >
+                <Settings2 className="w-3.5 h-3.5 text-teal-400" />
+                <span>Manage Niches</span>
+              </button>
+            </div>
           </div>
 
           {/* Search, Status & Owner Filters */}
