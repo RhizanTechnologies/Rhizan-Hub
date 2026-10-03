@@ -23,28 +23,17 @@ import {
   Building2,
   Link as LinkIcon,
   ChevronRight,
-  TrendingUp,
   Receipt,
   Users,
   Briefcase,
 } from 'lucide-react';
 import Link from 'next/link';
 
-const PIPELINE_STAGES: { id: ClientStatus; label: string; accent: string }[] = [
-  { id: 'LEAD', label: 'Leads', accent: 'border-[#262626]' },
-  { id: 'CONTACTED', label: 'Contacted', accent: 'border-blue-500/40' },
-  { id: 'MEETING', label: 'Meeting', accent: 'border-teal-500/40' },
-  { id: 'PROPOSAL', label: 'Proposal', accent: 'border-amber-500/40' },
-  { id: 'ACTIVE', label: 'Active Client', accent: 'border-emerald-500/40' },
-  { id: 'COMPLETED', label: 'Completed', accent: 'border-purple-500/40' },
-];
-
 export default function ClientsPage() {
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'ACCOUNTS' | 'PIPELINE'>('ACCOUNTS');
 
   // Client Selection for Detail Modal
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -332,196 +321,129 @@ export default function ClientsPage() {
       />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
-        {/* Navigation Switcher */}
+        {/* Navigation & Status Filter Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setActiveTab('ACCOUNTS')}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
-                activeTab === 'ACCOUNTS'
-                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#262626]'
-              }`}
-            >
-              <Briefcase className="w-3.5 h-3.5" />
-              <span>Active Deal Clients ({activeClients.length})</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('PIPELINE')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
-                activeTab === 'PIPELINE'
-                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#262626]'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>CRM Sales Pipeline ({clients.length})</span>
-            </button>
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
+              <Briefcase className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="font-heading font-bold text-sm text-white">Client Accounts ({clients.length})</h2>
+              <p className="text-[11px] text-neutral-400">Contracted partners, deal values, and scheduled meetings</p>
+            </div>
           </div>
 
-          <div className="text-xs text-neutral-400">
-            Total Contracted: <span className="font-bold text-white">${clients.reduce((s, c) => s + (c.dealValue || 0), 0).toLocaleString()}</span>
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-neutral-400">
+              Total Contracted: <span className="font-bold text-white font-mono">${clients.reduce((s, c) => s + (c.dealValue || 0), 0).toLocaleString()}</span>
+            </div>
           </div>
         </div>
 
-        {/* TAB 1: ACTIVE DEAL CLIENTS (Card Grid) */}
-        {activeTab === 'ACCOUNTS' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {activeClients.map((client) => {
-              const totalVal = client.dealValue || 0;
-              const paidVal = client.paidAmount || 0;
-              const pendingVal = Math.max(0, totalVal - paidVal);
-              const paidPercent = totalVal > 0 ? Math.min(100, Math.round((paidVal / totalVal) * 100)) : 0;
-              const linkedProjects = client.projects || [];
-              const meetingsCount = client.meetings?.length || 0;
+        {/* Client Accounts Card Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {clients.map((client) => {
+            const totalVal = client.dealValue || 0;
+            const paidVal = client.paidAmount || 0;
+            const pendingVal = Math.max(0, totalVal - paidVal);
+            const paidPercent = totalVal > 0 ? Math.min(100, Math.round((paidVal / totalVal) * 100)) : 0;
+            const linkedProjects = client.projects || [];
+            const meetingsCount = client.meetings?.length || 0;
 
-              return (
-                <div
-                  key={client._id}
-                  onClick={() => router.push(`/clients/${client._id}`)}
-                  className="bg-[#121212] border border-[#222222] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-xl hover:shadow-teal-950/20 group flex flex-col justify-between"
-                >
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-heading font-bold text-base text-white group-hover:text-teal-300 transition flex items-center gap-1.5">
-                          {client.name}
-                          <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-400" />
-                        </h3>
-                        <p className="text-xs text-neutral-400 mt-0.5">{client.contactPerson || 'Direct Client'}</p>
+            return (
+              <div
+                key={client._id}
+                onClick={() => router.push(`/clients/${client._id}`)}
+                className="bg-[#121212] border border-[#222222] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-xl hover:shadow-teal-950/20 group flex flex-col justify-between"
+              >
+                <div>
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-heading font-bold text-base text-white group-hover:text-teal-300 transition flex items-center gap-1.5">
+                        {client.name}
+                        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-400" />
+                      </h3>
+                      <p className="text-xs text-neutral-400 mt-0.5">{client.contactPerson || 'Direct Client'}</p>
+                    </div>
+
+                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border ${
+                      client.status === 'ACTIVE'
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                        : 'bg-teal-500/10 text-teal-400 border-teal-500/30'
+                    }`}>
+                      {client.status}
+                    </span>
+                  </div>
+
+                  {/* Contact Pills */}
+                  <div className="flex flex-wrap gap-2 text-[11px] text-neutral-400 mb-4">
+                    {client.email && (
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#181818] border border-[#262626]">
+                        <Mail className="w-3 h-3 text-neutral-500" /> {client.email}
+                      </span>
+                    )}
+                    {client.phone && (
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#181818] border border-[#262626]">
+                        <Phone className="w-3 h-3 text-neutral-500" /> {client.phone}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Linked Projects Section */}
+                  <div className="mb-4 p-3 rounded-xl bg-[#171717] border border-[#242424]">
+                    <div className="text-[11px] font-semibold text-neutral-300 flex items-center justify-between mb-2">
+                      <span className="flex items-center gap-1.5">
+                        <FolderKanban className="w-3.5 h-3.5 text-teal-400" /> Linked Projects
+                      </span>
+                      <span className="text-[10px] text-teal-400 font-bold">{linkedProjects.length}</span>
+                    </div>
+
+                    {linkedProjects.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {linkedProjects.slice(0, 3).map((p) => (
+                          <div key={p._id} className="flex items-center justify-between text-[11px]">
+                            <span className="text-neutral-200 font-medium truncate pr-2">{p.name}</span>
+                            <span className="text-[10px] text-teal-400 font-mono">{p.progress || 0}%</span>
+                          </div>
+                        ))}
                       </div>
+                    ) : (
+                      <p className="text-[11px] text-neutral-500 italic">No linked projects yet</p>
+                    )}
+                  </div>
 
-                      <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border ${
-                        client.status === 'ACTIVE'
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                          : 'bg-teal-500/10 text-teal-400 border-teal-500/30'
-                      }`}>
-                        {client.status}
+                  {/* Financial Summary */}
+                  <div className="space-y-1.5 mb-4">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-neutral-400">Payment Status ({paidPercent}%)</span>
+                      <span className="font-semibold text-white">
+                        ${paidVal.toLocaleString()} / <span className="text-neutral-400">${totalVal.toLocaleString()}</span>
                       </span>
                     </div>
-
-                    {/* Contact Pills */}
-                    <div className="flex flex-wrap gap-2 text-[11px] text-neutral-400 mb-4">
-                      {client.email && (
-                        <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#181818] border border-[#262626]">
-                          <Mail className="w-3 h-3 text-neutral-500" /> {client.email}
-                        </span>
-                      )}
-                      {client.phone && (
-                        <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#181818] border border-[#262626]">
-                          <Phone className="w-3 h-3 text-neutral-500" /> {client.phone}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Linked Projects Section */}
-                    <div className="mb-4 p-3 rounded-xl bg-[#171717] border border-[#242424]">
-                      <div className="text-[11px] font-semibold text-neutral-300 flex items-center justify-between mb-2">
-                        <span className="flex items-center gap-1.5">
-                          <FolderKanban className="w-3.5 h-3.5 text-teal-400" /> Linked Projects
-                        </span>
-                        <span className="text-[10px] text-teal-400 font-bold">{linkedProjects.length}</span>
-                      </div>
-
-                      {linkedProjects.length > 0 ? (
-                        <div className="space-y-1.5">
-                          {linkedProjects.slice(0, 3).map((p) => (
-                            <div key={p._id} className="flex items-center justify-between text-[11px]">
-                              <span className="text-neutral-200 font-medium truncate pr-2">{p.name}</span>
-                              <span className="text-[10px] text-teal-400 font-mono">{p.progress || 0}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-[11px] text-neutral-500 italic">No linked projects yet</p>
-                      )}
-                    </div>
-
-                    {/* Financial Summary */}
-                    <div className="space-y-1.5 mb-4">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-neutral-400">Payment Status ({paidPercent}%)</span>
-                        <span className="font-semibold text-white">
-                          ${paidVal.toLocaleString()} / <span className="text-neutral-400">${totalVal.toLocaleString()}</span>
-                        </span>
-                      </div>
-                      <div className="w-full bg-[#242424] h-2 rounded-full overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
-                          style={{ width: `${paidPercent}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card Footer */}
-                  <div className="pt-3 border-t border-[#1f1f1f] flex items-center justify-between text-[11px] text-neutral-400">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-teal-400" />
-                      {meetingsCount} Scheduled Meetings
-                    </span>
-                    <span className="text-teal-400 font-medium group-hover:underline">
-                      View Profile & Details →
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* TAB 2: CRM SALES PIPELINE (Kanban View) */}
-        {activeTab === 'PIPELINE' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3.5 overflow-x-auto pb-4">
-            {PIPELINE_STAGES.map((stage) => {
-              const stageClients = clients.filter((c) => c.status === stage.id);
-              const stageTotal = stageClients.reduce((sum, c) => sum + (c.dealValue || 0), 0);
-
-              return (
-                <div
-                  key={stage.id}
-                  className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-2xl p-3 flex flex-col min-h-[500px]"
-                >
-                  <div className="flex items-center justify-between pb-3 border-b border-[#1f1f1f] mb-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-white">{stage.label}</span>
-                      <span className="w-5 h-5 rounded-full bg-[#1c1c1c] text-[10px] text-neutral-400 font-bold flex items-center justify-center">
-                        {stageClients.length}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-teal-400 font-semibold font-mono">
-                      ${stageTotal.toLocaleString()}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2.5 flex-1">
-                    {stageClients.map((client) => (
+                    <div className="w-full bg-[#242424] h-2 rounded-full overflow-hidden">
                       <div
-                        key={client._id}
-                        onClick={() => router.push(`/clients/${client._id}`)}
-                        className="p-3 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-[#242424] hover:border-teal-500/40 cursor-pointer transition shadow-sm space-y-2"
-                      >
-                        <div className="font-heading text-xs font-bold text-white truncate">
-                          {client.name}
-                        </div>
-                        <div className="text-[11px] text-neutral-400 truncate">
-                          {client.contactPerson || client.serviceInterested}
-                        </div>
-                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-[#1e1e1e]">
-                          <span className="text-emerald-400 font-bold font-mono">
-                            ${(client.dealValue || 0).toLocaleString()}
-                          </span>
-                          <span className="text-neutral-500">{(client.projects || []).length} projects</span>
-                        </div>
-                      </div>
-                    ))}
+                        className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
+                        style={{ width: `${paidPercent}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
+
+                {/* Card Footer */}
+                <div className="pt-3 border-t border-[#1f1f1f] flex items-center justify-between text-[11px] text-neutral-400">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-teal-400" />
+                    {meetingsCount} Scheduled Meetings
+                  </span>
+                  <span className="text-teal-400 font-medium group-hover:underline">
+                    View Profile & Details →
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* CLIENT DETAIL MODAL / DRAWER */}

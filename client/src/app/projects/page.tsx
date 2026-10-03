@@ -24,10 +24,78 @@ import {
   Sparkles,
   Building2,
   Clock,
+  TrendingUp,
+  Search,
+  ArrowUpRight,
+  Minus,
 } from 'lucide-react';
 import { PriorityBadge } from '@/components/Badge';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+interface ProgressStage {
+  id: string;
+  label: string;
+  rangeLabel: string;
+  minProgress: number;
+  maxProgress: number;
+  borderAccent: string;
+  badgeAccent: string;
+  barColor: string;
+}
+
+const PROGRESS_PIPELINE_STAGES: ProgressStage[] = [
+  {
+    id: 'KICKOFF',
+    label: 'Planning & Setup',
+    rangeLabel: '0 - 24%',
+    minProgress: 0,
+    maxProgress: 24,
+    borderAccent: 'border-neutral-700/60',
+    badgeAccent: 'bg-neutral-800 text-neutral-300 border-neutral-700',
+    barColor: 'from-neutral-500 to-neutral-400',
+  },
+  {
+    id: 'DEV_EARLY',
+    label: 'In Development',
+    rangeLabel: '25 - 49%',
+    minProgress: 25,
+    maxProgress: 49,
+    borderAccent: 'border-blue-500/30',
+    badgeAccent: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    barColor: 'from-blue-500 to-cyan-400',
+  },
+  {
+    id: 'DEV_ADVANCED',
+    label: 'Advanced Build',
+    rangeLabel: '50 - 74%',
+    minProgress: 50,
+    maxProgress: 74,
+    borderAccent: 'border-teal-500/30',
+    badgeAccent: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+    barColor: 'from-teal-500 to-emerald-400',
+  },
+  {
+    id: 'REVIEW',
+    label: 'QA & Review',
+    rangeLabel: '75 - 99%',
+    minProgress: 75,
+    maxProgress: 99,
+    borderAccent: 'border-amber-500/30',
+    badgeAccent: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    barColor: 'from-amber-500 to-yellow-400',
+  },
+  {
+    id: 'COMPLETED',
+    label: 'Delivered & Live',
+    rangeLabel: '100%',
+    minProgress: 100,
+    maxProgress: 100,
+    borderAccent: 'border-emerald-500/30',
+    badgeAccent: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    barColor: 'from-emerald-500 to-teal-400',
+  },
+];
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -35,6 +103,11 @@ export default function ProjectsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // View state & search filters
+  const [viewMode, setViewMode] = useState<'PIPELINE' | 'GRID'>('PIPELINE');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('ALL');
 
   // Detail Modal
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -283,6 +356,57 @@ export default function ProjectsPage() {
     }
   };
 
+  const handleQuickProgressUpdate = async (e: React.MouseEvent, projectId: string, delta: number) => {
+    e.stopPropagation();
+    const proj = projects.find((p) => p._id === projectId);
+    if (!proj) return;
+    const currentProg = proj.progress || 0;
+    const newProgress = Math.max(0, Math.min(100, currentProg + delta));
+    if (newProgress === currentProg) return;
+
+    const newStatus =
+      newProgress === 100
+        ? 'COMPLETED'
+        : newProgress >= 75
+        ? 'REVIEW'
+        : newProgress > 0
+        ? 'IN_PROGRESS'
+        : 'PLANNING';
+
+    // Optimistic update
+    setProjects((prev) =>
+      prev.map((p) => (p._id === projectId ? { ...p, progress: newProgress, status: newStatus as any } : p))
+    );
+
+    try {
+      await apiFetch(`/projects/${projectId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ progress: newProgress, status: newStatus }),
+      });
+    } catch (err: any) {
+      console.error('Failed to update progress:', err);
+      loadAllData();
+    }
+  };
+
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch =
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (project.clientName && project.clientName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (project.techStack && project.techStack.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase())));
+
+    const matchesPriority = priorityFilter === 'ALL' || project.priority === priorityFilter;
+
+    return matchesSearch && matchesPriority;
+  });
+
+  const totalBudget = projects.reduce((acc, p) => acc + (p.budget || 0), 0);
+  const avgProgress =
+    projects.length > 0
+      ? Math.round(projects.reduce((acc, p) => acc + (p.progress || 0), 0) / projects.length)
+      : 0;
+
   return (
     <div className="flex-1 flex flex-col min-h-screen">
       <Header
@@ -295,155 +419,410 @@ export default function ProjectsPage() {
       />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
-        {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-          {projects.map((project) => {
-            const links = project.links || [];
-            return (
+        {/* KPI Quick Metrics */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222] shadow-sm">
+            <span className="text-xs text-neutral-400 font-medium">Total Active Projects</span>
+            <div className="font-heading text-2xl font-bold text-white mt-1">{projects.length}</div>
+            <p className="text-[11px] text-neutral-500 mt-1">Across all clients</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222] shadow-sm">
+            <div className="flex items-center justify-between text-xs text-neutral-400 font-medium">
+              <span>Avg Delivery Progress</span>
+              <span className="font-bold text-teal-400 font-mono">{avgProgress}%</span>
+            </div>
+            <div className="font-heading text-2xl font-bold text-teal-400 mt-1">{avgProgress}%</div>
+            <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden mt-2">
               <div
-                key={project._id}
-                onClick={() => router.push(`/projects/${project._id}`)}
-                className="bg-[#121212] border border-[#222222] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-xl hover:shadow-teal-950/20 group flex flex-col justify-between"
-              >
-                <div>
-                  {/* Card Header */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-heading font-bold text-base text-white group-hover:text-teal-300 transition flex items-center gap-1.5">
-                        {project.name}
-                        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-400" />
-                      </h3>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-teal-400 font-medium flex items-center gap-1">
-                          <Building2 className="w-3 h-3" />
-                          {project.clientName || 'Internal Project'}
+                className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all"
+                style={{ width: `${avgProgress}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222] shadow-sm">
+            <span className="text-xs text-neutral-400 font-medium">Total Delivery Budget</span>
+            <div className="font-heading text-2xl font-bold text-emerald-400 mt-1 font-mono">
+              ${totalBudget.toLocaleString()}
+            </div>
+            <p className="text-[11px] text-neutral-500 mt-1">Contracted project scope</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222] shadow-sm">
+            <span className="text-xs text-neutral-400 font-medium">Testing & Live</span>
+            <div className="font-heading text-2xl font-bold text-amber-400 mt-1">
+              {projects.filter((p) => (p.progress || 0) >= 75).length}
+            </div>
+            <p className="text-[11px] text-neutral-500 mt-1">Projects at 75%+ progress</p>
+          </div>
+        </div>
+
+        {/* View Switcher & Filters */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setViewMode('PIPELINE')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
+                viewMode === 'PIPELINE'
+                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#262626]'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Progress Pipeline ({filteredProjects.length})</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode('GRID')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
+                viewMode === 'GRID'
+                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#262626]'
+              }`}
+            >
+              <FolderKanban className="w-3.5 h-3.5" />
+              <span>Project Directory ({filteredProjects.length})</span>
+            </button>
+          </div>
+
+          {/* Search & Priority Filter */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search projects or clients..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#141414] border border-[#262626] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+              />
+            </div>
+
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="bg-[#141414] border border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 outline-none focus:border-teal-500 transition"
+            >
+              <option value="ALL">All Priorities</option>
+              <option value="URGENT">Urgent</option>
+              <option value="HIGH">High</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+            </select>
+          </div>
+        </div>
+
+        {/* VIEW 1: PROGRESS PIPELINE (Kanban View Based on Delivery Progress %) */}
+        {viewMode === 'PIPELINE' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5 overflow-x-auto pb-4">
+            {PROGRESS_PIPELINE_STAGES.map((stage) => {
+              const stageProjects = filteredProjects.filter((p) => {
+                const prog = p.progress || 0;
+                if (stage.minProgress === 100) return prog >= 100;
+                return prog >= stage.minProgress && prog <= stage.maxProgress;
+              });
+
+              const stageBudget = stageProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
+
+              return (
+                <div
+                  key={stage.id}
+                  className={`bg-[#0f0f0f] border ${stage.borderAccent} rounded-2xl p-3 flex flex-col min-h-[550px] shadow-sm`}
+                >
+                  {/* Column Header */}
+                  <div className="flex items-center justify-between pb-3 border-b border-[#1f1f1f] mb-3">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-white">{stage.label}</span>
+                        <span className="w-5 h-5 rounded-full bg-[#1c1c1c] text-[10px] text-neutral-400 font-bold flex items-center justify-center">
+                          {stageProjects.length}
                         </span>
                       </div>
-                    </div>
-
-                    <div className="flex flex-col items-end gap-1">
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase border ${
-                          project.status === 'COMPLETED'
-                            ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-                            : project.status === 'REVIEW'
-                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                            : 'bg-teal-500/10 text-teal-400 border-teal-500/20'
-                        }`}
-                      >
-                        {project.status.replace('_', ' ')}
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${stage.badgeAccent}`}>
+                        {stage.rangeLabel}
                       </span>
-                      {project.priority && (
-                        <PriorityBadge priority={project.priority} />
-                      )}
                     </div>
+
+                    <span className="text-[10px] text-emerald-400 font-semibold font-mono">
+                      ${stageBudget.toLocaleString()}
+                    </span>
                   </div>
 
-                  {/* Project Lead */}
-                  {project.lead && (
-                    <div className="flex items-center gap-2 mb-3 px-2.5 py-1 rounded-xl bg-[#161616] border border-[#262626] w-fit">
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-teal-500 text-black font-extrabold text-[9px] flex items-center justify-center">
-                        {project.lead.name?.charAt(0) || 'L'}
-                      </div>
-                      <div className="text-[11px] leading-tight">
-                        <span className="text-[9px] uppercase font-bold text-amber-400 mr-1">Project Lead:</span>
-                        <strong className="text-white font-medium">{project.lead.name}</strong>
-                      </div>
-                    </div>
-                  )}
-
-                  <p className="text-xs text-neutral-400 line-clamp-2 mb-3 leading-relaxed">
-                    {project.description || 'No description provided.'}
-                  </p>
-
-                  {/* Tech Stack Pills */}
-                  {project.techStack && project.techStack.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {project.techStack.map((tech, idx) => (
-                        <span key={idx} className="text-[10px] px-2 py-0.5 rounded-md bg-[#181818] text-neutral-300 border border-[#262626]">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Multiple Links Pills (Quick access directly on card) */}
-                  {links.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {links.slice(0, 3).map((l, idx) => (
-                        <a
-                          key={idx}
-                          href={l.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#181818] hover:bg-[#222222] border border-[#282828] text-[10px] text-neutral-300 hover:text-teal-300 transition"
+                  {/* Projects in this Progress Stage */}
+                  <div className="space-y-3 flex-1">
+                    {stageProjects.map((project) => {
+                      const prog = project.progress || 0;
+                      return (
+                        <div
+                          key={project._id}
+                          onClick={() => router.push(`/projects/${project._id}`)}
+                          className="p-3.5 rounded-xl bg-[#141414] hover:bg-[#181818] border border-[#242424] hover:border-teal-500/50 cursor-pointer transition shadow-sm space-y-2.5 group"
                         >
-                          {getLinkIcon(l.category)}
-                          <span className="truncate max-w-[90px]">{l.title}</span>
-                          <ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                        </a>
-                      ))}
-                      {links.length > 3 && (
-                        <span className="px-1.5 py-1 rounded-lg bg-[#181818] border border-[#282828] text-[10px] text-neutral-500">
-                          +{links.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  )}
+                          {/* Title & Priority */}
+                          <div>
+                            <div className="flex items-start justify-between gap-1 mb-1">
+                              <h4 className="font-heading text-xs font-bold text-white group-hover:text-teal-300 transition flex items-center gap-1 leading-snug">
+                                <span className="line-clamp-2">{project.name}</span>
+                                <ArrowUpRight className="w-3 h-3 text-neutral-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                              </h4>
+                              {project.priority && (
+                                <PriorityBadge priority={project.priority} />
+                              )}
+                            </div>
 
-                  {/* Progress Bar */}
-                  <div className="space-y-1.5 mb-4">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-neutral-400">Delivery Progress</span>
-                      <span className="font-semibold text-white font-mono">{project.progress || 0}%</span>
-                    </div>
-                    <div className="w-full bg-[#202020] h-2 rounded-full overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${project.progress || 0}%` }}
-                      />
-                    </div>
-                  </div>
+                            <div className="flex items-center gap-1 text-[11px] text-neutral-400">
+                              <Building2 className="w-3 h-3 text-teal-400 shrink-0" />
+                              <span className="truncate">{project.clientName || 'Internal'}</span>
+                            </div>
+                          </div>
 
-                  {/* Metadata Stats */}
-                  <div className="grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-[#171717] border border-[#242424] text-neutral-400 mb-4">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3 h-3 text-neutral-500" />
-                      {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'No deadline'}
-                    </span>
-                    <span className="flex items-center gap-1.5 font-mono text-neutral-300">
-                      <DollarSign className="w-3 h-3 text-emerald-400" />
-                      {project.budget ? `$${project.budget.toLocaleString()}` : 'Flexible'}
-                    </span>
-                  </div>
-                </div>
+                          {/* Interactive Delivery Progress */}
+                          <div className="space-y-1 p-2 rounded-lg bg-[#181818] border border-[#242424]">
+                            <div className="flex items-center justify-between text-[11px]">
+                              <span className="text-neutral-400">Progress</span>
+                              <div className="flex items-center gap-1.5">
+                                {/* Quick Bump Buttons */}
+                                <button
+                                  type="button"
+                                  title="Reduce progress by 10%"
+                                  onClick={(e) => handleQuickProgressUpdate(e, project._id, -10)}
+                                  className="w-4 h-4 rounded bg-[#242424] hover:bg-neutral-700 text-neutral-300 text-[10px] flex items-center justify-center transition"
+                                >
+                                  -
+                                </button>
+                                <span className="font-bold text-white font-mono text-xs">{prog}%</span>
+                                <button
+                                  type="button"
+                                  title="Advance progress by 10%"
+                                  onClick={(e) => handleQuickProgressUpdate(e, project._id, 10)}
+                                  className="w-4 h-4 rounded bg-[#242424] hover:bg-teal-600 hover:text-white text-neutral-300 text-[10px] flex items-center justify-center transition"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                            <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden">
+                              <div
+                                className={`bg-gradient-to-r ${stage.barColor} h-full rounded-full transition-all duration-300`}
+                                style={{ width: `${prog}%` }}
+                              />
+                            </div>
+                          </div>
 
-                {/* Card Footer: Members & Manage */}
-                <div className="pt-3 border-t border-[#1f1f1f] flex items-center justify-between">
-                  <div className="flex items-center -space-x-1.5 overflow-hidden">
-                    {(project.members || []).map((m: any, idx: number) => (
-                      <div
-                        key={idx}
-                        title={m.name}
-                        className="w-6 h-6 rounded-full bg-teal-700 border border-[#121212] flex items-center justify-center text-[10px] font-bold text-white uppercase shadow-sm"
-                      >
-                        {m.name?.charAt(0) || 'U'}
+                          {/* Lead & Assigned Team */}
+                          <div className="flex items-center justify-between pt-1 text-[10px]">
+                            {project.lead ? (
+                              <div className="flex items-center gap-1 truncate max-w-[120px]">
+                                <div className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[8px] font-bold flex items-center justify-center shrink-0">
+                                  {project.lead.name?.charAt(0) || 'L'}
+                                </div>
+                                <span className="text-neutral-300 truncate">{project.lead.name}</span>
+                              </div>
+                            ) : (
+                              <span className="text-neutral-500 italic">No Lead</span>
+                            )}
+
+                            <div className="flex items-center -space-x-1">
+                              {(project.members || []).slice(0, 3).map((m: any, idx: number) => (
+                                <div
+                                  key={idx}
+                                  title={m.name}
+                                  className="w-4 h-4 rounded-full bg-teal-800 text-[8px] text-white font-bold flex items-center justify-center border border-[#141414]"
+                                >
+                                  {m.name?.charAt(0) || 'U'}
+                                </div>
+                              ))}
+                              {(project.members || []).length > 3 && (
+                                <span className="text-[9px] text-neutral-500 pl-1 font-mono">
+                                  +{project.members.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Footer with Budget & Deadline */}
+                          <div className="flex items-center justify-between pt-1 border-t border-[#1e1e1e] text-[10px] text-neutral-400">
+                            <span className="text-emerald-400 font-mono font-bold">
+                              ${(project.budget || 0).toLocaleString()}
+                            </span>
+                            {project.deadline && (
+                              <span className="flex items-center gap-1 text-neutral-500">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(project.deadline).toLocaleDateString(undefined, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {stageProjects.length === 0 && (
+                      <div className="h-32 border border-dashed border-[#202020] rounded-xl flex items-center justify-center p-3 text-center">
+                        <span className="text-[11px] text-neutral-600">No projects in this stage</span>
                       </div>
-                    ))}
-                    {(project.members || []).length === 0 && (
-                      <span className="text-[10px] text-neutral-500 italic">No assigned team</span>
                     )}
                   </div>
-
-                  <span className="text-xs text-teal-400 font-medium group-hover:underline flex items-center gap-1">
-                    Details & Links →
-                  </span>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* VIEW 2: PROJECT DIRECTORY (Card Grid) */}
+        {viewMode === 'GRID' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            {filteredProjects.map((project) => {
+              const links = project.links || [];
+              return (
+                <div
+                  key={project._id}
+                  onClick={() => router.push(`/projects/${project._id}`)}
+                  className="bg-[#121212] border border-[#222222] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-xl hover:shadow-teal-950/20 group flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Card Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-heading font-bold text-base text-white group-hover:text-teal-300 transition flex items-center gap-1.5">
+                          {project.name}
+                          <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-400" />
+                        </h3>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-teal-400 font-medium flex items-center gap-1">
+                            <Building2 className="w-3 h-3" />
+                            {project.clientName || 'Internal Project'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-1">
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase border ${
+                            project.status === 'COMPLETED'
+                              ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                              : project.status === 'REVIEW'
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                              : 'bg-teal-500/10 text-teal-400 border-teal-500/20'
+                          }`}
+                        >
+                          {project.status.replace('_', ' ')}
+                        </span>
+                        {project.priority && (
+                          <PriorityBadge priority={project.priority} />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Project Lead */}
+                    {project.lead && (
+                      <div className="flex items-center gap-2 mb-3 px-2.5 py-1 rounded-xl bg-[#161616] border border-[#262626] w-fit">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-teal-500 text-black font-extrabold text-[9px] flex items-center justify-center">
+                          {project.lead.name?.charAt(0) || 'L'}
+                        </div>
+                        <div className="text-[11px] leading-tight">
+                          <span className="text-[9px] uppercase font-bold text-amber-400 mr-1">Project Lead:</span>
+                          <strong className="text-white font-medium">{project.lead.name}</strong>
+                        </div>
+                      </div>
+                    )}
+
+                    <p className="text-xs text-neutral-400 line-clamp-2 mb-3 leading-relaxed">
+                      {project.description || 'No description provided.'}
+                    </p>
+
+                    {/* Tech Stack Pills */}
+                    {project.techStack && project.techStack.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {project.techStack.map((tech, idx) => (
+                          <span key={idx} className="text-[10px] px-2 py-0.5 rounded-md bg-[#181818] text-neutral-300 border border-[#262626]">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Multiple Links Pills (Quick access directly on card) */}
+                    {links.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {links.slice(0, 3).map((l, idx) => (
+                          <a
+                            key={idx}
+                            href={l.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#181818] hover:bg-[#222222] border border-[#282828] text-[10px] text-neutral-300 hover:text-teal-300 transition"
+                          >
+                            {getLinkIcon(l.category)}
+                            <span className="truncate max-w-[90px]">{l.title}</span>
+                            <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                          </a>
+                        ))}
+                        {links.length > 3 && (
+                          <span className="px-1.5 py-1 rounded-lg bg-[#181818] border border-[#282828] text-[10px] text-neutral-500">
+                            +{links.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Progress Bar */}
+                    <div className="space-y-1.5 mb-4">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-neutral-400">Delivery Progress</span>
+                        <span className="font-semibold text-white font-mono">{project.progress || 0}%</span>
+                      </div>
+                      <div className="w-full bg-[#202020] h-2 rounded-full overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${project.progress || 0}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Metadata Stats */}
+                    <div className="grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-[#171717] border border-[#242424] text-neutral-400 mb-4">
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="w-3 h-3 text-neutral-500" />
+                        {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'No deadline'}
+                      </span>
+                      <span className="flex items-center gap-1.5 font-mono text-neutral-300">
+                        <DollarSign className="w-3 h-3 text-emerald-400" />
+                        {project.budget ? `$${project.budget.toLocaleString()}` : 'Flexible'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Footer: Members & Manage */}
+                  <div className="pt-3 border-t border-[#1f1f1f] flex items-center justify-between">
+                    <div className="flex items-center -space-x-1.5 overflow-hidden">
+                      {(project.members || []).map((m: any, idx: number) => (
+                        <div
+                          key={idx}
+                          title={m.name}
+                          className="w-6 h-6 rounded-full bg-teal-700 border border-[#121212] flex items-center justify-center text-[10px] font-bold text-white uppercase shadow-sm"
+                        >
+                          {m.name?.charAt(0) || 'U'}
+                        </div>
+                      ))}
+                      {(project.members || []).length === 0 && (
+                        <span className="text-[10px] text-neutral-500 italic">No assigned team</span>
+                      )}
+                    </div>
+
+                    <span className="text-xs text-teal-400 font-medium group-hover:underline flex items-center gap-1">
+                      Details & Links →
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* PROJECT DETAIL MODAL */}
