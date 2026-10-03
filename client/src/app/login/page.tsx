@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,12 +38,6 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickFill = (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setError(null);
   };
 
   return (
@@ -148,35 +142,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Quick Demo Switcher for fast local evaluation */}
-          <div className="mt-8 pt-5 border-t border-[#1e1e1e]">
-            <div className="flex items-center justify-between mb-2.5 text-[11px] text-neutral-400">
-              <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
-                Quick Test Profiles
-              </span>
-              <span className="text-[10px] text-neutral-500">Click to autofill</span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-1.5">
-              {[
-                { label: 'Abdulaziz', email: 'abdulaziz@rhizan.com', role: 'Admin' },
-                { label: 'Nebiyu', email: 'nebiyu@rhizan.com', role: 'Member' },
-                { label: 'Sadam', email: 'sadam@rhizan.com', role: 'Member' },
-              ].map((m) => (
-                <button
-                  key={m.label}
-                  type="button"
-                  onClick={() => handleQuickFill(m.email, 'password123')}
-                  className="p-2 rounded-lg bg-[#161616] hover:bg-[#202020] border border-[#242424] text-left transition"
-                >
-                  <div className="text-[11px] font-medium text-neutral-200">{m.label}</div>
-                  <div className="text-[9px] text-teal-400 font-mono">{m.role}</div>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Footer info */}

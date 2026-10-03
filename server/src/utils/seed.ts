@@ -43,7 +43,7 @@ const seedDatabase = async () => {
 
     const abdulaziz = await User.create({
       name: 'Abdulaziz',
-      email: 'abdulaziz@rhizan.com',
+      email: 'abdulazizisa579@gmail.com',
       password: passwordHash,
       role: 'ADMIN',
       title: 'Lead Full-Stack Engineer',
@@ -978,9 +978,9 @@ const seedDatabase = async () => {
     console.log('✨ DATABASE RE-SEEDED SUCCESSFULLY WITH PRODUCTION DATA');
     console.log('======================================================');
     console.log('Login credentials for testing:');
-    console.log('  👨‍💻 Admin:      abdulaziz@rhizan.com / password123');
-    console.log('  💼 Growth:     nebiyu@rhizan.com    / password123');
-    console.log('  🎯 Operations: sadam@rhizan.com     / password123');
+    console.log('  👨‍💻 Admin:      abdulazizisa579@gmail.com / password123');
+    console.log('  💼 Growth:     nebiyu@rhizan.com         / password123');
+    console.log('  🎯 Operations: sadam@rhizan.com          / password123');
     console.log('======================================================\n');
 
     process.exit(0);
