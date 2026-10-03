@@ -301,7 +301,26 @@ export interface DashboardSummary {
     activeClientsCount: number;
     teamMembersCount: number;
     hoursThisWeek: number;
+    myHoursToday?: number;
+    teamHoursToday?: number;
+    dailyTargetHours?: number;
   };
+  todayTimeTracking?: {
+    myHoursToday: number;
+    myMinutesToday: number;
+    myEntriesToday: TimeEntry[];
+    teamHoursToday: number;
+    dailyTargetHours: number;
+    percentage: number;
+  };
+  teamWeeklyBreakdown?: Array<{
+    id: string;
+    name: string;
+    role: string;
+    hours: number;
+    capacity: number;
+    percentage: number;
+  }>;
   activeProjects: Array<{
     id: string;
     name: string;
