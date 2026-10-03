@@ -12,6 +12,8 @@ import { Client } from '../models/Client';
 import { TimeEntry } from '../models/TimeEntry';
 import { Activity } from '../models/Activity';
 import { Standup } from '../models/Standup';
+import { Approach } from '../models/Approach';
+import { Niche } from '../models/Niche';
 import { connectDB } from '../config/db';
 
 const seedDatabase = async () => {
@@ -30,6 +32,8 @@ const seedDatabase = async () => {
     await TimeEntry.deleteMany({});
     await Activity.deleteMany({});
     await Standup.deleteMany({});
+    await Approach.deleteMany({});
+    await Niche.deleteMany({});
 
     console.log('🧹 Cleared all existing data from collections.');
 
@@ -212,6 +216,177 @@ const seedDatabase = async () => {
     });
 
     console.log('🤝 Created 6 realistic clients & CRM pipeline leads (with overdue and today alerts)');
+
+    // 2.1 Create Outreach Niches
+    await Niche.create([
+      { name: 'Bakery & F&B', description: 'Bakeries, cafes, restaurants, and food production', color: '#f59e0b' },
+      { name: 'Healthcare & Clinics', description: 'Hospitals, specialty clinics, and medical centers', color: '#06b6d4' },
+      { name: 'Logistics & Transport', description: 'Freight, vehicle fleets, and courier services', color: '#3b82f6' },
+      { name: 'Retail & Supermarkets', description: 'Grocery chains, department stores, and POS outlets', color: '#10b981' },
+      { name: 'Manufacturing & Printing', description: 'Commercial printing presses, packaging, and factories', color: '#8b5cf6' },
+    ]);
+
+    console.log('🏷️ Created 5 market niches for outreach');
+
+    // 2.2 Create Outreach Leads (Approaches) with Overdue & Today Follow-Up Badges
+    await Approach.create([
+      {
+        businessName: 'Blue Nile Logistics',
+        niche: 'Logistics & Transport',
+        contactPerson: 'Yonas Tesfaye',
+        phone: '+251 93 456 7890',
+        email: 'yonas@bluenile.com',
+        location: 'Bole Medhanealem, Addis Ababa',
+        status: 'IN_DISCUSSION',
+        assignedTo: nebiyu._id,
+        lastContactDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+        nextFollowUpDate: yesterday, // OVERDUE FOLLOW-UP ALERT (Shows ⚠️ Overdue)
+        notes: 'Fleet dispatch system. Missed scheduled sync yesterday; needs urgent follow-up call.',
+        contactHistory: [
+          {
+            date: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
+            channel: 'CALL',
+            notes: 'Initial discovery call with operations manager. Expressed interest in live GPS fleet tracking.',
+            loggedBy: nebiyu._id,
+          },
+          {
+            date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+            channel: 'WHATSAPP',
+            notes: 'Sent PDF overview of vehicle tracking and fuel calculation modules.',
+            loggedBy: nebiyu._id,
+          },
+        ],
+      },
+      {
+        businessName: 'Skyline Cafe & Roastery',
+        niche: 'Bakery & F&B',
+        contactPerson: 'Hana Kebede',
+        phone: '+251 92 345 6789',
+        email: 'hana@skyline.et',
+        location: 'Kazanchis, Addis Ababa',
+        status: 'PITCHED',
+        assignedTo: nebiyu._id,
+        lastContactDate: yesterday,
+        nextFollowUpDate: todayMorning, // TODAY FOLLOW-UP ALERT (Shows 🔔 Follow up today)
+        notes: 'Live demo scheduled for 3:00 PM today. Reviewing table QR ordering and waiter notification screens.',
+        contactHistory: [
+          {
+            date: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+            channel: 'CALL',
+            notes: 'Intro call regarding peak hour order delays.',
+            loggedBy: nebiyu._id,
+          },
+          {
+            date: yesterday,
+            channel: 'WHATSAPP',
+            notes: 'Confirmed demo session for Kazanchis headquarters today at 3 PM.',
+            loggedBy: nebiyu._id,
+          },
+        ],
+      },
+      {
+        businessName: 'Habesha Bakeries & Pastry',
+        niche: 'Bakery & F&B',
+        contactPerson: 'Solomon Tadesse',
+        phone: '+251 91 222 3344',
+        email: 'solomon@habeshabakery.et',
+        location: 'Piassa, Addis Ababa',
+        status: 'CONTACTED',
+        assignedTo: nebiyu._id,
+        lastContactDate: yesterday,
+        nextFollowUpDate: todayMorning, // TODAY FOLLOW-UP ALERT
+        notes: 'Owner requested pricing breakdown for inventory recipe costing and wastage reduction.',
+        contactHistory: [
+          {
+            date: yesterday,
+            channel: 'CALL',
+            notes: 'Detailed discussion about flour, yeast, and butter batch costing. Follow up with quotation today.',
+            loggedBy: nebiyu._id,
+          },
+        ],
+      },
+      {
+        businessName: 'Fresh Market Supermarkets',
+        niche: 'Retail & Supermarkets',
+        contactPerson: 'Samson Bekele',
+        phone: '+251 94 567 8901',
+        email: 'samson@freshmarket.com',
+        location: 'Sarbet, Addis Ababa',
+        status: 'CONTACTED',
+        assignedTo: nebiyu._id,
+        lastContactDate: yesterday,
+        nextFollowUpDate: inThreeDays,
+        notes: 'Multi-store barcode POS rollout across 3 supermarket locations. Preparing pitch deck for the board.',
+        contactHistory: [
+          {
+            date: yesterday,
+            channel: 'MEETING',
+            notes: 'Met at Sarbet branch to inspect barcode scanner compatibility and POS receipt requirements.',
+            loggedBy: nebiyu._id,
+          },
+        ],
+      },
+      {
+        businessName: 'Medina Pharmacy Chain',
+        niche: 'Healthcare & Clinics',
+        contactPerson: 'Dr. Amina Yusuf',
+        phone: '+251 91 555 7788',
+        email: 'amina@medinapharm.com',
+        location: 'Merkato, Addis Ababa',
+        status: 'IN_DISCUSSION',
+        assignedTo: sadam._id,
+        lastContactDate: yesterday,
+        nextFollowUpDate: tomorrow,
+        notes: 'Batch expiry tracking and automated supplier purchase orders across 4 pharmacy branches.',
+        contactHistory: [
+          {
+            date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+            channel: 'CALL',
+            notes: 'Discussed batch number and expiration date tracking compliance.',
+            loggedBy: sadam._id,
+          },
+        ],
+      },
+      {
+        businessName: 'Apex Printing & Packaging',
+        niche: 'Manufacturing & Printing',
+        contactPerson: 'Blen Assefa',
+        phone: '+251 95 678 9012',
+        email: 'blen@apexprint.et',
+        location: 'Kera, Addis Ababa',
+        status: 'PROSPECT',
+        assignedTo: sadam._id,
+        lastContactDate: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
+        nextFollowUpDate: nextWeek,
+        notes: 'Inbound inquiry regarding production job scheduling and automated quote generation.',
+      },
+      {
+        businessName: 'ABC Bakery Ltd',
+        niche: 'Bakery & F&B',
+        contactPerson: 'Dawit Mengistu',
+        phone: '+251 91 123 4567',
+        email: 'dawit@abcbakery.com',
+        location: 'CMC, Addis Ababa',
+        status: 'DEAL_WON',
+        assignedTo: nebiyu._id,
+        convertedClientId: clientAbcBakery._id,
+        notes: 'Signed contract for custom ERP & POS platform. Active in sprint development.',
+      },
+      {
+        businessName: 'Red Sea Freight Logistics',
+        niche: 'Logistics & Transport',
+        contactPerson: 'Mulugeta Zewde',
+        phone: '+251 92 888 9900',
+        email: 'mulugeta@redseafreight.et',
+        location: 'Gotera, Addis Ababa',
+        status: 'PROSPECT',
+        assignedTo: nebiyu._id,
+        nextFollowUpDate: inThreeDays,
+        notes: 'Cold outreach lead; 18 heavy cargo trucks operating between Djibouti port and Addis Ababa.',
+      },
+    ]);
+
+    console.log('🎯 Created 8 realistic outreach leads across all pipeline stages with follow-up alerts');
 
     // 3. Create Projects with Milestones, Deliverables & Resource Links
     const bakeryERP = await Project.create({
