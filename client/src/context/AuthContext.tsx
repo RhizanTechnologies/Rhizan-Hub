@@ -25,30 +25,92 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
 
   useEffect(() => {
-    const initializeAuth = () => {
+    let isMounted = true;
+
+    const initializeAuth = async () => {
       const savedToken = localStorage.getItem('rhizan_token');
       const savedUser = localStorage.getItem('rhizan_user');
 
       if (savedToken && savedUser) {
         try {
           const parsedUser = JSON.parse(savedUser) as User;
-          setToken(savedToken);
-          setUser(parsedUser);
+          if (isMounted) {
+            setToken(savedToken);
+            setUser(parsedUser);
+          }
+
+          // Verify with server whether user account still exists in database
+          try {
+            const verified = await apiFetch<User>('/auth/me');
+            if (isMounted) {
+              setUser(verified);
+              localStorage.setItem('rhizan_user', JSON.stringify(verified));
+            }
+          } catch {
+            // Account deleted or token invalid -> clear and kick to login
+            if (isMounted) {
+              localStorage.removeItem('rhizan_token');
+              localStorage.removeItem('rhizan_user');
+              setToken(null);
+              setUser(null);
+              if (pathname !== '/login') {
+                router.replace('/login');
+              }
+            }
+          }
         } catch {
           localStorage.removeItem('rhizan_token');
           localStorage.removeItem('rhizan_user');
+          if (isMounted) {
+            setToken(null);
+            setUser(null);
+          }
+        }
+      } else {
+        if (isMounted) {
           setToken(null);
           setUser(null);
         }
-      } else {
-        setToken(null);
-        setUser(null);
       }
-      setIsLoading(false);
+      if (isMounted) {
+        setIsLoading(false);
+      }
     };
 
     initializeAuth();
-  }, []);
+
+    // Listen for 401/403 invalidation dispatched by apiFetch
+    const handleAuthInvalidated = () => {
+      if (isMounted) {
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem('rhizan_token');
+        localStorage.removeItem('rhizan_user');
+      }
+    };
+
+    // Periodic heartbeat check: if user was deleted while idle, terminate session
+    const checkActiveSession = async () => {
+      const currentToken = localStorage.getItem('rhizan_token');
+      if (!currentToken) return;
+      try {
+        await apiFetch('/auth/me');
+      } catch {
+        // apiFetch automatically purges credentials and triggers login redirect
+      }
+    };
+
+    const heartbeatInterval = setInterval(checkActiveSession, 15000);
+    window.addEventListener('focus', checkActiveSession);
+    window.addEventListener('rhizan_auth_invalidated', handleAuthInvalidated);
+
+    return () => {
+      isMounted = false;
+      clearInterval(heartbeatInterval);
+      window.removeEventListener('focus', checkActiveSession);
+      window.removeEventListener('rhizan_auth_invalidated', handleAuthInvalidated);
+    };
+  }, [pathname, router]);
 
   const login = async (email: string, password: string): Promise<User> => {
     try {

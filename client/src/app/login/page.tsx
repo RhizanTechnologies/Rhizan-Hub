@@ -18,14 +18,18 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isPreFilled, setIsPreFilled] = useState(false);
 
-  // Pre-fill email and temporary password if redirected from invitation email or copy link
+  // Pre-fill email and temporary password if redirected from invitation email or copy link, or display error
   useEffect(() => {
     const emailParam = searchParams.get('email');
     const tempParam =
       searchParams.get('temp') ||
       searchParams.get('code') ||
       searchParams.get('password');
+    const errorParam = searchParams.get('error');
 
+    if (errorParam) {
+      setError(errorParam);
+    }
     if (emailParam) {
       setEmail(emailParam);
     }
