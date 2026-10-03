@@ -24,6 +24,8 @@ import {
   ChevronDown,
   Sparkles,
   GripVertical,
+  Gauge,
+  X,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -52,6 +54,14 @@ export default function TasksPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [assigneeFilter, setAssigneeFilter] = useState<string>('MY_TASKS'); // Default: Personal My Tasks
+
+  // WIP (Work In Progress) Limit state (default: 3 tasks in IN_PROGRESS per person)
+  const [wipLimit, setWipLimit] = useState<number>(3);
+  const [wipWarning, setWipWarning] = useState<{
+    message: string;
+    assigneeName: string;
+    count: number;
+  } | null>(null);
 
   // Modals state
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
@@ -112,9 +122,59 @@ export default function TasksPage() {
     }
   }, [user, teamMembers]);
 
+  // Count how many tasks an individual user currently has in IN_PROGRESS
+  const getInProgressCountForUser = (userIdOrEmail?: string, userName?: string) => {
+    if (!userIdOrEmail && !userName) return 0;
+    return tasks.filter((t) => {
+      if (t.status !== 'IN_PROGRESS') return false;
+      const aId = t.assignedTo?._id || (t.assignedTo as any)?.id || (typeof t.assignedTo === 'string' ? t.assignedTo : undefined);
+      const aEmail = t.assignedTo?.email?.toLowerCase();
+      const aName = t.assignedTo?.name?.toLowerCase();
+
+      return (
+        (userIdOrEmail && (aId === userIdOrEmail || aEmail === userIdOrEmail.toLowerCase())) ||
+        (userName && aName === userName.toLowerCase())
+      );
+    }).length;
+  };
+
+  // Check if moving/creating a task in IN_PROGRESS causes a WIP limit breach
+  const checkWipLimitWarning = (task: Task, targetStatus: TaskStatus) => {
+    if (targetStatus !== 'IN_PROGRESS' || wipLimit <= 0) return;
+    if (task.status === 'IN_PROGRESS') return;
+
+    const targetAssigneeId =
+      task.assignedTo?._id ||
+      (task.assignedTo as any)?.id ||
+      (typeof task.assignedTo === 'string' ? task.assignedTo : undefined);
+    const targetAssigneeName =
+      task.assignedTo?.name ||
+      (targetAssigneeId ? teamMembers.find((m) => ((m as any).id || (m as any)._id) === targetAssigneeId)?.name : '') ||
+      (user?.name || 'Assignee');
+
+    const currentCount = getInProgressCountForUser(
+      targetAssigneeId || task.assignedTo?.email || (user as any)?.id,
+      targetAssigneeName
+    );
+
+    const newCount = currentCount + 1;
+    if (newCount > wipLimit) {
+      setWipWarning({
+        message: `${targetAssigneeName} currently has ${currentCount} active tasks in progress. Adding "${task.title}" pushes them to ${newCount}, exceeding the recommended WIP limit of ${wipLimit}!`,
+        assigneeName: targetAssigneeName,
+        count: newCount,
+      });
+    }
+  };
+
   // Status Change with Dropdown
   const handleQuickStatusChange = async (taskId: string, newStatus: TaskStatus, e?: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent) => {
     if (e) e.stopPropagation();
+
+    const task = tasks.find((t) => t._id === taskId);
+    if (task) {
+      checkWipLimitWarning(task, newStatus);
+    }
 
     setTasks((prev) =>
       prev.map((t) => (t._id === taskId ? { ...t, status: newStatus } : t))
@@ -149,6 +209,8 @@ export default function TasksPage() {
       setDragOverColumnId(null);
       return;
     }
+
+    checkWipLimitWarning(task, targetStatus);
 
     const currentId = draggedTaskId;
 
@@ -322,6 +384,9 @@ export default function TasksPage() {
       });
 
       setTasks([created, ...tasks]);
+      if (created.status === 'IN_PROGRESS' && wipLimit > 0) {
+        checkWipLimitWarning(created, 'IN_PROGRESS');
+      }
       setTitle('');
       setDescription('');
       setNewSubtasks([]);
@@ -482,6 +547,33 @@ export default function TasksPage() {
     return true;
   });
 
+  // WIP (Work In Progress) Calculations
+  const overloadedMembers = teamMembers.filter((m) => {
+    const mId = (m as any).id || (m as any)._id;
+    return getInProgressCountForUser(mId, m.name) > wipLimit;
+  });
+
+  let currentViewInProgressCount = 0;
+  let isCurrentViewWipExceeded = false;
+  let isCurrentViewWipAtLimit = false;
+
+  if (assigneeFilter === 'MY_TASKS') {
+    currentViewInProgressCount = user ? getInProgressCountForUser((user as any).id, user.name) : 0;
+    isCurrentViewWipExceeded = wipLimit > 0 && currentViewInProgressCount > wipLimit;
+    isCurrentViewWipAtLimit = wipLimit > 0 && currentViewInProgressCount === wipLimit;
+  } else if (assigneeFilter !== 'ALL') {
+    const selectedMember = teamMembers.find(
+      (m) => (m as any).id === assigneeFilter || (m as any)._id === assigneeFilter
+    );
+    currentViewInProgressCount = selectedMember
+      ? getInProgressCountForUser(assigneeFilter, selectedMember.name)
+      : 0;
+    isCurrentViewWipExceeded = wipLimit > 0 && currentViewInProgressCount > wipLimit;
+    isCurrentViewWipAtLimit = wipLimit > 0 && currentViewInProgressCount === wipLimit;
+  } else {
+    isCurrentViewWipExceeded = wipLimit > 0 && overloadedMembers.length > 0;
+  }
+
   return (
     <div className="flex-1 flex flex-col min-h-screen">
       <Header
@@ -551,6 +643,27 @@ export default function TasksPage() {
                   <option value="HIGH">🟠 High</option>
                   <option value="MEDIUM">🟡 Medium</option>
                   <option value="LOW">🟢 Low</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+
+              {/* WIP Limit Dropdown */}
+              <div className="relative">
+                <select
+                  value={wipLimit}
+                  onChange={(e) => setWipLimit(Number(e.target.value))}
+                  className={`bg-[#181818] border text-xs rounded-xl px-3 py-2 pr-8 outline-none cursor-pointer appearance-none transition ${
+                    isCurrentViewWipExceeded
+                      ? 'border-rose-500/60 text-rose-300 font-semibold'
+                      : 'border-[#282828] text-white focus:border-teal-500'
+                  }`}
+                  title="Work-In-Progress (WIP) limit flags bottlenecks when too many tasks are in progress simultaneously."
+                >
+                  <option value={2}>🎯 WIP Limit: 2 / person</option>
+                  <option value={3}>🎯 WIP Limit: 3 / person (Recommended)</option>
+                  <option value={4}>🎯 WIP Limit: 4 / person</option>
+                  <option value={5}>🎯 WIP Limit: 5 / person</option>
+                  <option value={0}>🚫 No WIP Limit</option>
                 </select>
                 <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
@@ -682,6 +795,29 @@ export default function TasksPage() {
           </div>
         </div>
 
+        {/* WIP Warning Alert Banner */}
+        {wipWarning && (
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-xs shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="font-bold text-rose-300">WIP Limit Warning: </span>
+                <span>{wipWarning.message}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setWipWarning(null)}
+              className="p-1 rounded-lg hover:bg-rose-500/20 text-rose-400 hover:text-rose-200 transition shrink-0 ml-2"
+              title="Dismiss warning"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Mobile Column Tab Switcher */}
         <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
           <button
@@ -756,7 +892,7 @@ export default function TasksPage() {
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#222222]">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-heading text-xs font-bold uppercase tracking-wider text-neutral-200">
                       {col.label}
                     </span>
@@ -767,6 +903,39 @@ export default function TasksPage() {
                       <span className="text-[10px] font-mono text-neutral-500">
                         • {colEstimatedHours}h est
                       </span>
+                    )}
+
+                    {/* WIP Limit Tag for IN_PROGRESS */}
+                    {col.id === 'IN_PROGRESS' && wipLimit > 0 && (
+                      <div
+                        title={
+                          assigneeFilter === 'ALL'
+                            ? overloadedMembers.length > 0
+                              ? `${overloadedMembers.length} member(s) over limit (${wipLimit}): ${overloadedMembers.map((m) => m.name).join(', ')}`
+                              : `All members are within the ${wipLimit}-task WIP limit`
+                            : isCurrentViewWipExceeded
+                            ? `WIP limit exceeded! ${currentViewInProgressCount} tasks in progress (limit is ${wipLimit}). Focus on finishing before starting new tasks.`
+                            : isCurrentViewWipAtLimit
+                            ? `At WIP limit capacity (${currentViewInProgressCount}/${wipLimit}).`
+                            : `Within WIP limit (${currentViewInProgressCount}/${wipLimit})`
+                        }
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${
+                          isCurrentViewWipExceeded
+                            ? 'bg-rose-500/20 border-rose-500/40 text-rose-300 animate-pulse'
+                            : isCurrentViewWipAtLimit
+                            ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                            : 'bg-teal-500/15 border-teal-500/30 text-teal-300'
+                        }`}
+                      >
+                        <Gauge className="w-2.5 h-2.5" />
+                        <span>
+                          {assigneeFilter === 'ALL'
+                            ? overloadedMembers.length > 0
+                              ? `${overloadedMembers.length} Over WIP`
+                              : `WIP: ${wipLimit}/user`
+                            : `WIP: ${currentViewInProgressCount}/${wipLimit}`}
+                        </span>
+                      </div>
                     )}
                   </div>
 
@@ -795,6 +964,14 @@ export default function TasksPage() {
                     const subtasks = task.subtasks || [];
                     const completedSubtasks = subtasks.filter((s) => s.completed).length;
                     const isDraggingThis = draggedTaskId === task._id;
+                    const isTaskAssigneeOverWip =
+                      col.id === 'IN_PROGRESS' &&
+                      wipLimit > 0 &&
+                      Boolean(task.assignedTo) &&
+                      getInProgressCountForUser(
+                        task.assignedTo?._id || (task.assignedTo as any)?.id || task.assignedTo?.email,
+                        task.assignedTo?.name
+                      ) > wipLimit;
 
                     return (
                       <div
@@ -813,6 +990,8 @@ export default function TasksPage() {
                         className={`p-3.5 rounded-2xl bg-[#161616] border ${
                           isDraggingThis
                             ? 'opacity-40 border-dashed border-teal-500 scale-[0.98]'
+                            : isTaskAssigneeOverWip
+                            ? 'border-rose-500/50 hover:border-rose-500/80 shadow-rose-950/20 shadow-sm'
                             : dateInfo?.isOverdue
                             ? 'border-rose-500/30 hover:border-rose-500/60'
                             : 'border-[#242424] hover:border-teal-500/40'
@@ -823,6 +1002,15 @@ export default function TasksPage() {
                           <div className="flex items-center gap-1.5">
                             <GripVertical className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400 opacity-60 group-hover:opacity-100 transition shrink-0" />
                             <PriorityBadge priority={task.priority} />
+                            {isTaskAssigneeOverWip && (
+                              <span
+                                title={`Assignee has exceeded the ${wipLimit}-task WIP limit`}
+                                className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1"
+                              >
+                                <AlertTriangle className="w-2.5 h-2.5 text-rose-400" />
+                                <span>Over WIP</span>
+                              </span>
+                            )}
                           </div>
 
                           {dateInfo && (
@@ -944,10 +1132,16 @@ export default function TasksPage() {
                             {/* Assignee Avatar */}
                             {task.assignedTo ? (
                               <div
-                                title={`Assigned to ${task.assignedTo.name || 'Member'}`}
-                                className="flex items-center gap-1 bg-[#1a1a1a] border border-[#2a2a2a] px-1.5 py-0.5 rounded-md"
+                                title={`Assigned to ${task.assignedTo.name || 'Member'}${isTaskAssigneeOverWip ? ` (Over WIP Limit: >${wipLimit} tasks in progress)` : ''}`}
+                                className={`flex items-center gap-1 bg-[#1a1a1a] border px-1.5 py-0.5 rounded-md ${
+                                  isTaskAssigneeOverWip ? 'border-rose-500/40 text-rose-300' : 'border-[#2a2a2a]'
+                                }`}
                               >
-                                <div className="w-3.5 h-3.5 rounded-full bg-teal-600 text-white font-bold text-[8px] flex items-center justify-center">
+                                <div
+                                  className={`w-3.5 h-3.5 rounded-full text-white font-bold text-[8px] flex items-center justify-center ${
+                                    isTaskAssigneeOverWip ? 'bg-rose-600' : 'bg-teal-600'
+                                  }`}
+                                >
                                   {task.assignedTo.name?.charAt(0) || 'U'}
                                 </div>
                                 <span className="text-[10px] text-neutral-300 truncate max-w-[65px]">
