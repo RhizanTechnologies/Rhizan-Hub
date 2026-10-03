@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Header } from '@/components/Header';
+import { Modal } from '@/components/Modal';
 import { useAuth } from '@/context/AuthContext';
 import { TimeEntry, Project, Task, WeeklyTeamMemberSummary } from '@/types';
 import { apiFetch } from '@/lib/api';
@@ -23,6 +24,13 @@ import {
   Layers,
   ChevronDown,
   Sparkles,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+  Tag,
+  Briefcase,
+  CheckCircle2,
 } from 'lucide-react';
 
 const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
@@ -70,6 +78,28 @@ export default function TimeTrackingPage() {
   // Notification / success message
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
+  // Week navigation and detailed timesheet states
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [selectedMemberForDetails, setSelectedMemberForDetails] = useState<WeeklyTeamMemberSummary | null>(null);
+  const [selectedDayFilter, setSelectedDayFilter] = useState<string>('ALL');
+
+  // Week range calculation based on weekOffset (0 = current week, -1 = prev week, +1 = next week)
+  const weekRange = useMemo(() => {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1) + weekOffset * 7;
+    const start = new Date(now.getFullYear(), now.getMonth(), diffToMonday, 0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+
+    const startStr = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const endStr = end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    const label = `${startStr} – ${endStr}`;
+
+    return { start, end, label };
+  }, [weekOffset]);
+
   // Helper to format 12-hour clock (e.g. 09:30 AM)
   const formatClockTime = (dateObj: Date): string => {
     return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -91,15 +121,96 @@ export default function TimeTrackingPage() {
     return `${hours}h ${minutes}m`;
   };
 
+  // Load weekly team timesheets for the active weekRange
+  const loadWeeklySummaries = async (start: Date, end: Date) => {
+    try {
+      const data = await apiFetch<WeeklyTeamMemberSummary[]>(
+        `/time/weekly-summary?startDate=${start.toISOString()}&endDate=${end.toISOString()}`
+      );
+      if (data) {
+        setWeeklySummaries(data);
+        setSelectedMemberForDetails((prev) => {
+          if (!prev) return null;
+          return data.find((d) => d.user.id === prev.user.id) || null;
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load weekly summaries:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadWeeklySummaries(weekRange.start, weekRange.end);
+  }, [weekRange]);
+
+  // Breakdown of selected team member's tracked days (Monday through Sunday)
+  const memberDailyBreakdown = useMemo(() => {
+    if (!selectedMemberForDetails) return [];
+    const entries = selectedMemberForDetails.entries || [];
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const days = [];
+
+    for (let i = 0; i < 7; i++) {
+      const dayDate = new Date(weekRange.start);
+      dayDate.setDate(weekRange.start.getDate() + i);
+      const dateStr = dayDate.toISOString().split('T')[0];
+
+      const dayEntries = entries.filter((e) => {
+        const eDate = new Date(e.date).toISOString().split('T')[0];
+        return eDate === dateStr;
+      });
+
+      const dayMinutes = dayEntries.reduce((sum, e) => sum + (e.hours * 60 + e.minutes), 0);
+      const dayHours = Math.floor(dayMinutes / 60);
+      const dayRemMinutes = dayMinutes % 60;
+
+      days.push({
+        dayName: dayNames[i],
+        date: dayDate,
+        dateKey: dateStr,
+        dateFormatted: dayDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        isToday: new Date().toISOString().split('T')[0] === dateStr,
+        entries: dayEntries,
+        totalMinutes: dayMinutes,
+        formattedDuration:
+          dayMinutes === 0
+            ? '0h'
+            : dayRemMinutes === 0
+            ? `${dayHours}h`
+            : `${dayHours}h ${dayRemMinutes}m`,
+      });
+    }
+
+    return days;
+  }, [selectedMemberForDetails, weekRange.start]);
+
+  const selectedMemberStats = useMemo(() => {
+    if (!selectedMemberForDetails) return { billableHours: 0, nonBillableHours: 0, totalEntries: 0 };
+    const entries = selectedMemberForDetails.entries || [];
+    let billableMinutes = 0;
+    let nonBillableMinutes = 0;
+
+    entries.forEach((e) => {
+      const mins = e.hours * 60 + e.minutes;
+      if (e.billable) billableMinutes += mins;
+      else nonBillableMinutes += mins;
+    });
+
+    return {
+      billableHours: Math.round((billableMinutes / 60) * 10) / 10,
+      nonBillableHours: Math.round((nonBillableMinutes / 60) * 10) / 10,
+      totalEntries: entries.length,
+    };
+  }, [selectedMemberForDetails]);
+
   // Load backend data
   const loadData = async () => {
     try {
       setLoading(true);
-      const [entriesData, projectsData, tasksData, summariesData] = await Promise.all([
+      const [entriesData, projectsData, tasksData] = await Promise.all([
         apiFetch<TimeEntry[]>('/time'),
         apiFetch<Project[]>('/projects'),
         apiFetch<Task[]>('/tasks'),
-        apiFetch<WeeklyTeamMemberSummary[]>('/time/weekly-summary'),
       ]);
 
       if (entriesData) setEntries(entriesData);
@@ -110,7 +221,6 @@ export default function TimeTrackingPage() {
         }
       }
       if (tasksData) setTasks(tasksData);
-      if (summariesData) setWeeklySummaries(summariesData);
     } catch (err) {
       console.error('Failed to load time tracking data', err);
     } finally {
@@ -972,12 +1082,47 @@ export default function TimeTrackingPage() {
                     Weekly Team Timesheets & Capacity Burn
                   </h3>
                   <p className="text-xs text-neutral-400 mt-0.5">
-                    Live timesheet rollup for current week (Monday through Sunday)
+                    Live timesheet rollup for selected week. Click any member card to view day-by-day tracked details.
                   </p>
                 </div>
 
-                <div className="text-xs text-neutral-400 font-mono">
-                  Target: <strong className="text-teal-400">40h / member</strong>
+                {/* Week Navigation Controls */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex items-center bg-[#161616] border border-[#262626] rounded-xl p-1 text-xs shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => setWeekOffset((prev) => prev - 1)}
+                      className="p-1.5 hover:bg-[#222222] text-neutral-400 hover:text-white rounded-lg transition"
+                      title="Previous week"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="px-3 font-semibold text-white text-xs whitespace-nowrap">
+                      {weekRange.label}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setWeekOffset((prev) => prev + 1)}
+                      className="p-1.5 hover:bg-[#222222] text-neutral-400 hover:text-white rounded-lg transition"
+                      title="Next week"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {weekOffset !== 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setWeekOffset(0)}
+                      className="text-xs font-semibold text-teal-400 hover:text-teal-300 hover:underline px-2 py-1 transition"
+                    >
+                      Current Week
+                    </button>
+                  )}
+
+                  <div className="text-xs text-neutral-400 font-mono hidden md:block border-l border-[#262626] pl-3">
+                    Target: <strong className="text-teal-400">40h / member</strong>
+                  </div>
                 </div>
               </div>
 
@@ -990,15 +1135,18 @@ export default function TimeTrackingPage() {
                   return (
                     <div
                       key={summary.user.id}
-                      className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-3 shadow-sm hover:border-[#333333] transition"
+                      onClick={() => setSelectedMemberForDetails(summary)}
+                      className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-3 shadow-sm hover:border-teal-500/50 hover:bg-[#191919] transition cursor-pointer group"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-xs flex items-center justify-center">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
                             {summary.user.name.charAt(0)}
                           </div>
                           <div>
-                            <div className="text-xs font-bold text-white">{summary.user.name}</div>
+                            <div className="text-xs font-bold text-white group-hover:text-teal-300 transition">
+                              {summary.user.name}
+                            </div>
                             <div className="text-[11px] text-teal-400">{summary.user.title || 'Team Member'}</div>
                           </div>
                         </div>
@@ -1025,7 +1173,7 @@ export default function TimeTrackingPage() {
                         </div>
                       </div>
 
-                      {/* Project Breakdown Breakdown Pills */}
+                      {/* Project Breakdown Pills */}
                       {summary.projectBreakdown && summary.projectBreakdown.length > 0 && (
                         <div className="pt-2 border-t border-[#222222] space-y-1">
                           <span className="text-[10px] uppercase font-bold text-neutral-500 block">
@@ -1044,6 +1192,17 @@ export default function TimeTrackingPage() {
                           </div>
                         </div>
                       )}
+
+                      {/* Interactive Trigger Banner */}
+                      <div className="pt-2.5 border-t border-[#222222] flex items-center justify-between text-xs text-teal-400 group-hover:text-teal-300 font-medium">
+                        <span className="flex items-center gap-1.5">
+                          <CalendarDays className="w-3.5 h-3.5" />
+                          View Day-by-Day Logs
+                        </span>
+                        <span className="text-[10px] text-neutral-500 group-hover:text-teal-400 group-hover:translate-x-0.5 transition font-mono">
+                          {(summary.entries || []).length} log{(summary.entries || []).length === 1 ? '' : 's'} →
+                        </span>
+                      </div>
                     </div>
                   );
                 })}
@@ -1052,6 +1211,276 @@ export default function TimeTrackingPage() {
           </div>
         )}
       </div>
+
+      {/* DETAILED DAILY TIMESHEET MODAL */}
+      <Modal
+        isOpen={!!selectedMemberForDetails}
+        onClose={() => {
+          setSelectedMemberForDetails(null);
+          setSelectedDayFilter('ALL');
+        }}
+        title={selectedMemberForDetails ? `${selectedMemberForDetails.user.name}'s Weekly Timesheet` : 'Member Timesheet'}
+        maxWidth="max-w-3xl"
+      >
+        {selectedMemberForDetails && (
+          <div className="space-y-5">
+            {/* Member Profile & Metrics Header */}
+            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-md shadow-teal-950/30">
+                    {selectedMemberForDetails.user.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-heading text-sm sm:text-base font-bold text-white leading-tight">
+                      {selectedMemberForDetails.user.name}
+                    </h4>
+                    <p className="text-xs text-teal-400 font-medium">
+                      {selectedMemberForDetails.user.title || 'Team Member'}
+                      {selectedMemberForDetails.user.email && (
+                        <span className="text-neutral-500 ml-1.5 font-normal">
+                          • {selectedMemberForDetails.user.email}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 bg-[#111111] px-3.5 py-2 rounded-xl border border-[#222222] self-start sm:self-center">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">Total Logged</span>
+                    <span className="font-heading text-lg font-bold text-white font-mono">
+                      {selectedMemberForDetails.totalHours}h
+                    </span>
+                  </div>
+                  <div className="border-l border-[#262626] pl-3">
+                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">Capacity</span>
+                    <span className="text-xs font-mono text-teal-300">
+                      {Math.min(100, Math.round((selectedMemberForDetails.totalHours / (selectedMemberForDetails.user.capacity || 40)) * 100))}% of {selectedMemberForDetails.user.capacity || 40}h
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sub-metrics: Billable vs Non-Billable & Week Range */}
+              <div className="pt-2 border-t border-[#222222] flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-3">
+                  <span className="text-neutral-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    Billable: <strong className="text-emerald-400 font-mono">{selectedMemberStats.billableHours}h</strong>
+                  </span>
+                  <span className="text-neutral-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-neutral-500" />
+                    Non-billable: <strong className="text-neutral-300 font-mono">{selectedMemberStats.nonBillableHours}h</strong>
+                  </span>
+                  <span className="text-neutral-500">
+                    • {selectedMemberStats.totalEntries} time log{selectedMemberStats.totalEntries === 1 ? '' : 's'}
+                  </span>
+                </div>
+
+                <div className="text-[11px] text-neutral-400 font-mono">
+                  Week of <span className="text-neutral-200">{weekRange.label}</span>
+                </div>
+              </div>
+
+              {/* Project breakdown pills */}
+              {selectedMemberForDetails.projectBreakdown && selectedMemberForDetails.projectBreakdown.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-neutral-500 uppercase font-semibold mr-1">Projects:</span>
+                  {selectedMemberForDetails.projectBreakdown.map((pb, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#1f1f1f] text-neutral-300 text-[11px] border border-[#2a2a2a]"
+                    >
+                      <FolderKanban className="w-2.5 h-2.5 text-teal-400" />
+                      <span>{pb.projectName}</span>
+                      <strong className="text-teal-300 font-mono text-[10px]">{pb.hours}h</strong>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Day Filter Pills */}
+            <div className="space-y-1.5">
+              <div className="text-xs font-semibold text-neutral-300 flex items-center justify-between">
+                <span>Daily Breakdown (Monday – Sunday):</span>
+                {selectedDayFilter !== 'ALL' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDayFilter('ALL')}
+                    className="text-[11px] text-teal-400 hover:underline font-medium"
+                  >
+                    Show all days
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDayFilter('ALL')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                    selectedDayFilter === 'ALL'
+                      ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                      : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#242424]'
+                  }`}
+                >
+                  All Days ({selectedMemberForDetails.totalHours}h)
+                </button>
+                {memberDailyBreakdown.map((day) => (
+                  <button
+                    key={day.dayName}
+                    type="button"
+                    onClick={() => setSelectedDayFilter(day.dayName)}
+                    className={`px-2.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition flex items-center gap-1.5 ${
+                      selectedDayFilter === day.dayName
+                        ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                        : day.totalMinutes > 0
+                        ? 'bg-[#181818] text-neutral-300 hover:text-white border border-[#262626]'
+                        : 'bg-[#141414] text-neutral-500 hover:text-neutral-400 border border-[#1f1f1f]'
+                    }`}
+                  >
+                    <span>{day.dayName.slice(0, 3)}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                        selectedDayFilter === day.dayName
+                          ? 'bg-black/30 text-white'
+                          : day.totalMinutes > 0
+                          ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20'
+                          : 'bg-[#202020] text-neutral-600'
+                      }`}
+                    >
+                      {day.formattedDuration}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Day-by-Day List */}
+            <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar">
+              {memberDailyBreakdown
+                .filter((day) => selectedDayFilter === 'ALL' || selectedDayFilter === day.dayName)
+                .map((day) => {
+                  return (
+                    <div
+                      key={day.dayName}
+                      className="rounded-2xl bg-[#141414] border border-[#222222] overflow-hidden"
+                    >
+                      {/* Day Header */}
+                      <div className="py-2.5 px-4 bg-[#181818]/70 border-b border-[#222222] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-heading text-xs font-bold text-white">
+                            {day.dayName}
+                          </span>
+                          <span className="text-xs text-neutral-400 font-mono">
+                            {day.dateFormatted}
+                          </span>
+                          {day.isToday && (
+                            <span className="px-1.5 py-0.2 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[9px] uppercase font-bold tracking-wider">
+                              Today
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-xs font-mono font-bold px-2 py-0.5 rounded-lg ${
+                              day.totalMinutes > 0
+                                ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20'
+                                : 'text-neutral-500'
+                            }`}
+                          >
+                            {day.totalMinutes > 0 ? `${day.formattedDuration} logged` : '0h / No logs'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Day Entries List */}
+                      <div className="p-3 space-y-2">
+                        {day.entries.length === 0 ? (
+                          <div className="py-3 text-center text-xs text-neutral-500 italic">
+                            No time entries logged on {day.dayName}.
+                          </div>
+                        ) : (
+                          day.entries.map((entry) => (
+                            <div
+                              key={entry._id}
+                              className="p-3 rounded-xl bg-[#181818] border border-[#242424] hover:border-[#333333] transition space-y-2"
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div className="flex items-start gap-2.5">
+                                  <div className="w-7 h-7 rounded-lg bg-teal-500/10 text-teal-400 border border-teal-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                                    <Clock className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-white text-xs block leading-snug">
+                                      {entry.description || (entry.task as any)?.title || 'Work log'}
+                                    </span>
+                                    {(entry.task as any)?.title && entry.description && (
+                                      <span className="text-[11px] text-neutral-400 flex items-center gap-1 mt-0.5">
+                                        <CheckCircle2 className="w-3 h-3 text-teal-500 shrink-0" />
+                                        Task: {(entry.task as any).title}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+                                  {entry.startTime && entry.endTime && (
+                                    <span className="text-[11px] font-mono text-neutral-400 bg-[#202020] px-2 py-0.5 rounded border border-[#2a2a2a]">
+                                      {entry.startTime} – {entry.endTime}
+                                    </span>
+                                  )}
+                                  <span className="text-xs font-mono font-bold text-teal-300 bg-teal-500/10 px-2.5 py-0.5 rounded-lg border border-teal-500/20">
+                                    {formatDurationText(entry.hours, entry.minutes)}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Badges: Project, Client, Tag, Billable */}
+                              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#202020] text-[11px]">
+                                <span className="inline-flex items-center gap-1 text-neutral-300 bg-[#202020] px-2 py-0.5 rounded border border-[#2a2a2a]">
+                                  <FolderKanban className="w-3 h-3 text-teal-400" />
+                                  {(entry.project as any)?.name || 'Project'}
+                                </span>
+
+                                {(entry.project as any)?.clientName && (
+                                  <span className="text-neutral-500 text-[11px]">
+                                    Client: {(entry.project as any).clientName}
+                                  </span>
+                                )}
+
+                                {entry.tag && (
+                                  <span className="inline-flex items-center gap-1 text-neutral-400 bg-[#1c1c1c] px-2 py-0.5 rounded">
+                                    <Tag className="w-2.5 h-2.5 text-neutral-500" />
+                                    {entry.tag}
+                                  </span>
+                                )}
+
+                                <span
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-medium text-[10px] ${
+                                    entry.billable
+                                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                      : 'bg-neutral-800 text-neutral-400 border border-neutral-700/50'
+                                  }`}
+                                >
+                                  <DollarSign className="w-2.5 h-2.5" />
+                                  {entry.billable ? 'Billable' : 'Non-billable'}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

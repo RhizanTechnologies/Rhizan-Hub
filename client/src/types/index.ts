@@ -85,6 +85,7 @@ export interface WeeklyTeamMemberSummary {
   user: {
     id: string;
     name: string;
+    email?: string;
     title?: string;
     capacity?: number;
   };
@@ -93,6 +94,7 @@ export interface WeeklyTeamMemberSummary {
     projectName: string;
     hours: number;
   }[];
+  entries?: TimeEntry[];
 }
 
 export interface ResourceLink {

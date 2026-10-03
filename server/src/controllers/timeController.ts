@@ -123,21 +123,35 @@ export const deleteTimeEntry = async (req: AuthRequest, res: Response): Promise<
 
 export const getWeeklySummary = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    // Current week start (Monday) and end
-    const now = new Date();
-    const day = now.getDay();
-    const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
-    const startOfWeek = new Date(now.setDate(diffToMonday));
-    startOfWeek.setHours(0, 0, 0, 0);
+    const { startDate, endDate } = req.query;
 
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    endOfWeek.setHours(23, 59, 59, 999);
+    let startOfWeek: Date;
+    let endOfWeek: Date;
 
-    const users = await User.find().select('name email title weeklyCapacityHours');
+    if (startDate && endDate) {
+      startOfWeek = new Date(startDate as string);
+      startOfWeek.setHours(0, 0, 0, 0);
+      endOfWeek = new Date(endDate as string);
+      endOfWeek.setHours(23, 59, 59, 999);
+    } else {
+      // Current week start (Monday) and end (Sunday)
+      const now = new Date();
+      const day = now.getDay();
+      const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
+      startOfWeek = new Date(now.getFullYear(), now.getMonth(), diffToMonday, 0, 0, 0, 0);
+
+      endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+    }
+
+    const users = await User.find().select('name email title weeklyCapacityHours avatar');
     const weeklyEntries = await TimeEntry.find({
       date: { $gte: startOfWeek, $lte: endOfWeek },
-    }).populate('project', 'name');
+    })
+      .populate('project', 'name clientName')
+      .populate('task', 'title')
+      .sort({ date: 1, startTime: 1, createdAt: 1 });
 
     const summary = users.map((user) => {
       const userEntries = weeklyEntries.filter(
@@ -166,11 +180,13 @@ export const getWeeklySummary = async (req: AuthRequest, res: Response): Promise
         user: {
           id: user._id,
           name: user.name,
+          email: user.email,
           title: user.title,
           capacity: user.weeklyCapacityHours,
         },
         totalHours,
         projectBreakdown,
+        entries: userEntries,
       };
     });
 
