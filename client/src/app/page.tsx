@@ -29,10 +29,12 @@ import {
   Target,
   ChevronRight,
   RefreshCw,
+  Moon,
+  MessageSquareQuote,
 } from 'lucide-react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
-import { DashboardSummary, Project, Task, TimeEntry } from '@/types';
+import { DashboardSummary, Project, Task, TimeEntry, Standup } from '@/types';
 
 const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
 
@@ -74,6 +76,16 @@ export default function DashboardPage() {
   const [taskDueDate, setTaskDueDate] = useState(new Date().toISOString().split('T')[0]);
   const [taskEstimatedHours, setTaskEstimatedHours] = useState('2');
 
+  // Daily EOD Standup States (Optional)
+  const [isStandupModalOpen, setIsStandupModalOpen] = useState(false);
+  const [isStandupFeedOpen, setIsStandupFeedOpen] = useState(false);
+  const [todayStandups, setTodayStandups] = useState<Standup[]>([]);
+  const [myStandup, setMyStandup] = useState<Standup | null>(null);
+  const [standupCompleted, setStandupCompleted] = useState('');
+  const [standupPriorities, setStandupPriorities] = useState('');
+  const [standupBlockers, setStandupBlockers] = useState('');
+  const [isSubmittingStandup, setIsSubmittingStandup] = useState(false);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
@@ -113,10 +125,73 @@ export default function DashboardPage() {
         }
       }
       if (tasksRes) setTasks(tasksRes);
+      loadStandups();
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStandups = async () => {
+    try {
+      const res = await apiFetch<{ standups: Standup[]; myStandup: Standup | null }>('/standups/today');
+      if (res) {
+        setTodayStandups(res.standups || []);
+        setMyStandup(res.myStandup || null);
+        if (res.myStandup) {
+          setStandupCompleted(res.myStandup.completedToday);
+          setStandupPriorities(res.myStandup.prioritiesTomorrow);
+          setStandupBlockers(res.myStandup.blockers || '');
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load standups', e);
+    }
+  };
+
+  const openStandupModal = () => {
+    if (!myStandup) {
+      const completedTaskTitles = (data?.myTasks || [])
+        .filter((t) => t.status === 'DONE')
+        .map((t) => `• ${t.title}`)
+        .join('\n');
+
+      const timeSummary = myHoursToday > 0 ? `Logged ${myHoursToday}h today across active deliverables.` : '';
+      const autoFilled = [timeSummary, completedTaskTitles].filter(Boolean).join('\n');
+      if (autoFilled && !standupCompleted) {
+        setStandupCompleted(autoFilled);
+      }
+    }
+    setIsStandupModalOpen(true);
+  };
+
+  const handleStandupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!standupCompleted.trim() || !standupPriorities.trim()) {
+      alert('Please fill out what you completed today and priorities for tomorrow');
+      return;
+    }
+
+    try {
+      setIsSubmittingStandup(true);
+      await apiFetch<Standup>('/standups', {
+        method: 'POST',
+        body: JSON.stringify({
+          completedToday: standupCompleted.trim(),
+          prioritiesTomorrow: standupPriorities.trim(),
+          blockers: standupBlockers.trim(),
+          hoursWorked: myHoursToday,
+        }),
+      });
+
+      setIsStandupModalOpen(false);
+      showToast('🎉 Daily EOD Standup submitted successfully!');
+      loadStandups();
+    } catch (err: any) {
+      alert(err.message || 'Failed to submit standup');
+    } finally {
+      setIsSubmittingStandup(false);
     }
   };
 
@@ -471,8 +546,137 @@ export default function DashboardPage() {
               <FolderKanban className="w-3.5 h-3.5 text-teal-400" />
               <span>Kanban Board</span>
             </Link>
+
+            {/* Optional Daily EOD Standup Button */}
+            <button
+              type="button"
+              onClick={openStandupModal}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
+                myStandup
+                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                  : 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+              }`}
+              title="Optional: Share a quick 2-minute daily check-in"
+            >
+              <Moon className="w-3.5 h-3.5 text-indigo-400" />
+              <span>{myStandup ? 'Edit EOD Standup' : 'EOD Check-in (Optional)'}</span>
+            </button>
           </div>
         </div>
+
+        {/* Optional Daily EOD Standup Banner / Feed Toggle */}
+        <div className="p-3.5 bg-[#121212] border border-[#242424] rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
+              <Moon className="w-3.5 h-3.5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white">Daily EOD Wrap-Up</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700">
+                  Optional
+                </span>
+                {todayStandups.length > 0 && (
+                  <span className="text-[10px] font-semibold text-emerald-400">
+                    • {todayStandups.length} checked in today
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-neutral-400">
+                {myStandup
+                  ? 'You submitted your EOD wrap-up today. Great work!'
+                  : 'Keep your team asynchronously aligned — share what you completed, tomorrow\'s plan, and any blockers.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {todayStandups.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsStandupFeedOpen(!isStandupFeedOpen)}
+                className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#202020] text-neutral-300 hover:text-white border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
+              >
+                <Users className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{isStandupFeedOpen ? 'Hide Standups' : `View Standups (${todayStandups.length})`}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={openStandupModal}
+              className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md shadow-indigo-950 flex items-center gap-1.5"
+            >
+              <span>{myStandup ? 'Update My Standup' : '+ Share EOD Check-in'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Standup Feed Drawer (when opened) */}
+        {isStandupFeedOpen && todayStandups.length > 0 && (
+          <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between pb-2 border-b border-[#242424]">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Today's Team Standup Check-ins ({todayStandups.length})</span>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {todayStandups.map((s) => (
+                <div key={s._id} className="p-3.5 rounded-xl bg-[#181818] border border-[#2a2a2a] space-y-2.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-[9px] flex items-center justify-center">
+                        {s.userName.charAt(0)}
+                      </div>
+                      <div>
+                        <span className="font-bold text-white block">{s.userName}</span>
+                        <span className="text-[10px] text-neutral-400">{s.userRole || 'Team Member'}</span>
+                      </div>
+                    </div>
+                    {s.hoursWorked ? (
+                      <span className="text-[10px] font-mono font-bold text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">
+                        {s.hoursWorked}h logged
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-1.5 pt-1 border-t border-[#242424]">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block">
+                        Completed Today:
+                      </span>
+                      <p className="text-[11px] text-neutral-200 whitespace-pre-line leading-relaxed">
+                        {s.completedToday}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-teal-400 tracking-wider block">
+                        Planning Tomorrow:
+                      </span>
+                      <p className="text-[11px] text-neutral-300 whitespace-pre-line leading-relaxed">
+                        {s.prioritiesTomorrow}
+                      </p>
+                    </div>
+
+                    {s.blockers && (
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider block">
+                          Blockers / Impediments:
+                        </span>
+                        <p className="text-[11px] text-rose-300/90 whitespace-pre-line leading-relaxed">
+                          {s.blockers}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Top 6 KPIs Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-3.5">
@@ -1261,6 +1465,86 @@ export default function DashboardPage() {
               className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-lg shadow-teal-950 transition"
             >
               Create Task
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ========================================================================= */}
+      {/* MODAL: DAILY EOD STANDUP SUMMARY (OPTIONAL ASYNCHRONOUS CHECK-IN)         */}
+      {/* ========================================================================= */}
+      <Modal
+        isOpen={isStandupModalOpen}
+        onClose={() => setIsStandupModalOpen(false)}
+        title={myStandup ? "Update Today's EOD Standup" : "Daily EOD Standup Check-in (Optional)"}
+      >
+        <form onSubmit={handleStandupSubmit} className="space-y-4">
+          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 flex items-center justify-between">
+            <span className="font-medium">
+              💡 Asynchronous end-of-day summary to keep team members aligned without meetings.
+            </span>
+            {myHoursToday > 0 && (
+              <span className="font-mono font-bold text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20 shrink-0 ml-2">
+                {myHoursToday}h logged today
+              </span>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-neutral-300 mb-1">
+              1. What did you accomplish today? *
+            </label>
+            <textarea
+              rows={3}
+              required
+              value={standupCompleted}
+              onChange={(e) => setStandupCompleted(e.target.value)}
+              placeholder="e.g. Completed client onboarding wireframes, fixed API auth bug..."
+              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-neutral-300 mb-1">
+              2. What are your key priorities for tomorrow? *
+            </label>
+            <textarea
+              rows={2}
+              required
+              value={standupPriorities}
+              onChange={(e) => setStandupPriorities(e.target.value)}
+              placeholder="e.g. Deliverable review with Nebiyu, deploy production hotfix..."
+              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-neutral-300 mb-1">
+              3. Any blockers or dependencies? (Optional)
+            </label>
+            <input
+              type="text"
+              value={standupBlockers}
+              onChange={(e) => setStandupBlockers(e.target.value)}
+              placeholder="e.g. Waiting on client API credentials, need feedback on proposal..."
+              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setIsStandupModalOpen(false)}
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmittingStandup}
+              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-950 transition disabled:opacity-50"
+            >
+              {isSubmittingStandup ? 'Saving...' : myStandup ? 'Update Standup' : 'Submit Check-in'}
             </button>
           </div>
         </form>

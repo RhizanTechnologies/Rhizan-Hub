@@ -32,6 +32,7 @@ import {
   Check,
   Flag,
   Circle,
+  RefreshCw,
 } from 'lucide-react';
 import { PriorityBadge } from '@/components/Badge';
 import Link from 'next/link';
@@ -282,7 +283,25 @@ export default function ProjectDetailPage() {
   };
 
   const handleTaskStatusChange = async (taskId: string, newStatus: TaskStatus) => {
-    setTasks((prev) => prev.map((t) => (t._id === taskId ? { ...t, status: newStatus } : t)));
+    const updatedTasks = tasks.map((t) => (t._id === taskId ? { ...t, status: newStatus } : t));
+    setTasks(updatedTasks);
+
+    // Auto-calculate combined progress
+    const mDeliverables = project?.milestones || [];
+    const totalUnits = updatedTasks.length + mDeliverables.reduce((s, m) => s + (m.deliverables?.length || 0), 0);
+    const doneUnits =
+      updatedTasks.filter((t) => t.status === 'DONE').length +
+      mDeliverables.reduce((s, m) => s + (m.deliverables?.filter((d) => d.completed).length || 0), 0);
+    const newProg = totalUnits > 0 ? Math.round((doneUnits / totalUnits) * 100) : project?.progress || 0;
+
+    if (project && project.progress !== newProg) {
+      setProject({ ...project, progress: newProg });
+      apiFetch(`/projects/${project._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ progress: newProg }),
+      }).catch((e) => console.error('Failed to sync project progress', e));
+    }
+
     try {
       await apiFetch(`/tasks/${taskId}`, {
         method: 'PUT',
@@ -357,14 +376,39 @@ export default function ProjectDetailPage() {
 
     currentMilestones[mIdx] = targetM;
 
+    // Auto-calculate combined progress with updated deliverables
+    const totalUnits = tasks.length + currentMilestones.reduce((s, m) => s + (m.deliverables?.length || 0), 0);
+    const doneUnits =
+      tasks.filter((t) => t.status === 'DONE').length +
+      currentMilestones.reduce((s, m) => s + (m.deliverables?.filter((d) => d.completed).length || 0), 0);
+    const newProg = totalUnits > 0 ? Math.round((doneUnits / totalUnits) * 100) : project.progress || 0;
+
     try {
       const updated = await apiFetch<Project>(`/projects/${project._id}`, {
         method: 'PUT',
-        body: JSON.stringify({ milestones: currentMilestones }),
+        body: JSON.stringify({ milestones: currentMilestones, progress: newProg }),
       });
       setProject(updated);
     } catch (err: any) {
       alert(err.message || 'Failed to update deliverable');
+    }
+  };
+
+  const syncCalculatedProgress = async () => {
+    if (!project) return;
+    const totalUnits = tasks.length + totalDeliverables;
+    const doneUnits = completedCount + completedDeliverables;
+    const calculated = totalUnits > 0 ? Math.round((doneUnits / totalUnits) * 100) : 0;
+
+    setProject({ ...project, progress: calculated });
+    try {
+      await apiFetch(`/projects/${project._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ progress: calculated }),
+      });
+      alert(`Project progress auto-synchronized to ${calculated}%!`);
+    } catch (err: any) {
+      alert(err.message || 'Failed to sync progress');
     }
   };
 
@@ -682,14 +726,27 @@ export default function ProjectDetailPage() {
 
           {/* Overall Delivery Progress Bar */}
           <div className="space-y-1.5 pt-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-neutral-400 font-medium">Delivery Progress ({completedCount} of {tasks.length} tasks complete)</span>
-              <span className="font-mono text-teal-400 font-bold">{progressPercent}%</span>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-neutral-400 font-medium">
+                  Delivery Progress ({completedCount}/{tasks.length} tasks, {completedDeliverables}/{totalDeliverables} deliverables)
+                </span>
+                <button
+                  type="button"
+                  onClick={syncCalculatedProgress}
+                  title="Auto-calculate and sync progress to database"
+                  className="px-2 py-0.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 text-[10px] font-semibold flex items-center gap-1 transition"
+                >
+                  <RefreshCw className="w-2.5 h-2.5" />
+                  <span>Auto-Sync</span>
+                </button>
+              </div>
+              <span className="font-mono text-teal-400 font-bold">{project.progress ?? progressPercent}%</span>
             </div>
             <div className="w-full bg-[#1c1c1c] h-2.5 rounded-full overflow-hidden">
               <div
                 className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
+                style={{ width: `${project.progress ?? progressPercent}%` }}
               />
             </div>
           </div>

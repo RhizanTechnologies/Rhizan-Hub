@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
-import { Clock, Plus, LogOut, ChevronDown, Menu } from 'lucide-react';
+import { Clock, Plus, LogOut, ChevronDown, Menu, User as UserIcon, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 
 interface HeaderProps {
@@ -115,7 +115,29 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               </div>
 
-              <div className="p-1">
+              <div className="p-1 space-y-0.5">
+                {user?.id && (
+                  <Link
+                    href={`/team/${user.id}`}
+                    onClick={() => setMenuOpen(false)}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
+                  >
+                    <UserIcon className="w-4 h-4 text-neutral-400" />
+                    <span>My Profile</span>
+                  </Link>
+                )}
+
+                <Link
+                  href="/change-password"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
+                >
+                  <KeyRound className="w-4 h-4 text-neutral-400" />
+                  <span>Change Password</span>
+                </Link>
+
+                <div className="h-px bg-[#222222] my-1" />
+
                 <button
                   onClick={() => {
                     setMenuOpen(false);

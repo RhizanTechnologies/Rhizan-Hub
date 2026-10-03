@@ -406,3 +406,18 @@ export interface WeeklyReportData {
     recentApproaches: Approach[];
   };
 }
+
+export interface Standup {
+  _id: string;
+  user: User;
+  userName: string;
+  userRole?: string;
+  userAvatar?: string;
+  date: string;
+  completedToday: string;
+  prioritiesTomorrow: string;
+  blockers?: string;
+  hoursWorked?: number;
+  createdAt: string;
+  updatedAt: string;
+}

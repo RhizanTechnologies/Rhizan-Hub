@@ -36,6 +36,7 @@ import {
   ChevronLeft,
   ChevronRight,
   SlidersHorizontal,
+  AlertTriangle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -91,6 +92,7 @@ export default function ApproachesPage() {
   const [selectedNiche, setSelectedNiche] = useState('All Niches');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedOwner, setSelectedOwner] = useState<string>('ALL');
+  const [followUpFilter, setFollowUpFilter] = useState<'ALL' | 'ATTENTION'>('ALL');
   const [nicheDisplayMode, setNicheDisplayMode] = useState<'tabs' | 'dropdown'>('tabs');
   const tabsRef = React.useRef<HTMLDivElement>(null);
 
@@ -464,10 +466,49 @@ export default function ApproachesPage() {
     }
   };
 
+  // Check follow up status (Overdue vs Today)
+  const getFollowUpStatus = (dateStr?: string) => {
+    if (!dateStr) return null;
+    const target = new Date(dateStr);
+    const today = new Date();
+    target.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return { type: 'OVERDUE', text: `${Math.abs(diffDays)}d overdue`, days: diffDays };
+    if (diffDays === 0) return { type: 'TODAY', text: 'Today', days: 0 };
+    if (diffDays === 1) return { type: 'TOMORROW', text: 'Tomorrow', days: 1 };
+    return { type: 'UPCOMING', text: `In ${diffDays}d`, days: diffDays };
+  };
+
+  const overdueFollowUpsCount = approaches.filter((a) => {
+    if (a.status === 'DEAL_WON' || a.status === 'NOT_INTERESTED' || !a.nextFollowUpDate) return false;
+    const st = getFollowUpStatus(a.nextFollowUpDate);
+    return st?.type === 'OVERDUE';
+  }).length;
+
+  const todayFollowUpsCount = approaches.filter((a) => {
+    if (a.status === 'DEAL_WON' || a.status === 'NOT_INTERESTED' || !a.nextFollowUpDate) return false;
+    const st = getFollowUpStatus(a.nextFollowUpDate);
+    return st?.type === 'TODAY';
+  }).length;
+
   // Filter list
   const filteredApproaches = approaches.filter((a) => {
     const matchesNiche = selectedNiche === 'All Niches' || a.niche === selectedNiche;
     const matchesStatus = selectedStatus === 'ALL' || a.status === selectedStatus;
+
+    // Follow-up attention filter
+    if (followUpFilter === 'ATTENTION') {
+      const st = getFollowUpStatus(a.nextFollowUpDate);
+      if (
+        a.status === 'DEAL_WON' ||
+        a.status === 'NOT_INTERESTED' ||
+        (st?.type !== 'OVERDUE' && st?.type !== 'TODAY')
+      ) {
+        return false;
+      }
+    }
 
     // Filter by Owner
     let matchesOwner = true;
@@ -523,6 +564,46 @@ export default function ApproachesPage() {
             </div>
             <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center border border-teal-500/20 shrink-0">
               <Target className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div
+            onClick={() => setFollowUpFilter(followUpFilter === 'ATTENTION' ? 'ALL' : 'ATTENTION')}
+            className={`cursor-pointer transition border rounded-2xl p-4 shadow-sm flex items-center justify-between ${
+              overdueFollowUpsCount > 0
+                ? 'bg-rose-500/10 border-rose-500/30 hover:border-rose-500/50'
+                : todayFollowUpsCount > 0
+                ? 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/50'
+                : 'bg-[#111111] border-[#222222] hover:border-[#333333]'
+            }`}
+          >
+            <div>
+              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+                Follow-Up Attention
+              </span>
+              <span
+                className={`text-2xl font-bold font-heading mt-1 block ${
+                  overdueFollowUpsCount > 0
+                    ? 'text-rose-400'
+                    : todayFollowUpsCount > 0
+                    ? 'text-amber-400'
+                    : 'text-white'
+                }`}
+              >
+                {overdueFollowUpsCount + todayFollowUpsCount}
+              </span>
+              <span className="text-[10px] text-neutral-500">
+                {overdueFollowUpsCount} overdue • {todayFollowUpsCount} today
+              </span>
+            </div>
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
+                overdueFollowUpsCount > 0
+                  ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
+                  : 'bg-amber-500/20 border-amber-500/40 text-amber-400'
+              }`}
+            >
+              <AlertTriangle className="w-5 h-5" />
             </div>
           </div>
 
@@ -742,6 +823,21 @@ export default function ApproachesPage() {
                   ))}
                 </select>
               </div>
+
+              {/* Follow-up Attention Filter Button */}
+              <button
+                type="button"
+                onClick={() => setFollowUpFilter(followUpFilter === 'ATTENTION' ? 'ALL' : 'ATTENTION')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition border ${
+                  followUpFilter === 'ATTENTION'
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm'
+                    : 'bg-[#141414] text-neutral-400 border-[#262626] hover:text-white'
+                }`}
+                title="Filter leads that need follow-up today or are overdue"
+              >
+                <AlertTriangle className={`w-3.5 h-3.5 ${overdueFollowUpsCount > 0 ? 'text-rose-400' : 'text-amber-400'}`} />
+                <span>Follow-ups ({overdueFollowUpsCount + todayFollowUpsCount})</span>
+              </button>
             </div>
 
             {/* Search Input */}
@@ -904,33 +1000,52 @@ export default function ApproachesPage() {
                         </span>
                       </td>
 
-                      {/* Last Contact Date */}
+                      {/* Last Contact Date & Follow Up Alert */}
                       <td className="py-3.5 px-4">
-                        {appr.lastContactDate ? (
-                          <div className="space-y-0.5">
-                            <span className="text-neutral-200 font-medium flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-neutral-500" />
-                              {new Date(appr.lastContactDate).toLocaleDateString(undefined, {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
-                            </span>
-                            {appr.nextFollowUpDate && (
-                              <span className="text-[10px] text-amber-400 flex items-center gap-1">
-                                Follow-up:{' '}
-                                {new Date(appr.nextFollowUpDate).toLocaleDateString(undefined, {
-                                  month: 'short',
-                                  day: 'numeric',
-                                })}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-amber-500/80 font-medium text-[11px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                            Never Contacted
-                          </span>
-                        )}
+                        {(() => {
+                          const followUpStatus = getFollowUpStatus(appr.nextFollowUpDate);
+                          return (
+                            <div className="space-y-1">
+                              {appr.lastContactDate ? (
+                                <span className="text-neutral-200 font-medium flex items-center gap-1 text-[11px]">
+                                  <Clock className="w-3 h-3 text-neutral-500" />
+                                  {new Date(appr.lastContactDate).toLocaleDateString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric',
+                                  })}
+                                </span>
+                              ) : (
+                                <span className="text-neutral-500 text-[10px] italic">Not contacted</span>
+                              )}
+
+                              {appr.nextFollowUpDate && (
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  <span
+                                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded border flex items-center gap-1 ${
+                                      followUpStatus?.type === 'OVERDUE'
+                                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
+                                        : followUpStatus?.type === 'TODAY'
+                                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                        : 'bg-[#181818] text-neutral-400 border-[#282828]'
+                                    }`}
+                                  >
+                                    <Calendar className="w-2.5 h-2.5" />
+                                    <span>
+                                      {followUpStatus?.type === 'OVERDUE'
+                                        ? `⚠️ ${followUpStatus.text}`
+                                        : followUpStatus?.type === 'TODAY'
+                                        ? '⚡ Today'
+                                        : new Date(appr.nextFollowUpDate).toLocaleDateString(undefined, {
+                                            month: 'short',
+                                            day: 'numeric',
+                                          })}
+                                    </span>
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                     </tr>
                   );
