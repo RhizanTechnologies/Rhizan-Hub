@@ -122,6 +122,7 @@ export default function ApproachDetailPage() {
   const [formEmail, setFormEmail] = useState('');
   const [formLocation, setFormLocation] = useState('');
   const [formStatus, setFormStatus] = useState<ApproachStatus>('PROSPECT');
+  const [formAssignedTo, setFormAssignedTo] = useState<string>('');
   const [formNotes, setFormNotes] = useState('');
 
   // Log contact form state
@@ -151,6 +152,13 @@ export default function ApproachDetailPage() {
         setFormEmail(data.email || '');
         setFormLocation(data.location || '');
         setFormStatus(data.status);
+        setFormAssignedTo(
+          data.assignedTo
+            ? typeof data.assignedTo === 'object'
+              ? (data.assignedTo as any)._id || (data.assignedTo as any).id
+              : data.assignedTo
+            : ''
+        );
         setFormNotes(data.notes || '');
       }
     } catch (err) {
@@ -179,6 +187,7 @@ export default function ApproachDetailPage() {
         email: formEmail.trim(),
         location: formLocation.trim(),
         status: formStatus,
+        assignedTo: formAssignedTo || null,
         notes: formNotes.trim(),
       };
 
@@ -191,6 +200,20 @@ export default function ApproachDetailPage() {
       setIsEditModalOpen(false);
     } catch (err: any) {
       alert(err.message || 'Failed to update approach details');
+    }
+  };
+
+  const handleQuickReassign = async (newOwnerId: string) => {
+    if (!approach) return;
+    try {
+      const updated = await apiFetch<Approach>(`/approaches/${approach._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ assignedTo: newOwnerId || null }),
+      });
+      setApproach(updated);
+      setFormAssignedTo(newOwnerId);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update assigned lead owner');
     }
   };
 
@@ -365,6 +388,16 @@ export default function ApproachDetailPage() {
                   <Tag className="w-3 h-3" />
                   {approach.niche}
                 </span>
+                {approach.assignedTo ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#181818] text-teal-300 border border-teal-500/30 text-[11px] font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                    <span>Lead: {typeof approach.assignedTo === 'object' ? (approach.assignedTo as any).name : 'Assigned'}</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#181818] text-neutral-400 border border-[#282828] text-[11px]">
+                    <span>Open / Unassigned</span>
+                  </span>
+                )}
               </div>
               <p className="text-xs text-neutral-400 mt-0.5 flex items-center gap-3">
                 {approach.location && (
@@ -692,6 +725,39 @@ export default function ApproachDetailPage() {
                   <span className="text-neutral-600">None scheduled</span>
                 )}
               </div>
+
+              {/* Responsible Lead Follow-up Owner Quick Switcher */}
+              <div className="pt-3 border-t border-[#1e1e1e]">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-neutral-500 block text-[10px] uppercase font-bold tracking-wider">
+                    Responsible Team Member
+                  </span>
+                </div>
+                <div className="relative">
+                  <select
+                    value={
+                      approach.assignedTo
+                        ? typeof approach.assignedTo === 'object'
+                          ? (approach.assignedTo as any)._id || (approach.assignedTo as any).id
+                          : approach.assignedTo
+                        : ''
+                    }
+                    onChange={(e) => handleQuickReassign(e.target.value)}
+                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 pr-8 text-xs text-teal-300 font-medium outline-none focus:border-teal-500 appearance-none cursor-pointer"
+                  >
+                    <option value="">🌐 Open for Everyone (Unassigned)</option>
+                    {teamMembers.map((m) => (
+                      <option key={m.id || m._id} value={m.id || m._id}>
+                        👤 {m.name} {m.title ? `(${m.title})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+                <p className="text-[10px] text-neutral-500 mt-1">
+                  Change anytime. The assigned member owns communication and follow-up calls.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -972,6 +1038,32 @@ export default function ApproachDetailPage() {
                 className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
               />
             </div>
+          </div>
+
+          {/* Responsible Person / Lead Owner */}
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1 flex items-center justify-between">
+              <span>Responsible Person (Lead Follow-up)</span>
+              <span className="text-[10px] text-neutral-500 font-normal lowercase">(optional)</span>
+            </label>
+            <div className="relative">
+              <select
+                value={formAssignedTo}
+                onChange={(e) => setFormAssignedTo(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer"
+              >
+                <option value="">-- Open for Everyone (Unassigned) --</option>
+                {teamMembers.map((member) => (
+                  <option key={member.id || member._id} value={member.id || member._id}>
+                    👤 {member.name} {member.title ? `(${member.title})` : ''}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <p className="text-[10px] text-neutral-500 mt-1">
+              Select who from the team is responsible for managing communications and follow-ups with this lead.
+            </p>
           </div>
 
           <div>

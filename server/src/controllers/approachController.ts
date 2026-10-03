@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import { Approach } from '../models/Approach';
 import { Client } from '../models/Client';
 import { Activity } from '../models/Activity';
@@ -14,6 +15,7 @@ export const getApproaches = async (req: AuthRequest, res: Response): Promise<vo
 
     const approaches = await Approach.find(filter)
       .populate('convertedClientId', 'name status')
+      .populate('assignedTo', 'name email avatar title role')
       .sort({ updatedAt: -1 });
 
     res.json(approaches);
@@ -27,6 +29,7 @@ export const getApproachById = async (req: AuthRequest, res: Response): Promise<
     const { id } = req.params;
     const approach = await Approach.findById(id)
       .populate('convertedClientId', 'name status')
+      .populate('assignedTo', 'name email avatar title role')
       .populate('contactHistory.loggedBy', 'name avatar role');
 
     if (!approach) {
@@ -51,6 +54,7 @@ export const createApproach = async (req: AuthRequest, res: Response): Promise<v
       location,
       status,
       notes,
+      assignedTo,
       lastContactDate,
       nextFollowUpDate,
     } = req.body;
@@ -79,10 +83,13 @@ export const createApproach = async (req: AuthRequest, res: Response): Promise<v
       location: location || '',
       status: status || 'PROSPECT',
       notes: notes || '',
+      assignedTo: assignedTo && mongoose.Types.ObjectId.isValid(assignedTo) ? assignedTo : null,
       lastContactDate: lastContactDate ? new Date(lastContactDate) : undefined,
       nextFollowUpDate: nextFollowUpDate ? new Date(nextFollowUpDate) : undefined,
       contactHistory,
     });
+
+    await approach.populate('assignedTo', 'name email avatar title role');
 
     if (req.user) {
       await Activity.create({
@@ -161,7 +168,14 @@ export const addContactHistory = async (req: AuthRequest, res: Response): Promis
 export const updateApproach = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const approach = await Approach.findByIdAndUpdate(id, req.body, { new: true });
+    const updateData = { ...req.body };
+    if (updateData.assignedTo === '' || updateData.assignedTo === null) {
+      updateData.assignedTo = null;
+    }
+
+    const approach = await Approach.findByIdAndUpdate(id, updateData, { new: true })
+      .populate('convertedClientId', 'name status')
+      .populate('assignedTo', 'name email avatar title role');
 
     if (!approach) {
       res.status(404).json({ message: 'Approach record not found' });

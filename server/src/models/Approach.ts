@@ -32,6 +32,7 @@ export interface IApproach extends Document {
   lastContactDate?: Date;
   nextFollowUpDate?: Date;
   contactHistory: IContactHistory[];
+  assignedTo?: Types.ObjectId;
   convertedClientId?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -66,6 +67,7 @@ const ApproachSchema = new Schema<IApproach>(
       default: 'PROSPECT',
     },
     notes: { type: String, default: '' },
+    assignedTo: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     lastContactDate: { type: Date },
     nextFollowUpDate: { type: Date },
     contactHistory: [ContactHistorySchema],

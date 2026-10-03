@@ -30,8 +30,11 @@ import {
   Settings2,
   Check,
   X,
+  User as UserIcon,
+  ChevronDown,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 const STATUS_CONFIG: Record<ApproachStatus, { label: string; color: string; dot: string }> = {
   PROSPECT: {
@@ -73,14 +76,17 @@ function formatCleanPhone(raw?: string): string {
 
 export default function ApproachesPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [approaches, setApproaches] = useState<Approach[]>([]);
   const [niches, setNiches] = useState<Niche[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNiche, setSelectedNiche] = useState('All Niches');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
+  const [selectedOwner, setSelectedOwner] = useState<string>('ALL');
 
   // Modals
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,6 +121,7 @@ export default function ApproachesPage() {
   const [email, setEmail] = useState('');
   const [location, setLocation] = useState('');
   const [status, setStatus] = useState<ApproachStatus>('PROSPECT');
+  const [assignedTo, setAssignedTo] = useState<string>('');
   const [lastContactDate, setLastContactDate] = useState('');
   const [nextFollowUpDate, setNextFollowUpDate] = useState('');
   const [notes, setNotes] = useState('');
@@ -122,12 +129,14 @@ export default function ApproachesPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [approachesData, nichesData] = await Promise.all([
+      const [approachesData, nichesData, teamData] = await Promise.all([
         apiFetch<Approach[]>('/approaches'),
         apiFetch<Niche[]>('/niches'),
+        apiFetch<any[]>('/team'),
       ]);
       if (approachesData) setApproaches(approachesData);
       if (nichesData) setNiches(nichesData);
+      if (teamData) setTeamMembers(teamData);
     } catch (err) {
       console.error('Failed to load outreach data:', err);
     } finally {
@@ -178,6 +187,7 @@ export default function ApproachesPage() {
     setEmail('');
     setLocation('');
     setStatus('PROSPECT');
+    setAssignedTo('');
     setLastContactDate('');
     setNextFollowUpDate('');
     setNotes('');
@@ -195,6 +205,13 @@ export default function ApproachesPage() {
     setEmail(appr.email || '');
     setLocation(appr.location || '');
     setStatus(appr.status);
+    setAssignedTo(
+      appr.assignedTo
+        ? typeof appr.assignedTo === 'object'
+          ? (appr.assignedTo as any)._id || (appr.assignedTo as any).id
+          : appr.assignedTo
+        : ''
+    );
     setLastContactDate(appr.lastContactDate ? appr.lastContactDate.split('T')[0] : '');
     setNextFollowUpDate(appr.nextFollowUpDate ? appr.nextFollowUpDate.split('T')[0] : '');
     setNotes(appr.notes || '');
@@ -245,6 +262,7 @@ export default function ApproachesPage() {
       email: email.trim(),
       location: location.trim(),
       status,
+      assignedTo: assignedTo || null,
       lastContactDate: lastContactDate ? new Date(lastContactDate).toISOString() : undefined,
       nextFollowUpDate: nextFollowUpDate ? new Date(nextFollowUpDate).toISOString() : undefined,
       notes: notes.trim(),
@@ -434,14 +452,34 @@ export default function ApproachesPage() {
   const filteredApproaches = approaches.filter((a) => {
     const matchesNiche = selectedNiche === 'All Niches' || a.niche === selectedNiche;
     const matchesStatus = selectedStatus === 'ALL' || a.status === selectedStatus;
+
+    // Filter by Owner
+    let matchesOwner = true;
+    if (selectedOwner === 'UNASSIGNED') {
+      matchesOwner = !a.assignedTo;
+    } else if (selectedOwner === 'ME') {
+      if (!a.assignedTo) {
+        matchesOwner = false;
+      } else {
+        const ownerId = typeof a.assignedTo === 'object' ? (a.assignedTo as any)._id || (a.assignedTo as any).id : a.assignedTo;
+        const ownerEmail = typeof a.assignedTo === 'object' ? (a.assignedTo as any).email : '';
+        matchesOwner = ownerId === (user as any)?.id || ownerId === (user as any)?._id || ownerEmail === user?.email;
+      }
+    } else if (selectedOwner !== 'ALL') {
+      const ownerId = typeof a.assignedTo === 'object' ? (a.assignedTo as any)._id || (a.assignedTo as any).id : a.assignedTo;
+      matchesOwner = ownerId === selectedOwner;
+    }
+
     const query = searchQuery.toLowerCase();
+    const assignedName = a.assignedTo && typeof a.assignedTo === 'object' ? (a.assignedTo as any).name?.toLowerCase() || '' : '';
     const matchesSearch =
       a.businessName.toLowerCase().includes(query) ||
       (a.location && a.location.toLowerCase().includes(query)) ||
       (a.contactPerson && a.contactPerson.toLowerCase().includes(query)) ||
+      assignedName.includes(query) ||
       (a.notes && a.notes.toLowerCase().includes(query));
 
-    return matchesNiche && matchesStatus && matchesSearch;
+    return matchesNiche && matchesStatus && matchesOwner && matchesSearch;
   });
 
   return (
@@ -564,32 +602,53 @@ export default function ApproachesPage() {
             </button>
           </div>
 
-          {/* Search & Status Filters */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-            {/* Status Filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-neutral-400 font-medium">Status:</span>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="bg-[#141414] border border-[#262626] rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-teal-500"
-              >
-                <option value="ALL">All Statuses</option>
-                <option value="PROSPECT">Prospect</option>
-                <option value="CONTACTED">Contacted</option>
-                <option value="PITCHED">Pitched / Demo Sent</option>
-                <option value="IN_DISCUSSION">In Discussion</option>
-                <option value="DEAL_WON">Deal Won (Client)</option>
-                <option value="NOT_INTERESTED">Not Interested</option>
-              </select>
+          {/* Search, Status & Owner Filters */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Status Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-neutral-400 font-medium">Status:</span>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="bg-[#141414] border border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
+                >
+                  <option value="ALL">All Statuses</option>
+                  <option value="PROSPECT">Prospect</option>
+                  <option value="CONTACTED">Contacted</option>
+                  <option value="PITCHED">Pitched / Demo Sent</option>
+                  <option value="IN_DISCUSSION">In Discussion</option>
+                  <option value="DEAL_WON">Deal Won (Client)</option>
+                  <option value="NOT_INTERESTED">Not Interested</option>
+                </select>
+              </div>
+
+              {/* Responsible Lead Owner Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-neutral-400 font-medium">Responsible:</span>
+                <select
+                  value={selectedOwner}
+                  onChange={(e) => setSelectedOwner(e.target.value)}
+                  className="bg-[#141414] border border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500 cursor-pointer"
+                >
+                  <option value="ALL">All Leads</option>
+                  <option value="ME">👤 Assigned to Me</option>
+                  <option value="UNASSIGNED">🌐 Open (Unassigned)</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.id || m._id} value={m.id || m._id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Search Input */}
-            <div className="relative w-full sm:w-72">
+            <div className="relative w-full md:w-72">
               <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search business, contact, or location..."
+                placeholder="Search business, contact, owner, or area..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#141414] border border-[#262626] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
@@ -619,7 +678,7 @@ export default function ApproachesPage() {
               <thead>
                 <tr className="border-b border-[#1f1f1f] bg-[#141414]/80 text-[11px] text-neutral-400 font-semibold uppercase tracking-wider">
                   <th className="py-3 px-4">Business Name</th>
-                  <th className="py-3 px-4">Contact Person</th>
+                  <th className="py-3 px-4">Contact Person & Lead Owner</th>
                   <th className="py-3 px-4">Niche / Category</th>
                   <th className="py-3 px-4">Location</th>
                   <th className="py-3 px-4">Contact Info</th>
@@ -657,13 +716,24 @@ export default function ApproachesPage() {
                         </div>
                       </td>
 
-                      {/* Contact Person */}
+                      {/* Contact Person & Responsible Lead Owner */}
                       <td className="py-3.5 px-4 text-neutral-300 font-medium">
                         {appr.contactPerson ? (
-                          <span>{appr.contactPerson}</span>
+                          <span className="text-white font-medium block leading-snug">{appr.contactPerson}</span>
                         ) : (
-                          <span className="text-neutral-600">—</span>
+                          <span className="text-neutral-500 block leading-snug">—</span>
                         )}
+                        <div className="text-[11px] flex items-center gap-1.5 mt-0.5">
+                          <span className="text-neutral-500 text-[10px] uppercase font-semibold">Lead:</span>
+                          {appr.assignedTo ? (
+                            <span className="text-teal-400 font-medium inline-flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                              {typeof appr.assignedTo === 'object' ? (appr.assignedTo as any).name : 'Assigned'}
+                            </span>
+                          ) : (
+                            <span className="text-neutral-500 italic text-[11px]">Open (Unassigned)</span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Niche / Category */}
@@ -959,6 +1029,32 @@ export default function ApproachesPage() {
                 className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
               />
             </div>
+          </div>
+
+          {/* Responsible Person / Lead Follow-up Owner */}
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1 flex items-center justify-between">
+              <span>Responsible Person (Lead Follow-up)</span>
+              <span className="text-[10px] text-neutral-500 font-normal lowercase">(optional)</span>
+            </label>
+            <div className="relative">
+              <select
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(e.target.value)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer"
+              >
+                <option value="">-- Open for Everyone (Unassigned) --</option>
+                {teamMembers.map((member) => (
+                  <option key={member.id || member._id} value={member.id || member._id}>
+                    👤 {member.name} {member.title ? `(${member.title})` : ''}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <p className="text-[10px] text-neutral-500 mt-1">
+              Assign one person to manage follow-up calls and meetings, or leave open for the entire team.
+            </p>
           </div>
 
           <div>

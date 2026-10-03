@@ -245,6 +245,14 @@ export interface Approach {
   location?: string;
   status: ApproachStatus;
   notes?: string;
+  assignedTo?: {
+    _id: string;
+    name: string;
+    email?: string;
+    avatar?: string;
+    title?: string;
+    role?: string;
+  } | string | null;
   lastContactDate?: string;
   nextFollowUpDate?: string;
   contactHistory?: ContactInteraction[];
