@@ -774,7 +774,7 @@ export default function TeamPage() {
                 <div>
                   <h4 className="text-xs font-bold text-white">Invitation Created</h4>
                   <p className="text-[11px] text-neutral-300 mt-0.5">
-                    {createdInvite.emailMessage || 'Invitation created. To send emails automatically, configure Gmail or Resend in server/.env.'}
+                    {createdInvite.emailMessage || 'Invitation created. To send emails automatically, configure SMTP credentials in server/.env.'}
                   </p>
                 </div>
               </div>
