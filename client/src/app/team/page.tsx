@@ -26,7 +26,9 @@ import {
   ArrowRight,
   Layers,
   Send,
+  Trash2,
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 interface ActiveProjectItem {
   id?: string;
@@ -58,8 +60,17 @@ interface TeamMember {
 }
 
 export default function TeamPage() {
+  const { user: currentUser } = useAuth();
+  const isAdmin = currentUser?.role === 'ADMIN';
+  const currentUserId = currentUser?.id || currentUser?._id;
+
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Delete modal state
+  const [deleteTarget, setDeleteTarget] = useState<TeamMember | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState('');
@@ -280,6 +291,28 @@ export default function TeamPage() {
     }
   };
 
+  const handleDeleteMember = async () => {
+    if (!deleteTarget) return;
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+      await apiFetch(`/team/${deleteTarget.id}`, {
+        method: 'DELETE',
+      });
+      setToastMessage({
+        type: 'success',
+        text: `Team member ${deleteTarget.name} has been removed.`,
+      });
+      setTimeout(() => setToastMessage(null), 5000);
+      setDeleteTarget(null);
+      await loadTeam();
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete team member.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleCopyCredentials = () => {
     if (!createdInvite) return;
     const loginUrl = `${window.location.origin}/login`;
@@ -469,11 +502,27 @@ export default function TeamPage() {
                       </div>
                     </Link>
 
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${loadStatus.color}`}
-                    >
-                      {loadStatus.label}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${loadStatus.color}`}
+                      >
+                        {loadStatus.label}
+                      </span>
+                      {isAdmin && member.id !== currentUserId && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDeleteTarget(member);
+                          }}
+                          title={`Delete ${member.name}`}
+                          className="w-7 h-7 rounded-lg bg-neutral-900/80 hover:bg-rose-500/20 border border-neutral-800 hover:border-rose-500/40 text-neutral-500 hover:text-rose-400 flex items-center justify-center transition"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Summary Metric Stats */}
@@ -635,13 +684,29 @@ export default function TeamPage() {
                     </div>
                   )}
 
-                  <Link
-                    href={`/team/${member.id}`}
-                    className="w-full py-2 px-3 rounded-xl bg-[#181818] hover:bg-teal-500/10 border border-[#262626] hover:border-teal-500/40 text-xs font-medium text-neutral-300 hover:text-teal-300 flex items-center justify-center gap-1.5 transition group/btn"
-                  >
-                    <span>View Member Profile & Workload</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/team/${member.id}`}
+                      className="flex-1 py-2 px-3 rounded-xl bg-[#181818] hover:bg-teal-500/10 border border-[#262626] hover:border-teal-500/40 text-xs font-medium text-neutral-300 hover:text-teal-300 flex items-center justify-center gap-1.5 transition group/btn"
+                    >
+                      <span>View Profile & Workload</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                    </Link>
+                    {isAdmin && member.id !== currentUserId && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDeleteTarget(member);
+                        }}
+                        title={`Delete ${member.name}`}
+                        className="py-2 px-2.5 rounded-xl bg-[#181818] hover:bg-rose-500/20 border border-[#262626] hover:border-rose-500/40 text-neutral-400 hover:text-rose-400 flex items-center justify-center transition"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
 
                   <div className="text-center">
                     <span className="text-[11px] text-neutral-500 flex items-center justify-center gap-1.5 hover:text-neutral-400 transition">
@@ -940,6 +1005,76 @@ export default function TeamPage() {
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Delete Member Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => {
+          if (!isDeleting) {
+            setDeleteTarget(null);
+            setDeleteError(null);
+          }
+        }}
+        title="Delete Team Member"
+      >
+        {deleteTarget && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-white">Permanently Remove Member</h4>
+                <p className="text-xs text-rose-200/90 leading-relaxed">
+                  Are you sure you want to remove <strong className="text-white">{deleteTarget.name}</strong> ({deleteTarget.email}) from Rhizan Hub?
+                </p>
+                <p className="text-[11px] text-neutral-400 pt-1">
+                  This will revoke their access, unassign any open tasks, and remove them from project teams. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            {deleteError && (
+              <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setDeleteError(null);
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#1a1a1a] transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDeleteMember}
+                className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium text-xs shadow-md shadow-rose-950/40 flex items-center gap-2 transition disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Removing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Yes, Delete Member</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         )}

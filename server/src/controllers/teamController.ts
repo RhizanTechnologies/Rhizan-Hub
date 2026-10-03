@@ -5,6 +5,7 @@ import { Task } from '../models/Task';
 import { Project } from '../models/Project';
 import { TimeEntry } from '../models/TimeEntry';
 import { Approach } from '../models/Approach';
+import { Client } from '../models/Client';
 import { AuthRequest } from '../middlewares/auth';
 
 export const getTeam = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -197,5 +198,38 @@ export const updateTeamMember = async (req: AuthRequest, res: Response): Promise
     res.json(updated);
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to update team member', error: error.message });
+  }
+};
+
+export const deleteTeamMember = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const callerId = (req.user as any)?._id?.toString() || (req.user as any)?.id?.toString();
+    if (callerId === id) {
+      res.status(400).json({ message: 'You cannot delete your own account.' });
+      return;
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(404).json({ message: 'Team member not found' });
+      return;
+    }
+
+    // Clean up references in other collections
+    await Task.updateMany({ assignedTo: id }, { $unset: { assignedTo: '' } });
+    await Project.updateMany({ members: id }, { $pull: { members: id } });
+    if (callerId) {
+      await Project.updateMany({ lead: id }, { $set: { lead: callerId } });
+    }
+    await Approach.updateMany({ assignedTo: id }, { $unset: { assignedTo: '' } });
+    await Client.updateMany({ assignedTo: id }, { $unset: { assignedTo: '' } });
+
+    await User.findByIdAndDelete(id);
+
+    res.json({ message: `Team member ${user.name} deleted successfully.` });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to delete team member', error: error.message });
   }
 };

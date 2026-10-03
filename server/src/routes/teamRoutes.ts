@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getTeam, getTeamMemberDetails, updateTeamMember } from '../controllers/teamController';
+import { getTeam, getTeamMemberDetails, updateTeamMember, deleteTeamMember } from '../controllers/teamController';
 import { inviteMember, resendInvite } from '../controllers/authController';
 import { authenticateToken, requireAdmin } from '../middlewares/auth';
 
@@ -9,6 +9,7 @@ router.use(authenticateToken);
 router.get('/', getTeam);
 router.get('/:id', getTeamMemberDetails);
 router.patch('/:id', requireAdmin, updateTeamMember);
+router.delete('/:id', requireAdmin, deleteTeamMember);
 router.post('/invite', requireAdmin, inviteMember);
 router.post('/:id/resend-invite', requireAdmin, resendInvite);
 

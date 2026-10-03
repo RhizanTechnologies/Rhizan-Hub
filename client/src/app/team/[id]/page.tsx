@@ -28,7 +28,9 @@ import {
   Save,
   Briefcase,
   TrendingUp,
+  Trash2,
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 interface MemberDetailsResponse {
   user: {
@@ -108,6 +110,10 @@ export default function TeamMemberDetailPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'tasks' | 'time' | 'outreach'>('overview');
   const [taskFilter, setTaskFilter] = useState<'ALL' | 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE'>('ALL');
 
+  const { user: currentUser } = useAuth();
+  const isAdmin = currentUser?.role === 'ADMIN';
+  const currentUserId = currentUser?.id || currentUser?._id;
+
   // Edit modal
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editName, setEditName] = useState('');
@@ -117,6 +123,11 @@ export default function TeamMemberDetailPage() {
   const [editStatus, setEditStatus] = useState('ACTIVE');
   const [isUpdating, setIsUpdating] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+
+  // Delete modal
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const getFallbackMember = (id: string): MemberDetailsResponse => {
     if (id === '2' || id === '6abe3781770efbb9b5a4c96e') {
@@ -434,6 +445,21 @@ export default function TeamMemberDetailPage() {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+      await apiFetch(`/team/${memberId}`, {
+        method: 'DELETE',
+      });
+      router.push('/team');
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete team member');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Filter tasks
   const filteredTasks = useMemo(() => {
     if (!data?.tasks) return [];
@@ -499,9 +525,21 @@ export default function TeamMemberDetailPage() {
             <span>Back to Team Directory</span>
           </Link>
 
-          <span className="text-xs text-neutral-500">
-            RHIZAN Standard: <strong className="text-teal-400">48h / week</strong> (6 days × 8h)
-          </span>
+          <div className="flex items-center gap-3">
+            {isAdmin && user.id !== currentUserId && (
+              <button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="py-1.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-medium text-rose-300 hover:text-rose-200 flex items-center gap-1.5 transition shadow-sm"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Member</span>
+              </button>
+            )}
+            <span className="text-xs text-neutral-500 hidden sm:inline">
+              RHIZAN Standard: <strong className="text-teal-400">48h / week</strong> (6 days × 8h)
+            </span>
+          </div>
         </div>
 
         {/* Member Profile Card & Hero Banner */}
@@ -1266,33 +1304,119 @@ export default function TeamMemberDetailPage() {
             </div>
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-2">
+          <div className="pt-2 flex items-center justify-between gap-2">
+            <div>
+              {isAdmin && user.id !== currentUserId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditOpen(false);
+                    setIsDeleteModalOpen(true);
+                  }}
+                  className="px-3 py-2 rounded-xl text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 flex items-center gap-1.5 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Member</span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsEditOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#1a1a1a] transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30 flex items-center gap-2 transition disabled:opacity-50"
+              >
+                {isUpdating ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save Changes</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Member Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          if (!isDeleting) {
+            setIsDeleteModalOpen(false);
+            setDeleteError(null);
+          }
+        }}
+        title="Delete Team Member"
+      >
+        <div className="space-y-4">
+          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+              <Trash2 className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-xs font-bold text-white">Permanently Remove Member</h4>
+              <p className="text-xs text-rose-200/90 leading-relaxed">
+                Are you sure you want to remove <strong className="text-white">{user.name}</strong> ({user.email}) from Rhizan Hub?
+              </p>
+              <p className="text-[11px] text-neutral-400 pt-1">
+                This will revoke their access immediately, unassign their pending tasks, and remove them from all project teams. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+
+          {deleteError && (
+            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 shrink-0 text-rose-400" />
+              <span>{deleteError}</span>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2 pt-2">
             <button
               type="button"
-              onClick={() => setIsEditOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#1a1a1a] transition"
+              disabled={isDeleting}
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setDeleteError(null);
+              }}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#1a1a1a] transition disabled:opacity-50"
             >
               Cancel
             </button>
             <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30 flex items-center gap-2 transition disabled:opacity-50"
+              type="button"
+              disabled={isDeleting}
+              onClick={handleDelete}
+              className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium text-xs shadow-md shadow-rose-950/40 flex items-center gap-2 transition disabled:opacity-50"
             >
-              {isUpdating ? (
+              {isDeleting ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Saving...</span>
+                  <span>Removing...</span>
                 </>
               ) : (
                 <>
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Save Changes</span>
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Yes, Delete Member</span>
                 </>
               )}
             </button>
           </div>
-        </form>
+        </div>
       </Modal>
     </div>
   );
