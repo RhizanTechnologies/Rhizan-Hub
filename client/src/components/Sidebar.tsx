@@ -19,6 +19,7 @@ import {
   Compass,
   X,
   FileText,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
@@ -32,6 +33,7 @@ const navItems = [
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Time Tracking', href: '/time', icon: Clock },
   { name: 'Weekly Report', href: '/reports/weekly', icon: FileText },
+  { name: 'Settings', href: '/settings', icon: SlidersHorizontal },
 ];
 
 export const Sidebar: React.FC = () => {
