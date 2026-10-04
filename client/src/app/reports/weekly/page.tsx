@@ -87,7 +87,7 @@ export default function WeeklyReportPage() {
   const summary = report?.summary;
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#0a0a0a] text-white print:bg-white print:text-black">
+    <div className="flex-1 flex flex-col min-h-screen bg-[var(--background)] text-[var(--foreground)] print:bg-white print:text-black">
       {/* Screen-Only App Header */}
       <div className="print:hidden">
         <Header

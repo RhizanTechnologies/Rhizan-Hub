@@ -884,23 +884,23 @@ export default function TasksPage() {
                 }}
                 className={`${
                   isHiddenOnMobile ? 'hidden md:flex' : 'flex'
-                } bg-[#111111] border ${
+                } bg-slate-100/70 dark:bg-[#121926] border ${
                   isColumnTarget
-                    ? 'border-teal-500 bg-teal-950/20 shadow-lg shadow-teal-950/40 ring-2 ring-teal-500/30'
-                    : 'border-[#222222]'
-                } rounded-3xl p-3.5 flex-col min-h-[460px] md:min-h-[580px] shadow-sm transition-all duration-200`}
+                    ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/20 shadow-lg ring-2 ring-teal-500/30'
+                    : 'border-slate-200/90 dark:border-[#222e42]'
+                } rounded-3xl p-3.5 flex-col min-h-[460px] md:min-h-[580px] shadow-xs transition-all duration-200`}
               >
                 {/* Column Header */}
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#222222]">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200/80 dark:border-[#1e2a3c]">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-heading text-xs font-bold uppercase tracking-wider text-neutral-200">
+                    <span className="font-heading text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-neutral-200">
                       {col.label}
                     </span>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#1c1c1c] text-neutral-400 font-semibold border border-[#2a2a2a]">
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-white dark:bg-[#1a2332] text-slate-700 dark:text-neutral-400 font-semibold border border-slate-200 dark:border-[#253346] shadow-xs">
                       {colTasks.length}
                     </span>
                     {colEstimatedHours > 0 && (
-                      <span className="text-[10px] font-mono text-neutral-500">
+                      <span className="text-[10px] font-mono text-slate-500 dark:text-neutral-500">
                         • {colEstimatedHours}h est
                       </span>
                     )}
@@ -987,15 +987,15 @@ export default function TasksPage() {
                           setDragOverColumnId(null);
                         }}
                         onClick={() => setSelectedTask(task)}
-                        className={`p-3.5 rounded-2xl bg-[#161616] border ${
+                        className={`p-3.5 rounded-2xl bg-white dark:bg-[#182130] border ${
                           isDraggingThis
                             ? 'opacity-40 border-dashed border-teal-500 scale-[0.98]'
                             : isTaskAssigneeOverWip
-                            ? 'border-rose-500/50 hover:border-rose-500/80 shadow-rose-950/20 shadow-sm'
+                            ? 'border-rose-500/50 hover:border-rose-500/80 shadow-rose-950/10 shadow-xs'
                             : dateInfo?.isOverdue
                             ? 'border-rose-500/30 hover:border-rose-500/60'
-                            : 'border-[#242424] hover:border-teal-500/40'
-                        } transition-all cursor-grab active:cursor-grabbing shadow-sm group select-none space-y-2.5`}
+                            : 'border-slate-200/90 dark:border-[#243347] hover:border-teal-500/50'
+                        } transition-all cursor-grab active:cursor-grabbing shadow-xs hover:shadow-md group select-none space-y-2.5`}
                       >
                         {/* Top Badges: Priority + Due Date + Drag Grip */}
                         <div className="flex items-center justify-between gap-1.5">
@@ -1170,8 +1170,9 @@ export default function TasksPage() {
                   })}
 
                   {colTasks.length === 0 && (
-                    <div className="h-32 border border-dashed border-[#262626] rounded-2xl flex items-center justify-center text-xs text-neutral-600">
-                      No tasks in {col.label}
+                    <div className="h-36 border border-dashed border-slate-200/90 dark:border-[#243347] rounded-2xl flex flex-col items-center justify-center p-3 text-center transition-colors">
+                      <CheckSquare className="w-5 h-5 mb-1.5 text-slate-300 dark:text-neutral-600" />
+                      <span className="text-[11px] text-slate-400 dark:text-neutral-500 font-medium">No tasks in {col.label}</span>
                     </div>
                   )}
                 </div>

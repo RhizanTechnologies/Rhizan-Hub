@@ -51,9 +51,9 @@ const PROGRESS_PIPELINE_STAGES: ProgressStage[] = [
     rangeLabel: '0 - 24%',
     minProgress: 0,
     maxProgress: 24,
-    borderAccent: 'border-neutral-700/60',
-    badgeAccent: 'bg-neutral-800 text-neutral-300 border-neutral-700',
-    barColor: 'from-neutral-500 to-neutral-400',
+    borderAccent: 'border-slate-200/90 dark:border-neutral-700/60',
+    badgeAccent: 'bg-slate-200/70 text-slate-700 border-slate-300/80 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700',
+    barColor: 'from-slate-400 to-slate-500 dark:from-neutral-500 dark:to-neutral-400',
   },
   {
     id: 'DEV_EARLY',
@@ -61,8 +61,8 @@ const PROGRESS_PIPELINE_STAGES: ProgressStage[] = [
     rangeLabel: '25 - 49%',
     minProgress: 25,
     maxProgress: 49,
-    borderAccent: 'border-blue-500/30',
-    badgeAccent: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    borderAccent: 'border-blue-300/40 dark:border-blue-500/30',
+    badgeAccent: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
     barColor: 'from-blue-500 to-cyan-400',
   },
   {
@@ -71,8 +71,8 @@ const PROGRESS_PIPELINE_STAGES: ProgressStage[] = [
     rangeLabel: '50 - 74%',
     minProgress: 50,
     maxProgress: 74,
-    borderAccent: 'border-teal-500/30',
-    badgeAccent: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+    borderAccent: 'border-teal-300/40 dark:border-teal-500/30',
+    badgeAccent: 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20',
     barColor: 'from-teal-500 to-emerald-400',
   },
   {
@@ -81,8 +81,8 @@ const PROGRESS_PIPELINE_STAGES: ProgressStage[] = [
     rangeLabel: '75 - 99%',
     minProgress: 75,
     maxProgress: 99,
-    borderAccent: 'border-amber-500/30',
-    badgeAccent: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    borderAccent: 'border-amber-300/40 dark:border-amber-500/30',
+    badgeAccent: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
     barColor: 'from-amber-500 to-yellow-400',
   },
   {
@@ -91,8 +91,8 @@ const PROGRESS_PIPELINE_STAGES: ProgressStage[] = [
     rangeLabel: '100%',
     minProgress: 100,
     maxProgress: 100,
-    borderAccent: 'border-emerald-500/30',
-    badgeAccent: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    borderAccent: 'border-emerald-300/40 dark:border-emerald-500/30',
+    badgeAccent: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
     barColor: 'from-emerald-500 to-teal-400',
   },
 ];
@@ -478,7 +478,7 @@ export default function ProjectsPage() {
               className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
                 viewMode === 'GRID'
                   ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#262626]'
+                  : 'bg-white dark:bg-[#141414] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#262626]'
               }`}
             >
               <FolderKanban className="w-3.5 h-3.5" />
@@ -489,20 +489,20 @@ export default function ProjectsPage() {
           {/* Search & Priority Filter */}
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <div className="relative flex-1 sm:w-64">
-              <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search projects or clients..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#141414] border border-[#262626] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+                className="w-full bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition shadow-xs"
               />
             </div>
 
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="bg-[#141414] border border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 outline-none focus:border-teal-500 transition"
+              className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-slate-700 dark:text-neutral-300 outline-none focus:border-teal-500 transition shadow-xs"
             >
               <option value="ALL">All Priorities</option>
               <option value="URGENT">Urgent</option>
@@ -528,23 +528,23 @@ export default function ProjectsPage() {
               return (
                 <div
                   key={stage.id}
-                  className={`bg-[#0f0f0f] border ${stage.borderAccent} rounded-2xl p-3 flex flex-col min-h-[550px] shadow-sm`}
+                  className={`bg-slate-100/70 dark:bg-[#121926] border ${stage.borderAccent} rounded-2xl p-3 flex flex-col min-h-[550px] shadow-xs transition-colors`}
                 >
                   {/* Column Header */}
-                  <div className="flex items-center justify-between pb-3 border-b border-[#1f1f1f] mb-3">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-[#1e2a3c] mb-3">
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-white">{stage.label}</span>
-                        <span className="w-5 h-5 rounded-full bg-[#1c1c1c] text-[10px] text-neutral-400 font-bold flex items-center justify-center">
+                        <span className="text-xs font-semibold text-slate-900 dark:text-white">{stage.label}</span>
+                        <span className="w-5 h-5 rounded-full bg-white dark:bg-[#1a2332] text-[10px] text-slate-700 dark:text-neutral-400 font-semibold border border-slate-200 dark:border-[#253346] flex items-center justify-center shadow-xs">
                           {stageProjects.length}
                         </span>
                       </div>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${stage.badgeAccent}`}>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium border ${stage.badgeAccent}`}>
                         {stage.rangeLabel}
                       </span>
                     </div>
 
-                    <span className="text-[10px] text-emerald-400 font-semibold font-mono">
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold font-mono">
                       ${stageBudget.toLocaleString()}
                     </span>
                   </div>
@@ -557,52 +557,52 @@ export default function ProjectsPage() {
                         <div
                           key={project._id}
                           onClick={() => router.push(`/projects/${project._id}`)}
-                          className="p-3.5 rounded-xl bg-[#141414] hover:bg-[#181818] border border-[#242424] hover:border-teal-500/50 cursor-pointer transition shadow-sm space-y-2.5 group"
+                          className="p-3.5 rounded-xl bg-white dark:bg-[#182130] hover:bg-slate-50 dark:hover:bg-[#1e2a3c] border border-slate-200/90 dark:border-[#243347] hover:border-teal-500/50 cursor-pointer transition shadow-xs hover:shadow-md space-y-2.5 group"
                         >
                           {/* Title & Priority */}
                           <div>
                             <div className="flex items-start justify-between gap-1 mb-1">
-                              <h4 className="font-heading text-xs font-bold text-white group-hover:text-teal-300 transition flex items-center gap-1 leading-snug">
+                              <h4 className="font-heading text-xs font-semibold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition flex items-center gap-1 leading-snug">
                                 <span className="line-clamp-2">{project.name}</span>
-                                <ArrowUpRight className="w-3 h-3 text-neutral-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                                <ArrowUpRight className="w-3 h-3 text-slate-400 dark:text-neutral-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                               </h4>
                               {project.priority && (
                                 <PriorityBadge priority={project.priority} />
                               )}
                             </div>
 
-                            <div className="flex items-center gap-1 text-[11px] text-neutral-400">
-                              <Building2 className="w-3 h-3 text-teal-400 shrink-0" />
+                            <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-neutral-400">
+                              <Building2 className="w-3 h-3 text-teal-600 dark:text-teal-400 shrink-0" />
                               <span className="truncate">{project.clientName || 'Internal'}</span>
                             </div>
                           </div>
 
                           {/* Interactive Delivery Progress */}
-                          <div className="space-y-1 p-2 rounded-lg bg-[#181818] border border-[#242424]">
+                          <div className="space-y-1 p-2 rounded-lg bg-slate-50 dark:bg-[#131b27] border border-slate-200/80 dark:border-[#202c3e]">
                             <div className="flex items-center justify-between text-[11px]">
-                              <span className="text-neutral-400">Progress</span>
+                              <span className="text-slate-500 dark:text-neutral-400">Progress</span>
                               <div className="flex items-center gap-1.5">
                                 {/* Quick Bump Buttons */}
                                 <button
                                   type="button"
                                   title="Reduce progress by 10%"
                                   onClick={(e) => handleQuickProgressUpdate(e, project._id, -10)}
-                                  className="w-4 h-4 rounded bg-[#242424] hover:bg-neutral-700 text-neutral-300 text-[10px] flex items-center justify-center transition"
+                                  className="w-4 h-4 rounded bg-slate-200/80 dark:bg-[#202c3e] hover:bg-slate-300 dark:hover:bg-neutral-700 text-slate-700 dark:text-neutral-300 text-[10px] font-bold flex items-center justify-center transition"
                                 >
                                   -
                                 </button>
-                                <span className="font-bold text-white font-mono text-xs">{prog}%</span>
+                                <span className="font-semibold text-slate-900 dark:text-white font-mono text-xs">{prog}%</span>
                                 <button
                                   type="button"
                                   title="Advance progress by 10%"
                                   onClick={(e) => handleQuickProgressUpdate(e, project._id, 10)}
-                                  className="w-4 h-4 rounded bg-[#242424] hover:bg-teal-600 hover:text-white text-neutral-300 text-[10px] flex items-center justify-center transition"
+                                  className="w-4 h-4 rounded bg-slate-200/80 dark:bg-[#202c3e] hover:bg-teal-600 hover:text-white text-slate-700 dark:text-neutral-300 text-[10px] font-bold flex items-center justify-center transition"
                                 >
                                   +
                                 </button>
                               </div>
                             </div>
-                            <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden">
+                            <div className="w-full bg-slate-200 dark:bg-[#1a2434] h-1.5 rounded-full overflow-hidden">
                               <div
                                 className={`bg-gradient-to-r ${stage.barColor} h-full rounded-full transition-all duration-300`}
                                 style={{ width: `${prog}%` }}
@@ -614,13 +614,13 @@ export default function ProjectsPage() {
                           <div className="flex items-center justify-between pt-1 text-[10px]">
                             {project.lead ? (
                               <div className="flex items-center gap-1 truncate max-w-[120px]">
-                                <div className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[8px] font-bold flex items-center justify-center shrink-0">
+                                <div className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 text-[8px] font-bold flex items-center justify-center shrink-0">
                                   {project.lead.name?.charAt(0) || 'L'}
                                 </div>
-                                <span className="text-neutral-300 truncate">{project.lead.name}</span>
+                                <span className="text-slate-700 dark:text-neutral-300 truncate">{project.lead.name}</span>
                               </div>
                             ) : (
-                              <span className="text-neutral-500 italic">No Lead</span>
+                              <span className="text-slate-400 dark:text-neutral-500 italic">No Lead</span>
                             )}
 
                             <div className="flex items-center -space-x-1">
@@ -628,13 +628,13 @@ export default function ProjectsPage() {
                                 <div
                                   key={idx}
                                   title={m.name}
-                                  className="w-4 h-4 rounded-full bg-teal-800 text-[8px] text-white font-bold flex items-center justify-center border border-[#141414]"
+                                  className="w-4 h-4 rounded-full bg-teal-700 text-[8px] text-white font-bold flex items-center justify-center border border-white dark:border-[#141414]"
                                 >
                                   {m.name?.charAt(0) || 'U'}
                                 </div>
                               ))}
                               {(project.members || []).length > 3 && (
-                                <span className="text-[9px] text-neutral-500 pl-1 font-mono">
+                                <span className="text-[9px] text-slate-400 dark:text-neutral-500 pl-1 font-mono">
                                   +{project.members.length - 3}
                                 </span>
                               )}
@@ -642,12 +642,12 @@ export default function ProjectsPage() {
                           </div>
 
                           {/* Footer with Budget & Deadline */}
-                          <div className="flex items-center justify-between pt-1 border-t border-[#1e1e1e] text-[10px] text-neutral-400">
-                            <span className="text-emerald-400 font-mono font-bold">
+                          <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-[#202c3e] text-[10px] text-slate-500 dark:text-neutral-400">
+                            <span className="text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
                               ${(project.budget || 0).toLocaleString()}
                             </span>
                             {project.deadline && (
-                              <span className="flex items-center gap-1 text-neutral-500">
+                              <span className="flex items-center gap-1 text-slate-400 dark:text-neutral-500">
                                 <Calendar className="w-3 h-3" />
                                 {new Date(project.deadline).toLocaleDateString(undefined, {
                                   month: 'short',
@@ -661,8 +661,9 @@ export default function ProjectsPage() {
                     })}
 
                     {stageProjects.length === 0 && (
-                      <div className="h-32 border border-dashed border-[#202020] rounded-xl flex items-center justify-center p-3 text-center">
-                        <span className="text-[11px] text-neutral-600">No projects in this stage</span>
+                      <div className="h-36 border border-dashed border-slate-200/90 dark:border-[#243347] rounded-xl flex flex-col items-center justify-center p-3 text-center transition-colors">
+                        <FolderKanban className="w-5 h-5 mb-1.5 text-slate-300 dark:text-neutral-600" />
+                        <span className="text-[11px] text-slate-400 dark:text-neutral-500 font-medium">No projects in this stage</span>
                       </div>
                     )}
                   </div>
@@ -681,18 +682,18 @@ export default function ProjectsPage() {
                 <div
                   key={project._id}
                   onClick={() => router.push(`/projects/${project._id}`)}
-                  className="bg-[#121212] border border-[#222222] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-xl hover:shadow-teal-950/20 group flex flex-col justify-between"
+                  className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-lg shadow-xs group flex flex-col justify-between"
                 >
                   <div>
                     {/* Card Header */}
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="font-heading font-bold text-base text-white group-hover:text-teal-300 transition flex items-center gap-1.5">
+                        <h3 className="font-heading font-semibold text-base text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition flex items-center gap-1.5">
                           {project.name}
-                          <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-400" />
+                          <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-500" />
                         </h3>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-teal-400 font-medium flex items-center gap-1">
+                          <span className="text-xs text-teal-600 dark:text-teal-400 font-medium flex items-center gap-1">
                             <Building2 className="w-3 h-3" />
                             {project.clientName || 'Internal Project'}
                           </span>
@@ -703,10 +704,10 @@ export default function ProjectsPage() {
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase border ${
                             project.status === 'COMPLETED'
-                              ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                              ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20'
                               : project.status === 'REVIEW'
-                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                              : 'bg-teal-500/10 text-teal-400 border-teal-500/20'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'
+                              : 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20'
                           }`}
                         >
                           {project.status.replace('_', ' ')}
@@ -719,18 +720,18 @@ export default function ProjectsPage() {
 
                     {/* Project Lead */}
                     {project.lead && (
-                      <div className="flex items-center gap-2 mb-3 px-2.5 py-1 rounded-xl bg-[#161616] border border-[#262626] w-fit">
+                      <div className="flex items-center gap-2 mb-3 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] w-fit">
                         <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-teal-500 text-black font-extrabold text-[9px] flex items-center justify-center">
                           {project.lead.name?.charAt(0) || 'L'}
                         </div>
                         <div className="text-[11px] leading-tight">
-                          <span className="text-[9px] uppercase font-bold text-amber-400 mr-1">Project Lead:</span>
-                          <strong className="text-white font-medium">{project.lead.name}</strong>
+                          <span className="text-[9px] uppercase font-bold text-amber-600 dark:text-amber-400 mr-1">Project Lead:</span>
+                          <strong className="text-slate-800 dark:text-white font-medium">{project.lead.name}</strong>
                         </div>
                       </div>
                     )}
 
-                    <p className="text-xs text-neutral-400 line-clamp-2 mb-3 leading-relaxed">
+                    <p className="text-xs text-slate-500 dark:text-neutral-400 line-clamp-2 mb-3 leading-relaxed">
                       {project.description || 'No description provided.'}
                     </p>
 
