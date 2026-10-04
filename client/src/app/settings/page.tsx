@@ -43,9 +43,9 @@ export default function SettingsPage() {
   };
 
   const handleResetDefaults = () => {
-    setTheme('rhizan-dark');
+    setTheme('clean-light');
     setFont('inter');
-    showToast('✨ Appearance reset to Rhizan Dark & Inter');
+    showToast('✨ Appearance reset to Clean Light & Inter (Light & Crisp)');
   };
 
   const currentTheme = themesList.find((t) => t.id === theme) || themesList[0];
