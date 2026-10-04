@@ -5,8 +5,18 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AppShell } from '@/components/AppShell';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-outfit',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'RHIZAN Hub | Operations Platform',
@@ -23,19 +33,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className="light" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                var t = localStorage.getItem('rhizan_app_theme');
-                if (t) document.documentElement.setAttribute('data-theme', t);
-                var f = localStorage.getItem('rhizan_app_font');
-                if (f) document.documentElement.setAttribute('data-font', f);
+                var t = localStorage.getItem('rhizan_app_theme') || 'clean-light';
+                document.documentElement.setAttribute('data-theme', t);
+                var f = localStorage.getItem('rhizan_app_font') || 'inter';
+                document.documentElement.setAttribute('data-font', f);
                 if (t === 'clean-light') {
                   document.documentElement.classList.remove('dark');
                   document.documentElement.classList.add('light');
+                } else {
+                  document.documentElement.classList.remove('light');
+                  document.documentElement.classList.add('dark');
                 }
               } catch (e) {}
             `,
@@ -43,7 +56,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${outfit.variable} bg-[#0a0a0a] text-neutral-100 min-h-screen antialiased`}
+        className={`${inter.variable} ${outfit.variable} bg-[var(--background)] text-[var(--foreground)] min-h-screen antialiased font-normal selection:bg-teal-500/20`}
       >
         <AuthProvider>
           <ThemeProvider>

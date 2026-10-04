@@ -3,7 +3,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
-import { Clock, Plus, LogOut, ChevronDown, Menu, User as UserIcon, KeyRound, SlidersHorizontal } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
+import {
+  Clock,
+  Plus,
+  LogOut,
+  ChevronDown,
+  Menu,
+  User as UserIcon,
+  KeyRound,
+  SlidersHorizontal,
+  Sun,
+  Moon,
+} from 'lucide-react';
 import Link from 'next/link';
 
 interface HeaderProps {
@@ -22,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { user, logout } = useAuth();
   const { toggle } = useSidebar();
+  const { isLight, toggleColorMode } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -83,8 +96,23 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
+        {/* 1-Click Quick Light/Dark Mode Switcher */}
+        <button
+          onClick={toggleColorMode}
+          type="button"
+          className="p-2 rounded-xl border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-neutral-300 hover:text-white transition flex items-center justify-center shrink-0 shadow-sm"
+          title={isLight ? 'Switch to Dark Mode (Soft Slate)' : 'Switch to Clean Light Mode'}
+          aria-label="Toggle theme color"
+        >
+          {isLight ? (
+            <Moon className="w-4 h-4 text-indigo-500" />
+          ) : (
+            <Sun className="w-4 h-4 text-amber-400" />
+          )}
+        </button>
+
         {/* User Status Avatar & Dropdown */}
-        <div className="relative pl-2 sm:pl-3 border-l border-[#222222]" ref={menuRef}>
+        <div className="relative pl-1 sm:pl-2 border-l border-[#222222]" ref={menuRef}>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="flex items-center gap-2 sm:gap-2.5 p-1 rounded-xl hover:bg-[#181818] transition text-left"
@@ -116,6 +144,27 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               <div className="p-1 space-y-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleColorMode();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    {isLight ? (
+                      <Moon className="w-4 h-4 text-indigo-400" />
+                    ) : (
+                      <Sun className="w-4 h-4 text-amber-400" />
+                    )}
+                    <span>{isLight ? 'Dark Mode' : 'Light Mode'}</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-mono">
+                    {isLight ? 'Light Active' : 'Dark Active'}
+                  </span>
+                </button>
+
                 {user?.id && (
                   <Link
                     href={`/team/${user.id}`}
