@@ -20,9 +20,11 @@ import {
   X,
   FileText,
   SlidersHorizontal,
+  Download,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
+import { usePwa } from '@/context/PwaContext';
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -40,6 +42,7 @@ export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { isOpen, close } = useSidebar();
+  const { isInstallable, isInstalled, installPwa } = usePwa();
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
@@ -146,19 +149,34 @@ export const Sidebar: React.FC = () => {
             close();
             logout();
           }}
-          className="w-full py-1.5 px-3 rounded-lg bg-[#161616] hover:bg-[#202020] text-neutral-400 hover:text-rose-400 border border-[#262626] text-[11px] font-medium flex items-center justify-center gap-1.5 transition"
+          className="w-full py-1.5 px-3 rounded-lg bg-[#161616] hover:bg-[#202020] text-neutral-400 hover:text-rose-400 border border-[#262626] text-[11px] font-medium flex items-center justify-center gap-1.5 transition cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Sign Out</span>
         </button>
 
+        {/* PWA Install Button when available */}
+        {isInstallable && !isInstalled && (
+          <button
+            type="button"
+            onClick={() => {
+              close();
+              installPwa();
+            }}
+            className="w-full mt-2 py-1.5 px-3 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 hover:text-teal-300 border border-teal-500/20 text-[11px] font-medium flex items-center justify-center gap-1.5 transition cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Install Desktop App</span>
+          </button>
+        )}
+
         {/* Footer System Status */}
         <div className="mt-3 pt-2.5 border-t border-[#1f1f1f] flex items-center justify-between text-[10px] text-neutral-500">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></span>
-            v1.0.0 • Systems Active
+            v1.0.0 &bull; {isInstalled ? 'PWA Native' : 'PWA Ready'}
           </span>
-          <span>© 2026 Rhizan</span>
+          <span>&copy; 2026 Rhizan</span>
         </div>
       </div>
     </div>

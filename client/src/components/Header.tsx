@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useTheme } from '@/context/ThemeContext';
+import { usePwa } from '@/context/PwaContext';
 import {
   Clock,
   Plus,
@@ -15,6 +16,8 @@ import {
   SlidersHorizontal,
   Sun,
   Moon,
+  Download,
+  Check,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -35,6 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { user, logout } = useAuth();
   const { toggle } = useSidebar();
   const { isLight, toggleColorMode } = useTheme();
+  const { isInstallable, isInstalled, installPwa } = usePwa();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -110,6 +114,19 @@ export const Header: React.FC<HeaderProps> = ({
             <Sun className="w-4 h-4 text-amber-400" />
           )}
         </button>
+
+        {/* PWA Install Button in Header */}
+        {isInstallable && !isInstalled && (
+          <button
+            onClick={() => installPwa()}
+            type="button"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 hover:text-teal-300 text-xs font-medium transition shrink-0 cursor-pointer shadow-sm animate-pulse"
+            title="Install RHIZAN Hub app on this device"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Install App</span>
+          </button>
+        )}
 
         {/* User Status Avatar & Dropdown */}
         <div className="relative pl-1 sm:pl-2 border-l border-[#222222]" ref={menuRef}>
@@ -193,6 +210,37 @@ export const Header: React.FC<HeaderProps> = ({
                   <KeyRound className="w-4 h-4 text-neutral-400" />
                   <span>Change Password</span>
                 </Link>
+
+                {isInstallable && !isInstalled && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      installPwa();
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-teal-400 hover:text-teal-300 hover:bg-teal-500/10 border border-teal-500/20 transition text-left cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Download className="w-4 h-4 text-teal-400" />
+                      <span>Install App</span>
+                    </div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 font-semibold font-mono">
+                      PWA
+                    </span>
+                  </button>
+                )}
+
+                {isInstalled && (
+                  <div className="px-3 py-2 flex items-center justify-between text-[11px] text-neutral-400">
+                    <div className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-teal-400" />
+                      <span>App Installed</span>
+                    </div>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-teal-400 font-mono">
+                      Standalone
+                    </span>
+                  </div>
+                )}
 
                 <div className="h-px bg-[#222222] my-1" />
 

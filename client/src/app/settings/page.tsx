@@ -17,11 +17,17 @@ import {
   FolderKanban,
   Clock,
   ArrowRight,
+  Download,
+  Smartphone,
+  Wifi,
+  ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePwa } from '@/context/PwaContext';
 
 export default function SettingsPage() {
   const { theme, setTheme, font, setFont, themesList, fontsList } = useTheme();
+  const { isInstallable, isInstalled, isOffline, installPwa } = usePwa();
   const [sampleText, setSampleText] = useState('Rhizan Operations Platform 2026 • 48h Weekly Sprints');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -331,6 +337,79 @@ export default function SettingsPage() {
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* PWA & Application Card */}
+        <div className="p-6 rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] shadow-xl relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20 flex items-center justify-center">
+                <Smartphone className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-heading font-semibold text-[var(--foreground)]">
+                  Progressive Web App (PWA)
+                </h3>
+                <p className="text-xs text-[var(--muted)]">
+                  Install RHIZAN Hub on desktop or mobile for quick launch, native windowing, and offline access
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {isInstalled ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 text-xs font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-teal-400" />
+                  <span>Standalone App Active</span>
+                </span>
+              ) : isInstallable ? (
+                <button
+                  type="button"
+                  onClick={() => installPwa()}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 active:scale-[0.98] text-white text-xs font-semibold shadow-md shadow-teal-700/20 transition cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Install App</span>
+                </button>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--surface-elevated)] text-[var(--muted)] border border-[var(--border)] text-xs font-medium">
+                  <span>PWA Ready in Browser</span>
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+            <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground)]">
+                <Wifi className="w-4 h-4 text-teal-400" />
+                <span>Offline Support</span>
+              </div>
+              <p className="text-[11px] text-[var(--muted)]">
+                {isOffline ? 'Offline view currently active' : 'Service Worker active with precached fallback'}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground)]">
+                <Laptop className="w-4 h-4 text-indigo-400" />
+                <span>Cross Platform</span>
+              </div>
+              <p className="text-[11px] text-[var(--muted)]">
+                Installs as a native standalone app on macOS, Windows, Linux, Android, and iOS
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground)]">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Modern Security</span>
+              </div>
+              <p className="text-[11px] text-[var(--muted)]">
+                Isolated sandbox execution with strict token validation and safe background sync
+              </p>
             </div>
           </div>
         </div>
