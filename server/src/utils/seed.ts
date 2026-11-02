@@ -46,7 +46,7 @@ const seedDatabase = async () => {
       email: 'abdulazizisa579@gmail.com',
       password: passwordHash,
       role: 'CEO',
-      title: 'CEO & Founder',
+      title: 'Founder & CEO',
       weeklyCapacityHours: 48,
       status: 'ACTIVE',
       mustChangePassword: false,

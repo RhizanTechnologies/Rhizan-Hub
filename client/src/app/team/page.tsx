@@ -87,8 +87,8 @@ export default function TeamPage() {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<'CEO' | 'CTO' | 'COO' | 'ADMIN' | 'MEMBER'>('CEO');
-  const [inviteTitle, setInviteTitle] = useState('Chief Executive Officer');
+  const [inviteRole, setInviteRole] = useState<'CEO' | 'CTO' | 'COO' | 'MEMBER'>('CEO');
+  const [inviteTitle, setInviteTitle] = useState('Founder & CEO');
   const [inviteCapacity, setInviteCapacity] = useState('48');
   const [tempoPassword, setTempoPassword] = useState('');
   const [isInviting, setIsInviting] = useState(false);
@@ -816,13 +816,13 @@ export default function TeamPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                Department / Role Title
+                Job Title / Position
               </label>
               <input
                 type="text"
                 value={inviteTitle}
                 onChange={(e) => setInviteTitle(e.target.value)}
-                placeholder="e.g. Chief Executive Officer"
+                placeholder="e.g. Founder & CEO"
                 required
                 className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
               />
@@ -830,30 +830,53 @@ export default function TeamPage() {
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                System Role (Default: CEO, CTO, COO)
+                Company Role
               </label>
               <select
                 value={inviteRole}
                 onChange={(e) => {
                   const r = e.target.value as any;
                   setInviteRole(r);
-                  if (r === 'CEO' && (!inviteTitle || inviteTitle === 'Team Member' || inviteTitle === 'Development')) {
-                    setInviteTitle('Chief Executive Officer');
-                  } else if (r === 'CTO' && (!inviteTitle || inviteTitle === 'Team Member' || inviteTitle === 'Development')) {
-                    setInviteTitle('Chief Technology Officer');
-                  } else if (r === 'COO' && (!inviteTitle || inviteTitle === 'Team Member' || inviteTitle === 'Development')) {
-                    setInviteTitle('Chief Operating Officer');
-                  }
+                  if (r === 'CEO') setInviteTitle('Founder & CEO');
+                  else if (r === 'CTO') setInviteTitle('Founder & CTO');
+                  else if (r === 'COO') setInviteTitle('Founder & COO');
+                  else setInviteTitle('Founder');
                 }}
                 className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-medium"
               >
-                <option value="CEO">👑 CEO (Chief Executive Officer)</option>
-                <option value="CTO">⚡ CTO (Chief Technology Officer)</option>
-                <option value="COO">📊 COO (Chief Operating Officer)</option>
-                <option value="ADMIN">🛡️ Admin (System Administrator)</option>
-                <option value="MEMBER">👤 Member (Team Member)</option>
+                <option value="CEO">👑 CEO — Chief Executive Officer</option>
+                <option value="CTO">⚡ CTO — Chief Technology Officer</option>
+                <option value="COO">📊 COO — Chief Operating Officer</option>
+                <option value="MEMBER">👤 Member — Team Member</option>
               </select>
             </div>
+          </div>
+
+          {/* Quick Founder Preset Buttons in Invite Modal */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {[
+              { label: 'Founder & CEO', titleVal: 'Founder & CEO', r: 'CEO' as const },
+              { label: 'Founder & CTO', titleVal: 'Founder & CTO', r: 'CTO' as const },
+              { label: 'Founder & COO', titleVal: 'Founder & COO', r: 'COO' as const },
+              { label: 'Co-Founder', titleVal: 'Co-Founder', r: 'CEO' as const },
+              { label: 'Founder', titleVal: 'Founder', r: 'MEMBER' as const },
+            ].map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => {
+                  setInviteTitle(preset.titleVal);
+                  setInviteRole(preset.r);
+                }}
+                className={`text-[10px] px-2 py-0.5 rounded-lg border transition ${
+                  inviteTitle === preset.titleVal
+                    ? 'bg-teal-500/20 text-teal-300 border-teal-500/30 font-semibold'
+                    : 'bg-[#181818] text-neutral-400 border-[#262626] hover:text-white hover:border-[#383838]'
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
           </div>
 
           <div>

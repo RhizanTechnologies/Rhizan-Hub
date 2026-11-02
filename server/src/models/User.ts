@@ -22,7 +22,7 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['CEO', 'CTO', 'COO', 'ADMIN', 'MEMBER'], default: 'CEO' },
-    title: { type: String, default: 'Team Member' },
+    title: { type: String, default: 'Founder' },
     weeklyCapacityHours: { type: Number, default: 48 },
     status: { type: String, enum: ['ACTIVE', 'AWAY', 'OFFLINE'], default: 'ACTIVE' },
     avatar: { type: String, default: '' },

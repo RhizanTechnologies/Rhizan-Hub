@@ -1271,13 +1271,13 @@ export default function TeamMemberDetailPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                Department / Role Title
+                Job Title / Position
               </label>
               <input
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                placeholder="e.g. Development"
+                placeholder="e.g. Founder & CEO"
                 required
                 className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
               />
@@ -1285,26 +1285,53 @@ export default function TeamMemberDetailPage() {
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                System Role (Default: CEO, CTO, COO)
+                Company Role
               </label>
               <select
                 value={editRole}
                 onChange={(e) => {
                   const r = e.target.value as any;
                   setEditRole(r);
-                  if (r === 'CEO' && (!editTitle || editTitle === 'Team Member')) setEditTitle('Chief Executive Officer');
-                  else if (r === 'CTO' && (!editTitle || editTitle === 'Team Member')) setEditTitle('Chief Technology Officer');
-                  else if (r === 'COO' && (!editTitle || editTitle === 'Team Member')) setEditTitle('Chief Operating Officer');
+                  if (r === 'CEO') setEditTitle('Founder & CEO');
+                  else if (r === 'CTO') setEditTitle('Founder & CTO');
+                  else if (r === 'COO') setEditTitle('Founder & COO');
+                  else setEditTitle('Founder');
                 }}
                 className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-medium"
               >
-                <option value="CEO">👑 CEO (Chief Executive Officer)</option>
-                <option value="CTO">⚡ CTO (Chief Technology Officer)</option>
-                <option value="COO">📊 COO (Chief Operating Officer)</option>
-                <option value="ADMIN">🛡️ Admin (System Administrator)</option>
-                <option value="MEMBER">👤 Member (Team Member)</option>
+                <option value="CEO">👑 CEO — Chief Executive Officer</option>
+                <option value="CTO">⚡ CTO — Chief Technology Officer</option>
+                <option value="COO">📊 COO — Chief Operating Officer</option>
+                <option value="MEMBER">👤 Member — Team Member</option>
               </select>
             </div>
+          </div>
+
+          {/* Quick Founder Presets */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {[
+              { label: 'Founder & CEO', titleVal: 'Founder & CEO', r: 'CEO' as const },
+              { label: 'Founder & CTO', titleVal: 'Founder & CTO', r: 'CTO' as const },
+              { label: 'Founder & COO', titleVal: 'Founder & COO', r: 'COO' as const },
+              { label: 'Co-Founder', titleVal: 'Co-Founder', r: 'CEO' as const },
+              { label: 'Founder', titleVal: 'Founder', r: 'MEMBER' as const },
+            ].map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => {
+                  setEditTitle(preset.titleVal);
+                  setEditRole(preset.r);
+                }}
+                className={`text-[10px] px-2 py-0.5 rounded-lg border transition ${
+                  editTitle === preset.titleVal
+                    ? 'bg-teal-500/20 text-teal-300 border-teal-500/30 font-semibold'
+                    : 'bg-[#181818] text-neutral-400 border-[#262626] hover:text-white hover:border-[#383838]'
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

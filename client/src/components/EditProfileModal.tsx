@@ -55,12 +55,11 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   // Handle changing role and auto-suggesting job title if applicable
   const handleRoleChange = (newRole: UserRole) => {
     setRole(newRole);
-    if (!title || title === 'Team Member' || title === 'CEO' || title === 'CTO' || title === 'COO') {
-      if (newRole === 'CEO') setTitle('Chief Executive Officer');
-      else if (newRole === 'CTO') setTitle('Chief Technology Officer');
-      else if (newRole === 'COO') setTitle('Chief Operating Officer');
-      else if (newRole === 'ADMIN') setTitle('System Administrator');
-      else setTitle('Team Member');
+    if (!title || title === 'Team Member' || title === 'Founder' || title.includes('CEO') || title.includes('CTO') || title.includes('COO')) {
+      if (newRole === 'CEO') setTitle('Founder & CEO');
+      else if (newRole === 'CTO') setTitle('Founder & CTO');
+      else if (newRole === 'COO') setTitle('Founder & COO');
+      else setTitle('Founder');
     }
   };
 
@@ -77,7 +76,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       await updateProfile({
         name: name.trim(),
         role,
-        title: title.trim() || role,
+        title: title.trim() || (role === 'MEMBER' ? 'Founder' : `Founder & ${role}`),
         weeklyCapacityHours: Number(weeklyCapacityHours) || 48,
         status,
       });
@@ -142,11 +141,11 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           />
         </div>
 
-        {/* Role Selection Dropdown (Defaults to CEO, CTO, COO) */}
+        {/* Role Selection Dropdown (CEO, CTO, COO, Member) */}
         <div>
           <label className="block text-xs font-medium text-neutral-300 mb-1 flex items-center justify-between">
             <span>Executive / Company Role</span>
-            <span className="text-[10px] text-teal-400 font-semibold">Default Choices: CEO, CTO, COO</span>
+            <span className="text-[10px] text-teal-400 font-semibold">Options: 👑 CEO, ⚡ CTO, 📊 COO, 👤 Member</span>
           </label>
           <div className="relative">
             <select
@@ -157,12 +156,11 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <option value="CEO">👑 CEO — Chief Executive Officer</option>
               <option value="CTO">⚡ CTO — Chief Technology Officer</option>
               <option value="COO">📊 COO — Chief Operating Officer</option>
-              <option value="ADMIN">🛡️ ADMIN — System Administrator</option>
-              <option value="MEMBER">👤 MEMBER — Team Member</option>
+              <option value="MEMBER">👤 Member — Team Member</option>
             </select>
           </div>
           <p className="text-[10px] text-neutral-400 mt-1">
-            CEO, CTO, COO, and Admin roles automatically possess full workspace administrative privileges.
+            CEO, CTO, and COO roles automatically possess full workspace executive privileges.
           </p>
         </div>
 
@@ -175,18 +173,18 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Chief Executive Officer"
+            placeholder="e.g. Founder & CEO"
             className="w-full bg-[#181818] border border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
           />
 
-          {/* Quick Preset Buttons */}
+          {/* Quick Founder Preset Buttons */}
           <div className="flex flex-wrap gap-1.5 mt-2">
             {[
-              { label: 'CEO & Founder', titleVal: 'CEO & Founder', r: 'CEO' as UserRole },
-              { label: 'Chief Technology Officer', titleVal: 'Chief Technology Officer', r: 'CTO' as UserRole },
-              { label: 'Chief Operating Officer', titleVal: 'Chief Operating Officer', r: 'COO' as UserRole },
-              { label: 'Lead Full-Stack Engineer', titleVal: 'Lead Full-Stack Engineer', r: 'CTO' as UserRole },
-              { label: 'Growth & Business Lead', titleVal: 'Growth & Business Lead', r: 'COO' as UserRole },
+              { label: 'Founder & CEO', titleVal: 'Founder & CEO', r: 'CEO' as UserRole },
+              { label: 'Founder & CTO', titleVal: 'Founder & CTO', r: 'CTO' as UserRole },
+              { label: 'Founder & COO', titleVal: 'Founder & COO', r: 'COO' as UserRole },
+              { label: 'Co-Founder', titleVal: 'Co-Founder', r: 'CEO' as UserRole },
+              { label: 'Founder', titleVal: 'Founder', r: 'CEO' as UserRole },
             ].map((preset) => (
               <button
                 key={preset.label}
@@ -197,7 +195,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 }}
                 className={`text-[10px] px-2 py-0.5 rounded-lg border transition ${
                   title === preset.titleVal
-                    ? 'bg-teal-500/20 text-teal-300 border-teal-500/30'
+                    ? 'bg-teal-500/20 text-teal-300 border-teal-500/30 font-semibold'
                     : 'bg-[#181818] text-neutral-400 border-[#262626] hover:text-white hover:border-[#383838]'
                 }`}
               >
