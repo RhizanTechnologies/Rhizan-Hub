@@ -31,7 +31,6 @@ const navItems = [
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Projects', href: '/projects', icon: FolderKanban },
   { name: 'Clients', href: '/clients', icon: Building2 },
-  { name: 'Outreach & Leads', href: '/approaches', icon: Compass },
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Time Tracking', href: '/time', icon: Clock },
   { name: 'Weekly Report', href: '/reports/weekly', icon: FileText },
