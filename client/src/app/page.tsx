@@ -28,6 +28,7 @@ import {
   Zap,
   Target,
   ChevronRight,
+  ChevronDown,
   RefreshCw,
   Moon,
   MessageSquareQuote,
@@ -800,7 +801,7 @@ export default function DashboardPage() {
                   <select
                     value={timerProjectId}
                     onChange={(e) => setTimerProjectId(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#111111] border border-[#2a2a2a] rounded-xl text-xs text-white outline-none focus:border-teal-500 cursor-pointer appearance-none truncate pr-7"
+                    className="w-full px-3 py-2 bg-[#111111] border border-[#2a2a2a] rounded-xl text-xs text-white outline-none focus:border-teal-500 cursor-pointer appearance-none truncate pr-8"
                   >
                     <option value="" disabled>Select Project *</option>
                     {projects.map((p) => (
@@ -809,13 +810,14 @@ export default function DashboardPage() {
                       </option>
                     ))}
                   </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
 
                 <div className="relative">
                   <select
                     value={timerTaskId}
                     onChange={(e) => setTimerTaskId(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#111111] border border-[#2a2a2a] rounded-xl text-xs text-white outline-none focus:border-teal-500 cursor-pointer appearance-none truncate pr-7"
+                    className="w-full px-3 py-2 bg-[#111111] border border-[#2a2a2a] rounded-xl text-xs text-white outline-none focus:border-teal-500 cursor-pointer appearance-none truncate pr-8"
                   >
                     <option value="">(Optional) Link Task</option>
                     {tasks
@@ -826,6 +828,7 @@ export default function DashboardPage() {
                         </option>
                       ))}
                   </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
