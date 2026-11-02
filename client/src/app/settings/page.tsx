@@ -78,9 +78,9 @@ export default function SettingsPage() {
 
       <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
         {/* Top Control Bar with Quick Reset */}
-        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-[#111111] border border-[#222222]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-3xl bg-[#111111] border border-[#222222]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center shrink-0">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
@@ -96,11 +96,11 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={handleResetDefaults}
-              className="px-3.5 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
+              className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#282828] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset to Defaults</span>
@@ -111,15 +111,15 @@ export default function SettingsPage() {
         {/* ========================================================================= */}
         {/* SECTION 0: MY PROFILE & ROLE                                              */}
         {/* ========================================================================= */}
-        <div className="p-5 sm:p-6 rounded-3xl bg-[#121212] border border-[#262626] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-xl flex items-center justify-center shadow-lg shadow-teal-900/20 shrink-0 font-heading">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#121212] border border-[#262626] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 w-full md:w-auto">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-lg sm:text-xl flex items-center justify-center shadow-lg shadow-teal-900/20 shrink-0 font-heading">
               {user?.name?.charAt(0) || 'A'}
             </div>
-            <div className="min-w-0 space-y-1">
+            <div className="min-w-0 flex-1 space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base font-bold text-white truncate">{user?.name}</h3>
-                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
                   user?.role === 'CEO'
                     ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
                     : user?.role === 'CTO'
@@ -132,9 +132,11 @@ export default function SettingsPage() {
                 }`}>
                   {user?.role === 'CEO' ? '👑 CEO' : user?.role === 'CTO' ? '⚡ CTO' : user?.role === 'COO' ? '📊 COO' : user?.role === 'ADMIN' ? '🛡️ Admin' : '👤 Member'}
                 </span>
-                <span className="text-[10px] text-teal-400 font-mono">• {user?.weeklyCapacityHours || 48}h Weekly Target</span>
+                <span className="text-[10px] text-teal-400 font-mono shrink-0">• {user?.weeklyCapacityHours || 48}h Weekly Target</span>
               </div>
-              <p className="text-xs text-neutral-400 truncate">{user?.title || 'Executive Leadership'} • <span className="text-neutral-500">{user?.email}</span></p>
+              <p className="text-xs text-neutral-400 truncate">
+                {user?.title || 'Executive Leadership'} • <span className="text-neutral-500">{user?.email}</span>
+              </p>
             </div>
           </div>
 
@@ -154,14 +156,14 @@ export default function SettingsPage() {
         {/* SECTION 1: THEME PICKER                                                   */}
         {/* ========================================================================= */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-[#222222]">
-            <div className="flex items-center gap-2">
-              <Palette className="w-4 h-4 text-teal-400" />
-              <h3 className="font-heading text-base font-bold text-white">Color Themes</h3>
-              <span className="text-xs text-neutral-400 font-normal">({themesList.length} options)</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 pb-2 border-b border-[#222222]">
+            <div className="flex items-center gap-2 min-w-0">
+              <Palette className="w-4 h-4 text-teal-400 shrink-0" />
+              <h3 className="font-heading text-sm sm:text-base font-bold text-white truncate">Color Themes</h3>
+              <span className="text-xs text-neutral-400 font-normal shrink-0">({themesList.length} options)</span>
             </div>
-            <div className="text-xs text-neutral-400">
-              Active: <strong className="text-white">{currentTheme.name}</strong>
+            <div className="text-xs text-neutral-400 shrink-0">
+              Active: <strong className="text-teal-300 font-semibold">{currentTheme.name}</strong>
             </div>
           </div>
 
@@ -246,14 +248,14 @@ export default function SettingsPage() {
         {/* SECTION 2: FONT SELECTOR                                                  */}
         {/* ========================================================================= */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-[#222222]">
-            <div className="flex items-center gap-2">
-              <Type className="w-4 h-4 text-teal-400" />
-              <h3 className="font-heading text-base font-bold text-white">Typography & Fonts</h3>
-              <span className="text-xs text-neutral-400 font-normal">({fontsList.length} fonts)</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 pb-2 border-b border-[#222222]">
+            <div className="flex items-center gap-2 min-w-0">
+              <Type className="w-4 h-4 text-teal-400 shrink-0" />
+              <h3 className="font-heading text-sm sm:text-base font-bold text-white truncate">Typography & Fonts</h3>
+              <span className="text-xs text-neutral-400 font-normal shrink-0">({fontsList.length} fonts)</span>
             </div>
-            <div className="text-xs text-neutral-400">
-              Active: <strong className="text-white">{currentFont.name}</strong>
+            <div className="text-xs text-neutral-400 shrink-0">
+              Active: <strong className="text-teal-300 font-semibold">{currentFont.name}</strong>
             </div>
           </div>
 
@@ -311,15 +313,15 @@ export default function SettingsPage() {
         {/* ========================================================================= */}
         {/* SECTION 3: LIVE PLAYGROUND PREVIEW                                        */}
         {/* ========================================================================= */}
-        <div className="bg-[#111111] border border-[#222222] rounded-3xl p-5 sm:p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#222222]">
+        <div className="bg-[#111111] border border-[#222222] rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#222222]">
             <div className="flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-teal-400" />
+              <Sparkles className="w-4 h-4 text-teal-400 shrink-0" />
               <h3 className="font-heading text-sm sm:text-base font-bold text-white">
                 Live Component Preview
               </h3>
             </div>
-            <span className="text-xs font-mono font-bold text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20">
+            <span className="text-xs font-mono font-bold text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20 self-start sm:self-auto truncate max-w-full">
               {currentTheme.name} • {currentFont.name}
             </span>
           </div>
