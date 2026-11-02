@@ -59,10 +59,10 @@
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     },
     {
-      "name": "CRM Approaches",
-      "short_name": "CRM",
-      "description": "Lead and client pipeline",
-      "url": "/approaches",
+      "name": "Clients",
+      "short_name": "Clients",
+      "description": "View clients & deals",
+      "url": "/clients",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
