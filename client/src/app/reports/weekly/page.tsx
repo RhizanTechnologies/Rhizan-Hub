@@ -91,58 +91,56 @@ export default function WeeklyReportPage() {
       {/* Screen-Only App Header */}
       <div className="print:hidden">
         <Header
-          title="Weekly Operations Report"
-          subtitle="One-page executive performance, capacity utilization, and deliverables digest"
-          actionButton={{
-            label: 'Print / Save PDF',
-            onClick: handlePrint,
-          }}
+          title="Weekly Report"
+          subtitle="One-page executive performance, capacity utilization & deliverables digest"
         />
       </div>
 
-      <main className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-6 print:p-0 print:m-0 print:max-w-none">
+      <main className="p-3.5 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6 print:p-0 print:m-0 print:max-w-none">
         {/* Navigation & Controls Ribbon (Hidden on Print) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-[#111111] border border-[#222222] rounded-3xl shadow-md print:hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 bg-[#111111] border border-[#222222] rounded-2xl sm:rounded-3xl shadow-md print:hidden">
           {/* Week Navigation */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setWeekOffset((prev) => prev - 1)}
-              className="p-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#282828] transition"
-              title="Previous Week"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setWeekOffset((prev) => prev - 1)}
+                className="p-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#282828] transition"
+                title="Previous Week"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setWeekOffset(0)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
-                weekOffset === 0
-                  ? 'bg-teal-600 text-white border-teal-500 shadow-sm'
-                  : 'bg-[#181818] text-neutral-400 border-[#282828] hover:text-white'
-              }`}
-            >
-              Current Week
-            </button>
+              <button
+                type="button"
+                onClick={() => setWeekOffset(0)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+                  weekOffset === 0
+                    ? 'bg-teal-600 text-white border-teal-500 shadow-sm'
+                    : 'bg-[#181818] text-neutral-400 border-[#282828] hover:text-white'
+                }`}
+              >
+                Current Week
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setWeekOffset((prev) => prev + 1)}
-              className="p-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#282828] transition"
-              title="Next Week"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+              <button
+                type="button"
+                onClick={() => setWeekOffset((prev) => prev + 1)}
+                className="p-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#282828] transition"
+                title="Next Week"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
 
-            <span className="font-heading text-xs font-bold text-white ml-2 flex items-center gap-1.5 bg-[#161616] border border-[#262626] px-3 py-1.5 rounded-xl">
-              <Calendar className="w-3.5 h-3.5 text-teal-400" />
+            <span className="font-heading text-xs font-bold text-white flex items-center gap-1.5 bg-[#161616] border border-[#262626] px-3 py-1.5 rounded-xl">
+              <Calendar className="w-3.5 h-3.5 text-teal-400 shrink-0" />
               <span>{report?.weekRange.label || dateRange.label}</span>
             </span>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={loadWeeklyReport}
@@ -156,7 +154,7 @@ export default function WeeklyReportPage() {
             <button
               type="button"
               onClick={handlePrint}
-              className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-teal-950 transition active:scale-95"
+              className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-teal-950 transition active:scale-95 flex-1 sm:flex-none justify-center"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print / Save PDF</span>
@@ -167,11 +165,11 @@ export default function WeeklyReportPage() {
         {/* ========================================================================= */}
         {/* PRINTABLE ONE-PAGE REPORT CONTAINER                                       */}
         {/* ========================================================================= */}
-        <div className="bg-[#111111] border border-[#222222] rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl print:border-none print:shadow-none print:p-4 print:bg-white print:text-black">
+        <div className="bg-[#111111] border border-[#222222] rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 space-y-6 shadow-2xl print:border-none print:shadow-none print:p-4 print:bg-white print:text-black">
           {/* Executive Report Document Header */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-[#242424] print:border-neutral-300">
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-white p-2 flex items-center justify-center shadow-md print:border print:border-neutral-300">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-[#242424] print:border-neutral-300">
+            <div className="flex items-center gap-3 sm:gap-3.5">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white p-2 flex items-center justify-center shadow-md print:border print:border-neutral-300 shrink-0">
                 <Image
                   src="/logo_minimal.png"
                   alt="Rhizan Logo"
@@ -180,24 +178,24 @@ export default function WeeklyReportPage() {
                   className="object-contain"
                 />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white print:text-black">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="font-heading text-base sm:text-xl font-bold tracking-tight text-white print:text-black">
                     RHIZAN HUB
                   </h1>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 print:bg-neutral-100 print:text-black print:border-neutral-300">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 print:bg-neutral-100 print:text-black print:border-neutral-300 shrink-0">
                     Executive Weekly Report
                   </span>
                 </div>
-                <p className="text-xs text-neutral-400 print:text-neutral-600">
+                <p className="text-[11px] sm:text-xs text-neutral-400 print:text-neutral-600 truncate">
                   Deliverables, Capacity Utilization & Pipeline Performance
                 </p>
               </div>
             </div>
 
-            <div className="text-right">
-              <div className="text-xs font-bold text-white print:text-black flex items-center justify-end gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-teal-400 print:text-neutral-700" />
+            <div className="text-left sm:text-right shrink-0 pt-1 sm:pt-0">
+              <div className="text-xs font-bold text-white print:text-black flex items-center sm:justify-end gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-teal-400 print:text-neutral-700 shrink-0" />
                 <span>Week: {report?.weekRange.label || dateRange.label}</span>
               </div>
               <p className="text-[10px] text-neutral-500 print:text-neutral-500 mt-0.5">
@@ -207,75 +205,75 @@ export default function WeeklyReportPage() {
           </div>
 
           {/* Top Executive KPI Highlights (6 Cards) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 print:grid-cols-6 print:gap-2">
-            <div className="p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
-              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 print:grid-cols-6 print:gap-2">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
+              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1 truncate">
                 Team Workload
               </span>
-              <div className="font-heading text-base font-bold text-teal-400 print:text-black">
+              <div className="font-heading text-base sm:text-lg font-bold text-teal-400 print:text-black truncate">
                 {summary?.totalTeamHours ?? 0}h
               </div>
-              <span className="text-[10px] text-neutral-500">
+              <span className="text-[10px] text-neutral-500 block truncate">
                 of {summary?.expectedCapacityTotal ?? 144}h ({summary?.capacityUtilization ?? 0}%)
               </span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
-              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
+              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1 truncate">
                 Billable Ratio
               </span>
-              <div className="font-heading text-base font-bold text-emerald-400 print:text-black">
+              <div className="font-heading text-base sm:text-lg font-bold text-emerald-400 print:text-black truncate">
                 {summary?.billablePercentage ?? 0}%
               </div>
-              <span className="text-[10px] text-neutral-500">
+              <span className="text-[10px] text-neutral-500 block truncate">
                 {summary?.billableHours ?? 0}h client work
               </span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
-              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
+              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1 truncate">
                 Tasks Completed
               </span>
-              <div className="font-heading text-base font-bold text-white print:text-black">
+              <div className="font-heading text-base sm:text-lg font-bold text-white print:text-black truncate">
                 {summary?.tasksCompletedCount ?? 0}
               </div>
-              <span className="text-[10px] text-neutral-500">deliverables closed</span>
+              <span className="text-[10px] text-neutral-500 block truncate">deliverables closed</span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
-              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
+              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1 truncate">
                 Active Projects
               </span>
-              <div className="font-heading text-base font-bold text-white print:text-black">
+              <div className="font-heading text-base sm:text-lg font-bold text-white print:text-black truncate">
                 {summary?.activeProjectsCount ?? 0}
               </div>
-              <span className="text-[10px] text-neutral-500">ongoing contracts</span>
+              <span className="text-[10px] text-neutral-500 block truncate">ongoing contracts</span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
-              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
+              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1 truncate">
                 Outreach & Deals
               </span>
-              <div className="font-heading text-base font-bold text-white print:text-black">
+              <div className="font-heading text-base sm:text-lg font-bold text-white print:text-black truncate">
                 {summary?.newApproachesCount ?? 0}
               </div>
-              <span className="text-[10px] text-neutral-500">
+              <span className="text-[10px] text-neutral-500 block truncate">
                 {summary?.dealsWonCount ?? 0} deals won
               </span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
-              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
+              <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1 truncate">
                 At-Risk / Overdue
               </span>
               <div
-                className={`font-heading text-base font-bold ${
+                className={`font-heading text-base sm:text-lg font-bold truncate ${
                   (summary?.overdueCount ?? 0) > 0 ? 'text-rose-400' : 'text-neutral-400'
                 } print:text-black`}
               >
                 {summary?.overdueCount ?? 0}
               </div>
-              <span className="text-[10px] text-neutral-500">
+              <span className="text-[10px] text-neutral-500 block truncate">
                 {(summary?.overdueCount ?? 0) > 0 ? 'Requires triage' : 'Clean queue'}
               </span>
             </div>
@@ -283,18 +281,19 @@ export default function WeeklyReportPage() {
 
           {/* Section 1: Team Performance & 48h Weekly Capacity Matrix */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#222222] print:border-neutral-300">
+            <div className="flex flex-wrap items-center justify-between gap-1 pb-2 border-b border-[#222222] print:border-neutral-300">
               <h2 className="font-heading text-xs uppercase font-bold text-neutral-200 print:text-black flex items-center gap-2">
                 <Users className="w-3.5 h-3.5 text-teal-400 print:text-neutral-700" />
                 <span>1. Team Weekly Capacity & Performance (48h Standard)</span>
               </h2>
-              <span className="text-[11px] text-neutral-400 print:text-neutral-600">
-                Weekly Target: 48h / member (6 days × 8h)
-              </span>
+              <div className="flex items-center gap-2 text-[11px] text-neutral-400 print:text-neutral-600">
+                <span>Weekly Target: 48h / member (6 days × 8h)</span>
+                <span className="text-[10px] text-teal-400 font-semibold sm:hidden">Swipe table →</span>
+              </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 custom-scrollbar">
+              <table className="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead>
                   <tr className="border-b border-[#242424] text-[10px] uppercase font-bold text-neutral-400 print:border-neutral-300 print:text-neutral-600">
                     <th className="py-2.5 px-3">Team Member</th>
@@ -388,16 +387,16 @@ export default function WeeklyReportPage() {
                   key={proj.id}
                   className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-3 print:bg-white print:border-neutral-300"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-heading text-xs font-bold text-white print:text-black truncate max-w-[160px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-heading text-xs font-bold text-white print:text-black truncate">
                         {proj.name}
                       </h3>
-                      <p className="text-[10px] text-neutral-400 print:text-neutral-600">
+                      <p className="text-[10px] text-neutral-400 print:text-neutral-600 truncate">
                         {proj.clientName}
                       </p>
                     </div>
-                    <span className="text-xs font-mono font-bold text-teal-400 print:text-black">
+                    <span className="text-xs font-mono font-bold text-teal-400 print:text-black shrink-0">
                       {proj.progress}%
                     </span>
                   </div>
@@ -525,7 +524,7 @@ export default function WeeklyReportPage() {
           </div>
 
           {/* Section 4: Business Development & Operations Summary Footer */}
-          <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] print:bg-white print:border-neutral-300 flex flex-wrap items-center justify-between gap-4 text-xs">
+          <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] print:bg-white print:border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div className="space-y-1">
               <span className="font-heading text-xs font-bold text-white print:text-black flex items-center gap-1.5">
                 <Compass className="w-3.5 h-3.5 text-teal-400" />
@@ -538,7 +537,7 @@ export default function WeeklyReportPage() {
               </p>
             </div>
 
-            <div className="text-right text-[10px] text-neutral-500 print:text-neutral-500">
+            <div className="sm:text-right text-[10px] text-neutral-500 print:text-neutral-500 shrink-0">
               <span>RHIZAN TECH • Confidential Executive Operations Report</span>
             </div>
           </div>

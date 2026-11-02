@@ -74,6 +74,7 @@ export default function TimeTrackingPage() {
   const [projectFilter, setProjectFilter] = useState<string>('ALL');
   const [dateRangeFilter, setDateRangeFilter] = useState<'ALL' | 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'THIS_MONTH'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   // Notification / success message
   const [successToast, setSuccessToast] = useState<string | null>(null);
@@ -752,7 +753,7 @@ export default function TimeTrackingPage() {
                       setSelectedProjectId(e.target.value);
                       setSelectedTaskId('');
                     }}
-                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-2xl px-3.5 py-2.5 pr-8 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer font-medium"
+                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-2xl px-3.5 py-2.5 pr-9 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer font-medium truncate"
                   >
                     <option value="">-- Choose Project --</option>
                     {projects.map((p) => (
@@ -905,65 +906,113 @@ export default function TimeTrackingPage() {
             </div>
 
             {/* Filter and Search Ribbon */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-[#121212] border border-[#222222] rounded-2xl">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
-                  <Filter className="w-3.5 h-3.5 text-teal-400" />
-                  Filter:
-                </span>
-
-                {/* Project Filter */}
-                <select
-                  value={projectFilter}
-                  onChange={(e) => setProjectFilter(e.target.value)}
-                  className="bg-[#181818] border border-[#2a2a2a] text-white text-xs rounded-xl px-2.5 py-1.5 outline-none cursor-pointer"
-                >
-                  <option value="ALL">All Projects</option>
-                  {projects.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Date Range Filter */}
-                <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-1 no-scrollbar">
-                  {(['ALL', 'TODAY', 'YESTERDAY', 'THIS_WEEK', 'THIS_MONTH'] as const).map((mode) => (
-                    <button
-                      key={mode}
-                      type="button"
-                      onClick={() => setDateRangeFilter(mode)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                        dateRangeFilter === mode
-                          ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
-                          : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#262626]'
-                      }`}
-                    >
-                      {mode === 'ALL'
-                        ? 'All Time'
-                        : mode === 'TODAY'
-                        ? 'Today'
-                        : mode === 'YESTERDAY'
-                        ? 'Yesterday'
-                        : mode === 'THIS_WEEK'
-                        ? 'This Week'
-                        : 'This Month'}
-                    </button>
-                  ))}
+            <div className="bg-[#121212] border border-[#222222] rounded-2xl p-3 sm:p-3.5 space-y-3">
+              <div className="flex items-center justify-between gap-2.5">
+                {/* Search Bar */}
+                <div className="relative flex-1">
+                  <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search time logs..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+                  />
                 </div>
+
+                {/* Filter Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsFiltersOpen((prev) => !prev)}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition shrink-0 ${
+                    isFiltersOpen || projectFilter !== 'ALL' || dateRangeFilter !== 'ALL'
+                      ? 'bg-teal-500/15 text-teal-300 border-teal-500/40'
+                      : 'bg-[#181818] text-neutral-400 hover:text-white border-[#282828]'
+                  }`}
+                  title="Toggle filter controls"
+                >
+                  <Filter className="w-3.5 h-3.5 text-teal-400" />
+                  <span className="hidden xs:inline">Filters</span>
+                  {(projectFilter !== 'ALL' || dateRangeFilter !== 'ALL') && (
+                    <span className="w-2 h-2 rounded-full bg-teal-400" />
+                  )}
+                  <ChevronDown
+                    className={`w-3 h-3 transition-transform duration-200 ${
+                      isFiltersOpen ? 'rotate-180 text-teal-400' : 'text-neutral-500'
+                    }`}
+                  />
+                </button>
               </div>
 
-              {/* Keyword Search */}
-              <div className="relative w-full sm:w-60">
-                <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search time logs..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-[#181818] border border-[#2a2a2a] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
-                />
-              </div>
+              {/* Collapsible Filter Body */}
+              {isFiltersOpen && (
+                <div className="pt-2.5 border-t border-[#202020] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+                  <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                    {/* Project Filter */}
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                      <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider shrink-0">
+                        Project:
+                      </span>
+                      <select
+                        value={projectFilter}
+                        onChange={(e) => setProjectFilter(e.target.value)}
+                        className="bg-[#181818] border border-[#2a2a2a] text-white text-xs rounded-xl px-3 py-1.5 outline-none cursor-pointer flex-1 sm:flex-none sm:w-48"
+                      >
+                        <option value="ALL">All Projects</option>
+                        {projects.map((p) => (
+                          <option key={p._id} value={p._id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Date Range Filter */}
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 no-scrollbar">
+                      <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider shrink-0">
+                        Date:
+                      </span>
+                      {(['ALL', 'TODAY', 'YESTERDAY', 'THIS_WEEK', 'THIS_MONTH'] as const).map((mode) => (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() => setDateRangeFilter(mode)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
+                            dateRangeFilter === mode
+                              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+                              : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#262626]'
+                          }`}
+                        >
+                          {mode === 'ALL'
+                            ? 'All Time'
+                            : mode === 'TODAY'
+                            ? 'Today'
+                            : mode === 'YESTERDAY'
+                            ? 'Yesterday'
+                            : mode === 'THIS_WEEK'
+                            ? 'This Week'
+                            : 'This Month'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Reset Filters button if any active */}
+                  {(projectFilter !== 'ALL' || dateRangeFilter !== 'ALL' || searchQuery) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProjectFilter('ALL');
+                        setDateRangeFilter('ALL');
+                        setSearchQuery('');
+                      }}
+                      className="text-[11px] text-teal-400 hover:text-teal-300 underline font-medium"
+                    >
+                      Reset Filters
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* CLOCKIFY GROUPED ENTRIES BY DAY */}

@@ -486,60 +486,62 @@ export default function TeamPage() {
               >
                 <div>
                   {/* Member Profile Header */}
-                  <div className="flex items-start justify-between mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
                     <Link
                       href={`/team/${member.id}`}
-                      className="flex items-center gap-3 group/profile focus:outline-none"
+                      className="flex items-center gap-3 group/profile focus:outline-none min-w-0"
                     >
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-base flex items-center justify-center shadow-lg shadow-teal-900/20 font-heading group-hover/profile:scale-105 transition-transform">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-base flex items-center justify-center shadow-lg shadow-teal-900/20 font-heading group-hover/profile:scale-105 transition-transform shrink-0">
                         {member.name.charAt(0)}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h3 className="font-heading text-base font-bold text-white group-hover/profile:text-teal-300 transition-colors">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3 className="font-heading text-base font-bold text-white group-hover/profile:text-teal-300 transition-colors truncate">
                             {member.name}
                           </h3>
                           {member.role === 'CEO' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold shrink-0">
                               👑 CEO
                             </span>
                           )}
                           {member.role === 'CTO' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/30 font-bold">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/30 font-bold shrink-0">
                               ⚡ CTO
                             </span>
                           )}
                           {member.role === 'COO' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold shrink-0">
                               📊 COO
                             </span>
                           )}
                           {member.role === 'ADMIN' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/30 font-medium">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/30 font-medium shrink-0">
                               🛡️ Admin
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-neutral-400 font-medium">{member.title}</p>
+                        <p className="text-xs text-neutral-400 font-medium truncate">{member.title}</p>
                       </div>
                     </Link>
 
-                    <div className="flex items-center gap-2">
-                      {member.id === currentUserId && (
-                        <button
-                          type="button"
-                          onClick={() => setIsEditProfileOpen(true)}
-                          className="px-2 py-1 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[11px] font-semibold transition"
-                          title="Edit your profile"
+                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-start flex-wrap border-t border-[#1c1c1c] sm:border-0 pt-2 sm:pt-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {member.id === currentUserId && (
+                          <button
+                            type="button"
+                            onClick={() => setIsEditProfileOpen(true)}
+                            className="px-2.5 py-1 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[11px] font-semibold transition"
+                            title="Edit your profile"
+                          >
+                            Edit Profile
+                          </button>
+                        )}
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${loadStatus.color}`}
                         >
-                          Edit Profile
-                        </button>
-                      )}
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${loadStatus.color}`}
-                      >
-                        {loadStatus.label}
-                      </span>
+                          {loadStatus.label}
+                        </span>
+                      </div>
                       {isAdmin && member.id !== currentUserId && (
                         <button
                           type="button"
