@@ -85,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Quick Log Time Link */}
         <Link
           href="/time"
-          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-xs font-medium text-neutral-300 transition"
+          className="hidden xs:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-xs font-medium text-neutral-300 transition"
           title="Track & Log Time"
         >
           <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />

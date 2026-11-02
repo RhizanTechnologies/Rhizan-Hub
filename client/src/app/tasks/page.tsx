@@ -591,12 +591,12 @@ export default function TasksPage() {
           {/* Top Row: Personal Scope Switcher + Search + Projects */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Assignee / Person Filter Dropdown */}
-            <div className="flex items-center gap-2">
-              <div className="relative">
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+              <div className="relative w-full sm:w-auto flex-1 sm:flex-initial">
                 <select
                   value={assigneeFilter}
                   onChange={(e) => setAssigneeFilter(e.target.value)}
-                  className="bg-[#181818] border border-[#282828] text-white text-xs font-medium rounded-xl px-3 py-2 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none min-w-[200px]"
+                  className="w-full sm:w-auto bg-[#181818] border border-[#282828] text-white text-xs font-medium rounded-xl px-3 py-2 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none min-w-[180px]"
                 >
                   <option value="MY_TASKS">👤 My Tasks (Personal)</option>
                   <option value="ALL">👥 All Team Tasks</option>
@@ -615,11 +615,11 @@ export default function TasksPage() {
               </div>
 
               {/* Project Filter Dropdown */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto flex-1 sm:flex-initial">
                 <select
                   value={projectFilter}
                   onChange={(e) => setProjectFilter(e.target.value)}
-                  className="bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none min-w-[170px]"
+                  className="w-full sm:w-auto bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none min-w-[150px]"
                 >
                   <option value="ALL">📁 All Projects</option>
                   {projects.map((p) => (
@@ -632,11 +632,11 @@ export default function TasksPage() {
               </div>
 
               {/* Priority Filter Dropdown */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto flex-1 sm:flex-initial">
                 <select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none"
+                  className="w-full sm:w-auto bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none"
                 >
                   <option value="ALL">⚡ All Priorities</option>
                   <option value="URGENT">🔴 Urgent</option>
@@ -648,11 +648,11 @@ export default function TasksPage() {
               </div>
 
               {/* WIP Limit Dropdown */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto flex-1 sm:flex-initial">
                 <select
                   value={wipLimit}
                   onChange={(e) => setWipLimit(Number(e.target.value))}
-                  className={`bg-[#181818] border text-xs rounded-xl px-3 py-2 pr-8 outline-none cursor-pointer appearance-none transition ${
+                  className={`w-full sm:w-auto bg-[#181818] border text-xs rounded-xl px-3 py-2 pr-8 outline-none cursor-pointer appearance-none transition ${
                     isCurrentViewWipExceeded
                       ? 'border-rose-500/60 text-rose-300 font-semibold'
                       : 'border-[#282828] text-white focus:border-teal-500'
