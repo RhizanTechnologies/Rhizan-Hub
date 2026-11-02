@@ -57,35 +57,35 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="h-16 border-b border-[#222222] bg-[#0d0d0d]/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
-      <div className="flex items-center gap-3 min-w-0">
+      <header className="min-h-16 border-b border-[#222222] bg-[#0d0d0d]/80 backdrop-blur-md px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 sticky top-0 z-30">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
         {/* Mobile Hamburger Menu Toggle */}
         <button
           onClick={toggle}
           type="button"
-          className="lg:hidden min-w-[40px] min-h-[40px] p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-[#1a1a1a] active:bg-[#252525] border border-[#222222] transition shrink-0 flex items-center justify-center"
+          className="lg:hidden min-w-[38px] min-h-[38px] p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-[#1a1a1a] active:bg-[#252525] border border-[#222222] transition shrink-0 flex items-center justify-center"
           aria-label="Open sidebar navigation"
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="min-w-0">
-          <h1 className="font-heading text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-2 truncate">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-heading text-xs sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5 truncate">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-[11px] sm:text-xs text-neutral-400 truncate hidden xs:block">
+            <p className="text-[10px] sm:text-xs text-neutral-400 truncate hidden md:block">
               {subtitle}
             </p>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
         {/* Quick Log Time Link */}
         <Link
           href="/time"
-          className="hidden xs:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-xs font-medium text-neutral-300 transition"
+          className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-xs font-medium text-neutral-300 transition"
           title="Track & Log Time"
         >
           <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
@@ -96,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
         {actionButton && (
           <button
             onClick={actionButton.onClick}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-medium text-white shadow-md shadow-teal-900/30 transition shrink-0"
+            className="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-medium text-white shadow-md shadow-teal-900/30 transition shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{actionButton.label}</span>
@@ -108,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={toggleColorMode}
           type="button"
-          className="p-2 rounded-xl border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-neutral-300 hover:text-white transition flex items-center justify-center shrink-0 shadow-sm"
+          className="p-1.5 sm:p-2 rounded-xl border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-neutral-300 hover:text-white transition flex items-center justify-center shrink-0 shadow-sm"
           title={isLight ? 'Switch to Dark Mode (Soft Slate)' : 'Switch to Clean Light Mode'}
           aria-label="Toggle theme color"
         >
@@ -124,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => installPwa()}
             type="button"
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 hover:text-teal-300 text-xs font-medium transition shrink-0 cursor-pointer shadow-sm animate-pulse"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 hover:text-teal-300 text-xs font-medium transition shrink-0 cursor-pointer shadow-sm animate-pulse"
             title="Install RHIZAN Hub app on this device"
           >
             <Download className="w-3.5 h-3.5" />

@@ -68,6 +68,7 @@ export default function TasksPage() {
   const [newTaskStatus, setNewTaskStatus] = useState<TaskStatus>('TODO');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [mobileColumn, setMobileColumn] = useState<'ALL' | TaskStatus>('ALL');
+  const [isFiltersOpen, setIsFiltersOpen] = useState(true);
 
   // New task form state
   const [title, setTitle] = useState('');
@@ -587,21 +588,43 @@ export default function TasksPage() {
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-4">
         {/* Productivity Control & Filtering Ribbon */}
-        <div className="p-4 bg-[#121212] border border-[#222222] rounded-3xl space-y-4 shadow-md">
-          {/* Top Row: Search Bar */}
-          <div className="relative w-full">
-            <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search tasks, deliverables, or subtasks..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
-            />
+        <div className="p-3.5 sm:p-4 bg-[#121212] border border-[#222222] rounded-3xl space-y-3.5 shadow-md">
+          {/* Top Row: Search Bar + Filter Toggle Button */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search tasks, deliverables, or subtasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+              />
+            </div>
+
+            {/* Filter Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+              className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition shrink-0 ${
+                isFiltersOpen
+                  ? 'bg-teal-500/15 text-teal-300 border-teal-500/40 shadow-xs'
+                  : 'bg-[#181818] text-neutral-400 hover:text-white border-[#282828]'
+              }`}
+              title={isFiltersOpen ? 'Hide Filters' : 'Show Filters'}
+              aria-label="Toggle task filters"
+            >
+              <Filter className="w-4 h-4 text-teal-400" />
+              <span className="hidden sm:inline">{isFiltersOpen ? 'Hide Filters' : 'Filters'}</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isFiltersOpen ? 'rotate-180' : ''}`} />
+            </button>
           </div>
 
-          {/* Filters Grid: 1 col on mobile, 2 cols on tablet, 4 cols on desktop */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Collapsible Filter Body */}
+          {isFiltersOpen && (
+            <div className="space-y-3.5 pt-1 animate-in fade-in duration-200">
+              {/* Filters Grid: 1 col on mobile, 2 cols on tablet, 4 cols on desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* 1. Assignee / Member Scope */}
             <div className="space-y-1">
               <label className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1">
@@ -816,6 +839,8 @@ export default function TasksPage() {
                 : ` for ${teamMembers.find((m) => (m as any).id === assigneeFilter || (m as any)._id === assigneeFilter)?.name || 'selected member'}`}
             </div>
           </div>
+          </div>
+        )}
         </div>
 
         {/* WIP Warning Alert Banner */}
@@ -1231,7 +1256,7 @@ export default function TasksPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
               <select
@@ -1265,14 +1290,14 @@ export default function TasksPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 min-w-0"
               />
             </div>
 
