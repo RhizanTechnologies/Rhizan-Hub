@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={toggle}
           type="button"
-          className="lg:hidden p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-[#1a1a1a] border border-[#222222] transition shrink-0"
+          className="lg:hidden min-w-[40px] min-h-[40px] p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-[#1a1a1a] active:bg-[#252525] border border-[#222222] transition shrink-0 flex items-center justify-center"
           aria-label="Open sidebar navigation"
         >
           <Menu className="w-5 h-5" />

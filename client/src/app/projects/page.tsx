@@ -98,6 +98,7 @@ export default function ProjectsPage() {
   const [viewMode, setViewMode] = useState<'PIPELINE' | 'GRID'>('PIPELINE');
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
+  const [mobileStageFilter, setMobileStageFilter] = useState<'ALL' | string>('ALL');
 
   // Detail Modal
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -505,21 +506,62 @@ export default function ProjectsPage() {
 
         {/* VIEW 1: PROGRESS PIPELINE (Kanban View Based on Delivery Progress %) */}
         {viewMode === 'PIPELINE' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 overflow-x-auto pb-4">
-            {PROGRESS_PIPELINE_STAGES.map((stage) => {
-              const stageProjects = filteredProjects.filter((p) => {
-                const prog = p.progress || 0;
-                if (stage.minProgress === 100) return prog >= 100;
-                return prog >= stage.minProgress && prog <= stage.maxProgress;
-              });
+          <div className="space-y-3">
+            {/* Mobile Column Tab Switcher */}
+            <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
+              <button
+                type="button"
+                onClick={() => setMobileStageFilter('ALL')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  mobileStageFilter === 'ALL'
+                    ? 'bg-teal-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-[#181818] text-neutral-600 dark:text-neutral-400 border border-slate-200 dark:border-[#262626]'
+                }`}
+              >
+                All Stages ({filteredProjects.length})
+              </button>
+              {PROGRESS_PIPELINE_STAGES.map((stg) => {
+                const count = filteredProjects.filter((p) => {
+                  const prog = p.progress || 0;
+                  if (stg.minProgress === 100) return prog >= 100;
+                  return prog >= stg.minProgress && prog <= stg.maxProgress;
+                }).length;
+                const isSelected = mobileStageFilter === stg.id;
+                return (
+                  <button
+                    key={stg.id}
+                    type="button"
+                    onClick={() => setMobileStageFilter(stg.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition ${
+                      isSelected
+                        ? 'bg-teal-600 text-white shadow-sm'
+                        : 'bg-white dark:bg-[#181818] text-neutral-600 dark:text-neutral-400 border border-slate-200 dark:border-[#262626]'
+                    }`}
+                  >
+                    <span>{stg.label}</span>
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/10 dark:bg-black/40 font-bold">
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-              const stageBudget = stageProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 overflow-x-auto pb-4">
+              {PROGRESS_PIPELINE_STAGES.filter((stg) => mobileStageFilter === 'ALL' || mobileStageFilter === stg.id).map((stage) => {
+                const stageProjects = filteredProjects.filter((p) => {
+                  const prog = p.progress || 0;
+                  if (stage.minProgress === 100) return prog >= 100;
+                  return prog >= stage.minProgress && prog <= stage.maxProgress;
+                });
 
-              return (
-                <div
-                  key={stage.id}
-                  className={`bg-slate-100/70 dark:bg-[#121926] border ${stage.borderAccent} rounded-2xl p-3 flex flex-col min-h-[550px] shadow-xs transition-colors`}
-                >
+                const stageBudget = stageProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
+
+                return (
+                  <div
+                    key={stage.id}
+                    className={`bg-slate-100/70 dark:bg-[#121926] border ${stage.borderAccent} rounded-2xl p-3 flex flex-col min-h-[450px] md:min-h-[550px] shadow-xs transition-colors`}
+                  >
                   {/* Column Header */}
                   <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-[#1e2a3c] mb-3">
                     <div className="space-y-0.5">
@@ -661,7 +703,8 @@ export default function ProjectsPage() {
               );
             })}
           </div>
-        )}
+        </div>
+      )}
 
         {/* VIEW 2: PROJECT DIRECTORY (Card Grid) */}
         {viewMode === 'GRID' && (
