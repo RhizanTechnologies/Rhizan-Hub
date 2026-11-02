@@ -46,7 +46,7 @@ interface ProgressStage {
 
 const PROGRESS_PIPELINE_STAGES: ProgressStage[] = [
   {
-    id: 'KICKOFF',
+    id: 'PLANNING',
     label: 'Planning & Setup',
     rangeLabel: '0 - 24%',
     minProgress: 0,
@@ -56,24 +56,14 @@ const PROGRESS_PIPELINE_STAGES: ProgressStage[] = [
     barColor: 'from-slate-400 to-slate-500 dark:from-neutral-500 dark:to-neutral-400',
   },
   {
-    id: 'DEV_EARLY',
+    id: 'IN_DEVELOPMENT',
     label: 'In Development',
-    rangeLabel: '25 - 49%',
+    rangeLabel: '25 - 74%',
     minProgress: 25,
-    maxProgress: 49,
+    maxProgress: 74,
     borderAccent: 'border-blue-300/40 dark:border-blue-500/30',
     badgeAccent: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
-    barColor: 'from-blue-500 to-cyan-400',
-  },
-  {
-    id: 'DEV_ADVANCED',
-    label: 'Advanced Build',
-    rangeLabel: '50 - 74%',
-    minProgress: 50,
-    maxProgress: 74,
-    borderAccent: 'border-teal-300/40 dark:border-teal-500/30',
-    badgeAccent: 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20',
-    barColor: 'from-teal-500 to-emerald-400',
+    barColor: 'from-blue-500 to-indigo-500',
   },
   {
     id: 'REVIEW',
@@ -515,7 +505,7 @@ export default function ProjectsPage() {
 
         {/* VIEW 1: PROGRESS PIPELINE (Kanban View Based on Delivery Progress %) */}
         {viewMode === 'PIPELINE' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5 overflow-x-auto pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 overflow-x-auto pb-4">
             {PROGRESS_PIPELINE_STAGES.map((stage) => {
               const stageProjects = filteredProjects.filter((p) => {
                 const prog = p.progress || 0;
