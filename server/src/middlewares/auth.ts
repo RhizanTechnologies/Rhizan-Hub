@@ -6,10 +6,14 @@ export interface AuthRequest extends Request {
   user?: {
     id: string;
     email: string;
-    role: 'ADMIN' | 'MEMBER';
+    role: 'CEO' | 'CTO' | 'COO' | 'ADMIN' | 'MEMBER' | string;
     name: string;
   };
 }
+
+export const isExecutiveOrAdmin = (role?: string): boolean => {
+  return ['CEO', 'CTO', 'COO', 'ADMIN'].includes(role || '');
+};
 
 export const authenticateToken = async (
   req: AuthRequest,
@@ -60,8 +64,8 @@ export const requireAdmin = (
   res: Response,
   next: NextFunction
 ): void => {
-  if (req.user?.role !== 'ADMIN') {
-    res.status(403).json({ message: 'Admin privileges required' });
+  if (!isExecutiveOrAdmin(req.user?.role)) {
+    res.status(403).json({ message: 'Executive (CEO/CTO/COO) or Admin privileges required' });
     return;
   }
   next();

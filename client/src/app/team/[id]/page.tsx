@@ -111,14 +111,14 @@ export default function TeamMemberDetailPage() {
   const [taskFilter, setTaskFilter] = useState<'ALL' | 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE'>('ALL');
 
   const { user: currentUser } = useAuth();
-  const isAdmin = currentUser?.role === 'ADMIN';
+  const isAdmin = ['CEO', 'CTO', 'COO', 'ADMIN'].includes(currentUser?.role || '');
   const currentUserId = currentUser?.id || currentUser?._id;
 
   // Edit modal
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [editTitle, setEditTitle] = useState('');
-  const [editRole, setEditRole] = useState<'MEMBER' | 'ADMIN'>('MEMBER');
+  const [editRole, setEditRole] = useState<'CEO' | 'CTO' | 'COO' | 'ADMIN' | 'MEMBER'>('CEO');
   const [editCapacity, setEditCapacity] = useState('48');
   const [editStatus, setEditStatus] = useState('ACTIVE');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -507,11 +507,21 @@ export default function TeamMemberDetailPage() {
       {/* Top Header */}
       <Header
         title={user.name}
-        subtitle={`${user.title || 'Team Member'} • ${user.role === 'ADMIN' ? 'Administrator' : 'Standard Member'}`}
-        actionButton={{
-          label: 'Edit Member',
+        subtitle={`${user.title || 'Team Member'} • ${
+          user.role === 'CEO'
+            ? 'Chief Executive Officer'
+            : user.role === 'CTO'
+            ? 'Chief Technology Officer'
+            : user.role === 'COO'
+            ? 'Chief Operating Officer'
+            : user.role === 'ADMIN'
+            ? 'Administrator'
+            : 'Standard Member'
+        }`}
+        actionButton={(isAdmin || user.id === currentUserId) ? {
+          label: user.id === currentUserId ? 'Edit My Profile' : 'Edit Member',
           onClick: () => setIsEditOpen(true),
-        }}
+        } : undefined}
       />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-6">
@@ -550,11 +560,26 @@ export default function TeamMemberDetailPage() {
                 {user.name.charAt(0)}
               </div>
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-xl font-bold font-heading text-white">{user.name}</h2>
+                  {user.role === 'CEO' && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold">
+                      👑 CEO
+                    </span>
+                  )}
+                  {user.role === 'CTO' && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/30 font-bold">
+                      ⚡ CTO
+                    </span>
+                  )}
+                  {user.role === 'COO' && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold">
+                      📊 COO
+                    </span>
+                  )}
                   {user.role === 'ADMIN' && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">
-                      Admin
+                      🛡️ Admin
                     </span>
                   )}
                   <span
@@ -1260,15 +1285,24 @@ export default function TeamMemberDetailPage() {
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                System Role
+                System Role (Default: CEO, CTO, COO)
               </label>
               <select
                 value={editRole}
-                onChange={(e) => setEditRole(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+                onChange={(e) => {
+                  const r = e.target.value as any;
+                  setEditRole(r);
+                  if (r === 'CEO' && (!editTitle || editTitle === 'Team Member')) setEditTitle('Chief Executive Officer');
+                  else if (r === 'CTO' && (!editTitle || editTitle === 'Team Member')) setEditTitle('Chief Technology Officer');
+                  else if (r === 'COO' && (!editTitle || editTitle === 'Team Member')) setEditTitle('Chief Operating Officer');
+                }}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-medium"
               >
-                <option value="MEMBER">Member</option>
-                <option value="ADMIN">Admin</option>
+                <option value="CEO">👑 CEO (Chief Executive Officer)</option>
+                <option value="CTO">⚡ CTO (Chief Technology Officer)</option>
+                <option value="COO">📊 COO (Chief Operating Officer)</option>
+                <option value="ADMIN">🛡️ Admin (System Administrator)</option>
+                <option value="MEMBER">👤 Member (Team Member)</option>
               </select>
             </div>
           </div>

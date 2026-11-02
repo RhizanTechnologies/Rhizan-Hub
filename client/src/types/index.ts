@@ -1,9 +1,11 @@
+export type UserRole = 'CEO' | 'CTO' | 'COO' | 'ADMIN' | 'MEMBER';
+
 export interface User {
   _id?: string;
   id?: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'MEMBER';
+  role: UserRole;
   title: string;
   weeklyCapacityHours: number;
   status: 'ACTIVE' | 'AWAY' | 'OFFLINE';

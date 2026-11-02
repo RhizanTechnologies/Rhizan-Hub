@@ -18,8 +18,10 @@ import {
   Moon,
   Download,
   Check,
+  UserCog,
 } from 'lucide-react';
 import Link from 'next/link';
+import { EditProfileModal } from './EditProfileModal';
 
 interface HeaderProps {
   title: string;
@@ -40,6 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { isLight, toggleColorMode } = useTheme();
   const { isInstallable, isInstalled, installPwa } = usePwa();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,7 +56,8 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="h-16 border-b border-[#222222] bg-[#0d0d0d]/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+    <>
+      <header className="h-16 border-b border-[#222222] bg-[#0d0d0d]/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-3 min-w-0">
         {/* Mobile Hamburger Menu Toggle */}
         <button
@@ -151,16 +155,41 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Profile Dropdown Menu */}
           {menuOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#141414] border border-[#262626] shadow-2xl py-2 z-50 text-xs animate-fade-in">
-              <div className="px-3.5 py-2 border-b border-[#222222]">
-                <div className="font-semibold text-white truncate">{user?.name}</div>
+            <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-[#141414] border border-[#262626] shadow-2xl py-2 z-50 text-xs animate-fade-in">
+              <div className="px-3.5 py-2.5 border-b border-[#222222]">
+                <div className="font-semibold text-white truncate text-sm">{user?.name}</div>
                 <div className="text-[11px] text-neutral-400 truncate">{user?.email}</div>
-                <div className="mt-1.5 inline-block text-[10px] font-medium px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                  {user?.role || 'MEMBER'}
+                <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    user?.role === 'CEO'
+                      ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                      : user?.role === 'CTO'
+                      ? 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+                      : user?.role === 'COO'
+                      ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                      : user?.role === 'ADMIN'
+                      ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
+                      : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+                  }`}>
+                    {user?.role === 'CEO' ? '👑 CEO' : user?.role === 'CTO' ? '⚡ CTO' : user?.role === 'COO' ? '📊 COO' : user?.role === 'ADMIN' ? '🛡️ Admin' : '👤 Member'}
+                  </span>
+                  <span className="text-[10px] text-neutral-400 truncate max-w-[130px]">• {user?.title || 'Team Member'}</span>
                 </div>
               </div>
 
               <div className="p-1 space-y-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setIsEditProfileOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-teal-300 hover:text-teal-200 hover:bg-teal-500/10 font-semibold transition text-left"
+                >
+                  <UserCog className="w-4 h-4 text-teal-400" />
+                  <span>Edit Profile</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -189,7 +218,7 @@ export const Header: React.FC<HeaderProps> = ({
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
                   >
                     <UserIcon className="w-4 h-4 text-neutral-400" />
-                    <span>My Profile</span>
+                    <span>My Profile & Stats</span>
                   </Link>
                 )}
 
@@ -260,5 +289,11 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
     </header>
+
+    <EditProfileModal
+      isOpen={isEditProfileOpen}
+      onClose={() => setIsEditProfileOpen(false)}
+    />
+    </>
   );
 };

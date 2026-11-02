@@ -221,12 +221,15 @@ export const inviteMember = async (req: AuthRequest, res: Response): Promise<voi
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempoPassword, salt);
 
+    const validRoles = ['CEO', 'CTO', 'COO', 'ADMIN', 'MEMBER'];
+    const chosenRole = role && validRoles.includes(role) ? role : 'CEO';
+
     const newUser = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
-      role: role === 'ADMIN' ? 'ADMIN' : 'MEMBER',
-      title: title?.trim() || 'Team Member',
+      role: chosenRole,
+      title: title?.trim() || chosenRole,
       weeklyCapacityHours: Number(weeklyCapacityHours) || 48,
       status: 'ACTIVE',
       mustChangePassword: true,
@@ -298,5 +301,73 @@ export const resendInvite = async (req: AuthRequest, res: Response): Promise<voi
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to resend invitation', error: error.message });
+  }
+};
+
+export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    const { name, title, role, weeklyCapacityHours, status, avatar } = req.body;
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    if (name && typeof name === 'string' && name.trim()) {
+      user.name = name.trim();
+    }
+    if (title !== undefined && typeof title === 'string') {
+      user.title = title.trim();
+    }
+    const validRoles = ['CEO', 'CTO', 'COO', 'ADMIN', 'MEMBER'];
+    if (role && validRoles.includes(role)) {
+      user.role = role as any;
+    }
+    if (weeklyCapacityHours !== undefined) {
+      const cap = Number(weeklyCapacityHours);
+      if (!isNaN(cap) && cap >= 1 && cap <= 120) {
+        user.weeklyCapacityHours = cap;
+      }
+    }
+    if (status && ['ACTIVE', 'AWAY', 'OFFLINE'].includes(status)) {
+      user.status = status as any;
+    }
+    if (avatar !== undefined) {
+      user.avatar = avatar;
+    }
+
+    await user.save();
+
+    // Refreshed JWT
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role, name: user.name },
+      getJwtSecret(),
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: 'Profile updated successfully',
+      token,
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        title: user.title,
+        weeklyCapacityHours: user.weeklyCapacityHours,
+        status: user.status,
+        avatar: user.avatar,
+        mustChangePassword: Boolean(user.mustChangePassword),
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to update profile', error: error.message });
   }
 };

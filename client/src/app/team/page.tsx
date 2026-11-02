@@ -29,6 +29,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { EditProfileModal } from '@/components/EditProfileModal';
 
 interface ActiveProjectItem {
   id?: string;
@@ -61,11 +62,14 @@ interface TeamMember {
 
 export default function TeamPage() {
   const { user: currentUser } = useAuth();
-  const isAdmin = currentUser?.role === 'ADMIN';
+  const isAdmin = ['CEO', 'CTO', 'COO', 'ADMIN'].includes(currentUser?.role || '');
   const currentUserId = currentUser?.id || currentUser?._id;
 
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Edit profile modal state for current user
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<TeamMember | null>(null);
@@ -83,8 +87,8 @@ export default function TeamPage() {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<'MEMBER' | 'ADMIN'>('MEMBER');
-  const [inviteTitle, setInviteTitle] = useState('Development');
+  const [inviteRole, setInviteRole] = useState<'CEO' | 'CTO' | 'COO' | 'ADMIN' | 'MEMBER'>('CEO');
+  const [inviteTitle, setInviteTitle] = useState('Chief Executive Officer');
   const [inviteCapacity, setInviteCapacity] = useState('48');
   const [tempoPassword, setTempoPassword] = useState('');
   const [isInviting, setIsInviting] = useState(false);
@@ -495,9 +499,24 @@ export default function TeamPage() {
                           <h3 className="font-heading text-base font-bold text-white group-hover/profile:text-teal-300 transition-colors">
                             {member.name}
                           </h3>
+                          {member.role === 'CEO' && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold">
+                              👑 CEO
+                            </span>
+                          )}
+                          {member.role === 'CTO' && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/30 font-bold">
+                              ⚡ CTO
+                            </span>
+                          )}
+                          {member.role === 'COO' && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold">
+                              📊 COO
+                            </span>
+                          )}
                           {member.role === 'ADMIN' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">
-                              Admin
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/30 font-medium">
+                              🛡️ Admin
                             </span>
                           )}
                         </div>
@@ -506,6 +525,16 @@ export default function TeamPage() {
                     </Link>
 
                     <div className="flex items-center gap-2">
+                      {member.id === currentUserId && (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditProfileOpen(true)}
+                          className="px-2 py-1 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[11px] font-semibold transition"
+                          title="Edit your profile"
+                        >
+                          Edit Profile
+                        </button>
+                      )}
                       <span
                         className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${loadStatus.color}`}
                       >
@@ -793,7 +822,7 @@ export default function TeamPage() {
                 type="text"
                 value={inviteTitle}
                 onChange={(e) => setInviteTitle(e.target.value)}
-                placeholder="e.g. Development"
+                placeholder="e.g. Chief Executive Officer"
                 required
                 className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
               />
@@ -801,15 +830,28 @@ export default function TeamPage() {
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
-                System Role
+                System Role (Default: CEO, CTO, COO)
               </label>
               <select
                 value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+                onChange={(e) => {
+                  const r = e.target.value as any;
+                  setInviteRole(r);
+                  if (r === 'CEO' && (!inviteTitle || inviteTitle === 'Team Member' || inviteTitle === 'Development')) {
+                    setInviteTitle('Chief Executive Officer');
+                  } else if (r === 'CTO' && (!inviteTitle || inviteTitle === 'Team Member' || inviteTitle === 'Development')) {
+                    setInviteTitle('Chief Technology Officer');
+                  } else if (r === 'COO' && (!inviteTitle || inviteTitle === 'Team Member' || inviteTitle === 'Development')) {
+                    setInviteTitle('Chief Operating Officer');
+                  }
+                }}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-medium"
               >
-                <option value="MEMBER">Member</option>
-                <option value="ADMIN">Admin</option>
+                <option value="CEO">👑 CEO (Chief Executive Officer)</option>
+                <option value="CTO">⚡ CTO (Chief Technology Officer)</option>
+                <option value="COO">📊 COO (Chief Operating Officer)</option>
+                <option value="ADMIN">🛡️ Admin (System Administrator)</option>
+                <option value="MEMBER">👤 Member (Team Member)</option>
               </select>
             </div>
           </div>
@@ -1169,6 +1211,13 @@ export default function TeamPage() {
           <span className="text-xs font-medium">{toastMessage.text}</span>
         </div>
       )}
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        onSuccess={loadTeam}
+      />
     </div>
   );
 }

@@ -24,10 +24,15 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePwa } from '@/context/PwaContext';
+import { useAuth } from '@/context/AuthContext';
+import { EditProfileModal } from '@/components/EditProfileModal';
+import { UserCog } from 'lucide-react';
 
 export default function SettingsPage() {
+  const { user } = useAuth();
   const { theme, setTheme, font, setFont, themesList, fontsList } = useTheme();
   const { isInstallable, isInstalled, isOffline, installPwa } = usePwa();
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [sampleText, setSampleText] = useState('Rhizan Operations Platform 2026 • 48h Weekly Sprints');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -99,6 +104,48 @@ export default function SettingsPage() {
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset to Defaults</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* SECTION 0: MY PROFILE & ROLE                                              */}
+        {/* ========================================================================= */}
+        <div className="p-5 sm:p-6 rounded-3xl bg-[#121212] border border-[#262626] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-xl flex items-center justify-center shadow-lg shadow-teal-900/20 shrink-0 font-heading">
+              {user?.name?.charAt(0) || 'A'}
+            </div>
+            <div className="min-w-0 space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-bold text-white truncate">{user?.name}</h3>
+                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                  user?.role === 'CEO'
+                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                    : user?.role === 'CTO'
+                    ? 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+                    : user?.role === 'COO'
+                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                    : user?.role === 'ADMIN'
+                    ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
+                    : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+                }`}>
+                  {user?.role === 'CEO' ? '👑 CEO' : user?.role === 'CTO' ? '⚡ CTO' : user?.role === 'COO' ? '📊 COO' : user?.role === 'ADMIN' ? '🛡️ Admin' : '👤 Member'}
+                </span>
+                <span className="text-[10px] text-teal-400 font-mono">• {user?.weeklyCapacityHours || 48}h Weekly Target</span>
+              </div>
+              <p className="text-xs text-neutral-400 truncate">{user?.title || 'Executive Leadership'} • <span className="text-neutral-500">{user?.email}</span></p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">
+            <button
+              type="button"
+              onClick={() => setIsEditProfileOpen(true)}
+              className="w-full md:w-auto px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold shadow-md shadow-teal-900/30 flex items-center justify-center gap-2 transition"
+            >
+              <UserCog className="w-4 h-4" />
+              <span>Edit Profile & Role</span>
             </button>
           </div>
         </div>
@@ -414,6 +461,11 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
+
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+      />
     </div>
   );
 }

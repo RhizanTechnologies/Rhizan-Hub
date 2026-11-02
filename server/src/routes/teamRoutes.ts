@@ -8,7 +8,7 @@ const router = Router();
 router.use(authenticateToken);
 router.get('/', getTeam);
 router.get('/:id', getTeamMemberDetails);
-router.patch('/:id', requireAdmin, updateTeamMember);
+router.patch('/:id', updateTeamMember);
 router.delete('/:id', requireAdmin, deleteTeamMember);
 router.post('/invite', requireAdmin, inviteMember);
 router.post('/:id/resend-invite', requireAdmin, resendInvite);

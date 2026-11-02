@@ -131,11 +131,19 @@ export const Sidebar: React.FC = () => {
           <span className="text-[11px] font-medium text-neutral-400 flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-teal-400" /> Active Profile
           </span>
-          {user?.role === 'ADMIN' && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 flex items-center gap-0.5 font-medium">
-              <ShieldCheck className="w-2.5 h-2.5" /> Admin
-            </span>
-          )}
+          <span className={`text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 font-bold border ${
+            user?.role === 'CEO'
+              ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+              : user?.role === 'CTO'
+              ? 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+              : user?.role === 'COO'
+              ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+              : user?.role === 'ADMIN'
+              ? 'bg-teal-500/10 text-teal-400 border-teal-500/20'
+              : 'bg-neutral-800 text-neutral-400 border-neutral-700'
+          }`}>
+            {user?.role === 'CEO' ? '👑 CEO' : user?.role === 'CTO' ? '⚡ CTO' : user?.role === 'COO' ? '📊 COO' : user?.role === 'ADMIN' ? '🛡️ Admin' : '👤 Member'}
+          </span>
         </div>
 
         <div className="p-2.5 rounded-xl bg-[#181818] border border-[#262626] mb-2">

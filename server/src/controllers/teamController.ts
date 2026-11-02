@@ -6,7 +6,7 @@ import { Project } from '../models/Project';
 import { TimeEntry } from '../models/TimeEntry';
 import { Approach } from '../models/Approach';
 import { Client } from '../models/Client';
-import { AuthRequest } from '../middlewares/auth';
+import { AuthRequest, isExecutiveOrAdmin } from '../middlewares/auth';
 
 export const getTeam = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -176,14 +176,25 @@ export const getTeamMemberDetails = async (req: AuthRequest, res: Response): Pro
 export const updateTeamMember = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const callerId = (req.user as any)?._id?.toString() || (req.user as any)?.id?.toString();
+    const isSelf = callerId === id;
+    const isExec = isExecutiveOrAdmin(req.user?.role);
+
+    if (!isSelf && !isExec) {
+      res.status(403).json({ message: 'Executive (CEO/CTO/COO) or Admin privileges required to update other members' });
+      return;
+    }
+
     const { name, role, title, weeklyCapacityHours, status } = req.body;
+
+    const validRoles = ['CEO', 'CTO', 'COO', 'ADMIN', 'MEMBER'];
 
     const updated = await User.findByIdAndUpdate(
       id,
       {
         ...(name && { name: name.trim() }),
-        ...(role && { role }),
-        ...(title && { title: title.trim() }),
+        ...(role && validRoles.includes(role) && { role }),
+        ...(title !== undefined && { title: title.trim() }),
         ...(weeklyCapacityHours !== undefined && { weeklyCapacityHours: Number(weeklyCapacityHours) || 48 }),
         ...(status && { status }),
       },
