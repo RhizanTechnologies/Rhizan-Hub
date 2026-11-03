@@ -203,14 +203,31 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         ) {
           const newest = notifsList.find((n) => !n.read);
           if (newest) {
-            try {
-              new window.Notification(newest.title, {
-                body: newest.message,
-                icon: '/icons/notification-icon.png',
-                badge: '/icons/badge-transparent.png',
-              });
-            } catch {
-              // fallback
+            const notifTitle = newest.title || 'RHIZAN Hub';
+            const notifOptions = {
+              body: newest.message,
+              icon: '/icons/notification-icon.png',
+              badge: '/icons/badge-72x72.png',
+              data: { url: newest.link || '/' },
+              tag: newest._id || 'rhizan-hub-alert',
+              renotify: true,
+            };
+
+            // Android Chrome and PWAs require ServiceWorkerRegistration.showNotification()
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.ready
+                .then((reg) => {
+                  reg.showNotification(notifTitle, notifOptions);
+                })
+                .catch(() => {
+                  try {
+                    new window.Notification(notifTitle, notifOptions);
+                  } catch {}
+                });
+            } else {
+              try {
+                new window.Notification(notifTitle, notifOptions);
+              } catch {}
             }
           }
         }
@@ -225,7 +242,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [user, playChime]);
 
-  // Initial load and auto-polling
+  // Initial load and background-resilient auto-polling (Web Worker ticker)
   useEffect(() => {
     if (!user) {
       setNotifications([]);
@@ -236,14 +253,39 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     fetchNotifications();
 
-    // 10s fast pull polling loop
-    const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
+    // 10s background-resilient ticker using Web Worker (avoids browser background tab suspension)
+    let worker: Worker | null = null;
+    let fallbackInterval: NodeJS.Timeout | null = null;
+
+    try {
+      const workerCode = `
+        let timer = null;
+        self.onmessage = function(e) {
+          if (e.data === 'start') {
+            if (!timer) {
+              timer = setInterval(() => self.postMessage('tick'), 10000);
+            }
+          } else if (e.data === 'stop') {
+            if (timer) clearInterval(timer);
+            timer = null;
+          }
+        };
+      `;
+      const blob = new Blob([workerCode], { type: 'application/javascript' });
+      worker = new Worker(URL.createObjectURL(blob));
+      worker.onmessage = () => {
         fetchNotifications(true);
-      }
-    }, 10000);
+      };
+      worker.postMessage('start');
+    } catch {
+      // Fallback if web workers restricted in certain environments
+      fallbackInterval = setInterval(() => {
+        fetchNotifications(true);
+      }, 10000);
+    }
 
     const handleVisibilityChange = () => {
+      // Always pull immediately when returning to the app
       if (document.visibilityState === 'visible') {
         fetchNotifications(true);
       }
@@ -252,7 +294,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     window.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      clearInterval(interval);
+      if (worker) {
+        worker.postMessage('stop');
+        worker.terminate();
+      }
+      if (fallbackInterval) {
+        clearInterval(fallbackInterval);
+      }
       window.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [user, fetchNotifications]);
