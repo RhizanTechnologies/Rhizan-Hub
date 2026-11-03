@@ -29,10 +29,12 @@ import {
   Share2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useAlert } from '@/context/AlertContext';
 
 export default function ClientDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { showAlert } = useAlert();
   const clientId = params?.id as string;
 
   const [client, setClient] = useState<Client | null>(null);
@@ -168,7 +170,7 @@ export default function ClientDetailPage() {
       setIsEditModalOpen(false);
       await loadClient();
     } catch (err: any) {
-      alert(err.message || 'Failed to update client');
+      showAlert(err.message || 'Failed to update client', { type: 'error' });
     }
   };
 
@@ -200,7 +202,7 @@ export default function ClientDetailPage() {
       setNewProjectDescription('');
       await loadClient();
     } catch (err: any) {
-      alert(err.message || 'Failed to create project');
+      showAlert(err.message || 'Failed to create project', { type: 'error' });
     } finally {
       setCreatingProject(false);
     }
@@ -212,7 +214,7 @@ export default function ClientDetailPage() {
       await apiFetch(`/clients/${client._id}`, { method: 'DELETE' });
       router.push('/clients');
     } catch (err: any) {
-      alert(err.message || 'Failed to delete client');
+      showAlert(err.message || 'Failed to delete client', { type: 'error' });
     }
   };
 
@@ -244,7 +246,7 @@ export default function ClientDetailPage() {
       setMeetingLocation('');
       setMeetingNotes('');
     } catch (err: any) {
-      alert(err.message || 'Failed to schedule meeting');
+      showAlert(err.message || 'Failed to schedule meeting', { type: 'error' });
     }
   };
 
@@ -287,7 +289,7 @@ export default function ClientDetailPage() {
       setPaymentInvoice('');
       setPaymentDueDate('');
     } catch (err: any) {
-      alert(err.message || 'Failed to record payment');
+      showAlert(err.message || 'Failed to record payment', { type: 'error' });
     }
   };
 
@@ -319,7 +321,7 @@ export default function ClientDetailPage() {
       setLinkTitle('');
       setLinkUrl('');
     } catch (err: any) {
-      alert(err.message || 'Failed to attach link');
+      showAlert(err.message || 'Failed to attach link', { type: 'error' });
     }
   };
 
@@ -334,7 +336,7 @@ export default function ClientDetailPage() {
       });
       setClient(updated);
     } catch (err: any) {
-      alert(err.message || 'Failed to remove link');
+      showAlert(err.message || 'Failed to remove link', { type: 'error' });
     }
   };
 

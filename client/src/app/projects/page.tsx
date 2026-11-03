@@ -32,6 +32,7 @@ import {
 import { PriorityBadge } from '@/components/Badge';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAlert } from '@/context/AlertContext';
 
 interface ProgressStage {
   id: string;
@@ -89,13 +90,14 @@ const PROGRESS_PIPELINE_STAGES: ProgressStage[] = [
 
 export default function ProjectsPage() {
   const router = useRouter();
+  const { showAlert } = useAlert();
   const [projects, setProjects] = useState<Project[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   // View state & search filters
-  const [viewMode, setViewMode] = useState<'PIPELINE' | 'GRID'>('PIPELINE');
+  const [viewMode, setViewMode] = useState<'PIPELINE' | 'GRID'>('GRID');
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [mobileStageFilter, setMobileStageFilter] = useState<'ALL' | string>('ALL');
@@ -262,7 +264,7 @@ export default function ProjectsPage() {
       }
       await loadAllData();
     } catch (err: any) {
-      alert(err.message || 'Error saving project');
+      showAlert(err.message || 'Error saving project', { type: 'error' });
     }
   };
 
@@ -276,7 +278,7 @@ export default function ProjectsPage() {
       }
       setProjectToDelete(null);
     } catch (err: any) {
-      alert(err.message || 'Failed to delete project');
+      showAlert(err.message || 'Failed to delete project', { type: 'error' });
     }
   };
 
@@ -309,7 +311,7 @@ export default function ProjectsPage() {
       setNewLinkTitle('');
       setNewLinkUrl('');
     } catch (err: any) {
-      alert(err.message || 'Failed to add link');
+      showAlert(err.message || 'Failed to add link', { type: 'error' });
     }
   };
 
@@ -325,7 +327,7 @@ export default function ProjectsPage() {
       setSelectedProject(updated);
       setProjects((prev) => prev.map((p) => (p._id === updated._id ? updated : p)));
     } catch (err: any) {
-      alert(err.message || 'Failed to remove link');
+      showAlert(err.message || 'Failed to remove link', { type: 'error' });
     }
   };
 
@@ -453,18 +455,6 @@ export default function ProjectsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-4">
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => setViewMode('PIPELINE')}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
-                viewMode === 'PIPELINE'
-                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#262626]'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>Progress Pipeline ({filteredProjects.length})</span>
-            </button>
-
-            <button
               onClick={() => setViewMode('GRID')}
               className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
                 viewMode === 'GRID'
@@ -474,6 +464,18 @@ export default function ProjectsPage() {
             >
               <FolderKanban className="w-3.5 h-3.5" />
               <span>Project Directory ({filteredProjects.length})</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode('PIPELINE')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
+                viewMode === 'PIPELINE'
+                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                  : 'bg-white dark:bg-[#141414] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#262626]'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Progress Pipeline ({filteredProjects.length})</span>
             </button>
           </div>
 
@@ -504,7 +506,159 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {/* VIEW 1: PROGRESS PIPELINE (Kanban View Based on Delivery Progress %) */}
+        {/* VIEW 1: PROJECT DIRECTORY (Card Grid) */}
+        {viewMode === 'GRID' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            {filteredProjects.map((project) => {
+              const links = project.links || [];
+              return (
+                <div
+                  key={project._id}
+                  onClick={() => router.push(`/projects/${project._id}`)}
+                  className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-lg shadow-xs group flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Card Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-heading font-semibold text-base text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition flex items-center gap-1.5">
+                          {project.name}
+                          <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-500" />
+                        </h3>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-teal-600 dark:text-teal-400 font-medium flex items-center gap-1">
+                            <Building2 className="w-3 h-3" />
+                            {project.clientName || 'Internal Project'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-1">
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase border ${
+                            project.status === 'COMPLETED'
+                              ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20'
+                              : project.status === 'REVIEW'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'
+                              : 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20'
+                          }`}
+                        >
+                          {project.status.replace('_', ' ')}
+                        </span>
+                        {project.priority && (
+                          <PriorityBadge priority={project.priority} />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Project Lead */}
+                    {project.lead && (
+                      <div className="flex items-center gap-2 mb-3 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] w-fit">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-teal-500 text-black font-extrabold text-[9px] flex items-center justify-center">
+                          {project.lead.name?.charAt(0) || 'L'}
+                        </div>
+                        <div className="text-[11px] leading-tight">
+                          <span className="text-[9px] uppercase font-bold text-amber-600 dark:text-amber-400 mr-1">Project Lead:</span>
+                          <strong className="text-slate-800 dark:text-white font-medium">{project.lead.name}</strong>
+                        </div>
+                      </div>
+                    )}
+
+                    <p className="text-xs text-slate-500 dark:text-neutral-400 line-clamp-2 mb-3 leading-relaxed">
+                      {project.description || 'No description provided.'}
+                    </p>
+
+                    {/* Tech Stack Pills */}
+                    {project.techStack && project.techStack.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {project.techStack.map((tech, idx) => (
+                          <span key={idx} className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#181818] text-slate-700 dark:text-neutral-300 border border-slate-200 dark:border-[#262626]">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Multiple Links Pills (Quick access directly on card) */}
+                    {links.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {links.slice(0, 3).map((l, idx) => (
+                          <a
+                            key={idx}
+                            href={l.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#181818] hover:bg-slate-200 dark:hover:bg-[#222222] border border-slate-200 dark:border-[#282828] text-[10px] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 transition"
+                          >
+                            {getLinkIcon(l.category)}
+                            <span className="truncate max-w-[90px]">{l.title}</span>
+                            <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                          </a>
+                        ))}
+                        {links.length > 3 && (
+                          <span className="px-1.5 py-1 rounded-lg bg-slate-100 dark:bg-[#181818] border border-slate-200 dark:border-[#282828] text-[10px] text-slate-500 dark:text-neutral-500">
+                            +{links.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Progress Bar */}
+                    <div className="space-y-1.5 mb-4">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-500 dark:text-neutral-400">Delivery Progress</span>
+                        <span className="font-semibold text-slate-900 dark:text-white font-mono">{project.progress || 0}%</span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-[#202020] h-2 rounded-full overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${project.progress || 0}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Metadata Stats */}
+                    <div className="grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#242424] text-slate-600 dark:text-neutral-400 mb-4">
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
+                        {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'No deadline'}
+                      </span>
+                      <span className="flex items-center gap-1.5 font-mono text-slate-700 dark:text-neutral-300">
+                        <DollarSign className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                        {project.budget ? `$${project.budget.toLocaleString()}` : 'Flexible'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Footer: Members & Manage */}
+                  <div className="pt-3 border-t border-slate-100 dark:border-[#1f1f1f] flex items-center justify-between">
+                    <div className="flex items-center -space-x-1.5 overflow-hidden">
+                      {(project.members || []).map((m: any, idx: number) => (
+                        <div
+                          key={idx}
+                          title={m.name}
+                          className="w-6 h-6 rounded-full bg-teal-700 border border-[#121212] flex items-center justify-center text-[10px] font-bold text-white uppercase shadow-sm"
+                        >
+                          {m.name?.charAt(0) || 'U'}
+                        </div>
+                      ))}
+                      {(project.members || []).length === 0 && (
+                        <span className="text-[10px] text-slate-400 dark:text-neutral-500 italic">No assigned team</span>
+                      )}
+                    </div>
+
+                    <span className="text-xs text-teal-600 dark:text-teal-400 font-medium group-hover:underline flex items-center gap-1">
+                      Details & Links →
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* VIEW 2: PROGRESS PIPELINE (Kanban View Based on Delivery Progress %) */}
         {viewMode === 'PIPELINE' && (
           <div className="space-y-3">
             {/* Mobile Column Tab Switcher */}
@@ -705,158 +859,6 @@ export default function ProjectsPage() {
           </div>
         </div>
       )}
-
-        {/* VIEW 2: PROJECT DIRECTORY (Card Grid) */}
-        {viewMode === 'GRID' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-            {filteredProjects.map((project) => {
-              const links = project.links || [];
-              return (
-                <div
-                  key={project._id}
-                  onClick={() => router.push(`/projects/${project._id}`)}
-                  className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-lg shadow-xs group flex flex-col justify-between"
-                >
-                  <div>
-                    {/* Card Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-heading font-semibold text-base text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition flex items-center gap-1.5">
-                          {project.name}
-                          <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-500" />
-                        </h3>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-teal-600 dark:text-teal-400 font-medium flex items-center gap-1">
-                            <Building2 className="w-3 h-3" />
-                            {project.clientName || 'Internal Project'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-end gap-1">
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase border ${
-                            project.status === 'COMPLETED'
-                              ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20'
-                              : project.status === 'REVIEW'
-                              ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'
-                              : 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20'
-                          }`}
-                        >
-                          {project.status.replace('_', ' ')}
-                        </span>
-                        {project.priority && (
-                          <PriorityBadge priority={project.priority} />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Project Lead */}
-                    {project.lead && (
-                      <div className="flex items-center gap-2 mb-3 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] w-fit">
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-teal-500 text-black font-extrabold text-[9px] flex items-center justify-center">
-                          {project.lead.name?.charAt(0) || 'L'}
-                        </div>
-                        <div className="text-[11px] leading-tight">
-                          <span className="text-[9px] uppercase font-bold text-amber-600 dark:text-amber-400 mr-1">Project Lead:</span>
-                          <strong className="text-slate-800 dark:text-white font-medium">{project.lead.name}</strong>
-                        </div>
-                      </div>
-                    )}
-
-                    <p className="text-xs text-slate-500 dark:text-neutral-400 line-clamp-2 mb-3 leading-relaxed">
-                      {project.description || 'No description provided.'}
-                    </p>
-
-                    {/* Tech Stack Pills */}
-                    {project.techStack && project.techStack.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {project.techStack.map((tech, idx) => (
-                          <span key={idx} className="text-[10px] px-2 py-0.5 rounded-md bg-[#181818] text-neutral-300 border border-[#262626]">
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Multiple Links Pills (Quick access directly on card) */}
-                    {links.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {links.slice(0, 3).map((l, idx) => (
-                          <a
-                            key={idx}
-                            href={l.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#181818] hover:bg-[#222222] border border-[#282828] text-[10px] text-neutral-300 hover:text-teal-300 transition"
-                          >
-                            {getLinkIcon(l.category)}
-                            <span className="truncate max-w-[90px]">{l.title}</span>
-                            <ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                          </a>
-                        ))}
-                        {links.length > 3 && (
-                          <span className="px-1.5 py-1 rounded-lg bg-[#181818] border border-[#282828] text-[10px] text-neutral-500">
-                            +{links.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Progress Bar */}
-                    <div className="space-y-1.5 mb-4">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-neutral-400">Delivery Progress</span>
-                        <span className="font-semibold text-white font-mono">{project.progress || 0}%</span>
-                      </div>
-                      <div className="w-full bg-[#202020] h-2 rounded-full overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
-                          style={{ width: `${project.progress || 0}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Metadata Stats */}
-                    <div className="grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-[#171717] border border-[#242424] text-neutral-400 mb-4">
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="w-3 h-3 text-neutral-500" />
-                        {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'No deadline'}
-                      </span>
-                      <span className="flex items-center gap-1.5 font-mono text-neutral-300">
-                        <DollarSign className="w-3 h-3 text-emerald-400" />
-                        {project.budget ? `$${project.budget.toLocaleString()}` : 'Flexible'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Card Footer: Members & Manage */}
-                  <div className="pt-3 border-t border-[#1f1f1f] flex items-center justify-between">
-                    <div className="flex items-center -space-x-1.5 overflow-hidden">
-                      {(project.members || []).map((m: any, idx: number) => (
-                        <div
-                          key={idx}
-                          title={m.name}
-                          className="w-6 h-6 rounded-full bg-teal-700 border border-[#121212] flex items-center justify-center text-[10px] font-bold text-white uppercase shadow-sm"
-                        >
-                          {m.name?.charAt(0) || 'U'}
-                        </div>
-                      ))}
-                      {(project.members || []).length === 0 && (
-                        <span className="text-[10px] text-neutral-500 italic">No assigned team</span>
-                      )}
-                    </div>
-
-                    <span className="text-xs text-teal-400 font-medium group-hover:underline flex items-center gap-1">
-                      Details & Links →
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* PROJECT DETAIL MODAL */}

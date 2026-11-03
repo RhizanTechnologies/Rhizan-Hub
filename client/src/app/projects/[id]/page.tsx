@@ -41,7 +41,7 @@ import { useAlert } from '@/context/AlertContext';
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { showConfirm } = useAlert();
+  const { showAlert, showConfirm } = useAlert();
   const projectId = params?.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
@@ -194,7 +194,7 @@ export default function ProjectDetailPage() {
       setIsEditModalOpen(false);
       await loadProjectData();
     } catch (err: any) {
-      alert(err.message || 'Failed to update project');
+      showAlert(err.message || 'Failed to update project', { type: 'error' });
     }
   };
 
@@ -204,7 +204,7 @@ export default function ProjectDetailPage() {
       await apiFetch(`/projects/${project._id}`, { method: 'DELETE' });
       router.push('/projects');
     } catch (err: any) {
-      alert(err.message || 'Failed to delete project');
+      showAlert(err.message || 'Failed to delete project', { type: 'error' });
     }
   };
 
@@ -236,7 +236,7 @@ export default function ProjectDetailPage() {
       setLinkTitle('');
       setLinkUrl('');
     } catch (err: any) {
-      alert(err.message || 'Failed to add link');
+      showAlert(err.message || 'Failed to add link', { type: 'error' });
     }
   };
 
@@ -251,7 +251,7 @@ export default function ProjectDetailPage() {
       });
       setProject(updated);
     } catch (err: any) {
-      alert(err.message || 'Failed to remove link');
+      showAlert(err.message || 'Failed to remove link', { type: 'error' });
     }
   };
 
@@ -280,7 +280,7 @@ export default function ProjectDetailPage() {
       setTaskAssignedToId('');
       setTaskDueDate('');
     } catch (err: any) {
-      alert(err.message || 'Failed to create task for project');
+      showAlert(err.message || 'Failed to create task for project', { type: 'error' });
     }
   };
 
@@ -349,7 +349,7 @@ export default function ProjectDetailPage() {
       setMilestoneDescription('');
       setMilestoneDeliverablesInput('');
     } catch (err: any) {
-      alert(err.message || 'Failed to add milestone');
+      showAlert(err.message || 'Failed to add milestone', { type: 'error' });
     } finally {
       setSavingMilestone(false);
     }
@@ -392,7 +392,7 @@ export default function ProjectDetailPage() {
       });
       setProject(updated);
     } catch (err: any) {
-      alert(err.message || 'Failed to update deliverable');
+      showAlert(err.message || 'Failed to update deliverable', { type: 'error' });
     }
   };
 
@@ -408,9 +408,9 @@ export default function ProjectDetailPage() {
         method: 'PUT',
         body: JSON.stringify({ progress: calculated }),
       });
-      alert(`Project progress auto-synchronized to ${calculated}%!`);
+      showAlert(`Project progress auto-synchronized to ${calculated}%!`, { type: 'success' });
     } catch (err: any) {
-      alert(err.message || 'Failed to sync progress');
+      showAlert(err.message || 'Failed to sync progress', { type: 'error' });
     }
   };
 
@@ -434,7 +434,7 @@ export default function ProjectDetailPage() {
       setProject(updated);
       setDeliverableInputMap((prev) => ({ ...prev, [mIdx]: '' }));
     } catch (err: any) {
-      alert(err.message || 'Failed to add deliverable item');
+      showAlert(err.message || 'Failed to add deliverable item', { type: 'error' });
     }
   };
 
@@ -452,7 +452,7 @@ export default function ProjectDetailPage() {
       });
       setProject(updated);
     } catch (err: any) {
-      alert(err.message || 'Failed to delete deliverable item');
+      showAlert(err.message || 'Failed to delete deliverable item', { type: 'error' });
     }
   };
 
@@ -474,7 +474,7 @@ export default function ProjectDetailPage() {
       });
       setProject(updated);
     } catch (err: any) {
-      alert(err.message || 'Failed to update milestone status');
+      showAlert(err.message || 'Failed to update milestone status', { type: 'error' });
     }
   };
 
@@ -492,7 +492,7 @@ export default function ProjectDetailPage() {
           });
           setProject(updated);
         } catch (err: any) {
-          alert(err.message || 'Failed to delete milestone');
+          showAlert(err.message || 'Failed to delete milestone', { type: 'error' });
         }
       },
       {
@@ -545,7 +545,7 @@ export default function ProjectDetailPage() {
       });
       setProject(updated);
     } catch (err: any) {
-      alert(err.message || 'Failed to load phase templates');
+      showAlert(err.message || 'Failed to load phase templates', { type: 'error' });
     }
   };
 
@@ -1091,33 +1091,37 @@ export default function ProjectDetailPage() {
                   return (
                     <div
                       key={dev._id || idx}
-                      className={`p-3 rounded-xl border flex items-center justify-between ${
+                      className={`p-3 sm:p-3.5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 ${
                         isLead
                           ? 'bg-[#181818] border-amber-500/30 shadow-sm'
                           : 'bg-[#161616] border-[#262626]'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
                           isLead
                             ? 'bg-gradient-to-tr from-amber-500 to-amber-300 text-black font-extrabold shadow-sm'
                             : 'bg-gradient-to-tr from-teal-500 to-emerald-600 text-white'
                         }`}>
                           {dev.name?.charAt(0) || 'U'}
                         </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-semibold text-white">{dev.name}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-semibold text-white truncate max-w-[150px]">{dev.name}</span>
                             {isLead && (
-                              <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
                                 Project Lead
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-teal-400">{dev.title || 'Developer'}</div>
+                          <div className="text-[11px] text-teal-400 truncate mt-0.5">{dev.title || 'Developer'}</div>
                         </div>
                       </div>
-                      <span className="text-[10px] text-neutral-500">{dev.email}</span>
+                      {dev.email && (
+                        <div className="text-[11px] text-neutral-400 font-mono truncate pl-12 sm:pl-0 sm:text-right shrink-0 max-w-full sm:max-w-[200px]">
+                          {dev.email}
+                        </div>
+                      )}
                     </div>
                   );
                 })}

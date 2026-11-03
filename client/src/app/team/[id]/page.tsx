@@ -1134,7 +1134,7 @@ export default function TeamMemberDetailPage() {
                                   : 'bg-neutral-500/10 text-neutral-400 border border-neutral-500/20'
                               }`}
                             >
-                              {entry.billable ? 'Billable' : 'Internal'}
+                              {entry.billable ? 'Client' : 'Internal'}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-right font-bold text-teal-400 whitespace-nowrap">
@@ -1183,7 +1183,7 @@ export default function TeamMemberDetailPage() {
                               : 'bg-neutral-500/10 text-neutral-400 border border-neutral-500/20'
                           }`}
                         >
-                          {entry.billable ? 'Billable' : 'Internal'}
+                          {entry.billable ? 'Client' : 'Internal'}
                         </span>
                       </div>
                     </div>

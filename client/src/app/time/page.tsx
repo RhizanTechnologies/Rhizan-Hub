@@ -38,7 +38,7 @@ const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
 
 export default function TimeTrackingPage() {
   const { user } = useAuth();
-  const { showConfirm } = useAlert();
+  const { showAlert, showConfirm } = useAlert();
 
   // Data states
   const [entries, setEntries] = useState<TimeEntry[]>([]);
@@ -322,7 +322,7 @@ export default function TimeTrackingPage() {
     const fallbackProjectId = selectedProjectId || (projects.length > 0 ? projects[0]._id : undefined);
 
     if (!fallbackProjectId) {
-      alert('Please create or select a project before logging time.');
+      showAlert('Please create or select a project before logging time.', { type: 'warning' });
       setElapsedSeconds(0);
       return;
     }
@@ -351,7 +351,7 @@ export default function TimeTrackingPage() {
       setSuccessToast(`Logged ${formatDurationText(hours, minutes)} successfully!`);
       setTimeout(() => setSuccessToast(null), 3500);
     } catch (err: any) {
-      alert(err.message || 'Failed to save time entry');
+      showAlert(err.message || 'Failed to save time entry', { type: 'error' });
     }
   };
 
@@ -400,7 +400,7 @@ export default function TimeTrackingPage() {
     const fallbackProjectId = selectedProjectId || (projects.length > 0 ? projects[0]._id : undefined);
 
     if (!fallbackProjectId) {
-      alert('Please select a project before logging time.');
+      showAlert('Please select a project before logging time.', { type: 'warning' });
       return;
     }
 
@@ -450,7 +450,7 @@ export default function TimeTrackingPage() {
       setSuccessToast(`Logged ${formatDurationText(hoursToSave, minutesToSave)} manually!`);
       setTimeout(() => setSuccessToast(null), 3500);
     } catch (err: any) {
-      alert(err.message || 'Failed to save manual time entry');
+      showAlert(err.message || 'Failed to save manual time entry', { type: 'error' });
     }
   };
 
@@ -464,7 +464,7 @@ export default function TimeTrackingPage() {
         try {
           await apiFetch(`/time/${entryId}`, { method: 'DELETE' });
         } catch (err: any) {
-          alert(err.message || 'Failed to delete time entry');
+          showAlert(err.message || 'Failed to delete time entry', { type: 'error' });
         }
       },
       {
@@ -725,7 +725,7 @@ export default function TimeTrackingPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {/* Billable toggle */}
+                  {/* Client vs Internal toggle */}
                   <button
                     type="button"
                     onClick={() => setIsBillable(!isBillable)}
@@ -734,10 +734,10 @@ export default function TimeTrackingPage() {
                         ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
                         : 'bg-[#181818] text-neutral-500 border-[#282828]'
                     }`}
-                    title={isBillable ? 'Billable Time ($)' : 'Non-billable Time'}
+                    title={isBillable ? 'Client Work' : 'Internal Work'}
                   >
                     <DollarSign className="w-3.5 h-3.5" />
-                    <span>{isBillable ? 'Billable' : 'Non-billable'}</span>
+                    <span>{isBillable ? 'Client' : 'Internal'}</span>
                   </button>
                 </div>
               </div>
@@ -1357,16 +1357,16 @@ export default function TimeTrackingPage() {
                 </div>
               </div>
 
-              {/* Sub-metrics: Billable vs Non-Billable & Week Range */}
+              {/* Sub-metrics: Client vs Internal & Week Range */}
               <div className="pt-2 border-t border-[#222222] flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-3">
                   <span className="text-neutral-400 flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    Billable: <strong className="text-emerald-400 font-mono">{selectedMemberStats.billableHours}h</strong>
+                    Client: <strong className="text-emerald-400 font-mono">{selectedMemberStats.billableHours}h</strong>
                   </span>
                   <span className="text-neutral-400 flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-neutral-500" />
-                    Non-billable: <strong className="text-neutral-300 font-mono">{selectedMemberStats.nonBillableHours}h</strong>
+                    Internal: <strong className="text-neutral-300 font-mono">{selectedMemberStats.nonBillableHours}h</strong>
                   </span>
                   <span className="text-neutral-500">
                     • {selectedMemberStats.totalEntries} time log{selectedMemberStats.totalEntries === 1 ? '' : 's'}
@@ -1562,7 +1562,7 @@ export default function TimeTrackingPage() {
                                   }`}
                                 >
                                   <DollarSign className="w-2.5 h-2.5" />
-                                  {entry.billable ? 'Billable' : 'Non-billable'}
+                                  {entry.billable ? 'Client' : 'Internal'}
                                 </span>
                               </div>
                             </div>

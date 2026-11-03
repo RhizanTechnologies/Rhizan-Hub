@@ -42,7 +42,7 @@ const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { showConfirm } = useAlert();
+  const { showAlert, showConfirm } = useAlert();
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -61,6 +61,7 @@ export default function DashboardPage() {
   // Quick Modals
   const [isLogTimeOpen, setIsLogTimeOpen] = useState(false);
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
+  const [isActivityFeedOpen, setIsActivityFeedOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Quick Log Time Form State
@@ -172,7 +173,7 @@ export default function DashboardPage() {
   const handleStandupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!standupCompleted.trim() || !standupPriorities.trim()) {
-      alert('Please fill out what you completed today and priorities for tomorrow');
+      showAlert('Please fill out what you completed today and priorities for tomorrow', { type: 'warning' });
       return;
     }
 
@@ -192,7 +193,7 @@ export default function DashboardPage() {
       showToast('🎉 Daily EOD Standup submitted successfully!');
       loadStandups();
     } catch (err: any) {
-      alert(err.message || 'Failed to submit standup');
+      showAlert(err.message || 'Failed to submit standup', { type: 'error' });
     } finally {
       setIsSubmittingStandup(false);
     }
@@ -315,7 +316,7 @@ export default function DashboardPage() {
       loadDashboard();
     } catch (err: any) {
       console.error('Failed to log timer entry', err);
-      alert(err.message || 'Failed to save time entry');
+      showAlert(err.message || 'Failed to save time entry', { type: 'error' });
     }
   };
 
@@ -323,7 +324,7 @@ export default function DashboardPage() {
   const handleQuickPresetLog = async (presetMins: number) => {
     const projectId = timerProjectId || (projects.length > 0 ? projects[0]._id : '');
     if (!projectId) {
-      alert('Please select a project first');
+      showAlert('Please select a project first', { type: 'warning' });
       return;
     }
 
@@ -348,7 +349,7 @@ export default function DashboardPage() {
       showToast(`⚡ Logged ${formatDurationText(hours, minutes)} to today's timesheet!`);
       loadDashboard();
     } catch (err: any) {
-      alert(err.message || 'Failed to log preset time');
+      showAlert(err.message || 'Failed to log preset time', { type: 'error' });
     }
   };
 
@@ -356,14 +357,14 @@ export default function DashboardPage() {
   const handleManualLogSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualProjectId) {
-      alert('Please select a project');
+      showAlert('Please select a project', { type: 'warning' });
       return;
     }
 
     const hrs = parseInt(manualHours) || 0;
     const mins = parseInt(manualMinutes) || 0;
     if (hrs === 0 && mins === 0) {
-      alert('Please enter hours or minutes');
+      showAlert('Please enter hours or minutes', { type: 'warning' });
       return;
     }
 
@@ -387,7 +388,7 @@ export default function DashboardPage() {
       showToast(`✅ Successfully logged ${formatDurationText(hrs, mins)}!`);
       loadDashboard();
     } catch (err: any) {
-      alert(err.message || 'Failed to log time');
+      showAlert(err.message || 'Failed to log time', { type: 'error' });
     }
   };
 
@@ -415,7 +416,7 @@ export default function DashboardPage() {
       showToast('✅ New task added to your board!');
       loadDashboard();
     } catch (err: any) {
-      alert(err.message || 'Failed to create task');
+      showAlert(err.message || 'Failed to create task', { type: 'error' });
     }
   };
 
@@ -429,7 +430,7 @@ export default function DashboardPage() {
           showToast('🗑️ Time entry removed');
           loadDashboard();
         } catch (err: any) {
-          alert(err.message || 'Failed to delete time entry');
+          showAlert(err.message || 'Failed to delete time entry', { type: 'error' });
         }
       },
       {
@@ -506,14 +507,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Top Header with Quick Actions */}
+      {/* Top Header */}
       <Header
         title="Rhizan Operations Hub"
         subtitle={`Welcome back, ${user?.name || 'Abdulaziz'} 👋 • ${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}`}
-        actionButton={{
-          label: '+ Log Time',
-          onClick: () => setIsLogTimeOpen(true),
-        }}
       />
 
       <main className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
@@ -521,43 +518,70 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#111111] border border-[#222222] rounded-2xl">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
-            <span className="text-xs font-semibold text-neutral-300">Quick Actions:</span>
+            <span className="text-xs font-semibold text-neutral-300">Quick Navigation:</span>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setIsLogTimeOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-teal-600/10 hover:bg-teal-600/20 text-teal-400 border border-teal-500/30 text-xs font-semibold flex items-center gap-1.5 transition"
-            >
-              <Clock className="w-3.5 h-3.5" />
-              <span>Log Time Entry</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsNewTaskOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>New Task</span>
-            </button>
-
             <Link
               href="/time"
-              className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
+              className="px-3 py-1.5 rounded-xl bg-teal-600/10 hover:bg-teal-600/20 text-teal-400 border border-teal-500/30 text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Go to Time Tracking"
             >
-              <TrendingUp className="w-3.5 h-3.5 text-teal-400" />
-              <span>Full Timesheet</span>
+              <Clock className="w-3.5 h-3.5" />
+              <span>Log Time</span>
             </Link>
 
             <Link
               href="/tasks"
               className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Go to Tasks Kanban"
+            >
+              <CheckSquare className="w-3.5 h-3.5 text-teal-400" />
+              <span>Tasks</span>
+            </Link>
+
+            <Link
+              href="/projects"
+              className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Go to Projects"
             >
               <FolderKanban className="w-3.5 h-3.5 text-teal-400" />
-              <span>Kanban Board</span>
+              <span>Projects</span>
             </Link>
+
+            <Link
+              href="/clients"
+              className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Go to Clients"
+            >
+              <Building2 className="w-3.5 h-3.5 text-teal-400" />
+              <span>Clients</span>
+            </Link>
+
+            <Link
+              href="/approaches"
+              className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Go to Client Outreach"
+            >
+              <Target className="w-3.5 h-3.5 text-teal-400" />
+              <span>Client Outreach</span>
+            </Link>
+
+            {/* Mobile / Quick Operations Feed Popup Trigger */}
+            <button
+              type="button"
+              onClick={() => setIsActivityFeedOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+              title="Open Recent Operations Feed Popup"
+            >
+              <TrendingUp className="w-3.5 h-3.5 text-teal-400" />
+              <span>Operations Feed</span>
+              {(data?.recentActivities || []).length > 0 && (
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-teal-500/20 text-teal-300 font-mono font-bold">
+                  {data?.recentActivities?.length}
+                </span>
+              )}
+            </button>
 
             {/* Optional Daily EOD Standup Button */}
             <button
@@ -874,10 +898,10 @@ export default function DashboardPage() {
                         ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                         : 'bg-[#181818] border-[#2a2a2a] text-neutral-400'
                     }`}
-                    title="Billable toggle"
+                    title={timerBillable ? 'Client Work (Billable)' : 'Internal Work'}
                   >
                     <DollarSign className="w-3 h-3" />
-                    <span>{timerBillable ? 'Billable' : 'Internal'}</span>
+                    <span>{timerBillable ? 'Client' : 'Internal'}</span>
                   </button>
                 </div>
 
@@ -1371,7 +1395,9 @@ export default function DashboardPage() {
                 onChange={(e) => setManualBillable(e.target.checked)}
                 className="rounded border-[#333333] text-teal-600 focus:ring-0"
               />
-              <span>Billable to Client</span>
+              <span className="font-medium text-xs">
+                {manualBillable ? 'Client Work (Billable)' : 'Internal Work'}
+              </span>
             </label>
 
             <div className="flex items-center gap-2">
@@ -1562,6 +1588,50 @@ export default function DashboardPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* ========================================================================= */}
+      {/* MODAL: RECENT OPERATIONS FEED POPUP (FOR MOBILE & QUICK ACCESS)          */}
+      {/* ========================================================================= */}
+      <Modal
+        isOpen={isActivityFeedOpen}
+        onClose={() => setIsActivityFeedOpen(false)}
+        title="Recent Operations Feed"
+      >
+        <div className="space-y-3">
+          <p className="text-xs text-neutral-400">
+            Live updates across deliverables, project milestones, clients, and time logs.
+          </p>
+
+          <div className="space-y-2.5 max-h-[60vh] overflow-y-auto pr-0.5 custom-scrollbar">
+            {(data?.recentActivities || []).length > 0 ? (
+              data?.recentActivities.map((act) => (
+                <div
+                  key={act._id}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[#161616] border border-[#262626] text-xs gap-3"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      {act.userName?.charAt(0) || 'U'}
+                    </div>
+                    <div className="truncate">
+                      <span className="font-semibold text-white">{act.userName}</span>{' '}
+                      <span className="text-neutral-400">{act.action}</span>{' '}
+                      <span className="font-medium text-teal-300">"{act.entityTitle}"</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-neutral-500 shrink-0 font-mono">
+                    {act.createdAt}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-10 text-neutral-500 text-xs">
+                No activity recorded yet.
+              </div>
+            )}
+          </div>
+        </div>
       </Modal>
     </div>
   );

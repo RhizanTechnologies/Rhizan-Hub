@@ -28,9 +28,11 @@ import {
   Briefcase,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useAlert } from '@/context/AlertContext';
 
 export default function ClientsPage() {
   const router = useRouter();
+  const { showAlert } = useAlert();
   const [clients, setClients] = useState<Client[]>([]);
   const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -166,7 +168,7 @@ export default function ClientsPage() {
       }
       await loadData();
     } catch (err: any) {
-      alert(err.message || 'Error saving client');
+      showAlert(err.message || 'Error saving client', { type: 'error' });
     }
   };
 
@@ -180,7 +182,7 @@ export default function ClientsPage() {
       }
       setClientToDelete(null);
     } catch (err: any) {
-      alert(err.message || 'Error deleting client');
+      showAlert(err.message || 'Error deleting client', { type: 'error' });
     }
   };
 
@@ -213,7 +215,7 @@ export default function ClientsPage() {
       setNewMeetingLocation('');
       setNewMeetingNotes('');
     } catch (err: any) {
-      alert(err.message || 'Failed to add meeting');
+      showAlert(err.message || 'Failed to add meeting', { type: 'error' });
     }
   };
 
@@ -253,7 +255,7 @@ export default function ClientsPage() {
       setNewPaymentInvoice('');
       setNewPaymentDueDate('');
     } catch (err: any) {
-      alert(err.message || 'Failed to record payment');
+      showAlert(err.message || 'Failed to record payment', { type: 'error' });
     }
   };
 
@@ -285,7 +287,7 @@ export default function ClientsPage() {
       setNewLinkTitle('');
       setNewLinkUrl('');
     } catch (err: any) {
-      alert(err.message || 'Failed to add link');
+      showAlert(err.message || 'Failed to add link', { type: 'error' });
     }
   };
 
@@ -301,7 +303,7 @@ export default function ClientsPage() {
       setSelectedClient(updated);
       setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
     } catch (err: any) {
-      alert(err.message || 'Failed to delete link');
+      showAlert(err.message || 'Failed to delete link', { type: 'error' });
     }
   };
 
@@ -491,7 +493,7 @@ export default function ClientsPage() {
             </div>
 
             {/* Financial Overview Cards */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
               <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
                 <span className="text-[10px] text-neutral-400 uppercase font-semibold block">Total Deal Value</span>
                 <span className="text-base font-bold text-white font-mono mt-0.5 block">
@@ -513,7 +515,7 @@ export default function ClientsPage() {
             </div>
 
             {/* Detail Tabs */}
-            <div className="flex items-center gap-1 border-b border-[#222222] pb-2">
+            <div className="flex items-center gap-1 border-b border-[#222222] pb-2 overflow-x-auto no-scrollbar">
               {[
                 { id: 'PROJECTS', label: `Projects (${(selectedClient.projects || []).length})`, icon: FolderKanban },
                 { id: 'MEETINGS', label: `Meetings (${(selectedClient.meetings || []).length})`, icon: Calendar },
@@ -525,7 +527,7 @@ export default function ClientsPage() {
                   <button
                     key={t.id}
                     onClick={() => setDetailTab(t.id as any)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition shrink-0 whitespace-nowrap ${
                       detailTab === t.id
                         ? 'bg-teal-600 text-white'
                         : 'text-neutral-400 hover:text-white hover:bg-[#1a1a1a]'

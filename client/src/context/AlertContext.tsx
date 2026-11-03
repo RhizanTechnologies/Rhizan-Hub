@@ -237,7 +237,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-sm sm:max-w-md bg-[#131313] border border-[#262626] rounded-3xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 overflow-hidden animate-scale-in text-white space-y-4"
+            className="relative w-full max-w-sm sm:max-w-md bg-[#131313] border border-[#262626] rounded-3xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] sm:pb-6 overflow-hidden animate-scale-in text-white space-y-4"
           >
             {/* Mobile Drag Indicator */}
             <div className="w-10 h-1 rounded-full bg-neutral-700 mx-auto -mt-1 mb-1 sm:hidden" />

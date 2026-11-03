@@ -39,7 +39,7 @@ const COLUMNS: { id: TaskStatus; label: string; accent: string }[] = [
 
 export default function TasksPage() {
   const { user } = useAuth();
-  const { showConfirm } = useAlert();
+  const { showAlert, showConfirm } = useAlert();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
@@ -124,6 +124,15 @@ export default function TasksPage() {
       }
     }
   }, [user, teamMembers]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('create') === 'true') {
+        setIsNewTaskOpen(true);
+      }
+    }
+  }, []);
 
   // Count how many tasks an individual user currently has in IN_PROGRESS
   const getInProgressCountForUser = (userIdOrEmail?: string, userName?: string) => {
@@ -309,7 +318,7 @@ export default function TasksPage() {
         body: JSON.stringify({ subtasks: updatedSubtasks }),
       });
     } catch (err: any) {
-      alert(err.message || 'Failed to add subtask');
+      showAlert(err.message || 'Failed to add subtask', { type: 'error' });
     }
   };
 
@@ -328,7 +337,7 @@ export default function TasksPage() {
         body: JSON.stringify({ subtasks: updatedSubtasks }),
       });
     } catch (err: any) {
-      alert(err.message || 'Failed to remove subtask');
+      showAlert(err.message || 'Failed to remove subtask', { type: 'error' });
     }
   };
 
@@ -345,7 +354,7 @@ export default function TasksPage() {
         try {
           await apiFetch(`/tasks/${taskId}`, { method: 'DELETE' });
         } catch (err: any) {
-          alert(err.message || 'Failed to delete task');
+          showAlert(err.message || 'Failed to delete task', { type: 'error' });
         }
       },
       {
@@ -404,7 +413,7 @@ export default function TasksPage() {
       setSubtaskInput('');
       setIsNewTaskOpen(false);
     } catch (err: any) {
-      alert(err.message || 'Failed to create task');
+      showAlert(err.message || 'Failed to create task', { type: 'error' });
     }
   };
 
@@ -588,7 +597,12 @@ export default function TasksPage() {
   return (
     <div className="flex-1 flex flex-col min-h-screen">
       <Header
-        title="Personal Tasks & Daily Board"
+        title={
+          <>
+            <span className="sm:hidden">Personal Tasks</span>
+            <span className="hidden sm:inline">Personal Tasks & Daily Board</span>
+          </>
+        }
         subtitle="Individual work queue with subtask tracking, due dates, and project filtering"
         actionButton={{
           label: 'New Task',

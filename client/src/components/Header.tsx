@@ -21,10 +21,11 @@ import {
   UserCog,
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { EditProfileModal } from './EditProfileModal';
 
 interface HeaderProps {
-  title: string;
+  title: string | React.ReactNode;
   subtitle?: string;
   actionButton?: {
     label: string;
@@ -37,6 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
   subtitle,
   actionButton,
 }) => {
+  const pathname = usePathname();
   const { user, logout } = useAuth();
   const { toggle } = useSidebar();
   const { isLight, toggleColorMode } = useTheme();
@@ -82,15 +84,17 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-        {/* Quick Log Time Link */}
-        <Link
-          href="/time"
-          className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-xs font-medium text-neutral-300 transition"
-          title="Track & Log Time"
-        >
-          <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-          <span className="hidden sm:inline">Log Time</span>
-        </Link>
+        {/* Quick Log Time Link (visible across app except when already on time page) */}
+        {pathname !== '/time' && (
+          <Link
+            href="/time"
+            className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-xs font-medium text-neutral-300 transition"
+            title="Track & Log Time"
+          >
+            <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <span className="hidden sm:inline">Log Time</span>
+          </Link>
+        )}
 
         {/* Dynamic Action Button */}
         {actionButton && (

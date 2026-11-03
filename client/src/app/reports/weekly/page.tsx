@@ -220,7 +220,7 @@ export default function WeeklyReportPage() {
 
             <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161616] border border-[#262626] print:bg-neutral-50 print:border-neutral-200">
               <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block mb-1 truncate">
-                Billable Ratio
+                Client Ratio
               </span>
               <div className="font-heading text-base sm:text-lg font-bold text-emerald-400 print:text-black truncate">
                 {summary?.billablePercentage ?? 0}%
@@ -300,7 +300,7 @@ export default function WeeklyReportPage() {
                     <th className="py-2.5 px-3">Role</th>
                     <th className="py-2.5 px-3">Logged / Target</th>
                     <th className="py-2.5 px-3">Capacity %</th>
-                    <th className="py-2.5 px-3">Billable</th>
+                    <th className="py-2.5 px-3">Client Work</th>
                     <th className="py-2.5 px-3">Daily Logged (Mon – Sun)</th>
                     <th className="py-2.5 px-3">Top Projects</th>
                   </tr>
@@ -407,7 +407,7 @@ export default function WeeklyReportPage() {
                         Logged: <strong className="text-white font-mono">{m.hoursLogged}h</strong> / {m.targetHours}h
                       </span>
                       <span className="text-emerald-400 font-mono text-[11px]">
-                        Billable: <strong>{m.billableHours}h</strong>
+                        Client: <strong>{m.billableHours}h</strong>
                       </span>
                     </div>
                   </div>

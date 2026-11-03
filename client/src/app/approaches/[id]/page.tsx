@@ -29,6 +29,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useAlert } from '@/context/AlertContext';
 
 const STATUS_CONFIG: Record<ApproachStatus, { label: string; color: string; badge: string }> = {
   PROSPECT: {
@@ -87,6 +88,7 @@ function formatCleanPhone(raw?: string): string {
 export default function ApproachDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { showAlert } = useAlert();
   const approachId = params?.id as string;
 
   const [approach, setApproach] = useState<Approach | null>(null);
@@ -199,7 +201,7 @@ export default function ApproachDetailPage() {
       setApproach((prev) => (prev ? { ...prev, ...updated } : updated));
       setIsEditModalOpen(false);
     } catch (err: any) {
-      alert(err.message || 'Failed to update approach details');
+      showAlert(err.message || 'Failed to update approach details', { type: 'error' });
     }
   };
 
@@ -213,7 +215,7 @@ export default function ApproachDetailPage() {
       setApproach(updated);
       setFormAssignedTo(newOwnerId);
     } catch (err: any) {
-      alert(err.message || 'Failed to update assigned lead owner');
+      showAlert(err.message || 'Failed to update assigned lead owner', { type: 'error' });
     }
   };
 
@@ -227,7 +229,7 @@ export default function ApproachDetailPage() {
       setApproach((prev) => (prev ? { ...prev, status: updated.status } : updated));
       setFormStatus(newStatus);
     } catch (err: any) {
-      alert(err.message || 'Failed to update status');
+      showAlert(err.message || 'Failed to update status', { type: 'error' });
     }
   };
 
@@ -259,7 +261,7 @@ export default function ApproachDetailPage() {
       setLogUpdateStatus('');
       setIsLogModalOpen(false);
     } catch (err: any) {
-      alert(err.message || 'Failed to log contact interaction');
+      showAlert(err.message || 'Failed to log contact interaction', { type: 'error' });
     } finally {
       setSubmittingLog(false);
     }
@@ -317,7 +319,7 @@ export default function ApproachDetailPage() {
       setIsConvertModalOpen(false);
       router.push(`/clients/${res.client._id}`);
     } catch (err: any) {
-      alert(err.message || 'Failed to convert to client');
+      showAlert(err.message || 'Failed to convert to client', { type: 'error' });
     } finally {
       setConverting(false);
     }
@@ -329,7 +331,7 @@ export default function ApproachDetailPage() {
       await apiFetch(`/approaches/${approach._id}`, { method: 'DELETE' });
       router.push('/approaches');
     } catch (err: any) {
-      alert(err.message || 'Failed to delete target');
+      showAlert(err.message || 'Failed to delete target', { type: 'error' });
     }
   };
 
