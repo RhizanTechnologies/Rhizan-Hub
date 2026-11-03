@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { Standup } from '../models/Standup';
 import { User } from '../models/User';
 import { Activity } from '../models/Activity';
+import { Notification } from '../models/Notification';
 import { AuthRequest } from '../middlewares/auth';
 
 export const getTodayStandups = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -83,6 +84,20 @@ export const submitStandup = async (req: AuthRequest, res: Response): Promise<vo
         entityType: 'TASK',
         entityTitle: 'Daily Standup Wrap-Up',
       });
+    }
+
+    // Auto-resolve any STANDUP_REMINDER notifications for today
+    try {
+      await Notification.updateMany(
+        {
+          recipient: req.user?.id,
+          type: 'STANDUP_REMINDER',
+          read: false,
+        },
+        { read: true }
+      );
+    } catch (e) {
+      // non-critical
     }
 
     res.status(200).json(standup);

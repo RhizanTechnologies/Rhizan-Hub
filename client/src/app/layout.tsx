@@ -5,6 +5,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { PwaProvider } from '@/context/PwaContext';
 import { AlertProvider } from '@/context/AlertContext';
+import { NotificationProvider } from '@/context/NotificationContext';
+import { NotificationDrawer } from '@/components/NotificationDrawer';
 import { AppShell } from '@/components/AppShell';
 
 const inter = Inter({
@@ -96,9 +98,12 @@ export default function RootLayout({
           <AuthProvider>
             <ThemeProvider>
               <AlertProvider>
-                <AppShell>
-                  {children}
-                </AppShell>
+                <NotificationProvider>
+                  <NotificationDrawer />
+                  <AppShell>
+                    {children}
+                  </AppShell>
+                </NotificationProvider>
               </AlertProvider>
             </ThemeProvider>
           </AuthProvider>

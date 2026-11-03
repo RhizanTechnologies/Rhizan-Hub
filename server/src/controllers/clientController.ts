@@ -2,7 +2,9 @@ import { Response } from 'express';
 import { Client } from '../models/Client';
 import { Project } from '../models/Project';
 import { Activity } from '../models/Activity';
+import { User } from '../models/User';
 import { AuthRequest } from '../middlewares/auth';
+import { createNotification, notifyUsers } from '../utils/notificationHelper';
 
 export const getClients = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -158,6 +160,56 @@ export const updateClient = async (req: AuthRequest, res: Response): Promise<voi
         entityType: 'CLIENT',
         entityTitle: updated?.name || 'Client',
       });
+    }
+
+    // Trigger notification if a new meeting was scheduled
+    if (req.body.meetings && Array.isArray(req.body.meetings)) {
+      const oldMeetingsCount = existing.meetings?.length || 0;
+      if (req.body.meetings.length > oldMeetingsCount) {
+        const newestMeeting = req.body.meetings[req.body.meetings.length - 1];
+        if (newestMeeting && existing.assignedTo) {
+          const assignedId = (existing.assignedTo as any)?._id || existing.assignedTo;
+          if (assignedId && (!req.user || req.user.id !== assignedId.toString())) {
+            await createNotification({
+              recipient: assignedId,
+              actor: req.user?.id as any,
+              type: 'CLIENT_MEETING',
+              title: `Meeting Scheduled: ${updated?.name || existing.name}`,
+              message: `${req.user?.name || 'A team member'} scheduled "${newestMeeting.title}" for ${newestMeeting.date || 'upcoming'} at ${newestMeeting.time || 'agreed time'}.`,
+              link: `/clients/${id}`,
+              priority: 'high',
+              metadata: { clientId: id },
+            });
+          }
+        }
+      }
+    }
+
+    // Trigger notification if a payment was logged
+    if (req.body.payments && Array.isArray(req.body.payments)) {
+      const oldPaymentsCount = existing.payments?.length || 0;
+      if (req.body.payments.length > oldPaymentsCount) {
+        const newestPayment = req.body.payments[req.body.payments.length - 1];
+        if (newestPayment) {
+          try {
+            const activeUsers = await User.find({ status: 'ACTIVE' }, '_id');
+            await notifyUsers(
+              activeUsers.map((u) => u._id.toString()),
+              {
+                actor: req.user ? { id: req.user.id, name: req.user.name } : undefined,
+                type: 'PAYMENT_RECEIVED',
+                title: `Payment Logged: ${updated?.name || existing.name}`,
+                message: `${req.user?.name || 'A team member'} recorded payment "${newestPayment.title}" (${Number(newestPayment.amount || 0).toLocaleString()} ${updated?.currency || 'USD'} - ${newestPayment.status || 'PAID'}).`,
+                link: `/clients/${id}`,
+                priority: 'high',
+                metadata: { clientId: id },
+              }
+            );
+          } catch (payErr) {
+            console.error('Failed to notify payment logged:', payErr);
+          }
+        }
+      }
     }
 
     res.json(updated);

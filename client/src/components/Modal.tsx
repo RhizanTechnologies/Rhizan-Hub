@@ -47,7 +47,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         </div>
 
         {/* Scrollable Content Container with Generous Bottom Padding */}
-        <div className="mt-4 flex-1 overflow-y-auto pr-1 pb-6 sm:pb-3 custom-scrollbar">{children}</div>
+        <div className="mt-4 flex-1 overflow-y-auto pr-1.5 pb-12 sm:pb-4 custom-scrollbar">{children}</div>
       </div>
     </div>
   );

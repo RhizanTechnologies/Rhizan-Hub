@@ -423,3 +423,43 @@ export interface Standup {
   createdAt: string;
   updatedAt: string;
 }
+
+export type NotificationType =
+  | 'OUTREACH_FOLLOWUP'
+  | 'OUTREACH_ASSIGNED'
+  | 'DEAL_WON'
+  | 'TASK_ASSIGNED'
+  | 'TASK_DUE'
+  | 'TASK_REVIEW'
+  | 'TASK_COMMENT'
+  | 'WIP_LIMIT'
+  | 'PROJECT_DEADLINE'
+  | 'PROJECT_ASSIGNED'
+  | 'MILESTONE_COMPLETED'
+  | 'CLIENT_MEETING'
+  | 'PAYMENT_DUE'
+  | 'PAYMENT_RECEIVED'
+  | 'STANDUP_REMINDER'
+  | 'CAPACITY_ALERT'
+  | 'SYSTEM';
+
+export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+export interface AppNotification {
+  _id: string;
+  recipient: string;
+  actor?: {
+    id?: string;
+    name?: string;
+  };
+  type: NotificationType;
+  title: string;
+  message: string;
+  link: string;
+  read: boolean;
+  priority: NotificationPriority;
+  metadata?: Record<string, any>;
+  dedupKey?: string;
+  createdAt: string;
+  updatedAt: string;
+}

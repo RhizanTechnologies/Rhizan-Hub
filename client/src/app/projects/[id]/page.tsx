@@ -1107,21 +1107,29 @@ export default function ProjectDetailPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-semibold text-white truncate max-w-[150px]">{dev.name}</span>
+                            <span className="text-xs font-semibold text-white truncate">{dev.name}</span>
                             {isLead && (
-                              <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
+                              <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
                                 Project Lead
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-teal-400 truncate mt-0.5">{dev.title || 'Developer'}</div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-teal-400 truncate">{dev.title || 'Developer'}</span>
+                            {dev.email && (
+                              <>
+                                <span className="text-neutral-600 text-[10px] hidden sm:inline">•</span>
+                                <span className="text-[11px] text-neutral-400 font-mono truncate hidden sm:inline">{dev.email}</span>
+                              </>
+                            )}
+                          </div>
+                          {dev.email && (
+                            <div className="text-[11px] text-neutral-400 font-mono truncate sm:hidden mt-0.5">
+                              {dev.email}
+                            </div>
+                          )}
                         </div>
                       </div>
-                      {dev.email && (
-                        <div className="text-[11px] text-neutral-400 font-mono truncate pl-12 sm:pl-0 sm:text-right shrink-0 max-w-full sm:max-w-[200px]">
-                          {dev.email}
-                        </div>
-                      )}
                     </div>
                   );
                 })}

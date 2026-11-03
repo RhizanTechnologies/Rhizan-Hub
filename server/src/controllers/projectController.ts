@@ -4,6 +4,7 @@ import { Task } from '../models/Task';
 import { Client } from '../models/Client';
 import { Activity } from '../models/Activity';
 import { AuthRequest } from '../middlewares/auth';
+import { createNotification, notifyUsers } from '../utils/notificationHelper';
 
 export const getProjects = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -128,6 +129,42 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
       });
     }
 
+    try {
+      if (project.lead && (!req.user || project.lead.toString() !== req.user.id)) {
+        await createNotification({
+          recipient: project.lead as any,
+          actor: req.user ? { id: req.user.id, name: req.user.name } : undefined,
+          type: 'PROJECT_ASSIGNED',
+          title: `Project Lead: ${project.name}`,
+          message: `${req.user?.name || 'Rhizan Hub'} assigned you as Project Lead for "${project.name}".`,
+          link: `/projects/${project._id}`,
+          priority: 'high',
+          metadata: { projectId: project._id.toString() },
+        });
+      }
+
+      const otherMembers = (project.members || []).filter(
+        (m: any) =>
+          m.toString() !== req.user?.id &&
+          (!project.lead || m.toString() !== project.lead.toString())
+      );
+
+      for (const mId of otherMembers) {
+        await createNotification({
+          recipient: mId,
+          actor: req.user ? { id: req.user.id, name: req.user.name } : undefined,
+          type: 'PROJECT_ASSIGNED',
+          title: `Assigned to Project: ${project.name}`,
+          message: `${req.user?.name || 'Rhizan Hub'} added you to the project team for "${project.name}".`,
+          link: `/projects/${project._id}`,
+          priority: 'medium',
+          metadata: { projectId: project._id.toString() },
+        });
+      }
+    } catch (notifErr) {
+      console.error('Failed to notify project assignees:', notifErr);
+    }
+
     const populated = await Project.findById(project._id)
       .populate('lead', 'name email title avatar')
       .populate('members', 'name email title avatar')
@@ -186,6 +223,73 @@ export const updateProject = async (req: AuthRequest, res: Response): Promise<vo
         entityType: 'PROJECT',
         entityTitle: project?.name || 'Project',
       });
+    }
+
+    try {
+      // Check if new lead assigned
+      const oldLeadId = existing.lead?.toString();
+      const newLeadId = project?.lead?._id?.toString() || project?.lead?.toString();
+      if (newLeadId && newLeadId !== oldLeadId && (!req.user || newLeadId !== req.user.id)) {
+        await createNotification({
+          recipient: newLeadId as any,
+          actor: req.user ? { id: req.user.id, name: req.user.name } : undefined,
+          type: 'PROJECT_ASSIGNED',
+          title: `Assigned as Lead: ${project?.name}`,
+          message: `${req.user?.name || 'Rhizan Hub'} assigned you as Project Lead for "${project?.name}".`,
+          link: `/projects/${id}`,
+          priority: 'high',
+          metadata: { projectId: id },
+        });
+      }
+
+      // Check if new members were added
+      const oldMemberIds = new Set((existing.members || []).map((m: any) => m.toString()));
+      const newMembers = (project?.members || []).filter((m: any) => {
+        const mId = m?._id?.toString() || m?.toString();
+        return mId && !oldMemberIds.has(mId) && (!req.user || mId !== req.user.id);
+      });
+      for (const newM of newMembers) {
+        const mId = newM?._id?.toString() || newM?.toString();
+        await createNotification({
+          recipient: mId,
+          actor: req.user ? { id: req.user.id, name: req.user.name } : undefined,
+          type: 'PROJECT_ASSIGNED',
+          title: `Added to Project: ${project?.name}`,
+          message: `${req.user?.name || 'Rhizan Hub'} added you to the project team for "${project?.name}".`,
+          link: `/projects/${id}`,
+          priority: 'medium',
+          metadata: { projectId: id },
+        });
+      }
+
+      // Check if any milestone was newly completed
+      if (req.body.milestones && Array.isArray(req.body.milestones)) {
+        const oldMilestones = existing.milestones || [];
+        for (const newMs of req.body.milestones) {
+          if (newMs.status === 'COMPLETED') {
+            const oldMs = oldMilestones.find(
+              (m: any) => m.title === newMs.title || m._id?.toString() === newMs._id?.toString()
+            );
+            if (!oldMs || oldMs.status !== 'COMPLETED') {
+              const targetRecipients = (project?.members || [])
+                .map((m: any) => m?._id?.toString() || m?.toString())
+                .filter((mId: string) => mId && (!req.user || mId !== req.user.id));
+
+              await notifyUsers(targetRecipients, {
+                actor: req.user ? { id: req.user.id, name: req.user.name } : undefined,
+                type: 'MILESTONE_COMPLETED',
+                title: `Milestone Completed: ${newMs.title}`,
+                message: `Milestone "${newMs.title}" in project "${project?.name}" has been marked completed!`,
+                link: `/projects/${id}`,
+                priority: 'medium',
+                metadata: { projectId: id },
+              });
+            }
+          }
+        }
+      }
+    } catch (notifErr) {
+      console.error('Failed to process project notifications:', notifErr);
     }
 
     res.json(project);

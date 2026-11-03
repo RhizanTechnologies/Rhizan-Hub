@@ -18,6 +18,7 @@ import approachRoutes from './routes/approachRoutes';
 import nicheRoutes from './routes/nicheRoutes';
 import reportRoutes from './routes/reportRoutes';
 import standupRoutes from './routes/standupRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -70,6 +71,7 @@ app.use('/api/approaches', approachRoutes);
 app.use('/api/niches', nicheRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/standups', standupRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useTheme } from '@/context/ThemeContext';
 import { usePwa } from '@/context/PwaContext';
+import { useNotifications } from '@/context/NotificationContext';
 import {
   Clock,
   Plus,
@@ -19,6 +20,7 @@ import {
   Download,
   Check,
   UserCog,
+  Bell,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -43,6 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { toggle } = useSidebar();
   const { isLight, toggleColorMode } = useTheme();
   const { isInstallable, isInstalled, installPwa } = usePwa();
+  const { unreadCount, toggleDrawer } = useNotifications();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -107,6 +110,22 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="sm:hidden">New</span>
           </button>
         )}
+
+        {/* Real-Time Notification Bell */}
+        <button
+          onClick={toggleDrawer}
+          type="button"
+          className="relative p-1.5 sm:p-2 rounded-xl border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-neutral-300 hover:text-white transition flex items-center justify-center shrink-0 shadow-sm"
+          title={unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'Notifications'}
+          aria-label="Toggle notifications center"
+        >
+          <Bell className="w-4 h-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 bg-teal-500 text-black font-extrabold text-[9px] rounded-full flex items-center justify-center shadow-md animate-scale-in">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
 
         {/* 1-Click Quick Light/Dark Mode Switcher */}
         <button
