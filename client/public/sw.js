@@ -1,6 +1,6 @@
 // RHIZAN Hub PWA Service Worker
-const CACHE_VERSION = 'rhizan-hub-v1';
-const STATIC_CACHE = 'rhizan-static-v1';
+const CACHE_VERSION = 'rhizan-hub-v2';
+const STATIC_CACHE = 'rhizan-static-v2';
 const OFFLINE_URL = '/offline';
 
 const PRECACHE_ASSETS = [
