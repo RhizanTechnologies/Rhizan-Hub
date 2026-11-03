@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, CheckCircle2, Copy } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
@@ -17,6 +17,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPreFilled, setIsPreFilled] = useState(false);
+  const [copiedPass, setCopiedPass] = useState(false);
 
   // Pre-fill email and temporary password if redirected from invitation email or copy link, or display error
   useEffect(() => {
@@ -35,6 +36,11 @@ function LoginForm() {
     }
     if (tempParam) {
       setPassword(tempParam);
+      try {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(tempParam).catch(() => {});
+        }
+      } catch {}
     }
     if (emailParam || tempParam) {
       setIsPreFilled(true);
@@ -54,8 +60,12 @@ function LoginForm() {
       const user = await login(email, password);
 
       if (user.mustChangePassword) {
+        if (password) {
+          sessionStorage.setItem('rhizan_temp_pass', password);
+        }
         router.push('/change-password');
       } else {
+        sessionStorage.removeItem('rhizan_temp_pass');
         router.push('/');
       }
     } catch (err: any) {
@@ -135,18 +145,44 @@ function LoginForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1.5">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300">
+                  Password
+                </label>
+                {password && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(password);
+                      setCopiedPass(true);
+                      setTimeout(() => setCopiedPass(false), 2000);
+                    }}
+                    className="text-[11px] text-teal-600 dark:text-teal-400 hover:text-teal-500 font-medium flex items-center gap-1 transition"
+                    title="Click to copy password"
+                  >
+                    {copiedPass ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedPass ? 'Copied to clipboard!' : 'Click to copy'}</span>
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 dark:text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onClick={(e) => {
+                    if (isPreFilled && password) {
+                      (e.target as HTMLInputElement).select();
+                      navigator.clipboard.writeText(password);
+                      setCopiedPass(true);
+                      setTimeout(() => setCopiedPass(false), 2000);
+                    }
+                  }}
                   placeholder="Enter your password or temporary code"
                   required
-                  className="w-full bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition font-mono tracking-wide"
+                  className="w-full bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition font-mono tracking-wide cursor-pointer"
+                  title={isPreFilled ? "Click to copy password" : undefined}
                 />
                 <button
                   type="button"

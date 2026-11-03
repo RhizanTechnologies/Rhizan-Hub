@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { KeyRound, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, LogOut, ShieldAlert } from 'lucide-react';
+import { KeyRound, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, LogOut, ShieldAlert, Copy, Sparkles } from 'lucide-react';
 
 export default function ChangePasswordPage() {
   const router = useRouter();
@@ -17,6 +17,24 @@ export default function ChangePasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [copiedPass, setCopiedPass] = useState(false);
+  const [isAutoFilled, setIsAutoFilled] = useState(false);
+
+  // Auto-fill temporary password from login session or query params
+  useEffect(() => {
+    try {
+      const savedTemp = sessionStorage.getItem('rhizan_temp_pass');
+      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const urlTemp = params?.get('temp') || params?.get('code') || params?.get('password');
+      const temp = savedTemp || urlTemp;
+      if (temp) {
+        setCurrentPassword(temp);
+        setIsAutoFilled(true);
+      }
+    } catch (e) {
+      console.warn('Could not read session storage for temporary password', e);
+    }
+  }, []);
 
   // Password rules validation
   const hasMinLength = newPassword.length >= 6;
@@ -37,6 +55,7 @@ export default function ChangePasswordPage() {
       setLoading(true);
       setError(null);
       await changePassword(currentPassword, newPassword);
+      sessionStorage.removeItem('rhizan_temp_pass');
       setSuccess(true);
 
       // Short delay to show success feedback before redirecting to the hub
@@ -92,20 +111,49 @@ export default function ChangePasswordPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1.5">
-                Current / Temporary Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300">
+                  Current / Temporary Password
+                </label>
+                {currentPassword && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(currentPassword);
+                      setCopiedPass(true);
+                      setTimeout(() => setCopiedPass(false), 2000);
+                    }}
+                    className="text-[11px] text-teal-600 dark:text-teal-400 hover:text-teal-500 font-medium flex items-center gap-1 transition"
+                    title="Click to copy temporary password"
+                  >
+                    {copiedPass ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedPass ? 'Copied to clipboard!' : 'Click to copy'}</span>
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 dark:text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type={showPasswords ? 'text' : 'password'}
                   value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  onChange={(e) => {
+                    setCurrentPassword(e.target.value);
+                    setIsAutoFilled(false);
+                  }}
+                  onClick={(e) => {
+                    if (currentPassword) {
+                      (e.target as HTMLInputElement).select();
+                      navigator.clipboard.writeText(currentPassword);
+                      setCopiedPass(true);
+                      setTimeout(() => setCopiedPass(false), 2000);
+                    }
+                  }}
                   placeholder="Enter the password from your invitation"
                   required
-                  autoFocus
+                  autoFocus={!isAutoFilled}
                   disabled={loading || success}
-                  className="w-full bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition disabled:opacity-50 font-mono tracking-wide"
+                  className="w-full bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition disabled:opacity-50 font-mono tracking-wide cursor-pointer"
+                  title="Click to copy temporary password"
                 />
                 <button
                   type="button"
@@ -116,6 +164,13 @@ export default function ChangePasswordPage() {
                   {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+
+              {isAutoFilled && (
+                <p className="mt-1.5 text-[11px] text-teal-600 dark:text-teal-400 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                  <span>Temporary password carried over from invitation. Click it to copy or set your new password below.</span>
+                </p>
+              )}
             </div>
 
             <div>

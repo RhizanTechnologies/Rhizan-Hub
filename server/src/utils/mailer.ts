@@ -121,12 +121,17 @@ export const sendInvitationEmail = async ({
                           </tr>
                         </table>
 
-                        <!-- Click-to-Select Password Box -->
-                        <div class="password-box" style="background-color: #050811; border: 1px dashed rgba(20, 184, 166, 0.6); border-radius: 12px; padding: 16px 20px; text-align: center; cursor: pointer;">
-                          <span style="display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 22px; font-weight: 800; color: #2dd4bf; letter-spacing: 3px; user-select: all; -webkit-user-select: all; -moz-user-select: all; cursor: pointer;" title="Click to select temporary password">
-                            ${temporaryPassword}
-                          </span>
-                        </div>
+                        <!-- Click-to-Open & Auto-Fill Password Box -->
+                        <a href="${autoFillLoginUrl}" target="_blank" style="text-decoration: none; display: block;" title="Click to auto-fill temporary password and sign in">
+                          <div class="password-box" style="background-color: #050811; border: 1px dashed rgba(20, 184, 166, 0.6); border-radius: 12px; padding: 16px 20px; text-align: center; cursor: pointer;">
+                            <span style="display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 22px; font-weight: 800; color: #2dd4bf; letter-spacing: 3px; user-select: all; -webkit-user-select: all; -moz-user-select: all; cursor: pointer;" title="Click to copy and auto-fill temporary password">
+                              ${temporaryPassword}
+                            </span>
+                          </div>
+                        </a>
+                        <p style="margin: 8px 0 0 0; text-align: center; font-size: 11px; color: #64748b;">
+                          💡 Click the password above to automatically fill credentials in your browser
+                        </p>
                       </td>
                     </tr>
                   </table>
