@@ -2,6 +2,15 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export type UserRole = 'CEO' | 'CTO' | 'COO' | 'ADMIN' | 'MEMBER';
 
+export interface IPushSubscription {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+  createdAt?: Date;
+}
+
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -12,6 +21,7 @@ export interface IUser extends Document {
   status: 'ACTIVE' | 'AWAY' | 'OFFLINE';
   avatar?: string;
   mustChangePassword?: boolean;
+  pushSubscriptions?: IPushSubscription[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +37,16 @@ const UserSchema = new Schema<IUser>(
     status: { type: String, enum: ['ACTIVE', 'AWAY', 'OFFLINE'], default: 'ACTIVE' },
     avatar: { type: String, default: '' },
     mustChangePassword: { type: Boolean, default: false },
+    pushSubscriptions: [
+      {
+        endpoint: { type: String, required: true },
+        keys: {
+          p256dh: { type: String, required: true },
+          auth: { type: String, required: true },
+        },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

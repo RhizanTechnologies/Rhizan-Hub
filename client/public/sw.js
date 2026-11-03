@@ -122,3 +122,73 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+// ==========================================
+// BACKGROUND WEB PUSH (When App Is Closed)
+// ==========================================
+self.addEventListener('push', (event) => {
+  let payload = {
+    title: 'RHIZAN Hub',
+    body: 'You have a new workspace notification.',
+    link: '/',
+  };
+
+  try {
+    if (event.data) {
+      payload = event.data.json();
+    }
+  } catch (err) {
+    if (event.data) {
+      payload.body = event.data.text();
+    }
+  }
+
+  const title = payload.title || 'RHIZAN Hub';
+  const options = {
+    body: payload.body || payload.message,
+    icon: payload.icon || '/icons/icon-192x192.png',
+    badge: payload.badge || '/logo_minimal.png',
+    vibrate: [120, 60, 120],
+    tag: payload.dedupKey || 'rhizan-hub-alert',
+    renotify: true,
+    data: {
+      url: payload.link || '/',
+    },
+    actions: [
+      { action: 'open', title: 'Open in Hub' },
+      { action: 'close', title: 'Dismiss' },
+    ],
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Handle click on background OS notification
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'close') {
+    return;
+  }
+
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // If a window is already open, focus and navigate it
+      for (const client of windowClients) {
+        if ('focus' in client) {
+          if (client.url.includes(targetUrl)) {
+            return client.focus();
+          }
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      // Otherwise open a new window
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});

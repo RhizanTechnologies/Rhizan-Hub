@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth';
 import { Notification } from '../models/Notification';
+import { User } from '../models/User';
 import { evaluateDynamicAlerts } from '../utils/notificationHelper';
 
 export const getNotifications = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -133,5 +134,67 @@ export const clearAllRead = async (req: AuthRequest, res: Response): Promise<voi
     res.json({ message: 'Read notifications cleared' });
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to clear read notifications', error: error.message });
+  }
+};
+
+export const getVapidPublicKey = async (_req: AuthRequest, res: Response): Promise<void> => {
+  const publicKey =
+    process.env.VAPID_PUBLIC_KEY ||
+    'BAhJGymbGd5kdlFAQvEMmyE7jD-p2iM0-ESP1EL7LFs3mkNUF17-hroR5IS5dyak_LBs4h8OZJBNkXt8QwRrBrE';
+  res.json({ publicKey });
+};
+
+export const subscribePush = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const { subscription } = req.body;
+    if (!subscription || !subscription.endpoint || !subscription.keys) {
+      res.status(400).json({ message: 'Invalid push subscription payload' });
+      return;
+    }
+
+    // Add subscription if not already present
+    await User.findByIdAndUpdate(userId, {
+      $pull: { pushSubscriptions: { endpoint: subscription.endpoint } },
+    });
+
+    await User.findByIdAndUpdate(userId, {
+      $push: {
+        pushSubscriptions: {
+          endpoint: subscription.endpoint,
+          keys: {
+            p256dh: subscription.keys.p256dh,
+            auth: subscription.keys.auth,
+          },
+          createdAt: new Date(),
+        },
+      },
+    });
+
+    res.json({ message: 'Push subscription registered successfully' });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to register push subscription', error: error.message });
+  }
+};
+
+export const unsubscribePush = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    const { endpoint } = req.body;
+
+    if (userId && endpoint) {
+      await User.findByIdAndUpdate(userId, {
+        $pull: { pushSubscriptions: { endpoint } },
+      });
+    }
+
+    res.json({ message: 'Unsubscribed from push notifications' });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to unsubscribe push', error: error.message });
   }
 };

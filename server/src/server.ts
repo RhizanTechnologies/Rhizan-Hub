@@ -93,11 +93,30 @@ app.get('/', (_req, res) => {
   });
 });
 
+import { User } from './models/User';
+import { evaluateDynamicAlerts } from './utils/notificationHelper';
+
 // Start listener only in non-serverless environments (local dev or VPS container)
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`🚀 Rhizan Hub Server running on port ${PORT}`);
     console.log(`📡 API Health: http://localhost:${PORT}/api/health`);
+
+    // Periodic Background Evaluator: evaluates due tasks, outreach follow-ups, and standup reminders every 15 minutes
+    // and sends Web Push notifications to registered devices even when the app is closed
+    const runBackgroundAlertEvaluations = async () => {
+      try {
+        const activeUsers = await User.find({ status: 'ACTIVE' }, '_id');
+        for (const u of activeUsers) {
+          await evaluateDynamicAlerts(u._id.toString());
+        }
+      } catch (err: any) {
+        console.warn('Background dynamic alert evaluation warning:', err.message);
+      }
+    };
+
+    setTimeout(runBackgroundAlertEvaluations, 10000);
+    setInterval(runBackgroundAlertEvaluations, 15 * 60 * 1000);
   });
 }
 

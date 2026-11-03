@@ -35,12 +35,63 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const initialLoadDone = useRef(false);
   const prevUnreadCount = useRef(0);
 
-  // Initialize browser notification permission state
+  // Helper to convert VAPID public key
+  const urlBase64ToUint8Array = (base64String: string) => {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  };
+
+  // Subscribe to background Web Push (works even when app/tab is closed)
+  const subscribeToPushNotifications = useCallback(async () => {
+    if (
+      typeof window === 'undefined' ||
+      !('serviceWorker' in navigator) ||
+      !('PushManager' in window)
+    ) {
+      return;
+    }
+
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (!reg) return;
+
+      const res = await apiFetch<{ publicKey: string }>('/notifications/vapid-key');
+      if (!res?.publicKey) return;
+
+      const convertedKey = urlBase64ToUint8Array(res.publicKey);
+
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedKey,
+        });
+      }
+
+      await apiFetch('/notifications/subscribe', {
+        method: 'POST',
+        body: JSON.stringify({ subscription: sub }),
+      });
+    } catch (err: any) {
+      console.warn('Background web push subscription warning:', err.message);
+    }
+  }, []);
+
+  // Initialize browser notification permission & sync push if already granted
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setBrowserPermission(window.Notification.permission);
+      if (window.Notification.permission === 'granted' && user) {
+        subscribeToPushNotifications();
+      }
     }
-  }, []);
+  }, [user, subscribeToPushNotifications]);
 
   const requestBrowserPermission = async (): Promise<string> => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -48,9 +99,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const permission = await window.Notification.requestPermission();
         setBrowserPermission(permission);
         if (permission === 'granted') {
+          await subscribeToPushNotifications();
           try {
             new window.Notification('RHIZAN Hub Alerts Enabled', {
-              body: 'You will receive real-time follow-ups, task alerts, and meeting notifications.',
+              body: 'You will receive real-time follow-ups, task alerts, and meeting notifications even when closed.',
               icon: '/logo_minimal.png',
             });
           } catch {

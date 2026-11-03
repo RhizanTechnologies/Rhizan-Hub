@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import webpush from 'web-push';
 import { Notification, NotificationType, NotificationPriority } from '../models/Notification';
 import { Task } from '../models/Task';
 import { Approach } from '../models/Approach';
@@ -53,7 +54,7 @@ export async function createNotification(params: CreateNotificationParams) {
       }
     }
 
-    return await Notification.create({
+    const newNotification = await Notification.create({
       recipient,
       actor: actor
         ? {
@@ -70,9 +71,79 @@ export async function createNotification(params: CreateNotificationParams) {
       dedupKey,
       read: false,
     });
+
+    // Send Web Push notification to user's registered devices (even when app/tab is closed)
+    sendWebPush(recipient, { title, message, link }).catch((err) => {
+      console.warn('Background web push delivery error:', err.message);
+    });
+
+    return newNotification;
   } catch (err: any) {
     console.error('Error creating notification:', err);
     return null;
+  }
+}
+
+/**
+ * Sends a Web Push notification to all active browser/device subscriptions for a user
+ */
+export async function sendWebPush(
+  recipientId: Types.ObjectId | string,
+  payload: { title: string; message: string; link?: string }
+) {
+  try {
+    const user = await User.findById(recipientId);
+    if (!user || !user.pushSubscriptions || user.pushSubscriptions.length === 0) {
+      return;
+    }
+
+    const vapidPublicKey =
+      process.env.VAPID_PUBLIC_KEY ||
+      'BAhJGymbGd5kdlFAQvEMmyE7jD-p2iM0-ESP1EL7LFs3mkNUF17-hroR5IS5dyak_LBs4h8OZJBNkXt8QwRrBrE';
+    const vapidPrivateKey =
+      process.env.VAPID_PRIVATE_KEY || 'pVqy7mWh6h_s88G0QjY3rebjM8wcnhcHO1vnqxPcbis';
+    const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:contact@rhizantech.com';
+
+    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+
+    const pushData = JSON.stringify({
+      title: payload.title,
+      body: payload.message,
+      link: payload.link || '/',
+      icon: '/icons/icon-192x192.png',
+      badge: '/logo_minimal.png',
+    });
+
+    const deadEndpoints: string[] = [];
+
+    await Promise.all(
+      user.pushSubscriptions.map(async (sub) => {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: {
+                p256dh: sub.keys.p256dh,
+                auth: sub.keys.auth,
+              },
+            },
+            pushData
+          );
+        } catch (pushErr: any) {
+          if (pushErr.statusCode === 410 || pushErr.statusCode === 404) {
+            deadEndpoints.push(sub.endpoint);
+          }
+        }
+      })
+    );
+
+    if (deadEndpoints.length > 0) {
+      await User.findByIdAndUpdate(recipientId, {
+        $pull: { pushSubscriptions: { endpoint: { $in: deadEndpoints } } },
+      });
+    }
+  } catch (err: any) {
+    console.warn('sendWebPush failed:', err.message);
   }
 }
 
