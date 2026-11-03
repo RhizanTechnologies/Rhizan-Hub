@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useAlert } from '@/context/AlertContext';
 import { Header } from '@/components/Header';
 import { StatCard } from '@/components/StatCard';
 import { PriorityBadge } from '@/components/Badge';
@@ -41,6 +42,7 @@ const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { showConfirm } = useAlert();
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -418,15 +420,24 @@ export default function DashboardPage() {
   };
 
   // Delete today's time entry
-  const handleDeleteTimeEntry = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this time entry?')) return;
-    try {
-      await apiFetch(`/time/${id}`, { method: 'DELETE' });
-      showToast('🗑️ Time entry removed');
-      loadDashboard();
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete time entry');
-    }
+  const handleDeleteTimeEntry = (id: string) => {
+    showConfirm(
+      'Are you sure you want to delete this time entry? This cannot be undone.',
+      async () => {
+        try {
+          await apiFetch(`/time/${id}`, { method: 'DELETE' });
+          showToast('🗑️ Time entry removed');
+          loadDashboard();
+        } catch (err: any) {
+          alert(err.message || 'Failed to delete time entry');
+        }
+      },
+      {
+        title: 'Delete Time Entry',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
   };
 
   // Toggle Task Completion directly from Dashboard

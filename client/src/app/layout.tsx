@@ -4,6 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { PwaProvider } from '@/context/PwaContext';
+import { AlertProvider } from '@/context/AlertContext';
 import { AppShell } from '@/components/AppShell';
 
 const inter = Inter({
@@ -94,9 +95,11 @@ export default function RootLayout({
         <PwaProvider>
           <AuthProvider>
             <ThemeProvider>
-              <AppShell>
-                {children}
-              </AppShell>
+              <AlertProvider>
+                <AppShell>
+                  {children}
+                </AppShell>
+              </AlertProvider>
             </ThemeProvider>
           </AuthProvider>
         </PwaProvider>

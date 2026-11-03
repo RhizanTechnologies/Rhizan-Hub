@@ -28,6 +28,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useAlert } from '@/context/AlertContext';
 
 const COLUMNS: { id: TaskStatus; label: string; accent: string }[] = [
   { id: 'TODO', label: 'To Do', accent: 'border-[#262626]' },
@@ -38,6 +39,7 @@ const COLUMNS: { id: TaskStatus; label: string; accent: string }[] = [
 
 export default function TasksPage() {
   const { user } = useAuth();
+  const { showConfirm } = useAlert();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
@@ -331,19 +333,27 @@ export default function TasksPage() {
   };
 
   // Delete entire task
-  const handleDeleteTask = async (taskId: string) => {
-    if (!confirm('Are you sure you want to delete this task?')) return;
+  const handleDeleteTask = (taskId: string) => {
+    showConfirm(
+      'Are you sure you want to delete this task? This action cannot be undone.',
+      async () => {
+        setTasks((prev) => prev.filter((t) => t._id !== taskId));
+        if (selectedTask?._id === taskId) {
+          setSelectedTask(null);
+        }
 
-    setTasks((prev) => prev.filter((t) => t._id !== taskId));
-    if (selectedTask?._id === taskId) {
-      setSelectedTask(null);
-    }
-
-    try {
-      await apiFetch(`/tasks/${taskId}`, { method: 'DELETE' });
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete task');
-    }
+        try {
+          await apiFetch(`/tasks/${taskId}`, { method: 'DELETE' });
+        } catch (err: any) {
+          alert(err.message || 'Failed to delete task');
+        }
+      },
+      {
+        title: 'Delete Task',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
   };
 
   // Draft subtasks builder in Create Modal

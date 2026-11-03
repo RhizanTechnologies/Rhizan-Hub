@@ -36,10 +36,12 @@ import {
 } from 'lucide-react';
 import { PriorityBadge } from '@/components/Badge';
 import Link from 'next/link';
+import { useAlert } from '@/context/AlertContext';
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { showConfirm } = useAlert();
   const projectId = params?.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
@@ -476,19 +478,29 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleDeleteMilestone = async (mIdx: number) => {
-    if (!project || !confirm('Are you sure you want to remove this milestone?')) return;
-    const currentMilestones = (project.milestones || []).filter((_, idx) => idx !== mIdx);
+  const handleDeleteMilestone = (mIdx: number) => {
+    if (!project) return;
+    showConfirm(
+      'Are you sure you want to remove this milestone and its deliverables?',
+      async () => {
+        const currentMilestones = (project.milestones || []).filter((_, idx) => idx !== mIdx);
 
-    try {
-      const updated = await apiFetch<Project>(`/projects/${project._id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ milestones: currentMilestones }),
-      });
-      setProject(updated);
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete milestone');
-    }
+        try {
+          const updated = await apiFetch<Project>(`/projects/${project._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ milestones: currentMilestones }),
+          });
+          setProject(updated);
+        } catch (err: any) {
+          alert(err.message || 'Failed to delete milestone');
+        }
+      },
+      {
+        title: 'Delete Milestone',
+        confirmText: 'Remove',
+        isDestructive: true,
+      }
+    );
   };
 
   const handleLoadStandardPhases = async () => {

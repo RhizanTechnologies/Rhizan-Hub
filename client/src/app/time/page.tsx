@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
 import { useAuth } from '@/context/AuthContext';
+import { useAlert } from '@/context/AlertContext';
 import { TimeEntry, Project, Task, WeeklyTeamMemberSummary } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
@@ -37,6 +38,7 @@ const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
 
 export default function TimeTrackingPage() {
   const { user } = useAuth();
+  const { showConfirm } = useAlert();
 
   // Data states
   const [entries, setEntries] = useState<TimeEntry[]>([]);
@@ -453,16 +455,24 @@ export default function TimeTrackingPage() {
   };
 
   // DELETE TIME ENTRY
-  const handleDeleteEntry = async (entryId: string) => {
-    if (!confirm('Are you sure you want to delete this time entry?')) return;
+  const handleDeleteEntry = (entryId: string) => {
+    showConfirm(
+      'Are you sure you want to delete this time entry? This cannot be undone.',
+      async () => {
+        setEntries((prev) => prev.filter((e) => e._id !== entryId));
 
-    setEntries((prev) => prev.filter((e) => e._id !== entryId));
-
-    try {
-      await apiFetch(`/time/${entryId}`, { method: 'DELETE' });
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete time entry');
-    }
+        try {
+          await apiFetch(`/time/${entryId}`, { method: 'DELETE' });
+        } catch (err: any) {
+          alert(err.message || 'Failed to delete time entry');
+        }
+      },
+      {
+        title: 'Delete Time Entry',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
   };
 
   // Filter Tasks by Selected Project
