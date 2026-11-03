@@ -223,12 +223,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     fetchNotifications();
 
-    // 25s polling loop
+    // 30s polling loop
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchNotifications(true);
       }
-    }, 25000);
+    }, 30000);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {

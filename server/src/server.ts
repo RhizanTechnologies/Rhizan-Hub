@@ -102,7 +102,7 @@ if (!process.env.VERCEL) {
     console.log(`🚀 Rhizan Hub Server running on port ${PORT}`);
     console.log(`📡 API Health: http://localhost:${PORT}/api/health`);
 
-    // Periodic Background Evaluator: evaluates due tasks, outreach follow-ups, and standup reminders every 15 minutes
+    // Periodic Background Evaluator: evaluates due tasks, outreach follow-ups, and standup reminders every 30 seconds
     // and sends Web Push notifications to registered devices even when the app is closed
     const runBackgroundAlertEvaluations = async () => {
       try {
@@ -115,8 +115,8 @@ if (!process.env.VERCEL) {
       }
     };
 
-    setTimeout(runBackgroundAlertEvaluations, 10000);
-    setInterval(runBackgroundAlertEvaluations, 15 * 60 * 1000);
+    setTimeout(runBackgroundAlertEvaluations, 3000);
+    setInterval(runBackgroundAlertEvaluations, 30 * 1000);
   });
 }
 
