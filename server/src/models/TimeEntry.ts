@@ -33,4 +33,7 @@ const TimeEntrySchema = new Schema<ITimeEntry>(
   { timestamps: true }
 );
 
+TimeEntrySchema.index({ user: 1, date: -1 });
+TimeEntrySchema.index({ project: 1 });
+
 export const TimeEntry = mongoose.model<ITimeEntry>('TimeEntry', TimeEntrySchema);

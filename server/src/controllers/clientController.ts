@@ -172,7 +172,7 @@ export const updateClient = async (req: AuthRequest, res: Response): Promise<voi
           if (assignedId && (!req.user || req.user.id !== assignedId.toString())) {
             await createNotification({
               recipient: assignedId,
-              actor: req.user?.id as any,
+              actor: req.user ? { id: req.user.id, name: req.user.name } : undefined,
               type: 'CLIENT_MEETING',
               title: `Meeting Scheduled: ${updated?.name || existing.name}`,
               message: `${req.user?.name || 'A team member'} scheduled "${newestMeeting.title}" for ${newestMeeting.date || 'upcoming'} at ${newestMeeting.time || 'agreed time'}.`,

@@ -311,6 +311,9 @@ export const deleteProject = async (req: AuthRequest, res: Response): Promise<vo
     // Unlink from Client
     await Client.updateMany({ projects: id }, { $pull: { projects: id } });
 
+    // Unlink tasks connected to this project (prevent orphaned tasks)
+    await Task.updateMany({ project: id }, { $unset: { project: 1 } });
+
     res.json({ message: 'Project deleted successfully', id });
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to delete project', error: error.message });

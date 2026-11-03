@@ -222,7 +222,7 @@ export const inviteMember = async (req: AuthRequest, res: Response): Promise<voi
     const hashedPassword = await bcrypt.hash(tempoPassword, salt);
 
     const validRoles = ['CEO', 'CTO', 'COO', 'ADMIN', 'MEMBER'];
-    const chosenRole = role && validRoles.includes(role) ? role : 'CEO';
+    const chosenRole = role && validRoles.includes(role) ? role : 'MEMBER';
 
     const newUser = await User.create({
       name: name.trim(),

@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { TimeEntry } from '../models/TimeEntry';
 import { User } from '../models/User';
 import { Task } from '../models/Task';
-import { AuthRequest } from '../middlewares/auth';
+import { AuthRequest, isExecutiveOrAdmin } from '../middlewares/auth';
 
 export const getTimeEntries = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -74,6 +74,20 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response): Promise<
     const { id } = req.params;
     const { project, task, description, date, startTime, endTime, hours, minutes, billable, tag } = req.body;
 
+    const existing = await TimeEntry.findById(id);
+    if (!existing) {
+      res.status(404).json({ message: 'Time entry not found' });
+      return;
+    }
+
+    const callerId = req.user?.id;
+    const isOwner = existing.user.toString() === callerId;
+    const isAdmin = isExecutiveOrAdmin(req.user?.role);
+    if (!isOwner && !isAdmin) {
+      res.status(403).json({ message: 'You are only authorized to update your own time entries.' });
+      return;
+    }
+
     const updated = await TimeEntry.findByIdAndUpdate(
       id,
       {
@@ -94,11 +108,6 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response): Promise<
       .populate('project', 'name clientName')
       .populate('task', 'title');
 
-    if (!updated) {
-      res.status(404).json({ message: 'Time entry not found' });
-      return;
-    }
-
     res.json(updated);
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to update time entry', error: error.message });
@@ -108,12 +117,22 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response): Promise<
 export const deleteTimeEntry = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const deleted = await TimeEntry.findByIdAndDelete(id);
+    const existing = await TimeEntry.findById(id);
 
-    if (!deleted) {
+    if (!existing) {
       res.status(404).json({ message: 'Time entry not found' });
       return;
     }
+
+    const callerId = req.user?.id;
+    const isOwner = existing.user.toString() === callerId;
+    const isAdmin = isExecutiveOrAdmin(req.user?.role);
+    if (!isOwner && !isAdmin) {
+      res.status(403).json({ message: 'You are only authorized to delete your own time entries.' });
+      return;
+    }
+
+    await TimeEntry.findByIdAndDelete(id);
 
     res.json({ message: 'Time entry deleted successfully', id });
   } catch (error: any) {

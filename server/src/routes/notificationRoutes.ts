@@ -23,6 +23,7 @@ router.post('/subscribe', subscribePush);
 router.post('/unsubscribe', unsubscribePush);
 router.patch('/:id/read', markAsRead);
 router.post('/mark-all-read', markAllAsRead);
+router.patch('/mark-all-read', markAllAsRead);
 router.delete('/clear-read', clearAllRead);
 router.delete('/:id', deleteNotification);
 router.delete('/', clearAllRead);
