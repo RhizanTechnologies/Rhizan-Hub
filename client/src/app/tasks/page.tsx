@@ -1377,9 +1377,10 @@ export default function TasksPage() {
               <button
                 type="button"
                 onClick={handleAddDraftSubtask}
-                className="px-3 py-1.5 bg-[#222222] hover:bg-teal-600 text-white rounded-xl text-xs font-medium transition"
+                className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-sm shrink-0"
               >
-                Add
+                <Plus className="w-3 h-3" />
+                <span>Add</span>
               </button>
             </div>
 
@@ -1410,7 +1411,7 @@ export default function TasksPage() {
             )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+          <div className="sticky bottom-0 bg-[#121212] pt-3 pb-1 border-t border-[#222222] flex justify-end gap-2.5 z-10">
             <button
               type="button"
               onClick={() => setIsNewTaskOpen(false)}
@@ -1420,7 +1421,7 @@ export default function TasksPage() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white rounded-xl shadow-md transition"
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition shrink-0"
             >
               Create Task
             </button>

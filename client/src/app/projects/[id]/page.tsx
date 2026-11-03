@@ -1091,44 +1091,36 @@ export default function ProjectDetailPage() {
                   return (
                     <div
                       key={dev._id || idx}
-                      className={`p-3 sm:p-3.5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 ${
+                      className={`p-3.5 rounded-2xl border flex items-start gap-3 transition ${
                         isLead
                           ? 'bg-[#181818] border-amber-500/30 shadow-sm'
                           : 'bg-[#161616] border-[#262626]'
                       }`}
                     >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
-                          isLead
-                            ? 'bg-gradient-to-tr from-amber-500 to-amber-300 text-black font-extrabold shadow-sm'
-                            : 'bg-gradient-to-tr from-teal-500 to-emerald-600 text-white'
-                        }`}>
-                          {dev.name?.charAt(0) || 'U'}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-semibold text-white truncate">{dev.name}</span>
-                            {isLead && (
-                              <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
-                                Project Lead
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-teal-400 truncate">{dev.title || 'Developer'}</span>
-                            {dev.email && (
-                              <>
-                                <span className="text-neutral-600 text-[10px] hidden sm:inline">•</span>
-                                <span className="text-[11px] text-neutral-400 font-mono truncate hidden sm:inline">{dev.email}</span>
-                              </>
-                            )}
-                          </div>
-                          {dev.email && (
-                            <div className="text-[11px] text-neutral-400 font-mono truncate sm:hidden mt-0.5">
-                              {dev.email}
-                            </div>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                        isLead
+                          ? 'bg-gradient-to-tr from-amber-500 to-amber-300 text-black font-extrabold shadow-sm'
+                          : 'bg-gradient-to-tr from-teal-500 to-emerald-600 text-white'
+                      }`}>
+                        {dev.name?.charAt(0) || 'U'}
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-bold text-white truncate">{dev.name}</span>
+                          {isLead && (
+                            <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
+                              Project Lead
+                            </span>
                           )}
                         </div>
+                        <div className="text-[11px] text-teal-400 font-medium truncate">
+                          {dev.title || 'Developer'}
+                        </div>
+                        {dev.email && (
+                          <div className="text-[11px] text-neutral-400 font-mono truncate pt-0.5" title={dev.email}>
+                            {dev.email}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -1453,9 +1445,10 @@ export default function ProjectDetailPage() {
                               <button
                                 type="button"
                                 onClick={() => handleAddDeliverableItem(mIdx)}
-                                className="px-2.5 py-1 rounded-lg bg-[#202020] hover:bg-teal-600 hover:text-white text-neutral-400 text-xs font-medium transition"
+                                className="px-3 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center gap-1 transition shadow-sm shrink-0"
                               >
-                                Add
+                                <Plus className="w-3 h-3" />
+                                <span>Add</span>
                               </button>
                             </div>
                           </div>

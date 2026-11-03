@@ -9,6 +9,7 @@ import { useNotifications } from '@/context/NotificationContext';
 import {
   Clock,
   Plus,
+  Edit2,
   LogOut,
   ChevronDown,
   Menu,
@@ -31,6 +32,8 @@ interface HeaderProps {
   subtitle?: string;
   actionButton?: {
     label: string;
+    mobileLabel?: string;
+    icon?: React.ReactNode;
     onClick: () => void;
   };
 }
@@ -100,16 +103,31 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {/* Dynamic Action Button */}
-        {actionButton && (
-          <button
-            onClick={actionButton.onClick}
-            className="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-medium text-white shadow-md shadow-teal-900/30 transition shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{actionButton.label}</span>
-            <span className="sm:hidden">New</span>
-          </button>
-        )}
+        {actionButton && (() => {
+          const isEdit = actionButton.label.toLowerCase().includes('edit');
+          const mobileText =
+            actionButton.mobileLabel ||
+            (isEdit
+              ? 'Edit'
+              : actionButton.label.replace(/^(New|Add)\s+/i, '') || 'New');
+          return (
+            <button
+              onClick={actionButton.onClick}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white shadow-md shadow-teal-900/30 transition shrink-0"
+              title={actionButton.label}
+            >
+              {actionButton.icon ? (
+                actionButton.icon
+              ) : isEdit ? (
+                <Edit2 className="w-3.5 h-3.5" />
+              ) : (
+                <Plus className="w-3.5 h-3.5" />
+              )}
+              <span className="hidden sm:inline">{actionButton.label}</span>
+              <span className="sm:hidden">{mobileText}</span>
+            </button>
+          );
+        })()}
 
         {/* Real-Time Notification Bell */}
         <button

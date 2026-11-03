@@ -146,8 +146,8 @@ self.addEventListener('push', (event) => {
   const title = payload.title || 'RHIZAN Hub';
   const options = {
     body: payload.body || payload.message,
-    icon: payload.icon || '/icons/icon-192x192.png',
-    badge: payload.badge || '/logo_minimal.png',
+    icon: payload.icon || '/icons/notification-icon.png',
+    badge: payload.badge || '/icons/badge-transparent.png',
     vibrate: [120, 60, 120],
     tag: payload.dedupKey || 'rhizan-hub-alert',
     renotify: true,

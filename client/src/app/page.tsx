@@ -1492,7 +1492,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+          <div className="sticky bottom-0 bg-[#121212] flex items-center justify-end gap-2 pt-3 pb-1 border-t border-[#222222] z-10">
             <button
               type="button"
               onClick={() => setIsNewTaskOpen(false)}
@@ -1502,7 +1502,7 @@ export default function DashboardPage() {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-lg shadow-teal-950 transition"
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-lg shadow-teal-950 transition shrink-0"
             >
               Create Task
             </button>

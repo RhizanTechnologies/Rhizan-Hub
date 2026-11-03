@@ -103,7 +103,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           try {
             new window.Notification('RHIZAN Hub Alerts Enabled', {
               body: 'You will receive real-time follow-ups, task alerts, and meeting notifications even when closed.',
-              icon: '/logo_minimal.png',
+              icon: '/icons/notification-icon.png',
+              badge: '/icons/badge-transparent.png',
             });
           } catch {
             // fallback
@@ -194,7 +195,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             try {
               new window.Notification(newest.title, {
                 body: newest.message,
-                icon: '/logo_minimal.png',
+                icon: '/icons/notification-icon.png',
+                badge: '/icons/badge-transparent.png',
               });
             } catch {
               // fallback
