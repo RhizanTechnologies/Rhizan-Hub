@@ -78,6 +78,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         method: 'POST',
         body: JSON.stringify({ subscription: sub }),
       });
+
+      // Register Periodic Background Sync (pulls notifications in background on supported Android devices)
+      if ('periodicSync' in reg) {
+        try {
+          await (reg as any).periodicSync.register('pull-notifications', {
+            minInterval: 15 * 60 * 1000,
+          });
+        } catch {
+          // Periodic sync permission not granted or unsupported by OS
+        }
+      }
     } catch (err: any) {
       console.warn('Background web push subscription warning:', err.message);
     }

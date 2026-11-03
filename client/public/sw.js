@@ -197,3 +197,32 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+
+// Periodic Background Sync: Allows installed PWA on Android to pull notifications in background
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'pull-notifications') {
+    event.waitUntil(
+      fetch('/api/notifications?unreadOnly=true&limit=5')
+        .then((res) => {
+          if (!res.ok) throw new Error('Network error');
+          return res.json();
+        })
+        .then((data) => {
+          const list = Array.isArray(data) ? data : data?.notifications || [];
+          const unread = list.filter((n) => !n.read);
+          if (unread.length > 0) {
+            const newest = unread[0];
+            return self.registration.showNotification(newest.title || 'RHIZAN Hub', {
+              body: newest.message,
+              icon: '/icons/notification-icon.png',
+              badge: '/icons/badge-72x72.png',
+              data: { url: newest.link || '/' },
+              tag: newest.dedupKey || 'rhizan-hub-periodic-alert',
+              renotify: true,
+            });
+          }
+        })
+        .catch(() => {})
+    );
+  }
+});
