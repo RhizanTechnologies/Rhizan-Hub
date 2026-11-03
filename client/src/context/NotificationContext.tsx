@@ -10,6 +10,8 @@ interface NotificationContextType {
   unreadCount: number;
   loading: boolean;
   isDrawerOpen: boolean;
+  browserPermission: string;
+  requestBrowserPermission: () => Promise<string>;
   openDrawer: () => void;
   closeDrawer: () => void;
   toggleDrawer: () => void;
@@ -28,9 +30,40 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [browserPermission, setBrowserPermission] = useState<string>('default');
   
   const initialLoadDone = useRef(false);
   const prevUnreadCount = useRef(0);
+
+  // Initialize browser notification permission state
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setBrowserPermission(window.Notification.permission);
+    }
+  }, []);
+
+  const requestBrowserPermission = async (): Promise<string> => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        const permission = await window.Notification.requestPermission();
+        setBrowserPermission(permission);
+        if (permission === 'granted') {
+          try {
+            new window.Notification('RHIZAN Hub Alerts Enabled', {
+              body: 'You will receive real-time follow-ups, task alerts, and meeting notifications.',
+              icon: '/logo_minimal.png',
+            });
+          } catch {
+            // fallback
+          }
+        }
+        return permission;
+      } catch (err) {
+        console.error('Failed to request browser notification permission:', err);
+      }
+    }
+    return 'default';
+  };
 
   // Gentle synthesized chime using Web Audio API
   const playChime = useCallback(() => {
@@ -77,19 +110,49 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     try {
       if (!isBackground) setLoading(true);
-      const data = await apiFetch<AppNotification[]>('/notifications?limit=60');
-      if (Array.isArray(data)) {
-        setNotifications(data);
-        const count = data.filter((n) => !n.read).length;
-        setUnreadCount(count);
+      const data = await apiFetch<any>('/notifications?limit=60');
 
-        // Sound chime if unread count increased after initial load
-        if (initialLoadDone.current && count > prevUnreadCount.current) {
-          playChime();
+      // Support both object { notifications: [...], unreadCount: N } and raw array [...]
+      const notifsList: AppNotification[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.notifications)
+        ? data.notifications
+        : [];
+
+      setNotifications(notifsList);
+      
+      const count =
+        typeof data?.unreadCount === 'number'
+          ? data.unreadCount
+          : notifsList.filter((n) => !n.read).length;
+
+      setUnreadCount(count);
+
+      // Sound chime and show native OS notification if unread count increased after initial load
+      if (initialLoadDone.current && count > prevUnreadCount.current) {
+        playChime();
+
+        if (
+          typeof window !== 'undefined' &&
+          'Notification' in window &&
+          window.Notification.permission === 'granted'
+        ) {
+          const newest = notifsList.find((n) => !n.read);
+          if (newest) {
+            try {
+              new window.Notification(newest.title, {
+                body: newest.message,
+                icon: '/logo_minimal.png',
+              });
+            } catch {
+              // fallback
+            }
+          }
         }
-        prevUnreadCount.current = count;
-        initialLoadDone.current = true;
       }
+
+      prevUnreadCount.current = count;
+      initialLoadDone.current = true;
     } catch (err) {
       console.warn('Could not fetch notifications:', err);
     } finally {
@@ -108,12 +171,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     fetchNotifications();
 
-    // 35s polling loop
+    // 25s polling loop
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchNotifications(true);
       }
-    }, 35000);
+    }, 25000);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -199,6 +262,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         unreadCount,
         loading,
         isDrawerOpen,
+        browserPermission,
+        requestBrowserPermission,
         openDrawer,
         closeDrawer,
         toggleDrawer,

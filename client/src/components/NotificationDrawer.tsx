@@ -37,6 +37,8 @@ export const NotificationDrawer: React.FC = () => {
     unreadCount,
     loading,
     isDrawerOpen,
+    browserPermission,
+    requestBrowserPermission,
     closeDrawer,
     markAsRead,
     markAllAsRead,
@@ -225,6 +227,26 @@ export const NotificationDrawer: React.FC = () => {
             </button>
           )}
         </div>
+
+        {/* Desktop Browser Notification Permission Banner */}
+        {browserPermission === 'default' && (
+          <div className="mx-4 my-2.5 p-3 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Bell className="w-4 h-4 text-teal-400 shrink-0" />
+              <div className="text-[11px] leading-tight">
+                <span className="font-semibold text-white block">Desktop Push Alerts</span>
+                <span className="text-neutral-400 text-[10px]">Get real-time OS banner popups</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={requestBrowserPermission}
+              className="px-3 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-semibold shrink-0 transition"
+            >
+              Enable
+            </button>
+          </div>
+        )}
 
         {/* Tabs Filter */}
         <div className="px-4 pt-2.5 pb-2 border-b border-[#1f1f1f] bg-[#121212] flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
