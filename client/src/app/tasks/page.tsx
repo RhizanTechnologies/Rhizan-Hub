@@ -498,26 +498,25 @@ export default function TasksPage() {
     return { text: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), isToday: false, isOverdue: false, isTomorrow: false };
   };
 
-  // Metric counts for date badges
-  const todayCount = tasks.filter((t) => getDaysDiff(t.dueDate) === 0).length;
-  const tomorrowCount = tasks.filter((t) => getDaysDiff(t.dueDate) === 1).length;
-  const overdueCount = tasks.filter((t) => {
-    const diff = getDaysDiff(t.dueDate);
-    return diff !== null && diff < 0 && t.status !== 'DONE';
-  }).length;
-
-  // Filter Tasks Engine
-  const filteredTasks = tasks.filter((task) => {
+  // Check if a task matches the active Assignee, Project, Priority, and Search Keyword filters (active scope)
+  const matchesActiveScope = (task: Task) => {
     // 1. Assignee / Person Filter (Dropdown)
     if (assigneeFilter === 'MY_TASKS') {
       if (user) {
+        const userId = (user as any).id || (user as any)._id;
+        const assignedId = task.assignedTo?._id || (task.assignedTo as any)?.id;
         const isMyTask =
+          (userId && (assignedId === userId || task.assignedTo?._id === userId)) ||
           task.assignedTo?._id === (user as any).id ||
+          task.assignedTo?._id === (user as any)._id ||
           (task.assignedTo as any)?.id === (user as any).id ||
+          (task.assignedTo as any)?.id === (user as any)._id ||
           task.assignedTo?.email?.toLowerCase() === user.email?.toLowerCase() ||
           task.assignedTo?.name?.toLowerCase() === user.name?.toLowerCase();
         if (!isMyTask) return false;
       }
+    } else if (assigneeFilter === 'UNASSIGNED') {
+      if (task.assignedTo) return false;
     } else if (assigneeFilter !== 'ALL') {
       const assignedId = task.assignedTo?._id || (task.assignedTo as any)?.id;
       const assignedEmail = task.assignedTo?.email?.toLowerCase();
@@ -555,6 +554,22 @@ export default function TasksPage() {
       if (!matchTitle && !matchDesc && !matchSub) return false;
     }
 
+    return true;
+  };
+
+  // Base tasks matching the user's active context (e.g. My Tasks, Project, Priority, Search)
+  const scopedTasks = tasks.filter(matchesActiveScope);
+
+  // Metric counts for date badges (accurately scoped to active assignee & filters!)
+  const todayCount = scopedTasks.filter((t) => getDaysDiff(t.dueDate) === 0).length;
+  const tomorrowCount = scopedTasks.filter((t) => getDaysDiff(t.dueDate) === 1).length;
+  const overdueCount = scopedTasks.filter((t) => {
+    const diff = getDaysDiff(t.dueDate);
+    return diff !== null && diff < 0 && t.status !== 'DONE';
+  }).length;
+
+  // Filter Tasks Engine (Further filters the scoped tasks by Date)
+  const filteredTasks = scopedTasks.filter((task) => {
     // 5. Date Filter
     if (dateFilter === 'ALL') return true;
 
