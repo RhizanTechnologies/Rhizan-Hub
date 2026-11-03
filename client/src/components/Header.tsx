@@ -103,18 +103,13 @@ export const Header: React.FC<HeaderProps> = ({
           </Link>
         )}
 
-        {/* Dynamic Action Button */}
+        {/* Dynamic Action Button - Desktop/Tablet Header Only */}
         {actionButton && (() => {
           const isEdit = actionButton.label.toLowerCase().includes('edit');
-          const mobileText =
-            actionButton.mobileLabel ||
-            (isEdit
-              ? 'Edit'
-              : actionButton.label.replace(/^(New|Add)\s+/i, '') || 'New');
           return (
             <button
               onClick={actionButton.onClick}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white shadow-md shadow-teal-900/30 transition shrink-0"
+              className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-xs font-semibold text-white shadow-md shadow-teal-900/30 transition shrink-0 cursor-pointer"
               title={actionButton.label}
             >
               {actionButton.icon ? (
@@ -124,8 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
               ) : (
                 <Plus className="w-3.5 h-3.5" />
               )}
-              <span className="hidden sm:inline">{actionButton.label}</span>
-              <span className="sm:hidden">{mobileText}</span>
+              <span>{actionButton.label}</span>
             </button>
           );
         })()}
@@ -340,6 +334,45 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
     </header>
+
+    {/* Mobile In-Body Action Ribbon (Displays primary page actions in the body on mobile) */}
+    {(actionButton || (pathname !== '/time' && pathname !== '/login' && pathname !== '/change-password' && pathname !== '/docs' && pathname !== '/settings')) && (
+      <div className="sm:hidden px-3.5 pt-3 pb-1 max-w-7xl mx-auto w-full flex items-center gap-2">
+        {actionButton && (() => {
+          const isEdit = actionButton.label.toLowerCase().includes('edit');
+          return (
+            <button
+              type="button"
+              onClick={actionButton.onClick}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold text-xs shadow-md shadow-teal-900/30 transition cursor-pointer"
+            >
+              {actionButton.icon ? (
+                actionButton.icon
+              ) : isEdit ? (
+                <Edit2 className="w-4 h-4" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+              <span>{actionButton.label}</span>
+            </button>
+          );
+        })()}
+
+        {/* Quick Log Time on mobile if not already on /time */}
+        {pathname !== '/time' && (
+          <Link
+            href="/time"
+            className={`flex items-center justify-center gap-1.5 py-2.5 px-3.5 rounded-2xl border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] active:bg-[#222222] text-xs font-medium text-neutral-300 transition shrink-0 ${
+              !actionButton ? 'flex-1' : ''
+            }`}
+            title="Track & Log Time"
+          >
+            <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <span>Log Time</span>
+          </Link>
+        )}
+      </div>
+    )}
 
     <EditProfileModal
       isOpen={isEditProfileOpen}
