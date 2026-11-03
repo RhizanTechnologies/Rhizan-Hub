@@ -934,8 +934,15 @@ export default function TeamPage() {
                 type="text"
                 value={tempoPassword}
                 onChange={(e) => setTempoPassword(e.target.value)}
+                onClick={(e) => {
+                  (e.target as HTMLInputElement).select();
+                  navigator.clipboard.writeText(tempoPassword);
+                  setCopiedTemp(true);
+                  setTimeout(() => setCopiedTemp(false), 2000);
+                }}
                 required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-teal-300 font-mono tracking-wide outline-none transition"
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-teal-300 font-mono tracking-wide outline-none transition cursor-pointer"
+                title="Click to copy temporary password"
               />
             </div>
             <p className="text-[11px] text-neutral-500 mt-1">
@@ -1060,20 +1067,34 @@ export default function TeamPage() {
                   </button>
                 </div>
 
-                {/* Temporary Password with Direct Copy Button */}
-                <div className="flex items-center justify-between pt-1 border-t border-[#222222]">
-                  <div>
-                    <span className="text-[10px] uppercase font-sans text-neutral-500 block">Temporary Password</span>
-                    <span className="text-emerald-400 text-xs font-bold tracking-wider">{createdInvite.tempoPass}</span>
+                {/* Temporary Password with Direct Copy on Click */}
+                <div
+                  onClick={() => {
+                    navigator.clipboard.writeText(createdInvite.tempoPass);
+                    setCopiedPass(true);
+                    setTimeout(() => setCopiedPass(false), 2000);
+                  }}
+                  className="p-2.5 rounded-xl bg-[#111111] hover:bg-[#161616] border border-[#262626] hover:border-teal-500/50 flex items-center justify-between transition cursor-pointer group"
+                  title="Click to copy temporary password"
+                >
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-sans text-neutral-400 block font-semibold flex items-center gap-1">
+                      <span>Temporary Password</span>
+                      <span className="text-[9px] text-teal-400 font-normal">({copiedPass ? 'Copied to clipboard!' : 'click to copy'})</span>
+                    </span>
+                    <span className="text-emerald-400 text-sm font-bold font-mono tracking-wider group-hover:text-emerald-300 transition">
+                      {createdInvite.tempoPass}
+                    </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       navigator.clipboard.writeText(createdInvite.tempoPass);
                       setCopiedPass(true);
                       setTimeout(() => setCopiedPass(false), 2000);
                     }}
-                    className="py-1 px-2.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] border border-[#333333] text-[11px] text-teal-400 hover:text-teal-300 font-sans flex items-center gap-1.5 transition"
+                    className="py-1 px-2.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] border border-[#333333] text-[11px] text-teal-400 hover:text-teal-300 font-sans flex items-center gap-1.5 transition shrink-0"
                   >
                     {copiedPass ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedPass ? 'Copied' : 'Copy Password'}</span>
