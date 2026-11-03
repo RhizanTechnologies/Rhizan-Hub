@@ -21,6 +21,7 @@ import {
   FileText,
   SlidersHorizontal,
   Download,
+  BookOpen,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
@@ -36,6 +37,7 @@ const navItems = [
   { name: 'Time Tracking', href: '/time', icon: Clock },
   { name: 'Weekly Report', href: '/reports/weekly', icon: FileText },
   { name: 'Settings', href: '/settings', icon: SlidersHorizontal },
+  { name: 'Documentation', href: '/docs', icon: BookOpen },
 ];
 
 export const Sidebar: React.FC = () => {

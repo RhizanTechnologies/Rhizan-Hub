@@ -22,6 +22,7 @@ import {
   Check,
   UserCog,
   Bell,
+  BookOpen,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -270,6 +271,15 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <SlidersHorizontal className="w-4 h-4 text-neutral-400" />
                   <span>Settings & Appearance</span>
+                </Link>
+
+                <Link
+                  href="/docs"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
+                >
+                  <BookOpen className="w-4 h-4 text-teal-400" />
+                  <span>Hub Documentation</span>
                 </Link>
 
                 <Link
