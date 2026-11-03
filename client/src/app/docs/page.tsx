@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Header } from '@/components/Header';
-import { useAuth } from '@/context/AuthContext';
-import { usePwa } from '@/context/PwaContext';
 import {
-  BookOpen,
+  LayoutDashboard,
   CheckSquare,
   FolderKanban,
   Building2,
@@ -16,83 +14,463 @@ import {
   Clock,
   FileText,
   SlidersHorizontal,
-  Sparkles,
-  ShieldCheck,
-  Smartphone,
-  Download,
-  Laptop,
   ArrowRight,
   Search,
   HelpCircle,
-  Lightbulb,
-  ChevronRight,
   ChevronDown,
+  ChevronRight,
+  CheckCircle2,
+  Sparkles,
   ExternalLink,
   MessageSquare,
-  Copy,
-  Check,
-  AlertCircle,
   Phone,
   Calendar,
-  TrendingUp,
-  Award,
   Layers,
-  CheckCircle2,
-  Wifi,
-  Bell,
-  KeyRound,
+  Award,
   Filter,
-  Kanban,
-  Briefcase,
+  KeyRound,
+  ShieldCheck,
+  TrendingUp,
+  AlertTriangle,
+  Lightbulb,
 } from 'lucide-react';
 
-interface TopicCategory {
+interface PageGuide {
   id: string;
   name: string;
+  route: string;
   icon: React.ComponentType<{ className?: string }>;
-  description: string;
+  accentColor: string;
+  badge: string;
+  summary: string;
+  whatYouCanDo: {
+    title: string;
+    description: string;
+  }[];
+  howToUse: string[];
+  goldenRule: string;
 }
 
-const CATEGORIES: TopicCategory[] = [
-  { id: 'all', name: 'All Modules', icon: Layers, description: 'Complete documentation index' },
-  { id: 'quickstart', name: 'Quick Start & PWA', icon: Sparkles, description: 'Installation & core rhythm' },
-  { id: 'tasks', name: 'Tasks & Daily Board', icon: CheckSquare, description: 'Kanban, WIP limits & filters' },
-  { id: 'projects', name: 'Projects & Delivery', icon: FolderKanban, description: 'Milestones & repo links' },
-  { id: 'clients', name: 'Clients & Accounts', icon: Building2, description: 'Contracts, meetings & invoices' },
-  { id: 'outreach', name: 'Client Outreach', icon: Compass, description: 'Pipeline, WhatsApp & niches' },
-  { id: 'team', name: 'Team & User Roles', icon: Users, description: 'Permissions & credential reset' },
-  { id: 'time', name: 'Time Tracking', icon: Clock, description: '48h sprint capacity & timesheets' },
-  { id: 'reports', name: 'Standups & Reports', icon: FileText, description: 'Daily EOD & weekly summaries' },
-  { id: 'faq', name: 'FAQs & Pro-Tips', icon: HelpCircle, description: 'Common solutions & shortcuts' },
+const PAGES_GUIDE: PageGuide[] = [
+  {
+    id: 'dashboard',
+    name: 'Dashboard',
+    route: '/',
+    icon: LayoutDashboard,
+    accentColor: 'text-teal-400',
+    badge: 'Operations Hub',
+    summary:
+      'The executive control center providing real-time visibility into company-wide project delivery, team capacity, and recent operations activity.',
+    whatYouCanDo: [
+      {
+        title: 'Executive Metrics Overview',
+        description:
+          'Monitor active projects, in-progress deliverables, total client count, deals won, and team capacity at a glance.',
+      },
+      {
+        title: 'Live Activity Feed',
+        description:
+          'View real-time updates as teammates move tasks, log billable hours, convert deals, or submit daily standup reports.',
+      },
+      {
+        title: 'Delivery Progress Pulse',
+        description:
+          'Track overall software delivery velocity across all client projects with visual progress indicators.',
+      },
+      {
+        title: 'Quick Operations Shortcuts',
+        description:
+          'Fast access to log hours, create urgent tasks, or review active deliverables without leaving the main view.',
+      },
+    ],
+    howToUse: [
+      'Start your workday here to assess overall sprint health and team velocity.',
+      'Check the Live Activity Feed to see deliverables completed by teammates overnight or earlier in the day.',
+      'Click on any active project card to jump directly into its milestone and deliverables dashboard.',
+    ],
+    goldenRule:
+      'The Dashboard is your morning launchpad. If metrics show blocked projects or low capacity, review the Weekly Report standups immediately.',
+  },
+  {
+    id: 'tasks',
+    name: 'Tasks (Daily Board)',
+    route: '/tasks',
+    icon: CheckSquare,
+    accentColor: 'text-sky-400',
+    badge: 'Daily Execution',
+    summary:
+      'The daily execution engine and Kanban board for individual tasks, deliverable checklists, due dates, and WIP bottleneck limits.',
+    whatYouCanDo: [
+      {
+        title: '4-Stage Kanban Workflow',
+        description:
+          'Drag or update tasks across To Do, In Progress, Review, and Done to reflect real-time deliverable status.',
+      },
+      {
+        title: 'Scope to "My Tasks (Personal)"',
+        description:
+          'Select the Assignee filter to "My Tasks (Personal)" to focus exclusively on your own assigned tasks and due dates.',
+      },
+      {
+        title: 'WIP Bottleneck Protection',
+        description:
+          'The board automatically flags when more than 3 tasks are In Progress per person to protect team focus.',
+      },
+      {
+        title: 'Deliverables & Subtask Checklists',
+        description:
+          'Break large engineering or design tickets into micro-checklists that can be checked off in real time.',
+      },
+      {
+        title: 'Due Date Filter Badges',
+        description:
+          'Click Today, Tomorrow, This Week, or Overdue badges to filter the board with counts scoped to your active filter.',
+      },
+      {
+        title: 'Board vs List View',
+        description:
+          'Toggle seamlessly between the visual 4-column Kanban board and a compact table list view for rapid triage.',
+      },
+    ],
+    howToUse: [
+      'Set the Assignee dropdown to "My Tasks (Personal)" to view your personal work queue.',
+      'Pick 1 or 2 highest priority items from "To Do" and move them to "In Progress".',
+      'As you write code or produce designs, check off individual subtask deliverables inside the task modal.',
+      'When your pull request is opened or deliverable is ready for QA, move the task to "Review".',
+      'Once verified and merged, mark the task as "Done".',
+    ],
+    goldenRule:
+      'Never keep more than 3 tasks in "In Progress" at the same time. Finish or move existing items to Review before starting new ones.',
+  },
+  {
+    id: 'projects',
+    name: 'Projects',
+    route: '/projects',
+    icon: FolderKanban,
+    accentColor: 'text-indigo-400',
+    badge: 'Delivery Management',
+    summary:
+      'Central hub for managing client software engagements, delivery budgets, technical milestones, and engineering repository links.',
+    whatYouCanDo: [
+      {
+        title: 'Directory vs Progress Pipeline',
+        description:
+          'Toggle between the visual card directory and the chronological delivery pipeline showing milestone progression.',
+      },
+      {
+        title: 'Automated Delivery Progress %',
+        description:
+          'Progress bars update automatically based on the ratio of completed tasks versus total tasks under the project.',
+      },
+      {
+        title: 'Engineering & Design Links',
+        description:
+          'Direct 1-click links to GitHub Repositories, Figma Design Systems, and Staging Environments stored right on the card.',
+      },
+      {
+        title: 'Commercial Budget Tracking',
+        description:
+          'Monitor contracted delivery budget ($), start dates, target completion dates, and assigned Project Leads.',
+      },
+      {
+        title: 'Create & Edit Projects',
+        description:
+          'Add new client projects, designate the project lead, specify deliverables, and link to registered client accounts.',
+      },
+    ],
+    howToUse: [
+      'Use the Progress Pipeline view to review milestone completion during weekly client syncs.',
+      'Access technical resources (Figma, GitHub, Staging) directly from the project card shortcuts.',
+      'Click into any project to inspect its linked client, milestones, and filtered list of tasks.',
+    ],
+    goldenRule:
+      'Every project must have an assigned Project Lead responsible for weekly progress updates and staging deployments.',
+  },
+  {
+    id: 'clients',
+    name: 'Clients (CRM)',
+    route: '/clients',
+    icon: Building2,
+    accentColor: 'text-emerald-400',
+    badge: 'Account Management',
+    summary:
+      'The client relationship directory tracking contracted accounts, stakeholder contacts, invoices, payments, and scheduled meetings.',
+    whatYouCanDo: [
+      {
+        title: 'Commercial Health & Invoicing',
+        description:
+          'Track total Deal Value ($), cleared Paid milestone deposits, and remaining Pending balances for each account.',
+      },
+      {
+        title: 'Stakeholder & Contact Directory',
+        description:
+          'Maintain primary contact persons, direct phone numbers, email addresses, and contracted services.',
+      },
+      {
+        title: 'Meeting & Signoff Scheduling',
+        description:
+          'Schedule sprint review meetings, demos, and milestone signoffs with dates, times, and location/Google Meet links.',
+      },
+      {
+        title: 'Client Specification Links',
+        description:
+          'Attach client requirements docs, contracts, and briefs directly to the client profile.',
+      },
+    ],
+    howToUse: [
+      'Open a client card to review payment milestones before releasing production code or new features.',
+      'Schedule upcoming stakeholder demos and milestone signoffs under the meetings section.',
+      'Click phone numbers or emails directly from the card to initiate instant client communications.',
+    ],
+    goldenRule:
+      'Keep invoice payment statuses up to date so leadership has an accurate picture of cash flow and accounts receivable.',
+  },
+  {
+    id: 'approaches',
+    name: 'Client Outreach',
+    route: '/approaches',
+    icon: Compass,
+    accentColor: 'text-amber-400',
+    badge: 'Business Development',
+    summary:
+      'Prospecting and business development pipeline for approaching businesses, logging interactions, scheduling follow-ups, and winning new client deals.',
+    whatYouCanDo: [
+      {
+        title: '6-Stage Outreach Pipeline',
+        description:
+          'Track prospect lifecycle: Identified → Contacted → In Discussion → Proposal Sent → Follow-up Required → Deal Won (Client).',
+      },
+      {
+        title: '1-Click WhatsApp Web Shortcut',
+        description:
+          'Click the WhatsApp badge on any prospect to launch instant messaging with a pre-formatted intro note.',
+      },
+      {
+        title: '1-Click Phone Dialer',
+        description:
+          'Click the phone icon to instantly initiate calls to prospective decision makers on mobile or desktop.',
+      },
+      {
+        title: 'Interaction History & Follow-ups',
+        description:
+          'Log call notes, feedback, and set next follow-up dates. Automated alerts remind you on the morning follow-ups are due.',
+      },
+      {
+        title: 'Industry Niches Management',
+        description:
+          'Organize prospects by industry sector (Retail & Supermarket, Technology, Healthcare, Hospitality, etc.).',
+      },
+      {
+        title: '1-Click Deal Won Conversion',
+        description:
+          'When negotiations succeed, mark as "Deal Won (Client)" and click "Convert to Client" to automatically create their CRM record.',
+      },
+    ],
+    howToUse: [
+      'Filter by industry niche to focus outreach on a targeted market sector.',
+      'Click the WhatsApp icon to send an introduction message to the business owner or manager.',
+      'Log the call outcome in the interaction drawer and pick a follow-up date for next week.',
+      'When the client accepts the proposal, mark as "Deal Won" and convert them directly into an active Client.',
+    ],
+    goldenRule:
+      'Never leave a contacted prospect without a scheduled next follow-up date. Consistent follow-ups convert leads into contracts.',
+  },
+  {
+    id: 'team',
+    name: 'Team & Roles',
+    route: '/team',
+    icon: Users,
+    accentColor: 'text-rose-400',
+    badge: 'Talent & Permissions',
+    summary:
+      'The internal team directory, organizational hierarchy, role permissions governance, and streamlined member onboarding.',
+    whatYouCanDo: [
+      {
+        title: '5-Tier Role Governance',
+        description:
+          'Clear role designations: 👑 CEO (Executive), ⚡ CTO (Tech Strategy), 📊 COO (Operations), 🛡️ Admin (System), and 👤 Member (Contributor).',
+      },
+      {
+        title: 'Streamlined Member Onboarding',
+        description:
+          'Invite teammates with automatic temporary password generation and 1-click password copy for instant private dispatch.',
+      },
+      {
+        title: 'Automated Welcome Emails',
+        description:
+          'System sends an onboarding email with an active auto-fill link that inputs the temporary password into the reset form.',
+      },
+      {
+        title: 'Mandatory First-Login Password Change',
+        description:
+          'New members are required to set their own secure personal password on initial login before accessing company data.',
+      },
+      {
+        title: 'Weekly Capacity Tracking',
+        description:
+          'View each member’s weekly hour target (default 48h) and monitor real-time logged hours.',
+      },
+    ],
+    howToUse: [
+      'Admins click "Invite Member", fill in name, email, title, role, and capacity.',
+      'Click "Copy Temporary Password" on the confirmation modal to dispatch credentials to the new hire.',
+      'Click on any team member card to inspect their active tasks, logged hours, and activity logs.',
+    ],
+    goldenRule:
+      'Only assign CEO, CTO, COO, or Admin roles to verified leadership. All core engineers and designers should be assigned Member.',
+  },
+  {
+    id: 'time',
+    name: 'Time Tracking',
+    route: '/time',
+    icon: Clock,
+    accentColor: 'text-teal-400',
+    badge: 'Sprint Capacity',
+    summary:
+      'Sprint hour logging, 48-hour weekly capacity meters, billable project allocation, and paginated timesheet audits.',
+    whatYouCanDo: [
+      {
+        title: 'Log Work Hours',
+        description:
+          'Record task hours with project association, date, duration, description, and work tags (Frontend, Backend, Design, QA, Strategy).',
+      },
+      {
+        title: 'Billable vs Non-Billable Tagging',
+        description:
+          'Distinguish client-billable delivery hours from internal operational or administrative work.',
+      },
+      {
+        title: '48h Sprint Capacity Meter',
+        description:
+          'Real-time visual capacity meter shows weekly progress toward the 48h standard with under-capacity and overtime alerts.',
+      },
+      {
+        title: 'Paginated Timesheets Table',
+        description:
+          'Audit all team time entries with 10 entries per page, search keywords, and member/project filters.',
+      },
+      {
+        title: 'Edit & Correct Entries',
+        description:
+          'Easily edit descriptions or delete accidental duplicate entries to keep client billing clean.',
+      },
+    ],
+    howToUse: [
+      'At the end of each focused work block or daily at 5:30 PM, click "Log Time".',
+      'Select the project you worked on, enter the hours/minutes, pick a tag, and write a concise note.',
+      'Check your weekly capacity meter to ensure you are on track to achieve your 48h sprint capacity.',
+    ],
+    goldenRule:
+      'Log time on the day work is performed. Never postpone logging hours until the end of the month.',
+  },
+  {
+    id: 'reports',
+    name: 'Weekly Report & Standups',
+    route: '/reports/weekly',
+    icon: FileText,
+    accentColor: 'text-amber-400',
+    badge: 'Accountability',
+    summary:
+      'The daily asynchronous EOD standup check-in system and executive weekly delivery summary for unblocking teammates and monitoring velocity.',
+    whatYouCanDo: [
+      {
+        title: '60-Second Daily EOD Standup',
+        description:
+          'Submit your daily check-in: Completed Today, Tomorrow’s Priorities, Blockers/Dependencies, and Hours Worked.',
+      },
+      {
+        title: 'Live Team Standup Feed',
+        description:
+          'Read daily check-ins from engineers and outreach specialists to maintain full async alignment without long meetings.',
+      },
+      {
+        title: 'Blocker Identification & Resolution',
+        description:
+          'Highlight dependencies, waiting PR reviews, or missing client credentials so leads can resolve them immediately.',
+      },
+      {
+        title: 'Executive Weekly Rollup',
+        description:
+          'Automated summary of shipped features, department highlights, and company-wide velocity for weekly leadership reviews.',
+      },
+    ],
+    howToUse: [
+      'Every evening between 5:00 PM and 6:30 PM, open "Weekly Report" and click "Submit Daily Standup".',
+      'Fill in 2-3 bullet points for Completed Today and Tomorrow’s Priorities.',
+      'If you are blocked by code reviews or missing assets, clearly state the blocker.',
+      'Project Leads review the standup feed each morning to unblock their team before deep work begins.',
+    ],
+    goldenRule:
+      'Daily EOD standups are mandatory for all active staff. If you have a blocker, write it explicitly so leadership can clear it.',
+  },
+  {
+    id: 'settings',
+    name: 'Settings & Appearance',
+    route: '/settings',
+    icon: SlidersHorizontal,
+    accentColor: 'text-purple-400',
+    badge: 'Personalization',
+    summary:
+      'Customize themes, enterprise dark/light palettes, typography, profile details, and background push notifications.',
+    whatYouCanDo: [
+      {
+        title: '7 Enterprise Color Themes',
+        description:
+          'Switch between Clean Light, Rhizan Dark, Midnight Navy, Cyber Violet, Forest Emerald, Luxury Gold, and Monokai Pro.',
+      },
+      {
+        title: 'Custom Typography',
+        description:
+          'Personalize font styling across the Hub: Plus Jakarta Sans, Inter, JetBrains Mono, or Roboto.',
+      },
+      {
+        title: 'Light / Dark Mode Toggle',
+        description:
+          'Instantly toggle high-contrast dark and light modes with persistent localStorage storage.',
+      },
+      {
+        title: 'Edit Profile & Details',
+        description:
+          'Update your display name, official title, and phone number directly from your personal settings.',
+      },
+      {
+        title: 'PWA & Cache Management',
+        description:
+          'Check Progressive Web App installation status, offline cache health, and background sync.',
+      },
+    ],
+    howToUse: [
+      'Pick a color theme and typography that suits your working environment and ambient lighting.',
+      'Click "Edit Profile" to keep your title and contact phone up to date for teammates.',
+      'Enable browser push notification permissions when prompted to receive task due alerts.',
+    ],
+    goldenRule:
+      'Keep your profile name and title accurate so team assignment dropdowns and client lead designations stay clear.',
+  },
 ];
 
 export default function DocumentationPage() {
-  const { user } = useAuth();
-  const { isInstallable, isInstalled, installPwa } = usePwa();
-
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [activeRole, setActiveRole] = useState<'engineer' | 'growth' | 'exec'>('engineer');
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedCode(id);
-    setTimeout(() => setCopiedCode(null), 2000);
-  };
+  const [selectedPage, setSelectedPage] = useState<string>('all');
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
     setExpandedFaq(expandedFaq === index ? null : index);
   };
 
-  // Filter topics based on search and category
-  const matchesFilter = (catId: string, searchTerms: string[]) => {
-    if (selectedCategory !== 'all' && selectedCategory !== catId) return false;
+  // Filter pages based on search and selected pill
+  const filteredPages = PAGES_GUIDE.filter((page) => {
+    if (selectedPage !== 'all' && page.id !== selectedPage) return false;
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
-    return searchTerms.some((term) => term.toLowerCase().includes(query));
-  };
+    const matchName = page.name.toLowerCase().includes(query);
+    const matchSummary = page.summary.toLowerCase().includes(query);
+    const matchActions = page.whatYouCanDo.some(
+      (a) => a.title.toLowerCase().includes(query) || a.description.toLowerCase().includes(query)
+    );
+    const matchHowTo = page.howToUse.some((h) => h.toLowerCase().includes(query));
+    return matchName || matchSummary || matchActions || matchHowTo;
+  });
 
   return (
     <div className="flex-1 flex flex-col min-w-0 pb-20">
@@ -100,32 +478,20 @@ export default function DocumentationPage() {
         title={
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-              <BookOpen className="w-5 h-5" />
+              <Layers className="w-5 h-5" />
             </div>
-            <span>Rhizan Hub Documentation</span>
+            <span>Rhizan Hub Operational Manual</span>
           </div>
         }
-        subtitle="The definitive operational playbook, module guides, and workflows for Rhizan Technologies staff"
-        actionButton={
-          isInstallable && !isInstalled
-            ? {
-                label: 'Install Desktop App',
-                mobileLabel: 'Install',
-                icon: <Download className="w-4 h-4" />,
-                onClick: installPwa,
-              }
-            : undefined
-        }
+        subtitle="A clear, page-by-page operational guide explaining what each page is for and what you can do on it"
       />
 
       <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
-        {/* Hero Banner with Search */}
+        {/* Banner with Live Search */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#121c24] via-[#101720] to-[#0c1017] border border-teal-500/20 p-6 sm:p-8 shadow-2xl">
           <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-1/3 -mb-12 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-
           <div className="relative z-10 space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-white p-2 flex items-center justify-center shadow-lg shadow-teal-900/30">
                   <Image
@@ -137,41 +503,29 @@ export default function DocumentationPage() {
                   />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl sm:text-2xl font-bold font-heading text-white tracking-wide">
-                      RHIZAN HUB OPERATIONS
-                    </h1>
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30">
-                      v1.0 Production
-                    </span>
-                  </div>
+                  <h1 className="text-xl sm:text-2xl font-bold font-heading text-white tracking-wide">
+                    PAGE-BY-PAGE HUB GUIDE
+                  </h1>
                   <p className="text-xs sm:text-sm text-neutral-300">
-                    High-velocity, async-first operating system for internal projects, clients, and outreach
+                    Understand the exact purpose, capabilities, and operational rules for every page in Rhizan Hub
                   </p>
                 </div>
               </div>
 
-              {/* Status Pills */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  {isInstalled ? 'Installed Native PWA' : 'PWA Ready'}
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/10 text-teal-300 border border-teal-500/30">
-                  <Clock className="w-3.5 h-3.5" />
-                  48h Sprint Standard
-                </span>
-              </div>
+              <span className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/10 text-teal-300 border border-teal-500/30">
+                <Sparkles className="w-3.5 h-3.5" />
+                9 Core Modules
+              </span>
             </div>
 
-            {/* Live Search Input */}
+            {/* Live Search */}
             <div className="relative max-w-2xl">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search workflows, module guides, roles, WIP rules, shortcuts..."
+                placeholder="Search any page, feature, rule, or action (e.g., WIP limit, WhatsApp, Standup)..."
                 className="w-full pl-11 pr-10 py-3 rounded-2xl bg-[#0a0f16]/90 border border-teal-500/30 text-white placeholder-neutral-400 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 transition shadow-inner"
               />
               {searchQuery && (
@@ -184,15 +538,25 @@ export default function DocumentationPage() {
               )}
             </div>
 
-            {/* Quick Navigation Category Badges */}
+            {/* Quick Navigation Pills */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-              {CATEGORIES.map((cat) => {
-                const Icon = cat.icon;
-                const isSelected = selectedCategory === cat.id;
+              <button
+                onClick={() => setSelectedPage('all')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer ${
+                  selectedPage === 'all'
+                    ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/25'
+                    : 'bg-[#151e28] text-neutral-300 hover:bg-[#1b2634] hover:text-white border border-[#233142]'
+                }`}
+              >
+                <span>All Pages (9)</span>
+              </button>
+              {PAGES_GUIDE.map((page) => {
+                const Icon = page.icon;
+                const isSelected = selectedPage === page.id;
                 return (
                   <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
+                    key={page.id}
+                    onClick={() => setSelectedPage(page.id)}
                     className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer ${
                       isSelected
                         ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/25'
@@ -200,7 +564,7 @@ export default function DocumentationPage() {
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
-                    <span>{cat.name}</span>
+                    <span>{page.name}</span>
                   </button>
                 );
               })}
@@ -208,953 +572,192 @@ export default function DocumentationPage() {
           </div>
         </div>
 
-        {/* Interactive Playbook by Role */}
-        <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-teal-400" />
-                <h2 className="text-lg font-bold text-[var(--foreground)]">Role-Based Daily Playbooks</h2>
+        {/* Page Guides Grid */}
+        <div className="space-y-8">
+          {filteredPages.map((page, index) => {
+            const Icon = page.icon;
+            return (
+              <div
+                key={page.id}
+                id={page.id}
+                className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6 shadow-sm hover:border-[var(--border-hover)] transition scroll-mt-24"
+              >
+                {/* Page Header Bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)]">
+                      <Icon className={`w-6 h-6 ${page.accentColor}`} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-mono font-bold text-teal-400">
+                          {String(index + 1).padStart(2, '0')}.
+                        </span>
+                        <h2 className="text-lg sm:text-xl font-bold text-[var(--foreground)] font-heading">
+                          {page.name}
+                        </h2>
+                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-[var(--surface-elevated)] text-[var(--muted)] border border-[var(--border)]">
+                          {page.route}
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                          {page.badge}
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-[var(--muted)] mt-1">{page.summary}</p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={page.route}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold shadow-md shadow-teal-900/20 transition self-start sm:self-auto cursor-pointer"
+                  >
+                    <span>Open {page.name}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+
+                {/* Section 1: What You Can Do Here */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-teal-400 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    What You Can Do On This Page
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {page.whatYouCanDo.map((action, aIdx) => (
+                      <div
+                        key={aIdx}
+                        className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-1.5"
+                      >
+                        <h4 className="text-xs font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                          <span>{action.title}</span>
+                        </h4>
+                        <p className="text-xs text-[var(--muted)] leading-relaxed">{action.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 2: Step-by-Step How to Use */}
+                <div className="p-5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--foreground)] flex items-center gap-2">
+                    <CheckSquare className="w-4 h-4 text-sky-400" />
+                    How to Use It (Step-by-Step Workflow)
+                  </h3>
+                  <ol className="space-y-2 text-xs text-[var(--muted)] list-decimal list-inside leading-relaxed">
+                    {page.howToUse.map((step, sIdx) => (
+                      <li key={sIdx} className="text-[var(--foreground)]">
+                        <span className="text-[var(--muted)]">{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                {/* Section 3: Golden Rule / Pro Tip */}
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="text-xs space-y-0.5">
+                    <span className="font-bold text-amber-300 uppercase tracking-wider text-[10px]">
+                      Golden Operational Rule
+                    </span>
+                    <p className="text-neutral-200 leading-relaxed">{page.goldenRule}</p>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-[var(--muted)] mt-1">
-                Select your role to see the exact recommended daily rhythm and best practices
+            );
+          })}
+
+          {filteredPages.length === 0 && (
+            <div className="p-12 text-center rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] space-y-3">
+              <Search className="w-8 h-8 text-[var(--muted)] mx-auto" />
+              <h3 className="text-sm font-semibold text-[var(--foreground)]">No matching pages or features found</h3>
+              <p className="text-xs text-[var(--muted)]">Try searching for keywords like "Kanban", "Tasks", "Clients", "Hours", or "Outreach".</p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedPage('all');
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-teal-500/10 text-teal-400 text-xs font-semibold border border-teal-500/20 hover:bg-teal-500/20 transition cursor-pointer"
+              >
+                Reset Search
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* General Troubleshooting & FAQ */}
+        <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
+          <div className="flex items-center gap-3 border-b border-[var(--border)] pb-4">
+            <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
+              <HelpCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
+                General Operations FAQs
+              </h3>
+              <p className="text-xs text-[var(--muted)]">
+                Frequently asked operational questions across all Hub modules
               </p>
             </div>
-
-            {/* Role Switcher */}
-            <div className="flex items-center p-1 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] self-start sm:self-auto">
-              <button
-                onClick={() => setActiveRole('engineer')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeRole === 'engineer'
-                    ? 'bg-teal-600 text-white shadow-md'
-                    : 'text-[var(--muted)] hover:text-[var(--foreground)]'
-                }`}
-              >
-                <Laptop className="w-3.5 h-3.5" />
-                <span>Engineer & Designer</span>
-              </button>
-              <button
-                onClick={() => setActiveRole('growth')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeRole === 'growth'
-                    ? 'bg-teal-600 text-white shadow-md'
-                    : 'text-[var(--muted)] hover:text-[var(--foreground)]'
-                }`}
-              >
-                <Compass className="w-3.5 h-3.5" />
-                <span>Sales & Growth</span>
-              </button>
-              <button
-                onClick={() => setActiveRole('exec')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeRole === 'exec'
-                    ? 'bg-teal-600 text-white shadow-md'
-                    : 'text-[var(--muted)] hover:text-[var(--foreground)]'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Lead & Executive</span>
-              </button>
-            </div>
           </div>
 
-          {/* Role Content Cards */}
-          {activeRole === 'engineer' && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in">
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider font-mono">
-                  Step 1 • 09:00 AM
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Personal Sprint Board</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Open <strong className="text-[var(--foreground)]">Tasks</strong> and ensure Assignee filter is set to{' '}
-                  <span className="text-teal-400">"My Tasks (Personal)"</span>. Pick top priority tasks from To Do and move them to In Progress.
-                </p>
-                <Link
-                  href="/tasks"
-                  className="inline-flex items-center gap-1 text-xs text-teal-400 hover:text-teal-300 font-medium pt-2"
+          <div className="space-y-3">
+            {[
+              {
+                q: 'What should I do if a task is taking longer than expected?',
+                a: 'If a deliverable is delayed or blocked, do not let it sit silently in "In Progress". State the blocker explicitly in your daily EOD Standup on the Weekly Report page (/reports/weekly) so the Project Lead or CTO can help you resolve it.',
+              },
+              {
+                q: 'How do I know which tasks are assigned to me versus other teammates?',
+                a: 'On the Tasks page (/tasks), look at the Assignee dropdown at the top left. Select "My Tasks (Personal)". This will instantly filter the board and due date badges (Today, Tomorrow, Overdue) strictly to your own workload.',
+              },
+              {
+                q: 'How do I reset my password?',
+                a: 'Click your avatar profile button in the top right corner of the header and select "Change Password". If you were just invited with a temporary password, the system automatically redirects you to the change password page on initial login.',
+              },
+              {
+                q: 'How does a prospect become a Client in the CRM?',
+                a: 'On the Client Outreach page (/approaches), when your negotiations succeed and a contract is agreed, switch their status to "Deal Won (Client)". A prompt will appear allowing you to convert the business directly into an active Client record in one click.',
+              },
+              {
+                q: 'When should I log my work hours?',
+                a: 'Log your hours daily on the Time Tracking page (/time), preferably at the end of each focused session or during the 5:30 PM wrapup. Rhizan operates on a 48h weekly sprint capacity standard.',
+              },
+            ].map((item, idx) => {
+              const isOpen = expandedFaq === idx;
+              return (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden transition"
                 >
-                  Go to Tasks <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider font-mono">
-                  Step 2 • Focused Work
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">WIP Discipline & Links</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Respect the <strong className="text-amber-400">Max 3 Tasks / Person limit</strong>. Check deliverables subtasks and use project links (Figma, GitHub, Staging) directly from task cards.
-                </p>
-                <Link
-                  href="/projects"
-                  className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-medium pt-2"
-                >
-                  View Projects <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider font-mono">
-                  Step 3 • Log Sprint Hours
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Log Billable Hours</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Log your active dev/design hours in <strong className="text-[var(--foreground)]">Time Tracking</strong>. Target your 48h weekly sprint capacity meter.
-                </p>
-                <Link
-                  href="/time"
-                  className="inline-flex items-center gap-1 text-xs text-sky-400 hover:text-sky-300 font-medium pt-2"
-                >
-                  Log Time <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono">
-                  Step 4 • 06:00 PM EOD
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Daily Check-In</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Open <strong className="text-[var(--foreground)]">Weekly Report</strong> and submit your 60-second EOD standup: accomplishments, tomorrow's plan, and any blockers.
-                </p>
-                <Link
-                  href="/reports/weekly"
-                  className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-medium pt-2"
-                >
-                  Submit Standup <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {activeRole === 'growth' && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in">
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider font-mono">
-                  Stage 1 • Prospecting
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Target Research & Niches</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  In <strong className="text-[var(--foreground)]">Client Outreach</strong>, filter by niche or add newly targeted businesses with key decision maker contacts.
-                </p>
-                <Link
-                  href="/approaches"
-                  className="inline-flex items-center gap-1 text-xs text-teal-400 hover:text-teal-300 font-medium pt-2"
-                >
-                  Open Outreach <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono">
-                  Stage 2 • Direct Outreach
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">1-Click WhatsApp & Phone</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Click the green WhatsApp button or Phone icon on the approach row to launch instant chat with pre-filled intro pitch.
-                </p>
-                <span className="text-[11px] text-neutral-400">Status: Contacted &bull; In Discussion</span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider font-mono">
-                  Stage 3 • Interaction Logs
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Log Notes & Follow-ups</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Record call outcome, feedback, and set the next follow-up date. Automated notifications alert you on the due morning!
-                </p>
-                <span className="text-[11px] text-amber-400">Never miss a scheduled callback</span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider font-mono">
-                  Stage 4 • Deal Won
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Convert to Client</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Mark status as <strong className="text-emerald-400">Deal Won (Client)</strong>. Click "Convert to Client" to automatically create their active CRM account!
-                </p>
-                <Link
-                  href="/clients"
-                  className="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 font-medium pt-2"
-                >
-                  View Clients <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {activeRole === 'exec' && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in">
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider font-mono">
-                  Leadership • Pulse Check
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Executive Dashboard</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Audit company delivery progress, active projects, live deals won, and team capacity burndown across all departments.
-                </p>
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-medium pt-2"
-                >
-                  View Dashboard <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider font-mono">
-                  Delivery • Budgets & Scope
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Project Governance</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Inspect delivery progress pipelines, contract scope, assigned project leads, and client repository deliverables.
-                </p>
-                <Link
-                  href="/projects"
-                  className="inline-flex items-center gap-1 text-xs text-teal-400 hover:text-teal-300 font-medium pt-2"
-                >
-                  Inspect Projects <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider font-mono">
-                  People • Talent & Roles
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Team Management</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Invite teammates with automatic credentials generation, 1-click password copy, and instant email dispatch.
-                </p>
-                <Link
-                  href="/team"
-                  className="inline-flex items-center gap-1 text-xs text-sky-400 hover:text-sky-300 font-medium pt-2"
-                >
-                  Manage Team <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider font-mono">
-                  Accountability • Standups
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">Blocker Resolution</h4>
-                <p className="text-xs text-[var(--muted)] leading-relaxed">
-                  Read daily EOD check-ins in the Weekly Report, identify blocked engineers, and resolve dependencies immediately.
-                </p>
-                <Link
-                  href="/reports/weekly"
-                  className="inline-flex items-center gap-1 text-xs text-rose-400 hover:text-rose-300 font-medium pt-2"
-                >
-                  Weekly Brief <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Detailed Module Documentation */}
-        <div className="space-y-8">
-          {/* 1. Quick Start & PWA Guide */}
-          {matchesFilter('quickstart', ['pwa', 'install', 'mobile', 'offline', 'shortcuts', 'desktop']) && (
-            <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center gap-3 border-b border-[var(--border)] pb-4">
-                <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                    1. Quick Start & PWA Native Installation
-                  </h3>
-                  <p className="text-xs text-[var(--muted)]">
-                    Run Rhizan Hub as a standalone desktop or mobile application with offline support
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Desktop Install */}
-                <div className="p-5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-3">
-                  <div className="flex items-center gap-2 text-teal-400">
-                    <Laptop className="w-4 h-4" />
-                    <h4 className="text-sm font-semibold text-[var(--foreground)]">Windows & macOS</h4>
-                  </div>
-                  <ol className="text-xs text-[var(--muted)] space-y-2 list-decimal list-inside leading-relaxed">
-                    <li>Open Rhizan Hub in Chrome, Edge, or Brave.</li>
-                    <li>
-                      Look at the right side of the address bar for the{' '}
-                      <strong className="text-[var(--foreground)]">Install</strong> icon (computer with arrow).
-                    </li>
-                    <li>
-                      Or click the <strong className="text-teal-400">"Install Desktop App"</strong> button in the
-                      sidebar bottom left.
-                    </li>
-                    <li>Launch directly from your Taskbar or macOS Launchpad.</li>
-                  </ol>
-                </div>
-
-                {/* iOS Install */}
-                <div className="p-5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-3">
-                  <div className="flex items-center gap-2 text-sky-400">
-                    <Smartphone className="w-4 h-4" />
-                    <h4 className="text-sm font-semibold text-[var(--foreground)]">Apple iOS (iPhone / iPad)</h4>
-                  </div>
-                  <ol className="text-xs text-[var(--muted)] space-y-2 list-decimal list-inside leading-relaxed">
-                    <li>Open Rhizan Hub in Apple Safari.</li>
-                    <li>
-                      Tap the <strong className="text-[var(--foreground)]">Share</strong> icon (square with arrow up).
-                    </li>
-                    <li>
-                      Scroll down and tap <strong className="text-sky-400">"Add to Home Screen"</strong>.
-                    </li>
-                    <li>The Hub opens full screen without browser toolbars.</li>
-                  </ol>
-                </div>
-
-                {/* Android Install */}
-                <div className="p-5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-3">
-                  <div className="flex items-center gap-2 text-emerald-400">
-                    <Download className="w-4 h-4" />
-                    <h4 className="text-sm font-semibold text-[var(--foreground)]">Android</h4>
-                  </div>
-                  <ol className="text-xs text-[var(--muted)] space-y-2 list-decimal list-inside leading-relaxed">
-                    <li>Open Rhizan Hub in Google Chrome.</li>
-                    <li>Tap the 3 dots menu in the top right corner.</li>
-                    <li>
-                      Tap <strong className="text-emerald-400">"Install app"</strong> or "Add to Home screen".
-                    </li>
-                    <li>Enjoy standalone native performance and offline caching.</li>
-                  </ol>
-                </div>
-              </div>
-
-              {/* Callout: Notifications & Offline */}
-              <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-start gap-3">
-                <Bell className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
-                <div className="text-xs space-y-1">
-                  <p className="font-semibold text-teal-300">Push Notifications & Offline Availability</p>
-                  <p className="text-neutral-300 leading-relaxed">
-                    When prompted by your browser, click <strong className="text-white">"Allow Notifications"</strong>.
-                    Rhizan Hub alerts you when tasks are approaching due dates, client follow-ups are due, or new
-                    deliverables are assigned to you. Cached assets allow you to inspect projects even when offline.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 2. Tasks & Kanban Board */}
-          {matchesFilter('tasks', ['tasks', 'kanban', 'wip', 'todo', 'subtasks', 'assignee', 'due dates']) && (
-            <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-4 flex-wrap gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                    <CheckSquare className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                      2. Personal Tasks & Daily Kanban Board
-                    </h3>
-                    <p className="text-xs text-[var(--muted)]">
-                      Queue management, deliverable checklists, and WIP bottleneck limits
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/tasks"
-                  className="px-3.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 text-xs font-semibold border border-teal-500/20 transition flex items-center gap-1.5"
-                >
-                  <span>Open Tasks Board</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              {/* Columns Explanation */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-1.5">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-neutral-500/10 text-neutral-400 border border-neutral-500/20">
-                    COLUMN 1
-                  </span>
-                  <h4 className="text-sm font-semibold text-[var(--foreground)]">TO DO</h4>
-                  <p className="text-xs text-[var(--muted)]">
-                    Sprint backlog items prioritized for execution. Subtasks can be prepared in advance.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-teal-500/30 space-y-1.5">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                    COLUMN 2 &bull; WIP LIMIT
-                  </span>
-                  <h4 className="text-sm font-semibold text-[var(--foreground)]">IN PROGRESS</h4>
-                  <p className="text-xs text-[var(--muted)]">
-                    Tasks currently being actively coded or designed. Recommended maximum of 3 concurrent tasks per
-                    member to prevent context switching.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-amber-500/30 space-y-1.5">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    COLUMN 3
-                  </span>
-                  <h4 className="text-sm font-semibold text-[var(--foreground)]">REVIEW</h4>
-                  <p className="text-xs text-[var(--muted)]">
-                    Pull Requests undergoing code review, QA staging verification, or awaiting stakeholder signoff.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-emerald-500/30 space-y-1.5">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    COLUMN 4
-                  </span>
-                  <h4 className="text-sm font-semibold text-[var(--foreground)]">DONE</h4>
-                  <p className="text-xs text-[var(--muted)]">
-                    Completed, tested, and verified deliverables ready for milestone invoicing.
-                  </p>
-                </div>
-              </div>
-
-              {/* Filters Guide */}
-              <div className="p-5 rounded-2xl bg-[#0f1722] border border-[#1e2d3f] space-y-3">
-                <h4 className="text-xs font-bold text-teal-300 uppercase tracking-wider flex items-center gap-2">
-                  <Filter className="w-3.5 h-3.5" />
-                  Powerful Scoped Filtering Engine
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-neutral-300">
-                  <div className="space-y-1.5">
-                    <p className="font-semibold text-white">1. Assignee Scoping:</p>
-                    <p className="text-neutral-400">
-                      Selecting <strong className="text-teal-300">"My Tasks (Personal)"</strong> hides everyone else's
-                      tasks and personalizes all date badges (Today, Tomorrow, Overdue) strictly to your own workload.
-                    </p>
-                  </div>
-                  <div className="space-y-1.5">
-                    <p className="font-semibold text-white">2. Date Filter Badges:</p>
-                    <p className="text-neutral-400">
-                      Click <strong className="text-amber-300">"Today"</strong>,{' '}
-                      <strong className="text-rose-300">"Overdue"</strong>, or{' '}
-                      <strong className="text-sky-300">"This Week"</strong> pills to instantly focus your daily priority
-                      stream.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 3. Projects & Software Delivery */}
-          {matchesFilter('projects', ['projects', 'milestones', 'github', 'figma', 'staging', 'budget']) && (
-            <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-4 flex-wrap gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                    <FolderKanban className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                      3. Projects & Client Deliverables
-                    </h3>
-                    <p className="text-xs text-[var(--muted)]">
-                      Milestone tracking, budgets, team ownership, and repository integrations
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/projects"
-                  className="px-3.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 text-xs font-semibold border border-teal-500/20 transition flex items-center gap-1.5"
-                >
-                  <span>Go to Projects</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2">
-                    <Award className="w-4 h-4 text-teal-400" />
-                    Project Directory vs Pipeline
-                  </h4>
-                  <p className="text-xs text-[var(--muted)] leading-relaxed">
-                    Toggle between card grid and step-by-step pipeline view to see active delivery progress (0% - 100%)
-                    computed automatically from linked tasks.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2">
-                    <ExternalLink className="w-4 h-4 text-sky-400" />
-                    External Engineering Links
-                  </h4>
-                  <p className="text-xs text-[var(--muted)] leading-relaxed">
-                    Every project card stores direct links to its <strong className="text-[var(--foreground)]">GitHub Repository</strong>,{' '}
-                    <strong className="text-[var(--foreground)]">Figma Designs</strong>, and{' '}
-                    <strong className="text-[var(--foreground)]">Staging Environment</strong>.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2">
-                    <Users className="w-4 h-4 text-emerald-400" />
-                    Lead Ownership
-                  </h4>
-                  <p className="text-xs text-[var(--muted)] leading-relaxed">
-                    Each project designates a Project Lead who oversees weekly milestones, signs off on deliverable PRs,
-                    and communicates timeline updates with the client.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 4. Clients & CRM */}
-          {matchesFilter('clients', ['clients', 'crm', 'contracts', 'invoices', 'meetings', 'payments']) && (
-            <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-4 flex-wrap gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                    <Building2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                      4. Clients & Accounts Management
-                    </h3>
-                    <p className="text-xs text-[var(--muted)]">
-                      Contract values, invoice milestones, payments status, and scheduled reviews
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/clients"
-                  className="px-3.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 text-xs font-semibold border border-teal-500/20 transition flex items-center gap-1.5"
-                >
-                  <span>Open Clients</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs text-[var(--muted)]">
-                <div className="p-5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-3">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-emerald-400" />
-                    Contract Financial Tracking
-                  </h4>
-                  <p className="leading-relaxed">
-                    Track the exact commercial health for every account:
-                  </p>
-                  <ul className="space-y-1.5 list-disc list-inside">
-                    <li><strong className="text-[var(--foreground)]">Deal Value ($)</strong>: Total contracted value for the software engagement.</li>
-                    <li><strong className="text-emerald-400">Paid Amount ($)</strong>: Cleared milestone deposits.</li>
-                    <li><strong className="text-amber-400">Pending Amount ($)</strong>: Milestone balances due on signoff.</li>
-                  </ul>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-3">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-sky-400" />
-                    Meetings & Milestones
-                  </h4>
-                  <p className="leading-relaxed">
-                    Schedule client demo calls and review meetings directly within the client file. Key stakeholders
-                    receive reminders, ensuring transparent client relationships.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 5. Client Outreach Pipeline */}
-          {matchesFilter('outreach', ['outreach', 'approaches', 'whatsapp', 'niches', 'pipeline', 'deals']) && (
-            <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-4 flex-wrap gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                    <Compass className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                      5. Client Outreach & Approaches Pipeline
-                    </h3>
-                    <p className="text-xs text-[var(--muted)]">
-                      Multi-stage prospect sales funnel, direct WhatsApp triggers, and conversion workflow
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/approaches"
-                  className="px-3.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 text-xs font-semibold border border-teal-500/20 transition flex items-center gap-1.5"
-                >
-                  <span>Go to Outreach</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              {/* Status progression flow */}
-              <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-3">
-                <h4 className="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">
-                  Outreach Stage Progression
-                </h4>
-                <div className="flex items-center gap-2 flex-wrap text-xs font-medium">
-                  <span className="px-2.5 py-1 rounded-lg bg-neutral-800 text-neutral-300">1. IDENTIFIED</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-neutral-500" />
-                  <span className="px-2.5 py-1 rounded-lg bg-sky-500/15 text-sky-300">2. CONTACTED</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-neutral-500" />
-                  <span className="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-300">3. IN DISCUSSION</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-neutral-500" />
-                  <span className="px-2.5 py-1 rounded-lg bg-purple-500/15 text-purple-300">4. PROPOSAL SENT</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-neutral-500" />
-                  <span className="px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-300">5. FOLLOW-UP</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-neutral-500" />
-                  <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                    6. DEAL WON (CLIENT)
-                  </span>
-                </div>
-              </div>
-
-              {/* WhatsApp and Follow-up Pro Tips */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
-                  <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
-                    <MessageSquare className="w-4 h-4" />
-                    <span>Instant WhatsApp Outreach</span>
-                  </div>
-                  <p className="text-xs text-neutral-300 leading-relaxed">
-                    Clicking the WhatsApp badge on any approach row opens WhatsApp Web or mobile app with a personalized
-                    intro note pre-addressed to the contact person.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 space-y-2">
-                  <div className="flex items-center gap-2 text-teal-400 text-xs font-bold">
-                    <Sparkles className="w-4 h-4" />
-                    <span>1-Click Conversion to Client</span>
-                  </div>
-                  <p className="text-xs text-neutral-300 leading-relaxed">
-                    When you close a deal, select "Deal Won (Client)". A prompt will appear allowing you to convert the
-                    prospect straight into a registered Client account without retyping details.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 6. Team & Role Management */}
-          {matchesFilter('team', ['team', 'roles', 'ceo', 'cto', 'coo', 'admin', 'member', 'password', 'invite']) && (
-            <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-4 flex-wrap gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                      6. Team Hierarchy & Role Permissions
-                    </h3>
-                    <p className="text-xs text-[var(--muted)]">
-                      Role badges, automated invitations, 1-click credential copying, and security
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/team"
-                  className="px-3.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 text-xs font-semibold border border-teal-500/20 transition flex items-center gap-1.5"
-                >
-                  <span>Open Team Directory</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              {/* Roles Breakdown */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-amber-500/30 space-y-1">
-                  <span className="text-[10px] font-bold text-amber-400">👑 CEO</span>
-                  <p className="text-xs font-semibold text-[var(--foreground)]">Chief Executive</p>
-                  <p className="text-[11px] text-[var(--muted)]">Full executive governance, company KPIs, user management.</p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-sky-500/30 space-y-1">
-                  <span className="text-[10px] font-bold text-sky-400">⚡ CTO</span>
-                  <p className="text-xs font-semibold text-[var(--foreground)]">Chief Technology</p>
-                  <p className="text-[11px] text-[var(--muted)]">Engineering architecture, technical roadmaps, staging signoff.</p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-emerald-500/30 space-y-1">
-                  <span className="text-[10px] font-bold text-emerald-400">📊 COO</span>
-                  <p className="text-xs font-semibold text-[var(--foreground)]">Chief Operations</p>
-                  <p className="text-[11px] text-[var(--muted)]">Project delivery cadence, client success, weekly burndown.</p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-teal-500/30 space-y-1">
-                  <span className="text-[10px] font-bold text-teal-400">🛡️ Admin</span>
-                  <p className="text-xs font-semibold text-[var(--foreground)]">System Admin</p>
-                  <p className="text-[11px] text-[var(--muted)]">Team invites, account onboarding, permission governance.</p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-1">
-                  <span className="text-[10px] font-bold text-neutral-400">👤 Member</span>
-                  <p className="text-xs font-semibold text-[var(--foreground)]">Core Contributor</p>
-                  <p className="text-[11px] text-[var(--muted)]">Engineers, designers, outreach specialists, time logging.</p>
-                </div>
-              </div>
-
-              {/* Onboarding & Password Flow */}
-              <div className="p-5 rounded-2xl bg-[#0f1722] border border-[#1e2d3f] space-y-3">
-                <h4 className="text-xs font-bold text-teal-300 uppercase tracking-wider flex items-center gap-2">
-                  <KeyRound className="w-3.5 h-3.5" />
-                  Streamlined Team Onboarding Flow
-                </h4>
-                <ol className="text-xs text-neutral-300 space-y-2 list-decimal list-inside leading-relaxed">
-                  <li>
-                    When an Admin creates a new team member, the Hub automatically generates a secure temporary password.
-                  </li>
-                  <li>
-                    A modal immediately displays the password with a <strong className="text-teal-300">1-click Copy button</strong> so you can dispatch it via private channel.
-                  </li>
-                  <li>
-                    A customized welcome email is sent to the teammate with an active auto-fill link that inputs their temporary password automatically into the password reset form.
-                  </li>
-                  <li>
-                    On first login, the user is redirected to set their own permanent password before accessing the system.
-                  </li>
-                </ol>
-              </div>
-            </div>
-          )}
-
-          {/* 7. Time Tracking & Sprints */}
-          {matchesFilter('time', ['time', 'capacity', 'hours', 'timesheet', 'pagination', 'billable']) && (
-            <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-4 flex-wrap gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                      7. Time Tracking & 48h Sprint Standard
-                    </h3>
-                    <p className="text-xs text-[var(--muted)]">
-                      Capacity management, billable project allocation, and paginated audit history
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/time"
-                  className="px-3.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 text-xs font-semibold border border-teal-500/20 transition flex items-center gap-1.5"
-                >
-                  <span>Open Time Tracker</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs text-[var(--muted)]">
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)]">48 Hours / Week Capacity</h4>
-                  <p className="leading-relaxed">
-                    Rhizan operates on 48h weekly sprints. The capacity meter turns green as you approach 48h and flags
-                    under-utilization or overtime.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)]">Billable vs Non-Billable</h4>
-                  <p className="leading-relaxed">
-                    Tag hours with specific work types (Frontend, Backend, Design, QA, Strategy). Billable hours feed directly into client invoices.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-2">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)]">Paginated Timesheet Table</h4>
-                  <p className="leading-relaxed">
-                    Timesheets are paginated (10 entries/page) with full date range and teammate filters for swift monthly audits.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 8. Standups & Weekly Report */}
-          {matchesFilter('reports', ['standup', 'eod', 'report', 'blockers', 'weekly']) && (
-            <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-4 flex-wrap gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                      8. Daily Standups & Weekly Executive Brief
-                    </h3>
-                    <p className="text-xs text-[var(--muted)]">
-                      60-second daily check-ins, velocity meters, and automatic department summaries
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/reports/weekly"
-                  className="px-3.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 text-xs font-semibold border border-teal-500/20 transition flex items-center gap-1.5"
-                >
-                  <span>Open Weekly Report</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs text-[var(--muted)]">
-                <div className="p-5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-3">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-teal-400" />
-                    Daily EOD Standup Format
-                  </h4>
-                  <p className="leading-relaxed">
-                    Submit your check-in every evening between 5:00 PM and 6:30 PM:
-                  </p>
-                  <ol className="space-y-1.5 list-decimal list-inside">
-                    <li><strong className="text-[var(--foreground)]">Completed Today</strong>: Concrete deliverables shipped.</li>
-                    <li><strong className="text-[var(--foreground)]">Tomorrow's Priorities</strong>: The 2-3 most impactful tasks.</li>
-                    <li><strong className="text-rose-400">Blockers & Dependencies</strong>: Code reviews, APIs, or credentials needed.</li>
-                    <li><strong className="text-teal-400">Hours Worked Today</strong>: Total logged hours.</li>
-                  </ol>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] space-y-3">
-                  <h4 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2">
-                    <Award className="w-4 h-4 text-amber-400" />
-                    Automated Executive Summary
-                  </h4>
-                  <p className="leading-relaxed">
-                    The Weekly Report aggregates all team standups and time entries into department metrics, delivery velocity,
-                    and billable utilization charts for leadership review every Friday.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 9. Interactive FAQ & Pro-Tips Accordion */}
-          {matchesFilter('faq', ['faq', 'password', 'notifications', 'theme', 'shortcuts', 'questions']) && (
-            <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center gap-3 border-b border-[var(--border)] pb-4">
-                <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                  <HelpCircle className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                    9. Frequently Asked Questions & Pro-Tips
-                  </h3>
-                  <p className="text-xs text-[var(--muted)]">
-                    Quick answers to common questions and practical power-user tips
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {[
-                  {
-                    q: 'How do background notifications work and why do I need to allow them?',
-                    a: 'Rhizan Hub uses a Service Worker and native Push API to alert you about tasks due today, overdue follow-ups, and milestone events. When your browser displays a permission banner, click "Allow". If you ever missed it, check your browser lock icon in the address bar and switch Notifications to "Allow".',
-                  },
-                  {
-                    q: 'How do I change my temporary password?',
-                    a: 'When you log in with a temporary password from your welcome email, the system automatically redirects you to the Change Password screen. You can also click your avatar in the top right header at any time and select "Change Password".',
-                  },
-                  {
-                    q: 'What is the WIP (Work-In-Progress) Bottleneck Limit on the Tasks board?',
-                    a: 'The Kanban methodology discourages having more than 3 active tasks per person in "In Progress" at the same time. Excessive multitasking creates bottlenecks and delays delivery. Complete or move your active tasks to Review before starting new ones!',
-                  },
-                  {
-                    q: 'Can I personalize the visual theme and typography?',
-                    a: 'Yes! Navigate to Settings & Appearance (/settings) from the sidebar or header menu. You can choose from 7 enterprise themes (Clean Light, Rhizan Dark, Midnight Navy, Cyber Violet, etc.) and custom fonts like Plus Jakarta Sans, Inter, or JetBrains Mono.',
-                  },
-                  {
-                    q: 'How do I convert an outreach prospect into an active Client?',
-                    a: 'In Client Outreach (/approaches), when your negotiations succeed, change the status to "Deal Won (Client)". A 1-click conversion action allows you to import the business directly into Clients with their deal value and contact details.',
-                  },
-                  {
-                    q: 'Can I use Rhizan Hub while travelling or with poor internet connectivity?',
-                    a: 'Yes. Rhizan Hub is a Progressive Web App (PWA) with active service worker caching. It caches essential UI screens and data so you can view existing tasks and project specifications even during flight or network drops.',
-                  },
-                ].map((item, idx) => {
-                  const isOpen = expandedFaq === idx;
-                  return (
-                    <div
-                      key={idx}
-                      className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden transition"
-                    >
-                      <button
-                        onClick={() => toggleFaq(idx)}
-                        className="w-full p-4 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-[var(--surface)] transition"
-                      >
-                        <span className="text-xs sm:text-sm font-semibold text-[var(--foreground)]">{item.q}</span>
-                        {isOpen ? (
-                          <ChevronDown className="w-4 h-4 text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4 text-[var(--muted)] shrink-0" />
-                        )}
-                      </button>
-                      {isOpen && (
-                        <div className="px-4 pb-4 pt-1 text-xs text-[var(--muted)] leading-relaxed border-t border-[var(--border)] animate-fade-in">
-                          {item.a}
-                        </div>
-                      )}
+                  <button
+                    onClick={() => toggleFaq(idx)}
+                    className="w-full p-4 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-[var(--surface)] transition"
+                  >
+                    <span className="text-xs sm:text-sm font-semibold text-[var(--foreground)]">{item.q}</span>
+                    {isOpen ? (
+                      <ChevronDown className="w-4 h-4 text-teal-400 shrink-0" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 text-[var(--muted)] shrink-0" />
+                    )}
+                  </button>
+                  {isOpen && (
+                    <div className="px-4 pb-4 pt-1 text-xs text-[var(--muted)] leading-relaxed border-t border-[var(--border)] animate-fade-in">
+                      {item.a}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* 10. Copyable Daily Rhythm Checklist */}
-          <div className="rounded-3xl bg-gradient-to-br from-[#101924] to-[#0c1219] border border-teal-500/20 p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-teal-400" />
-                  Rhizan Daily Operational Checklist
-                </h3>
-                <p className="text-xs text-neutral-300">
-                  A high-impact 3-step checklist to paste in your daily notes or planner
-                </p>
-              </div>
-
-              <button
-                onClick={() =>
-                  handleCopy(
-                    `# Rhizan Daily Checklist\n- [ ] 09:00 AM: Open Rhizan Hub -> Tasks -> Filter "My Tasks" -> Set top 2 priorities\n- [ ] 10:00 AM - 05:00 PM: Deep execution, track subtasks, log time on project tasks\n- [ ] 06:00 PM: Submit EOD Standup in Weekly Report & verify logged capacity`,
-                    'daily-checklist'
-                  )
-                }
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 text-xs font-semibold transition cursor-pointer self-start sm:self-auto"
-              >
-                {copiedCode === 'daily-checklist' ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Copied Checklist!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Checklist</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#090d13] border border-[#1b2633] text-xs font-mono text-neutral-300 space-y-2 leading-relaxed">
-              <p className="text-teal-400 font-bold"># Daily Operational Rhythm</p>
-              <p>• [09:00 AM] Morning Kickoff: Check Dashboard & Tasks (filter: "My Tasks"). Pick 2 top priorities.</p>
-              <p>• [Mid-day] Deep Execution: Respect WIP limit (max 3 in progress). Check off subtasks as delivered.</p>
-              <p>• [05:30 PM] Time Tracking: Log hours worked with tags (Frontend, Backend, Design, QA).</p>
-              <p>• [06:00 PM] EOD Standup: Submit 1-min check-in (completed, tomorrow priorities, blockers).</p>
-            </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Footer Support Contact */}
+        {/* Footer Support Info */}
         <div className="p-6 rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] text-center space-y-2">
-          <p className="text-xs font-semibold text-[var(--foreground)]">Need additional help or have feedback?</p>
+          <p className="text-xs font-semibold text-[var(--foreground)]">Rhizan Technologies Internal Operations Manual</p>
           <p className="text-xs text-[var(--muted)]">
-            Reach out to internal operations leadership or visit the public portal at{' '}
+            For technical support, account access, or client billing inquiries, contact leadership or visit{' '}
             <a
               href="https://www.rhizantech.com"
               target="_blank"
