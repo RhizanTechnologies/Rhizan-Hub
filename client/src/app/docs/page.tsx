@@ -16,12 +16,9 @@ import {
   SlidersHorizontal,
   ArrowRight,
   Search,
-  HelpCircle,
-  ChevronDown,
   ChevronRight,
   CheckCircle2,
   Sparkles,
-  ExternalLink,
   MessageSquare,
   Phone,
   Calendar,
@@ -452,11 +449,6 @@ const PAGES_GUIDE: PageGuide[] = [
 export default function DocumentationPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPage, setSelectedPage] = useState<string>('all');
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-
-  const toggleFaq = (index: number) => {
-    setExpandedFaq(expandedFaq === index ? null : index);
-  };
 
   // Filter pages based on search and selected pill
   const filteredPages = PAGES_GUIDE.filter((page) => {
@@ -684,89 +676,6 @@ export default function DocumentationPage() {
               </button>
             </div>
           )}
-        </div>
-
-        {/* General Troubleshooting & FAQ */}
-        <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 sm:p-8 space-y-6">
-          <div className="flex items-center gap-3 border-b border-[var(--border)] pb-4">
-            <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-              <HelpCircle className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)]">
-                General Operations FAQs
-              </h3>
-              <p className="text-xs text-[var(--muted)]">
-                Frequently asked operational questions across all Hub modules
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {[
-              {
-                q: 'What should I do if a task is taking longer than expected?',
-                a: 'If a deliverable is delayed or blocked, do not let it sit silently in "In Progress". State the blocker explicitly in your daily EOD Standup on the Weekly Report page (/reports/weekly) so the Project Lead or CTO can help you resolve it.',
-              },
-              {
-                q: 'How do I know which tasks are assigned to me versus other teammates?',
-                a: 'On the Tasks page (/tasks), look at the Assignee dropdown at the top left. Select "My Tasks (Personal)". This will instantly filter the board and due date badges (Today, Tomorrow, Overdue) strictly to your own workload.',
-              },
-              {
-                q: 'How do I reset my password?',
-                a: 'Click your avatar profile button in the top right corner of the header and select "Change Password". If you were just invited with a temporary password, the system automatically redirects you to the change password page on initial login.',
-              },
-              {
-                q: 'How does a prospect become a Client in the CRM?',
-                a: 'On the Client Outreach page (/approaches), when your negotiations succeed and a contract is agreed, switch their status to "Deal Won (Client)". A prompt will appear allowing you to convert the business directly into an active Client record in one click.',
-              },
-              {
-                q: 'When should I log my work hours?',
-                a: 'Log your hours daily on the Time Tracking page (/time), preferably at the end of each focused session or during the 5:30 PM wrapup. Rhizan operates on a 48h weekly sprint capacity standard.',
-              },
-            ].map((item, idx) => {
-              const isOpen = expandedFaq === idx;
-              return (
-                <div
-                  key={idx}
-                  className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden transition"
-                >
-                  <button
-                    onClick={() => toggleFaq(idx)}
-                    className="w-full p-4 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-[var(--surface)] transition"
-                  >
-                    <span className="text-xs sm:text-sm font-semibold text-[var(--foreground)]">{item.q}</span>
-                    {isOpen ? (
-                      <ChevronDown className="w-4 h-4 text-teal-400 shrink-0" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-[var(--muted)] shrink-0" />
-                    )}
-                  </button>
-                  {isOpen && (
-                    <div className="px-4 pb-4 pt-1 text-xs text-[var(--muted)] leading-relaxed border-t border-[var(--border)] animate-fade-in">
-                      {item.a}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Footer Support Info */}
-        <div className="p-6 rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] text-center space-y-2">
-          <p className="text-xs font-semibold text-[var(--foreground)]">Rhizan Technologies Internal Operations Manual</p>
-          <p className="text-xs text-[var(--muted)]">
-            For technical support, account access, or client billing inquiries, contact leadership or visit{' '}
-            <a
-              href="https://www.rhizantech.com"
-              target="_blank"
-              rel="noreferrer"
-              className="text-teal-400 hover:underline font-medium inline-flex items-center gap-1"
-            >
-              rhizantech.com <ExternalLink className="w-3 h-3" />
-            </a>
-          </p>
         </div>
       </div>
     </div>
