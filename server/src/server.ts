@@ -95,6 +95,11 @@ app.get('/', (_req, res) => {
 
 import { User } from './models/User';
 import { evaluateDynamicAlerts } from './utils/notificationHelper';
+import { evaluateAllAlerts } from './controllers/notificationController';
+
+// Dedicated Cron trigger route
+app.get('/api/cron/evaluate', evaluateAllAlerts);
+app.post('/api/cron/evaluate', evaluateAllAlerts);
 
 // Start listener only in non-serverless environments (local dev or VPS container)
 if (!process.env.VERCEL) {

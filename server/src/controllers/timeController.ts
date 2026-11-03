@@ -6,7 +6,7 @@ import { AuthRequest, isExecutiveOrAdmin } from '../middlewares/auth';
 
 export const getTimeEntries = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { userId, projectId, startDate, endDate } = req.query;
+    const { userId, projectId, startDate, endDate, page, limit, pagination } = req.query;
     const filter: any = {};
 
     if (userId && userId !== 'ALL') filter.user = userId;
@@ -16,6 +16,40 @@ export const getTimeEntries = async (req: AuthRequest, res: Response): Promise<v
       filter.date = {};
       if (startDate) filter.date.$gte = new Date(startDate as string);
       if (endDate) filter.date.$lte = new Date(endDate as string);
+    }
+
+    const shouldPaginate = page !== undefined || limit !== undefined || pagination === 'true';
+
+    if (shouldPaginate) {
+      const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+      const limitNum = Math.max(1, Math.min(200, parseInt(limit as string, 10) || 30));
+      const skip = (pageNum - 1) * limitNum;
+
+      const [entries, total] = await Promise.all([
+        TimeEntry.find(filter)
+          .populate('user', 'name email title avatar')
+          .populate('project', 'name clientName')
+          .populate('task', 'title')
+          .sort({ date: -1, createdAt: -1 })
+          .skip(skip)
+          .limit(limitNum),
+        TimeEntry.countDocuments(filter),
+      ]);
+
+      const totalPages = Math.ceil(total / limitNum) || 1;
+
+      res.json({
+        entries,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages,
+          hasNext: pageNum < totalPages,
+          hasPrev: pageNum > 1,
+        },
+      });
+      return;
     }
 
     const entries = await TimeEntry.find(filter)

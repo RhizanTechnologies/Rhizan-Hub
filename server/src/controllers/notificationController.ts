@@ -198,3 +198,38 @@ export const unsubscribePush = async (req: AuthRequest, res: Response): Promise<
     res.status(500).json({ message: 'Failed to unsubscribe push', error: error.message });
   }
 };
+
+/**
+ * Serverless Cron Handler (e.g. for Vercel Cron or external scheduler)
+ * Evaluates tasks, outreach follow-ups, client meetings, standups, and capacity alerts for all active members
+ */
+export const evaluateAllAlerts = async (req: any, res: Response): Promise<void> => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const cronSecret = process.env.CRON_SECRET;
+
+    // If CRON_SECRET is configured in Vercel environment variables, enforce authorization
+    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+      res.status(401).json({ message: 'Unauthorized cron request' });
+      return;
+    }
+
+    const activeUsers = await User.find({ status: 'ACTIVE' }, '_id');
+    const evaluated: string[] = [];
+
+    for (const u of activeUsers) {
+      await evaluateDynamicAlerts(u._id.toString());
+      evaluated.push(u._id.toString());
+    }
+
+    res.json({
+      success: true,
+      message: `Dynamic alerts evaluated successfully for ${evaluated.length} active users`,
+      evaluatedUsersCount: evaluated.length,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Error running cron dynamic alert evaluation:', error);
+    res.status(500).json({ message: 'Cron evaluation failed', error: error.message });
+  }
+};

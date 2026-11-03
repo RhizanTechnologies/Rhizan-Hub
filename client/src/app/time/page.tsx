@@ -78,6 +78,10 @@ export default function TimeTrackingPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
+  // Pagination states
+  const [daysPerPage, setDaysPerPage] = useState<number>(5);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
   // Notification / success message
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
@@ -211,19 +215,25 @@ export default function TimeTrackingPage() {
     try {
       setLoading(true);
       const [entriesData, projectsData, tasksData] = await Promise.all([
-        apiFetch<TimeEntry[]>('/time'),
+        apiFetch<any>('/time'),
         apiFetch<Project[]>('/projects'),
-        apiFetch<Task[]>('/tasks'),
+        apiFetch<any>('/tasks'),
       ]);
 
-      if (entriesData) setEntries(entriesData);
+      if (entriesData) {
+        const loadedEntries = Array.isArray(entriesData) ? entriesData : (entriesData.entries || []);
+        setEntries(loadedEntries);
+      }
       if (projectsData) {
         setProjects(projectsData);
         if (projectsData.length > 0 && !selectedProjectId) {
           setSelectedProjectId(projectsData[0]._id);
         }
       }
-      if (tasksData) setTasks(tasksData);
+      if (tasksData) {
+        const loadedTasks = Array.isArray(tasksData) ? tasksData : (tasksData.tasks || []);
+        setTasks(loadedTasks);
+      }
     } catch (err) {
       console.error('Failed to load time tracking data', err);
     } finally {
@@ -567,6 +577,26 @@ export default function TimeTrackingPage() {
 
     return Object.values(groups).sort((a, b) => b.dateKey.localeCompare(a.dateKey));
   }, [filteredEntries]);
+
+  // Reset pagination to page 1 on filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [projectFilter, dateRangeFilter, searchQuery]);
+
+  const totalDays = groupedDays.length;
+  const totalPages = daysPerPage === -1 ? 1 : Math.max(1, Math.ceil(totalDays / daysPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedDays = useMemo(() => {
+    if (daysPerPage === -1) return groupedDays;
+    const startIndex = (currentPage - 1) * daysPerPage;
+    return groupedDays.slice(startIndex, startIndex + daysPerPage);
+  }, [groupedDays, currentPage, daysPerPage]);
 
   // Overall Metrics
   const todayEntries = entries.filter((e) => {
@@ -1028,7 +1058,7 @@ export default function TimeTrackingPage() {
             {/* CLOCKIFY GROUPED ENTRIES BY DAY */}
             <div className="space-y-5">
               {groupedDays.length > 0 ? (
-                groupedDays.map((dayGroup) => {
+                paginatedDays.map((dayGroup) => {
                   const dayHours = Math.floor(dayGroup.totalMinutes / 60);
                   const dayMins = dayGroup.totalMinutes % 60;
 
@@ -1161,6 +1191,68 @@ export default function TimeTrackingPage() {
                 </div>
               )}
             </div>
+
+            {/* Pagination Controls Bar */}
+            {groupedDays.length > 0 && (
+              <div className="p-4 rounded-2xl bg-[#111111] border border-[#222222] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+                {/* Count indicator */}
+                <div className="text-xs text-neutral-400 text-center sm:text-left">
+                  Showing days <span className="font-semibold text-white font-mono">{daysPerPage === -1 ? 1 : Math.min((currentPage - 1) * daysPerPage + 1, totalDays)}</span> to{' '}
+                  <span className="font-semibold text-white font-mono">{daysPerPage === -1 ? totalDays : Math.min(currentPage * daysPerPage, totalDays)}</span> of{' '}
+                  <span className="font-semibold text-teal-400 font-mono">{totalDays}</span> days{' '}
+                  <span className="text-neutral-500 font-mono">({filteredEntries.length} logged entries)</span>
+                </div>
+
+                {/* Page Navigation & Page Size */}
+                <div className="flex items-center gap-3 flex-wrap justify-center">
+                  <div className="flex items-center gap-1.5 text-xs text-neutral-400">
+                    <span>Days per page:</span>
+                    <select
+                      value={daysPerPage}
+                      onChange={(e) => {
+                        setDaysPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="bg-[#181818] border border-[#282828] text-white text-xs rounded-lg px-2 py-1 outline-none focus:border-teal-500"
+                    >
+                      <option value="3">3</option>
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="20">20</option>
+                      <option value="-1">All</option>
+                    </select>
+                  </div>
+
+                  {daysPerPage !== -1 && totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Prev</span>
+                      </button>
+
+                      <div className="px-2.5 py-1 text-xs font-mono text-neutral-300">
+                        Page <strong className="text-teal-400 font-bold">{currentPage}</strong> of <strong>{totalPages}</strong>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                      >
+                        <span className="hidden sm:inline">Next</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         ) : (
           /* TEAM WEEKLY TIMESHEET & REPORTS TAB */

@@ -1,6 +1,6 @@
 // RHIZAN Hub PWA Service Worker
-const CACHE_VERSION = 'rhizan-hub-v2';
-const STATIC_CACHE = 'rhizan-static-v2';
+const CACHE_VERSION = 'rhizan-hub-v3';
+const STATIC_CACHE = 'rhizan-static-v3';
 const OFFLINE_URL = '/offline';
 
 const PRECACHE_ASSETS = [
@@ -8,6 +8,11 @@ const PRECACHE_ASSETS = [
   '/logo_minimal.png',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
+  '/icons/icon-maskable-192x192.png',
+  '/icons/icon-maskable-512x512.png',
+  '/icons/badge-72x72.png',
+  '/icons/badge-transparent.png',
+  '/icons/notification-icon.png',
   '/apple-touch-icon.png',
   '/favicon.ico',
   '/manifest.json',
@@ -147,7 +152,7 @@ self.addEventListener('push', (event) => {
   const options = {
     body: payload.body || payload.message,
     icon: payload.icon || '/icons/notification-icon.png',
-    badge: payload.badge || '/icons/badge-transparent.png',
+    badge: payload.badge || '/icons/badge-72x72.png',
     vibrate: [120, 60, 120],
     tag: payload.dedupKey || 'rhizan-hub-alert',
     renotify: true,

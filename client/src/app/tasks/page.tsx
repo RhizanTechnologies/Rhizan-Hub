@@ -26,6 +26,11 @@ import {
   GripVertical,
   Gauge,
   X,
+  LayoutGrid,
+  List as ListIcon,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
@@ -72,6 +77,17 @@ export default function TasksPage() {
   const [mobileColumn, setMobileColumn] = useState<'ALL' | TaskStatus>('ALL');
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
 
+  // View mode & Pagination states
+  const [viewMode, setViewMode] = useState<'KANBAN' | 'LIST'>('KANBAN');
+  const [tasksPerPage, setTasksPerPage] = useState<number>(15);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [columnLimits, setColumnLimits] = useState<{ [key: string]: number }>({
+    TODO: 15,
+    IN_PROGRESS: 15,
+    REVIEW: 15,
+    DONE: 15,
+  });
+
   // New task form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -91,12 +107,15 @@ export default function TasksPage() {
     try {
       setLoading(true);
       const [tasksData, projectsData, teamData] = await Promise.all([
-        apiFetch<Task[]>('/tasks'),
+        apiFetch<any>('/tasks'),
         apiFetch<Project[]>('/projects'),
         apiFetch<any[]>('/team'),
       ]);
 
-      if (tasksData) setTasks(tasksData);
+      if (tasksData) {
+        const loadedTasks = Array.isArray(tasksData) ? tasksData : (tasksData.tasks || []);
+        setTasks(loadedTasks);
+      }
       if (projectsData) {
         setProjects(projectsData);
         if (projectsData.length > 0 && !selectedProjectId) {
@@ -567,6 +586,26 @@ export default function TasksPage() {
     return true;
   });
 
+  // Pagination calculations for List view
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [dateFilter, customDate, projectFilter, priorityFilter, searchQuery, assigneeFilter, mobileColumn, viewMode]);
+
+  const totalListTasks = filteredTasks.length;
+  const totalListPages = tasksPerPage === -1 ? 1 : Math.max(1, Math.ceil(totalListTasks / tasksPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalListPages) {
+      setCurrentPage(totalListPages);
+    }
+  }, [currentPage, totalListPages]);
+
+  const paginatedTasks = React.useMemo(() => {
+    if (tasksPerPage === -1) return filteredTasks;
+    const start = (currentPage - 1) * tasksPerPage;
+    return filteredTasks.slice(start, start + tasksPerPage);
+  }, [filteredTasks, currentPage, tasksPerPage]);
+
   // WIP (Work In Progress) Calculations
   const overloadedMembers = teamMembers.filter((m) => {
     const mId = (m as any).id || (m as any)._id;
@@ -624,6 +663,36 @@ export default function TasksPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
               />
+            </div>
+
+            {/* View Switcher: Kanban vs Table List */}
+            <div className="flex items-center bg-[#181818] border border-[#282828] rounded-xl p-1 gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode('KANBAN')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  viewMode === 'KANBAN'
+                    ? 'bg-teal-600 text-white shadow-xs'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+                title="Kanban Board View"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Board</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('LIST')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  viewMode === 'LIST'
+                    ? 'bg-teal-600 text-white shadow-xs'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+                title="Table List View"
+              >
+                <ListIcon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">List</span>
+              </button>
             </div>
 
             {/* Filter Toggle Button */}
@@ -890,7 +959,9 @@ export default function TasksPage() {
           </div>
         )}
 
-        {/* Mobile Column Tab Switcher */}
+        {viewMode === 'KANBAN' ? (
+          <>
+            {/* Mobile Column Tab Switcher */}
         <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
           <button
             type="button"
@@ -933,6 +1004,8 @@ export default function TasksPage() {
             const colTasks = filteredTasks.filter((t) => t.status === col.id);
             const colEstimatedHours = colTasks.reduce((sum, t) => sum + (t.estimatedHours || 0), 0);
             const isColumnTarget = dragOverColumnId === col.id;
+            const limit = columnLimits[col.id] || 15;
+            const visibleTasks = colTasks.slice(0, limit);
 
             return (
               <div
@@ -1031,7 +1104,7 @@ export default function TasksPage() {
 
                 {/* Task Cards List */}
                 <div className="space-y-3 flex-1 overflow-y-auto">
-                  {colTasks.map((task) => {
+                  {visibleTasks.map((task) => {
                     const dateInfo = formatTaskDueDate(task.dueDate);
                     const subtasks = task.subtasks || [];
                     const completedSubtasks = subtasks.filter((s) => s.completed).length;
@@ -1241,6 +1314,25 @@ export default function TasksPage() {
                     );
                   })}
 
+                  {/* Column Pagination / Show More controls */}
+                  {colTasks.length > limit ? (
+                    <button
+                      type="button"
+                      onClick={() => setColumnLimits((prev) => ({ ...prev, [col.id]: (prev[col.id] || 15) + 15 }))}
+                      className="w-full py-2 rounded-xl bg-white dark:bg-[#16202e] hover:bg-slate-200 dark:hover:bg-[#1e2a3c] border border-slate-200 dark:border-[#28384e] text-teal-600 dark:text-teal-400 text-xs font-semibold transition"
+                    >
+                      Show {Math.min(15, colTasks.length - limit)} more ({colTasks.length - limit} left)
+                    </button>
+                  ) : colTasks.length > 15 ? (
+                    <button
+                      type="button"
+                      onClick={() => setColumnLimits((prev) => ({ ...prev, [col.id]: 15 }))}
+                      className="w-full py-1 text-slate-400 dark:text-neutral-500 hover:text-slate-600 dark:hover:text-neutral-300 text-[10px] font-medium transition text-center"
+                    >
+                      Collapse to 15
+                    </button>
+                  ) : null}
+
                   {colTasks.length === 0 && (
                     <div className="h-36 border border-dashed border-slate-200/90 dark:border-[#243347] rounded-2xl flex flex-col items-center justify-center p-3 text-center transition-colors">
                       <CheckSquare className="w-5 h-5 mb-1.5 text-slate-300 dark:text-neutral-600" />
@@ -1252,6 +1344,195 @@ export default function TasksPage() {
             );
           })}
         </div>
+      </>
+    ) : (
+      /* Table List View with Full Pagination */
+      <div className="space-y-4">
+        <div className="rounded-3xl bg-[#121212] border border-[#222222] overflow-hidden shadow-md">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-[#222222] bg-[#161616] text-neutral-400 font-semibold uppercase text-[10px] tracking-wider">
+                  <th className="py-3 px-4">Priority</th>
+                  <th className="py-3 px-4">Task</th>
+                  <th className="py-3 px-4">Project</th>
+                  <th className="py-3 px-4">Assignee</th>
+                  <th className="py-3 px-4">Due Date</th>
+                  <th className="py-3 px-4">Est.</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1c1c1c]">
+                {paginatedTasks.length > 0 ? (
+                  paginatedTasks.map((t) => {
+                    const projectName = t.project?.name || 'Internal';
+                    const assignee = t.assignedTo;
+                    const completedSubtasks = (t.subtasks || []).filter((st) => st.completed).length;
+                    const totalSubtasks = (t.subtasks || []).length;
+                    const isOverdue = t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'DONE';
+
+                    return (
+                      <tr
+                        key={t._id}
+                        onClick={() => setSelectedTask(t)}
+                        className="hover:bg-[#181818] transition cursor-pointer group"
+                      >
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <PriorityBadge priority={t.priority} />
+                        </td>
+                        <td className="py-3 px-4 max-w-xs">
+                          <div className="font-semibold text-white group-hover:text-teal-400 transition truncate">
+                            {t.title}
+                          </div>
+                          {totalSubtasks > 0 && (
+                            <div className="text-[11px] text-neutral-400 flex items-center gap-1.5 mt-0.5 font-mono">
+                              <ListChecks className="w-3 h-3 text-teal-400" />
+                              <span>{completedSubtasks}/{totalSubtasks} subtasks</span>
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-neutral-300 whitespace-nowrap">
+                          {projectName}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          {assignee ? (
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-5 h-5 rounded-full bg-teal-500/20 text-teal-300 font-bold text-[10px] flex items-center justify-center">
+                                {assignee.name ? assignee.name.charAt(0) : 'U'}
+                              </div>
+                              <span className="text-white text-xs">{assignee.name}</span>
+                            </div>
+                          ) : (
+                            <span className="text-neutral-500 italic">Unassigned</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px]">
+                          {t.dueDate ? (
+                            <span className={isOverdue ? 'text-rose-400 font-bold' : 'text-neutral-400'}>
+                              {new Date(t.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            </span>
+                          ) : (
+                            <span className="text-neutral-600">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-neutral-400">
+                          {t.estimatedHours ? `${t.estimatedHours}h` : '—'}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <select
+                            value={t.status}
+                            onChange={(e) => handleQuickStatusChange(t._id, e.target.value as TaskStatus, e)}
+                            className={`text-[11px] font-bold rounded-lg px-2.5 py-1 border outline-none cursor-pointer ${
+                              t.status === 'DONE'
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                : t.status === 'IN_PROGRESS'
+                                ? 'bg-teal-500/10 text-teal-400 border-teal-500/30'
+                                : t.status === 'REVIEW'
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+                            }`}
+                          >
+                            <option value="TODO">To Do</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="REVIEW">Review</option>
+                            <option value="DONE">Done</option>
+                          </select>
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedTask(t)}
+                              className="p-1.5 rounded-lg hover:bg-[#252525] text-neutral-400 hover:text-white transition"
+                              title="View details"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTask(t._id)}
+                              className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                              title="Delete task"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-neutral-500">
+                      No tasks match the active filters or search query.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* List Pagination Toolbar */}
+        {filteredTasks.length > 0 && (
+          <div className="p-4 rounded-2xl bg-[#111111] border border-[#222222] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+            <div className="text-xs text-neutral-400 text-center sm:text-left">
+              Showing tasks <span className="font-semibold text-white font-mono">{tasksPerPage === -1 ? 1 : Math.min((currentPage - 1) * tasksPerPage + 1, totalListTasks)}</span> to{' '}
+              <span className="font-semibold text-white font-mono">{tasksPerPage === -1 ? totalListTasks : Math.min(currentPage * tasksPerPage, totalListTasks)}</span> of{' '}
+              <span className="font-semibold text-teal-400 font-mono">{totalListTasks}</span> tasks
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              <div className="flex items-center gap-1.5 text-xs text-neutral-400">
+                <span>Tasks per page:</span>
+                <select
+                  value={tasksPerPage}
+                  onChange={(e) => {
+                    setTasksPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="bg-[#181818] border border-[#282828] text-white text-xs rounded-lg px-2 py-1 outline-none focus:border-teal-500"
+                >
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                  <option value="-1">All</option>
+                </select>
+              </div>
+
+              {tasksPerPage !== -1 && totalListPages > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Prev</span>
+                  </button>
+
+                  <div className="px-2.5 py-1 text-xs font-mono text-neutral-300">
+                    Page <strong className="text-teal-400 font-bold">{currentPage}</strong> of <strong>{totalListPages}</strong>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(totalListPages, p + 1))}
+                    disabled={currentPage === totalListPages}
+                    className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    )}
       </div>
 
       {/* New Task Modal with Subtasks Builder */}

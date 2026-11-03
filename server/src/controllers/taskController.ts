@@ -6,7 +6,7 @@ import { createNotification } from '../utils/notificationHelper';
 
 export const getTasks = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { status, project, assignedTo, dueDate, dateFilter } = req.query;
+    const { status, project, assignedTo, dueDate, dateFilter, page, limit, pagination } = req.query;
     const filter: any = {};
 
     if (status && status !== 'ALL') filter.status = status;
@@ -40,6 +40,41 @@ export const getTasks = async (req: AuthRequest, res: Response): Promise<void> =
         filter.dueDate = { $lt: startOfDay };
         filter.status = { $ne: 'DONE' };
       }
+    }
+
+    const shouldPaginate = page !== undefined || limit !== undefined || pagination === 'true';
+
+    if (shouldPaginate) {
+      const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+      const limitNum = Math.max(1, Math.min(100, parseInt(limit as string, 10) || 20));
+      const skip = (pageNum - 1) * limitNum;
+
+      const [tasks, total] = await Promise.all([
+        Task.find(filter)
+          .populate('assignedTo', 'name email title avatar')
+          .populate('project', 'name clientName status')
+          .populate('createdBy', 'name email')
+          .populate('comments.author', 'name email avatar')
+          .sort({ dueDate: 1, createdAt: -1 })
+          .skip(skip)
+          .limit(limitNum),
+        Task.countDocuments(filter),
+      ]);
+
+      const totalPages = Math.ceil(total / limitNum) || 1;
+
+      res.json({
+        tasks,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages,
+          hasNext: pageNum < totalPages,
+          hasPrev: pageNum > 1,
+        },
+      });
+      return;
     }
 
     const tasks = await Task.find(filter)

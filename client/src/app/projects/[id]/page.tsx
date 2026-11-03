@@ -1426,10 +1426,11 @@ export default function ProjectDetailPage() {
                             ))}
 
                             {/* Inline Add Deliverable Input */}
-                            <div className="flex items-center gap-2 pt-1.5">
+                            <div className="mt-2.5 flex items-center rounded-xl bg-[#121212] border border-[#2a2a2a] focus-within:border-teal-500/80 focus-within:ring-1 focus-within:ring-teal-500/40 p-1 pl-3 transition-all">
+                              <Plus className="w-3.5 h-3.5 text-neutral-500 mr-2 shrink-0" />
                               <input
                                 type="text"
-                                placeholder="+ Add deliverable to this phase (press enter)..."
+                                placeholder="Add deliverable to this phase (press Enter)..."
                                 value={deliverableInputMap[mIdx] || ''}
                                 onChange={(e) =>
                                   setDeliverableInputMap((prev) => ({ ...prev, [mIdx]: e.target.value }))
@@ -1440,14 +1441,14 @@ export default function ProjectDetailPage() {
                                     handleAddDeliverableItem(mIdx);
                                   }
                                 }}
-                                className="flex-1 bg-[#101010] border border-[#282828] rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-teal-500"
+                                className="flex-1 bg-transparent text-xs text-white placeholder-neutral-500 outline-none min-w-0"
                               />
                               <button
                                 type="button"
                                 onClick={() => handleAddDeliverableItem(mIdx)}
-                                className="px-3 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center gap-1 transition shadow-sm shrink-0"
+                                disabled={!(deliverableInputMap[mIdx] || '').trim()}
+                                className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-semibold flex items-center gap-1 transition shrink-0 shadow-sm active:scale-95"
                               >
-                                <Plus className="w-3 h-3" />
                                 <span>Add</span>
                               </button>
                             </div>

@@ -111,7 +111,7 @@ export async function sendWebPush(
       body: payload.message,
       link: payload.link || '/',
       icon: '/icons/notification-icon.png',
-      badge: '/icons/badge-transparent.png',
+      badge: '/icons/badge-72x72.png',
     });
 
     const deadEndpoints: string[] = [];

@@ -9,10 +9,15 @@ import {
   getVapidPublicKey,
   subscribePush,
   unsubscribePush,
+  evaluateAllAlerts,
 } from '../controllers/notificationController';
 import { authenticateToken } from '../middlewares/auth';
 
 const router = Router();
+
+// Serverless Cron & external alert evaluation endpoint (protected by CRON_SECRET if configured)
+router.get('/evaluate', evaluateAllAlerts);
+router.post('/evaluate', evaluateAllAlerts);
 
 router.use(authenticateToken);
 
