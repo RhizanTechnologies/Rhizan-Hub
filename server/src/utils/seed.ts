@@ -215,6 +215,38 @@ const seedDatabase = async () => {
       entityTitle: task.title,
     });
 
+    // 7. Create 1 Single Client Outreach Target (Approach)
+    const niche = await Niche.create({
+      name: 'Retail & Supermarket',
+      description: 'Supermarkets, department stores, and retail outlets',
+      color: '#10b981',
+    });
+
+    const approach = await Approach.create({
+      businessName: 'Fresh Corner Supermarket',
+      niche: niche.name,
+      contactPerson: 'Kidus Tadesse',
+      phone: '+251 91 198 7654',
+      email: 'kidus@freshcornermarket.et',
+      location: 'Bole Atlas, Addis Ababa',
+      status: 'IN_DISCUSSION',
+      notes: 'Interested in modernizing POS terminals and barcode-based inventory tracking. Follow-up demo scheduled.',
+      assignedTo: demoUser._id,
+      lastContactDate: yesterday,
+      nextFollowUpDate: todayMorning,
+      contactHistory: [
+        {
+          date: yesterday,
+          channel: 'MEETING',
+          notes: 'Discovery meeting held at main branch. Outlined inventory shrinkage issues and discussed ERP integration.',
+          nextFollowUpDate: todayMorning,
+          loggedBy: demoUser._id,
+        },
+      ],
+    });
+
+    console.log(`🎯 Created 1 Client Outreach Target: ${approach.businessName} (${approach.status})`);
+
     console.log('\n======================================================');
     console.log('✨ DATABASE RE-SEEDED WITH 1 CLEAN CONNECTED RECORD SET');
     console.log('======================================================');
@@ -223,6 +255,7 @@ const seedDatabase = async () => {
     console.log(`  📁 Project:    ${project.name} (75% progress)`);
     console.log(`  ✅ Task:       ${task.title} (In Progress)`);
     console.log(`  ⏱️ Time Log:   ${timeEntry.hours}h ${timeEntry.minutes}m logged today`);
+    console.log(`  🎯 Outreach:   ${approach.businessName} (${approach.status} - ${approach.niche})`);
     console.log('======================================================\n');
 
     process.exit(0);
