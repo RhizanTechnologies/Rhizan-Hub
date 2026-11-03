@@ -870,7 +870,8 @@ export default function ApproachesPage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* DESKTOP TABLE VIEW */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-[#1f1f1f] bg-[#141414]/80 text-[11px] text-neutral-400 font-semibold uppercase tracking-wider">
@@ -1068,6 +1069,179 @@ export default function ApproachesPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* MOBILE NICE CARD VIEW */}
+          <div className="md:hidden p-3 space-y-3">
+            {filteredApproaches.map((appr) => {
+              const statusConf = STATUS_CONFIG[appr.status] || STATUS_CONFIG.PROSPECT;
+              const cleanPhone = formatCleanPhone(appr.phone);
+              const followUpStatus = getFollowUpStatus(appr.nextFollowUpDate);
+
+              return (
+                <div
+                  key={appr._id}
+                  onClick={() => router.push(`/approaches/${appr._id}`)}
+                  className="p-4 rounded-2xl bg-[#141414] border border-[#242424] active:bg-[#181818] hover:border-teal-500/40 transition-all space-y-3 shadow-sm cursor-pointer"
+                >
+                  {/* Card Header: Avatar + Business Name + Niche + Status Badge */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                      <div className="w-9 h-9 rounded-xl bg-[#202020] border border-[#2c2c2c] text-teal-400 font-bold flex items-center justify-center shrink-0">
+                        {appr.businessName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1">
+                          <span className="font-heading font-bold text-sm text-white truncate block">
+                            {appr.businessName}
+                          </span>
+                          <ChevronRight className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-medium shrink-0">
+                            <Tag className="w-2.5 h-2.5" />
+                            {appr.niche}
+                          </span>
+                          {appr.contactHistory && appr.contactHistory.length > 0 && (
+                            <span className="text-[10px] text-neutral-500">
+                              • {appr.contactHistory.length} log{appr.contactHistory.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <span
+                      className={`inline-flex items-center gap-1 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border shrink-0 ${statusConf.color}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${statusConf.dot}`} />
+                      {statusConf.label}
+                    </span>
+                  </div>
+
+                  {/* Lead Info Grid */}
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-[#191919] p-2.5 rounded-xl border border-[#262626]">
+                    <div>
+                      <span className="text-[10px] text-neutral-500 uppercase font-semibold block">Contact</span>
+                      <span className="text-white font-medium truncate block">
+                        {appr.contactPerson || '—'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-neutral-500 uppercase font-semibold block">Lead Owner</span>
+                      {appr.assignedTo ? (
+                        <span className="text-teal-400 font-medium inline-flex items-center gap-1 truncate">
+                          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0" />
+                          {typeof appr.assignedTo === 'object' ? (appr.assignedTo as any).name : 'Assigned'}
+                        </span>
+                      ) : (
+                        <span className="text-neutral-500 italic text-[11px]">Unassigned</span>
+                      )}
+                    </div>
+                    {appr.location && (
+                      <div className="col-span-2 flex items-center gap-1 text-[11px] text-neutral-400 pt-1.5 border-t border-[#232323]">
+                        <MapPin className="w-3 h-3 text-neutral-500 shrink-0" />
+                        <span className="truncate">{appr.location}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bottom Row: Dates + Touch Action Buttons */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#1f1f1f] text-xs">
+                    {/* Follow-up / Last contact date */}
+                    <div className="min-w-0 flex-1">
+                      {followUpStatus ? (
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md border inline-flex items-center gap-1 ${
+                            followUpStatus?.type === 'OVERDUE'
+                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
+                              : followUpStatus?.type === 'TODAY'
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                              : 'bg-[#1e1e1e] text-neutral-300 border-[#2a2a2a]'
+                          }`}
+                        >
+                          <Calendar className="w-2.5 h-2.5" />
+                          <span className="truncate">
+                            {followUpStatus?.type === 'OVERDUE'
+                              ? `⚠️ ${followUpStatus.text}`
+                              : followUpStatus?.type === 'TODAY'
+                              ? '⚡ Follow-up Today'
+                              : `Next: ${new Date(appr.nextFollowUpDate!).toLocaleDateString(undefined, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}`}
+                          </span>
+                        </span>
+                      ) : appr.lastContactDate ? (
+                        <span className="text-[11px] text-neutral-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-neutral-500" />
+                          Last: {new Date(appr.lastContactDate).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-neutral-500 italic">Not contacted yet</span>
+                      )}
+                    </div>
+
+                    {/* Touch Action Buttons */}
+                    <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      {appr.phone && (
+                        <>
+                          <a
+                            href={`tel:${cleanPhone}`}
+                            className="p-2 rounded-xl bg-[#202020] hover:bg-[#282828] active:bg-[#303030] text-neutral-300 hover:text-white border border-[#2d2d2d] transition"
+                            title="Call"
+                            aria-label="Call business"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                          </a>
+                          {cleanPhone && (
+                            <a
+                              href={`https://wa.me/${cleanPhone.replace('+', '')}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1 transition"
+                              title="WhatsApp"
+                              aria-label="WhatsApp"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" />
+                              <span>WA</span>
+                            </a>
+                          )}
+                        </>
+                      )}
+                      {appr.email && (
+                        <a
+                          href={`mailto:${appr.email}`}
+                          className="p-2 rounded-xl bg-[#202020] hover:bg-[#282828] active:bg-[#303030] text-neutral-300 hover:text-white border border-[#2d2d2d] transition"
+                          title="Email"
+                          aria-label="Email business"
+                        >
+                          <Mail className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {filteredApproaches.length === 0 && (
+              <div className="py-10 text-center text-neutral-500 bg-[#121212] rounded-2xl border border-[#222222]">
+                <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                <p className="text-xs">No outreach targets found matching your filter.</p>
+                <button
+                  type="button"
+                  onClick={openCreateModal}
+                  className="mt-2 text-xs text-teal-400 font-semibold hover:underline"
+                >
+                  + Add First Target
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

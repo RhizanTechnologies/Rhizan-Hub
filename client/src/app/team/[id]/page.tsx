@@ -1102,7 +1102,8 @@ export default function TeamMemberDetailPage() {
 
             {timeEntries.length > 0 ? (
               <div className="bg-[#121212] border border-[#222222] rounded-2xl overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
+                {/* DESKTOP TABLE VIEW */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-[#181818] border-b border-[#262626] text-neutral-400 uppercase text-[10px] tracking-wider">
                       <tr>
@@ -1143,6 +1144,50 @@ export default function TeamMemberDetailPage() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* MOBILE NICE CARD VIEW */}
+                <div className="md:hidden p-3.5 space-y-3">
+                  {timeEntries.map((entry) => (
+                    <div
+                      key={entry._id}
+                      className="p-3.5 rounded-xl bg-[#161616] border border-[#242424] space-y-2.5 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <span className="font-semibold text-xs text-white block truncate">
+                            {entry.project?.name || 'General Work'}
+                          </span>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">
+                            {entry.description || entry.task?.title || 'Logged time'}
+                          </p>
+                        </div>
+                        <span className="text-xs font-bold text-teal-400 font-mono shrink-0 px-2 py-0.5 rounded-md bg-teal-500/10 border border-teal-500/20">
+                          {entry.hours}h {entry.minutes > 0 ? `${entry.minutes}m` : ''}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] pt-2 border-t border-[#202020]">
+                        <span className="text-neutral-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-neutral-500" />
+                          {new Date(entry.date).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                            entry.billable
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : 'bg-neutral-500/10 text-neutral-400 border border-neutral-500/20'
+                          }`}
+                        >
+                          {entry.billable ? 'Billable' : 'Internal'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (

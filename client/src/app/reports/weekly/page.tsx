@@ -288,11 +288,11 @@ export default function WeeklyReportPage() {
               </h2>
               <div className="flex items-center gap-2 text-[11px] text-neutral-400 print:text-neutral-600">
                 <span>Weekly Target: 48h / member (6 days × 8h)</span>
-                <span className="text-[10px] text-teal-400 font-semibold sm:hidden">Swipe table →</span>
               </div>
             </div>
 
-            <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 custom-scrollbar">
+            {/* DESKTOP & PRINT TABLE VIEW */}
+            <div className="hidden md:block print:block overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 custom-scrollbar">
               <table className="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead>
                   <tr className="border-b border-[#242424] text-[10px] uppercase font-bold text-neutral-400 print:border-neutral-300 print:text-neutral-600">
@@ -366,6 +366,92 @@ export default function WeeklyReportPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* MOBILE NICE CARD VIEW */}
+            <div className="md:hidden print:hidden space-y-3">
+              {(report?.teamPerformance || []).map((m) => (
+                <div
+                  key={m.id}
+                  className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-3 shadow-sm"
+                >
+                  {/* Card Header: Avatar + Name + Role + Utilization */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-teal-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                        {m.name.charAt(0)}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-xs text-white block truncate">{m.name}</span>
+                        <span className="text-[10px] text-neutral-400 block">{m.role}</span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-xs font-mono font-bold text-teal-400">
+                        {m.utilizationPercent}%
+                      </span>
+                      <span className="text-[10px] text-neutral-500 block">capacity</span>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar & Hours Breakdown */}
+                  <div className="space-y-1.5">
+                    <div className="w-full bg-[#111111] h-2 rounded-full overflow-hidden border border-[#242424]">
+                      <div
+                        className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all"
+                        style={{ width: `${Math.min(100, m.utilizationPercent)}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-neutral-400">
+                        Logged: <strong className="text-white font-mono">{m.hoursLogged}h</strong> / {m.targetHours}h
+                      </span>
+                      <span className="text-emerald-400 font-mono text-[11px]">
+                        Billable: <strong>{m.billableHours}h</strong>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Daily Logged Strip (Mon - Sun) */}
+                  <div className="pt-2 border-t border-[#222222] space-y-1.5">
+                    <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block">
+                      Daily Hours (Mon – Sun)
+                    </span>
+                    <div className="grid grid-cols-7 gap-1 text-center font-mono">
+                      {m.dailyHours.map((d) => (
+                        <div
+                          key={d.day}
+                          className={`py-1 rounded-lg text-[10px] flex flex-col items-center ${
+                            d.hours >= 8
+                              ? 'bg-teal-500/20 text-teal-300 font-bold border border-teal-500/30'
+                              : d.hours > 0
+                              ? 'bg-[#1f1f1f] text-neutral-200 border border-[#2a2a2a]'
+                              : 'bg-[#121212] text-neutral-600 border border-[#1d1d1d]'
+                          }`}
+                        >
+                          <span className="text-[8px] text-neutral-500 uppercase">{d.day.slice(0, 1)}</span>
+                          <span className="font-semibold">{d.hours > 0 ? d.hours : '0'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Top Projects */}
+                  {m.topProjects && m.topProjects.length > 0 && (
+                    <div className="pt-2 border-t border-[#222222] flex items-center gap-1.5 flex-wrap text-[11px]">
+                      <span className="text-[10px] text-neutral-500 uppercase font-semibold">Projects:</span>
+                      {m.topProjects.map((p, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-0.5 rounded-md bg-[#1f1f1f] text-neutral-300 border border-[#2a2a2a] text-[10px]"
+                        >
+                          {p.name} ({p.hours}h)
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
