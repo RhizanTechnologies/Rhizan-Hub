@@ -324,20 +324,20 @@ export default function ClientsPage() {
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* Navigation & Status Filter Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#222e42] pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
               <Briefcase className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-heading font-bold text-sm text-white">Client Accounts ({clients.length})</h2>
-              <p className="text-[11px] text-neutral-400">Contracted partners, deal values, and scheduled meetings</p>
+              <h2 className="font-heading font-bold text-sm text-slate-900 dark:text-white">Client Accounts ({clients.length})</h2>
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400">Contracted partners, deal values, and scheduled meetings</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="text-xs text-neutral-400">
-              Total Contracted: <span className="font-bold text-white font-mono">${clients.reduce((s, c) => s + (c.dealValue || 0), 0).toLocaleString()}</span>
+            <div className="text-xs text-slate-500 dark:text-neutral-400">
+              Total Contracted: <span className="font-bold text-slate-900 dark:text-white font-mono">${clients.reduce((s, c) => s + (c.dealValue || 0), 0).toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -356,74 +356,74 @@ export default function ClientsPage() {
               <div
                 key={client._id}
                 onClick={() => router.push(`/clients/${client._id}`)}
-                className="bg-[#121212] border border-[#222222] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-xl hover:shadow-teal-950/20 group flex flex-col justify-between"
+                className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-lg shadow-xs group flex flex-col justify-between"
               >
                 <div>
                   {/* Header */}
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="font-heading font-bold text-base text-white group-hover:text-teal-300 transition flex items-center gap-1.5">
+                      <h3 className="font-heading font-semibold text-base text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition flex items-center gap-1.5">
                         {client.name}
-                        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-400" />
+                        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-500" />
                       </h3>
-                      <p className="text-xs text-neutral-400 mt-0.5">{client.contactPerson || 'Direct Client'}</p>
+                      <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">{client.contactPerson || 'Direct Client'}</p>
                     </div>
 
                     <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border ${
                       client.status === 'ACTIVE'
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                        : 'bg-teal-500/10 text-teal-400 border-teal-500/30'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30'
+                        : 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30'
                     }`}>
                       {client.status}
                     </span>
                   </div>
 
                   {/* Contact Pills */}
-                  <div className="flex flex-wrap gap-2 text-[11px] text-neutral-400 mb-4">
+                  <div className="flex flex-wrap gap-2 text-[11px] text-slate-600 dark:text-neutral-400 mb-4">
                     {client.email && (
-                      <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#181818] border border-[#262626]">
-                        <Mail className="w-3 h-3 text-neutral-500" /> {client.email}
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#182130] border border-slate-200 dark:border-[#243347] text-slate-700 dark:text-neutral-300">
+                        <Mail className="w-3 h-3 text-slate-400 dark:text-neutral-500" /> {client.email}
                       </span>
                     )}
                     {client.phone && (
-                      <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#181818] border border-[#262626]">
-                        <Phone className="w-3 h-3 text-neutral-500" /> {client.phone}
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#182130] border border-slate-200 dark:border-[#243347] text-slate-700 dark:text-neutral-300">
+                        <Phone className="w-3 h-3 text-slate-400 dark:text-neutral-500" /> {client.phone}
                       </span>
                     )}
                   </div>
 
                   {/* Linked Projects Section */}
-                  <div className="mb-4 p-3 rounded-xl bg-[#171717] border border-[#242424]">
-                    <div className="text-[11px] font-semibold text-neutral-300 flex items-center justify-between mb-2">
+                  <div className="mb-4 p-3 rounded-xl bg-slate-50 dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                    <div className="text-[11px] font-semibold text-slate-700 dark:text-neutral-300 flex items-center justify-between mb-2">
                       <span className="flex items-center gap-1.5">
-                        <FolderKanban className="w-3.5 h-3.5 text-teal-400" /> Linked Projects
+                        <FolderKanban className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> Linked Projects
                       </span>
-                      <span className="text-[10px] text-teal-400 font-bold">{linkedProjects.length}</span>
+                      <span className="text-[10px] text-teal-600 dark:text-teal-400 font-bold">{linkedProjects.length}</span>
                     </div>
 
                     {linkedProjects.length > 0 ? (
                       <div className="space-y-1.5">
                         {linkedProjects.slice(0, 3).map((p) => (
                           <div key={p._id} className="flex items-center justify-between text-[11px]">
-                            <span className="text-neutral-200 font-medium truncate pr-2">{p.name}</span>
-                            <span className="text-[10px] text-teal-400 font-mono">{p.progress || 0}%</span>
+                            <span className="text-slate-800 dark:text-neutral-200 font-medium truncate pr-2">{p.name}</span>
+                            <span className="text-[10px] text-teal-600 dark:text-teal-400 font-mono">{p.progress || 0}%</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-[11px] text-neutral-500 italic">No linked projects yet</p>
+                      <p className="text-[11px] text-slate-400 dark:text-neutral-500 italic">No linked projects yet</p>
                     )}
                   </div>
 
                   {/* Financial Summary */}
                   <div className="space-y-1.5 mb-4">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-neutral-400">Payment Status ({paidPercent}%)</span>
-                      <span className="font-semibold text-white">
-                        ${paidVal.toLocaleString()} / <span className="text-neutral-400">${totalVal.toLocaleString()}</span>
+                      <span className="text-slate-500 dark:text-neutral-400">Payment Status ({paidPercent}%)</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">
+                        ${paidVal.toLocaleString()} / <span className="text-slate-500 dark:text-neutral-400">${totalVal.toLocaleString()}</span>
                       </span>
                     </div>
-                    <div className="w-full bg-[#242424] h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-100 dark:bg-[#1e2a3c] h-2 rounded-full overflow-hidden">
                       <div
                         className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                         style={{ width: `${paidPercent}%` }}
@@ -433,12 +433,12 @@ export default function ClientsPage() {
                 </div>
 
                 {/* Card Footer */}
-                <div className="pt-3 border-t border-[#1f1f1f] flex items-center justify-between text-[11px] text-neutral-400">
+                <div className="pt-3 border-t border-slate-100 dark:border-[#1e2a3c] flex items-center justify-between text-[11px] text-slate-500 dark:text-neutral-400">
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-teal-400" />
+                    <Calendar className="w-3 h-3 text-teal-600 dark:text-teal-400" />
                     {meetingsCount} Scheduled Meetings
                   </span>
-                  <span className="text-teal-400 font-medium group-hover:underline">
+                  <span className="text-teal-600 dark:text-teal-400 font-medium group-hover:underline flex items-center gap-1">
                     View Profile & Details →
                   </span>
                 </div>
@@ -457,16 +457,16 @@ export default function ClientsPage() {
         {selectedClient && (
           <div className="space-y-5">
             {/* Top Overview & Action Buttons */}
-            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-heading text-base font-bold text-white">{selectedClient.name}</h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                  <h3 className="font-heading text-base font-bold text-slate-900 dark:text-white">{selectedClient.name}</h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
                     {selectedClient.status}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-1.5">
-                  <span>Contact: <strong className="text-neutral-200">{selectedClient.contactPerson || 'N/A'}</strong></span>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-neutral-400 mt-1.5">
+                  <span>Contact: <strong className="text-slate-800 dark:text-neutral-200">{selectedClient.contactPerson || 'N/A'}</strong></span>
                   {selectedClient.email && <span>• {selectedClient.email}</span>}
                   {selectedClient.phone && <span>• {selectedClient.phone}</span>}
                 </div>
@@ -476,7 +476,7 @@ export default function ClientsPage() {
                 <button
                   type="button"
                   onClick={() => openEditModal(selectedClient)}
-                  className="px-3 py-1.5 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#222222] text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#243347] bg-white hover:bg-slate-100 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   <span>Edit Client</span>
@@ -484,7 +484,7 @@ export default function ClientsPage() {
                 <button
                   type="button"
                   onClick={() => setClientToDelete(selectedClient)}
-                  className="px-3 py-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete</span>
@@ -494,21 +494,21 @@ export default function ClientsPage() {
 
             {/* Financial Overview Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
-              <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
-                <span className="text-[10px] text-neutral-400 uppercase font-semibold block">Total Deal Value</span>
-                <span className="text-base font-bold text-white font-mono mt-0.5 block">
+              <div className="p-3 rounded-xl bg-white dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                <span className="text-[10px] text-slate-500 dark:text-neutral-400 uppercase font-semibold block">Total Deal Value</span>
+                <span className="text-base font-bold text-slate-900 dark:text-white font-mono mt-0.5 block">
                   ${(selectedClient.dealValue || 0).toLocaleString()}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
-                <span className="text-[10px] text-emerald-400 uppercase font-semibold block">Paid Amount</span>
-                <span className="text-base font-bold text-emerald-400 font-mono mt-0.5 block">
+              <div className="p-3 rounded-xl bg-white dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-semibold block">Paid Amount</span>
+                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block">
                   ${(selectedClient.paidAmount || 0).toLocaleString()}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
-                <span className="text-[10px] text-amber-400 uppercase font-semibold block">Balance Outstanding</span>
-                <span className="text-base font-bold text-amber-400 font-mono mt-0.5 block">
+              <div className="p-3 rounded-xl bg-white dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-semibold block">Balance Outstanding</span>
+                <span className="text-base font-bold text-amber-600 dark:text-amber-400 font-mono mt-0.5 block">
                   ${Math.max(0, (selectedClient.dealValue || 0) - (selectedClient.paidAmount || 0)).toLocaleString()}
                 </span>
               </div>

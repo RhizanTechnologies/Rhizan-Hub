@@ -414,19 +414,19 @@ export default function ProjectsPage() {
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* KPI Quick Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222] shadow-sm">
-            <span className="text-xs text-neutral-400 font-medium">Total Active Projects</span>
-            <div className="font-heading text-2xl font-bold text-white mt-1">{projects.length}</div>
-            <p className="text-[11px] text-neutral-500 mt-1">Across all clients</p>
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xs">
+            <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium">Total Active Projects</span>
+            <div className="font-heading text-2xl font-bold text-slate-900 dark:text-white mt-1">{projects.length}</div>
+            <p className="text-[11px] text-slate-400 dark:text-neutral-500 mt-1">Across all clients</p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222] shadow-sm">
-            <div className="flex items-center justify-between text-xs text-neutral-400 font-medium">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xs">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-neutral-400 font-medium">
               <span>Avg Delivery Progress</span>
-              <span className="font-bold text-teal-400 font-mono">{avgProgress}%</span>
+              <span className="font-bold text-teal-600 dark:text-teal-400 font-mono">{avgProgress}%</span>
             </div>
-            <div className="font-heading text-2xl font-bold text-teal-400 mt-1">{avgProgress}%</div>
-            <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden mt-2">
+            <div className="font-heading text-2xl font-bold text-teal-600 dark:text-teal-400 mt-1">{avgProgress}%</div>
+            <div className="w-full bg-slate-100 dark:bg-[#1e2a3c] h-1.5 rounded-full overflow-hidden mt-2">
               <div
                 className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all"
                 style={{ width: `${avgProgress}%` }}
@@ -434,25 +434,25 @@ export default function ProjectsPage() {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222] shadow-sm">
-            <span className="text-xs text-neutral-400 font-medium">Total Delivery Budget</span>
-            <div className="font-heading text-2xl font-bold text-emerald-400 mt-1 font-mono">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xs">
+            <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium">Total Delivery Budget</span>
+            <div className="font-heading text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
               ${totalBudget.toLocaleString()}
             </div>
-            <p className="text-[11px] text-neutral-500 mt-1">Contracted project scope</p>
+            <p className="text-[11px] text-slate-400 dark:text-neutral-500 mt-1">Contracted project scope</p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222] shadow-sm">
-            <span className="text-xs text-neutral-400 font-medium">Testing & Live</span>
-            <div className="font-heading text-2xl font-bold text-amber-400 mt-1">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xs">
+            <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium">Testing & Live</span>
+            <div className="font-heading text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">
               {projects.filter((p) => (p.progress || 0) >= 75).length}
             </div>
-            <p className="text-[11px] text-neutral-500 mt-1">Projects at 75%+ progress</p>
+            <p className="text-[11px] text-slate-400 dark:text-neutral-500 mt-1">Projects at 75%+ progress</p>
           </div>
         </div>
 
         {/* View Switcher & Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#222e42] pb-4">
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setViewMode('GRID')}

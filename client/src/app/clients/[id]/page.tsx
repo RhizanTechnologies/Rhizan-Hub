@@ -397,7 +397,7 @@ export default function ClientDetailPage() {
         </div>
 
         {/* Client Hero Card */}
-        <div className="p-4 sm:p-6 rounded-3xl bg-[#111111] border border-[#222222] shadow-xl space-y-5">
+        <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xl space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 min-w-0">
               <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-heading font-extrabold text-xl sm:text-2xl flex items-center justify-center shadow-lg shadow-teal-900/30 shrink-0">
@@ -405,15 +405,15 @@ export default function ClientDetailPage() {
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                  <h1 className="font-heading font-extrabold text-lg sm:text-xl text-white tracking-tight truncate">
+                  <h1 className="font-heading font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight truncate">
                     {client.name}
                   </h1>
-                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/30">
+                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/30">
                     {client.status}
                   </span>
                 </div>
-                <p className="text-xs text-neutral-400 mt-1">
-                  Primary Contact: <strong className="text-neutral-200">{client.contactPerson || 'Direct Company'}</strong> • Scope: <span className="text-teal-300 font-medium">{client.serviceInterested}</span>
+                <p className="text-xs text-slate-500 dark:text-neutral-400 mt-1">
+                  Primary Contact: <strong className="text-slate-800 dark:text-neutral-200">{client.contactPerson || 'Direct Company'}</strong> • Scope: <span className="text-teal-600 dark:text-teal-300 font-medium">{client.serviceInterested}</span>
                 </p>
               </div>
             </div>
@@ -423,7 +423,7 @@ export default function ClientDetailPage() {
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
-                className="px-3.5 py-2 rounded-xl border border-[#262626] bg-[#181818] hover:bg-[#222222] text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
+                className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#243347] bg-white hover:bg-slate-100 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
               >
                 <Edit2 className="w-3.5 h-3.5" />
                 <span>Edit Client</span>
@@ -431,7 +431,7 @@ export default function ClientDetailPage() {
               <button
                 type="button"
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="px-3.5 py-2 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
+                className="px-3.5 py-2 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete</span>
@@ -440,19 +440,19 @@ export default function ClientDetailPage() {
           </div>
 
           {/* Contact Strip */}
-          <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-[#1e1e1e] text-xs text-neutral-300">
+          <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-100 dark:border-[#1e2a3c] text-xs text-slate-600 dark:text-neutral-300">
             {client.email && (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#171717] border border-[#262626]">
-                <Mail className="w-3.5 h-3.5 text-teal-400" /> {client.email}
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                <Mail className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> {client.email}
               </span>
             )}
             {client.phone && (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#171717] border border-[#262626]">
-                <Phone className="w-3.5 h-3.5 text-teal-400" /> {client.phone}
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                <Phone className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> {client.phone}
               </span>
             )}
             {client.notes && (
-              <span className="text-xs text-neutral-400 italic">
+              <span className="text-xs text-slate-400 dark:text-neutral-400 italic">
                 Note: {client.notes}
               </span>
             )}
@@ -461,48 +461,48 @@ export default function ClientDetailPage() {
 
         {/* Financial Metrics Strip */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222]">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-neutral-400 uppercase font-semibold block">Total Contract / Deal Value</span>
+              <span className="text-[11px] text-slate-500 dark:text-neutral-400 uppercase font-semibold block">Total Contract / Deal Value</span>
               {isBudgetFromProjects && (
-                <span className="text-[10px] text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20 font-medium">
+                <span className="text-[10px] text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20 font-medium">
                   {connectedProjects.length} Projects Total
                 </span>
               )}
             </div>
-            <span className="text-xl font-bold font-mono text-white mt-1 block">
+            <span className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1 block">
               {currencySymbol}{dealVal.toLocaleString()}
             </span>
             {connectedProjects.length > 0 && (
-              <div className="text-[11px] text-neutral-400 mt-2 pt-2 border-t border-[#1e1e1e] flex flex-wrap gap-x-2 gap-y-0.5">
+              <div className="text-[11px] text-slate-500 dark:text-neutral-400 mt-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c] flex flex-wrap gap-x-2 gap-y-0.5">
                 {connectedProjects.map((p, idx) => (
-                  <span key={p._id} className="text-neutral-400">
-                    <span className="text-neutral-300 font-medium">{p.name}</span>: <span className="text-teal-400 font-mono">{currencySymbol}{(p.budget || 0).toLocaleString()}</span>
+                  <span key={p._id} className="text-slate-500 dark:text-neutral-400">
+                    <span className="text-slate-700 dark:text-neutral-300 font-medium">{p.name}</span>: <span className="text-teal-600 dark:text-teal-400 font-mono">{currencySymbol}{(p.budget || 0).toLocaleString()}</span>
                     {idx < connectedProjects.length - 1 ? ' • ' : ''}
                   </span>
                 ))}
               </div>
             )}
           </div>
-          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222]">
-            <span className="text-[11px] text-emerald-400 uppercase font-semibold block">Paid So Far</span>
-            <span className="text-xl font-bold font-mono text-emerald-400 mt-1 block">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xs">
+            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 uppercase font-semibold block">Paid So Far</span>
+            <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">
               {currencySymbol}{paidVal.toLocaleString()} ({paidPercent}%)
             </span>
-            <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden mt-2">
+            <div className="w-full bg-slate-100 dark:bg-[#1e2a3c] h-1.5 rounded-full overflow-hidden mt-2">
               <div className="bg-emerald-400 h-full rounded-full" style={{ width: `${paidPercent}%` }} />
             </div>
           </div>
-          <div className="p-4 rounded-2xl bg-[#121212] border border-[#222222]">
-            <span className="text-[11px] text-amber-400 uppercase font-semibold block">Outstanding Balance</span>
-            <span className="text-xl font-bold font-mono text-amber-400 mt-1 block">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xs">
+            <span className="text-[11px] text-amber-600 dark:text-amber-400 uppercase font-semibold block">Outstanding Balance</span>
+            <span className="text-xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-1 block">
               {currencySymbol}{balance.toLocaleString()}
             </span>
           </div>
         </div>
 
         {/* Detailed Sections Tabs */}
-        <div className="flex items-center gap-2 border-b border-[#222222] pb-3 overflow-x-auto max-w-full no-scrollbar whitespace-nowrap">
+        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#222e42] pb-3 overflow-x-auto max-w-full no-scrollbar whitespace-nowrap">
           {[
             { id: 'PROJECTS', label: `Connected Projects (${connectedProjects.length})`, icon: FolderKanban },
             { id: 'MEETINGS', label: `Meeting Schedules (${(client.meetings || []).length})`, icon: Calendar },
@@ -517,7 +517,7 @@ export default function ClientDetailPage() {
                 className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
                   activeTab === tab.id
                     ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                    : 'bg-[#121212] text-neutral-400 hover:text-white border border-[#222222]'
+                    : 'bg-white dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#222e42]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -564,40 +564,40 @@ export default function ClientDetailPage() {
                 {connectedProjects.map((proj) => (
                   <div
                     key={proj._id}
-                    className="p-5 rounded-2xl bg-[#121212] border border-[#222222] hover:border-teal-500/40 transition flex flex-col justify-between space-y-3"
+                    className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/50 transition flex flex-col justify-between space-y-3 shadow-xs"
                   >
                     <div>
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h4 className="font-heading font-bold text-sm text-white">
+                          <h4 className="font-heading font-semibold text-sm text-slate-900 dark:text-white">
                             {proj.name}
                           </h4>
                           {proj.lead && (
-                            <span className="text-[10px] text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-medium inline-flex items-center gap-1 mt-1">
+                            <span className="text-[10px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-500/20 font-medium inline-flex items-center gap-1 mt-1">
                               Lead: {proj.lead.name}
                             </span>
                           )}
                         </div>
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20">
                           {proj.status.replace('_', ' ')}
                         </span>
                       </div>
-                      <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-slate-500 dark:text-neutral-400 line-clamp-2 leading-relaxed">
                         {proj.description || 'No description provided.'}
                       </p>
                     </div>
 
-                    <div className="space-y-1.5 pt-2 border-t border-[#1e1e1e]">
+                    <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-neutral-400">Delivery Progress</span>
-                        <span className="font-mono text-teal-400 font-bold">{proj.progress || 0}%</span>
+                        <span className="text-slate-500 dark:text-neutral-400">Delivery Progress</span>
+                        <span className="font-mono text-teal-600 dark:text-teal-400 font-bold">{proj.progress || 0}%</span>
                       </div>
-                      <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-teal-400 h-full rounded-full" style={{ width: `${proj.progress || 0}%` }} />
+                      <div className="w-full bg-slate-100 dark:bg-[#1e2a3c] h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-teal-500 h-full rounded-full" style={{ width: `${proj.progress || 0}%` }} />
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs pt-1 text-neutral-400">
+                    <div className="flex items-center justify-between text-xs pt-1 text-slate-500 dark:text-neutral-400">
                       <div>
                         <span>Project Price: <strong className="text-teal-300 font-mono">{currencySymbol}{proj.budget ? proj.budget.toLocaleString() : '0'}</strong></span>
                         {proj.budget ? (

@@ -560,7 +560,7 @@ export default function ApproachesPage() {
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* TOP STAT METRIC CARDS */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
-          <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
             <div>
               <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
                 Total Targets
@@ -581,7 +581,7 @@ export default function ApproachesPage() {
                 ? 'bg-rose-50/70 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 hover:border-rose-400 dark:hover:border-rose-500/50'
                 : todayFollowUpsCount > 0
                 ? 'bg-amber-50/70 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30 hover:border-amber-400 dark:hover:border-amber-500/50'
-                : 'bg-white dark:bg-[#111111] border-slate-200 dark:border-[#222222] hover:border-slate-300 dark:hover:border-[#333333]'
+                : 'bg-white dark:bg-[#151d2a] border-slate-200 dark:border-[#222e42] hover:border-teal-500/50'
             }`}
           >
             <div>
@@ -614,7 +614,7 @@ export default function ApproachesPage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
             <div>
               <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
                 Discussions
@@ -628,7 +628,7 @@ export default function ApproachesPage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
             <div>
               <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
                 Deals Won
@@ -642,7 +642,7 @@ export default function ApproachesPage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
             <div>
               <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
                 Needs Follow-Up
@@ -656,7 +656,7 @@ export default function ApproachesPage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
             <div>
               <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
                 Not Interested
@@ -674,14 +674,14 @@ export default function ApproachesPage() {
         {/* CONTROLS: NICHE FILTER, MANAGE NICHES & SEARCH BAR */}
         <div className="space-y-3">
           {/* Niche Filter Bar (Scrollable Tabs or Dropdown) */}
-          <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
             {nicheDisplayMode === 'tabs' ? (
               <div className="flex items-center gap-1.5 min-w-0 flex-1 relative">
                 {/* Scroll Left Button */}
                 <button
                   type="button"
                   onClick={() => scrollTabs('left')}
-                  className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#161616] dark:hover:bg-[#222222] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white flex items-center justify-center shrink-0 border border-slate-200 dark:border-[#262626] transition shadow-xs"
+                  className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white flex items-center justify-center shrink-0 border border-slate-200 dark:border-[#243347] transition shadow-xs"
                   title="Scroll left"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -697,7 +697,7 @@ export default function ApproachesPage() {
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 whitespace-nowrap transition ${
                       selectedNiche === 'All Niches'
                         ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                        : 'bg-slate-100 dark:bg-[#161616] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#242424]'
+                        : 'bg-slate-100 dark:bg-[#182130] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#243347]'
                     }`}
                   >
                     All Niches ({approaches.length})
@@ -711,7 +711,7 @@ export default function ApproachesPage() {
                         className={`px-3 py-1.5 rounded-xl text-xs font-medium shrink-0 whitespace-nowrap transition flex items-center gap-1.5 ${
                           selectedNiche === n.name
                             ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                            : 'bg-slate-100 dark:bg-[#161616] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#242424]'
+                            : 'bg-slate-100 dark:bg-[#182130] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#243347]'
                         }`}
                       >
                         <span>{n.name}</span>
@@ -720,7 +720,7 @@ export default function ApproachesPage() {
                             className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
                               selectedNiche === n.name
                                 ? 'bg-black/25 text-white'
-                                : 'bg-slate-200 dark:bg-[#222222] text-slate-600 dark:text-neutral-400'
+                                : 'bg-slate-200 dark:bg-[#202c3e] text-slate-600 dark:text-neutral-400'
                             }`}
                           >
                             {count}
@@ -735,7 +735,7 @@ export default function ApproachesPage() {
                 <button
                   type="button"
                   onClick={() => scrollTabs('right')}
-                  className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#161616] dark:hover:bg-[#222222] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white flex items-center justify-center shrink-0 border border-slate-200 dark:border-[#262626] transition shadow-xs"
+                  className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white flex items-center justify-center shrink-0 border border-slate-200 dark:border-[#243347] transition shadow-xs"
                   title="Scroll right"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -749,7 +749,7 @@ export default function ApproachesPage() {
                 <select
                   value={selectedNiche}
                   onChange={(e) => setSelectedNiche(e.target.value)}
-                  className="bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 cursor-pointer w-full max-w-xs"
+                  className="bg-slate-50 dark:bg-[#121824] border border-slate-200 dark:border-[#222e42] rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 cursor-pointer w-full max-w-xs"
                 >
                   <option value="All Niches">All Niches ({approaches.length})</option>
                   {niches.map((n) => {
@@ -770,7 +770,7 @@ export default function ApproachesPage() {
               <button
                 type="button"
                 onClick={() => setNicheDisplayMode((prev) => (prev === 'tabs' ? 'dropdown' : 'tabs'))}
-                className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#161616] dark:hover:bg-[#222222] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white border border-slate-200 dark:border-[#262626] text-xs font-medium flex items-center gap-1.5 transition"
+                className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white border border-slate-200 dark:border-[#243347] text-xs font-medium flex items-center gap-1.5 transition"
                 title={nicheDisplayMode === 'tabs' ? 'Switch to dropdown view' : 'Switch to scrollable tabs view'}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
@@ -782,7 +782,7 @@ export default function ApproachesPage() {
               {/* Manage Niches Trigger Button */}
               <button
                 onClick={openManageNichesModal}
-                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#161616] dark:hover:bg-[#222222] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white border border-slate-200 dark:border-[#262626] text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
+                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white border border-slate-200 dark:border-[#243347] text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
                 title="Add, edit or delete industry niches"
               >
                 <Settings2 className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
@@ -800,7 +800,7 @@ export default function ApproachesPage() {
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-teal-500 shadow-xs"
+                  className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-teal-500 shadow-xs"
                 >
                   <option value="ALL">All Statuses</option>
                   <option value="PROSPECT">Prospect</option>
@@ -818,7 +818,7 @@ export default function ApproachesPage() {
                 <select
                   value={selectedOwner}
                   onChange={(e) => setSelectedOwner(e.target.value)}
-                  className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-teal-500 cursor-pointer shadow-xs"
+                  className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-teal-500 cursor-pointer shadow-xs"
                 >
                   <option value="ALL">All Leads</option>
                   <option value="ME">👤 Assigned to Me</option>
@@ -838,7 +838,7 @@ export default function ApproachesPage() {
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition border ${
                   followUpFilter === 'ATTENTION'
                     ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-500/40 shadow-xs'
-                    : 'bg-white dark:bg-[#141414] text-slate-600 dark:text-neutral-400 border-slate-200 dark:border-[#262626] hover:text-slate-900 dark:hover:text-white'
+                    : 'bg-white dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 border-slate-200 dark:border-[#222e42] hover:text-slate-900 dark:hover:text-white'
                 }`}
                 title="Filter leads that need follow-up today or are overdue"
               >
@@ -855,20 +855,20 @@ export default function ApproachesPage() {
                 placeholder="Search business, contact, owner, or area..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 shadow-xs"
+                className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 shadow-xs"
               />
             </div>
           </div>
         </div>
 
         {/* APPROACHES TABLE */}
-        <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl overflow-hidden shadow-xs">
-          <div className="p-4 border-b border-slate-200 dark:border-[#222222] flex items-center justify-between">
+        <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl overflow-hidden shadow-xs">
+          <div className="p-4 border-b border-slate-200 dark:border-[#222e42] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-heading text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 Approached Businesses Pipeline
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#1a1a1a] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#282828] font-mono">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#121824] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#202c3e] font-mono">
                 {filteredApproaches.length} targets
               </span>
             </div>
@@ -881,7 +881,7 @@ export default function ApproachesPage() {
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-[#1f1f1f] bg-slate-50 dark:bg-[#141414]/80 text-[11px] text-slate-500 dark:text-neutral-400 font-semibold uppercase tracking-wider">
+                <tr className="border-b border-slate-200 dark:border-[#222e42] bg-slate-50 dark:bg-[#121824]/90 text-[11px] text-slate-500 dark:text-neutral-400 font-semibold uppercase tracking-wider">
                   <th className="py-3 px-4">Business Name</th>
                   <th className="py-3 px-4">Contact Person & Lead Owner</th>
                   <th className="py-3 px-4">Location</th>
@@ -890,7 +890,7 @@ export default function ApproachesPage() {
                   <th className="py-3 px-4">Last Contact Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-[#1c1c1c]">
+              <tbody className="divide-y divide-slate-100 dark:divide-[#1e2a3c]">
                 {filteredApproaches.map((appr) => {
                   const statusConf = STATUS_CONFIG[appr.status] || STATUS_CONFIG.PROSPECT;
                   const cleanPhone = formatCleanPhone(appr.phone);
@@ -899,12 +899,12 @@ export default function ApproachesPage() {
                     <tr
                       key={appr._id}
                       onClick={() => router.push(`/approaches/${appr._id}`)}
-                      className="hover:bg-slate-50/80 dark:hover:bg-[#181818] transition group cursor-pointer"
+                      className="hover:bg-slate-50/80 dark:hover:bg-[#182130] transition group cursor-pointer"
                     >
                       {/* Business Name & Niche */}
                       <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#202020] group-hover:bg-teal-500/15 group-hover:border-teal-500/30 border border-slate-200 dark:border-[#2a2a2a] text-teal-600 dark:text-teal-400 font-bold flex items-center justify-center shrink-0 transition">
+                          <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#182130] group-hover:bg-teal-500/15 group-hover:border-teal-500/30 border border-slate-200 dark:border-[#243347] text-teal-600 dark:text-teal-400 font-bold flex items-center justify-center shrink-0 transition">
                             {appr.businessName.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0 max-w-[210px]">
@@ -1089,12 +1089,12 @@ export default function ApproachesPage() {
                 <div
                   key={appr._id}
                   onClick={() => router.push(`/approaches/${appr._id}`)}
-                  className="p-4 rounded-2xl bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#242424] active:bg-slate-50 dark:active:bg-[#181818] hover:border-teal-500/40 transition-all space-y-3 shadow-xs cursor-pointer"
+                  className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] active:bg-slate-50 dark:active:bg-[#182130] hover:border-teal-500/50 transition-all space-y-3 shadow-xs cursor-pointer"
                 >
                   {/* Card Header: Avatar + Business Name + Niche + Status Badge */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                      <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#202020] border border-slate-200 dark:border-[#2c2c2c] text-teal-600 dark:text-teal-400 font-bold flex items-center justify-center shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#182130] border border-slate-200 dark:border-[#243347] text-teal-600 dark:text-teal-400 font-bold flex items-center justify-center shrink-0">
                         {appr.businessName.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -1128,7 +1128,7 @@ export default function ApproachesPage() {
                   </div>
 
                   {/* Lead Info Grid */}
-                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 dark:bg-[#191919] p-2.5 rounded-xl border border-slate-200 dark:border-[#262626]">
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 dark:bg-[#121824] p-2.5 rounded-xl border border-slate-200 dark:border-[#1e2a3c]">
                     <div>
                       <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase font-semibold block">Contact</span>
                       <span className="text-slate-800 dark:text-white font-medium truncate block">
@@ -1147,7 +1147,7 @@ export default function ApproachesPage() {
                       )}
                     </div>
                     {appr.location && (
-                      <div className="col-span-2 flex items-center gap-1 text-[11px] text-slate-600 dark:text-neutral-400 pt-1.5 border-t border-slate-200 dark:border-[#232323]">
+                      <div className="col-span-2 flex items-center gap-1 text-[11px] text-slate-600 dark:text-neutral-400 pt-1.5 border-t border-slate-200 dark:border-[#1e2a3c]">
                         <MapPin className="w-3 h-3 text-slate-400 dark:text-neutral-500 shrink-0" />
                         <span className="truncate">{appr.location}</span>
                       </div>
@@ -1155,7 +1155,7 @@ export default function ApproachesPage() {
                   </div>
 
                   {/* Bottom Row: Dates + Touch Action Buttons */}
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-[#1f1f1f] text-xs">
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-[#1e2a3c] text-xs">
                     {/* Follow-up / Last contact date */}
                     <div className="min-w-0 flex-1">
                       {followUpStatus ? (
@@ -1165,7 +1165,7 @@ export default function ApproachesPage() {
                               ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40 animate-pulse'
                               : followUpStatus?.type === 'TODAY'
                               ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40'
-                              : 'bg-slate-100 dark:bg-[#1e1e1e] text-slate-700 dark:text-neutral-300 border-slate-200 dark:border-[#2a2a2a]'
+                              : 'bg-slate-100 dark:bg-[#182130] text-slate-700 dark:text-neutral-300 border-slate-200 dark:border-[#243347]'
                           }`}
                         >
                           <Calendar className="w-2.5 h-2.5" />
