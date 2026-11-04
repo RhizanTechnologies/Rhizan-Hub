@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
@@ -33,6 +33,8 @@ import {
   Flag,
   Circle,
   RefreshCw,
+  MessageSquare,
+  Pencil,
 } from 'lucide-react';
 import { PriorityBadge } from '@/components/Badge';
 import Link from 'next/link';
@@ -60,13 +62,71 @@ export default function ProjectDetailPage() {
   const [linkUrl, setLinkUrl] = useState('');
   const [linkCategory, setLinkCategory] = useState<'SRS' | 'REQUIREMENTS' | 'GITHUB' | 'FIGMA' | 'LIVE' | 'STAGING' | 'DRIVE' | 'DOCS' | 'OTHER'>('SRS');
 
-  // Add Task to this Project Form
+  // Add Task to this Project Form (Modal)
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [taskTitle, setTaskTitle] = useState('');
+  const [taskDescription, setTaskDescription] = useState('');
   const [taskPriority, setTaskPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'>('MEDIUM');
   const [taskAssignedToId, setTaskAssignedToId] = useState('');
   const [taskDueDate, setTaskDueDate] = useState('');
-  const [taskEstHours, setTaskEstHours] = useState('4');
+  const [taskEstHours, setTaskEstHours] = useState('2');
+  const [taskSubtasks, setTaskSubtasks] = useState<string[]>([]);
+  const [taskSubtaskInput, setTaskSubtaskInput] = useState('');
+  const [savingTask, setSavingTask] = useState(false);
+  const taskDescriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  // Selected Task Detail & Comments Modal
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [detailSubtaskText, setDetailSubtaskText] = useState('');
+  const [commentText, setCommentText] = useState('');
+
+  // Edit Task State
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editTaskTitle, setEditTaskTitle] = useState('');
+  const [editTaskDescription, setEditTaskDescription] = useState('');
+  const [editTaskAssignedToId, setEditTaskAssignedToId] = useState('');
+  const [editTaskDueDate, setEditTaskDueDate] = useState('');
+  const [editTaskPriority, setEditTaskPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'>('MEDIUM');
+  const [editTaskEstHours, setEditTaskEstHours] = useState('2');
+  const [savingEditTask, setSavingEditTask] = useState(false);
+  const editTaskDescRef = useRef<HTMLTextAreaElement>(null);
+
+  // Edit Milestone State
+  const [editingMilestoneIndex, setEditingMilestoneIndex] = useState<number | null>(null);
+  const [editMilestoneTitle, setEditMilestoneTitle] = useState('');
+  const [editMilestoneDueDate, setEditMilestoneDueDate] = useState('');
+  const [editMilestoneDescription, setEditMilestoneDescription] = useState('');
+  const [savingEditMilestone, setSavingEditMilestone] = useState(false);
+  const editMilestoneDescRef = useRef<HTMLTextAreaElement>(null);
+
+  // Edit Link State
+  const [editingLinkIndex, setEditingLinkIndex] = useState<number | null>(null);
+  const [editLinkTitle, setEditLinkTitle] = useState('');
+  const [editLinkUrl, setEditLinkUrl] = useState('');
+  const [editLinkCategory, setEditLinkCategory] = useState<'SRS' | 'REQUIREMENTS' | 'GITHUB' | 'FIGMA' | 'LIVE' | 'STAGING' | 'DRIVE' | 'DOCS' | 'OTHER'>('SRS');
+  const [savingEditLink, setSavingEditLink] = useState(false);
+
+  // Auto-resize effects
+  useEffect(() => {
+    if (taskDescriptionRef.current) {
+      taskDescriptionRef.current.style.height = 'auto';
+      taskDescriptionRef.current.style.height = `${Math.max(68, taskDescriptionRef.current.scrollHeight)}px`;
+    }
+  }, [taskDescription, isAddingTask]);
+
+  useEffect(() => {
+    if (editTaskDescRef.current) {
+      editTaskDescRef.current.style.height = 'auto';
+      editTaskDescRef.current.style.height = `${Math.max(68, editTaskDescRef.current.scrollHeight)}px`;
+    }
+  }, [editTaskDescription, editingTask]);
+
+  useEffect(() => {
+    if (editMilestoneDescRef.current) {
+      editMilestoneDescRef.current.style.height = 'auto';
+      editMilestoneDescRef.current.style.height = `${Math.max(68, editMilestoneDescRef.current.scrollHeight)}px`;
+    }
+  }, [editMilestoneDescription, editingMilestoneIndex]);
 
   // View Tabs: Roadmap/Milestones vs Kanban Tasks
   const [activeTab, setActiveTab] = useState<'MILESTONES' | 'TASKS'>('MILESTONES');
@@ -261,15 +321,18 @@ export default function ProjectDetailPage() {
     if (!project || !taskTitle.trim()) return;
 
     try {
+      setSavingTask(true);
       const newTask = await apiFetch<Task>('/tasks', {
         method: 'POST',
         body: JSON.stringify({
           title: taskTitle.trim(),
+          description: taskDescription.trim(),
           project: project._id,
           priority: taskPriority,
           assignedTo: taskAssignedToId || undefined,
           dueDate: taskDueDate ? new Date(taskDueDate).toISOString() : undefined,
-          estimatedHours: parseFloat(taskEstHours) || 4,
+          estimatedHours: parseFloat(taskEstHours) || 2,
+          subtasks: taskSubtasks.map((s) => ({ title: s, completed: false })),
           status: 'TODO',
         }),
       });
@@ -277,10 +340,296 @@ export default function ProjectDetailPage() {
       setTasks([newTask, ...tasks]);
       setIsAddingTask(false);
       setTaskTitle('');
+      setTaskDescription('');
       setTaskAssignedToId('');
       setTaskDueDate('');
+      setTaskEstHours('2');
+      setTaskSubtasks([]);
+      setTaskSubtaskInput('');
+      showAlert('Project task created successfully', { type: 'success' });
     } catch (err: any) {
       showAlert(err.message || 'Failed to create task for project', { type: 'error' });
+    } finally {
+      setSavingTask(false);
+    }
+  };
+
+  const handleAddDraftTaskSubtask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!taskSubtaskInput.trim()) return;
+    setTaskSubtasks([...taskSubtasks, taskSubtaskInput.trim()]);
+    setTaskSubtaskInput('');
+  };
+
+  const handleRemoveDraftTaskSubtask = (idx: number) => {
+    setTaskSubtasks(taskSubtasks.filter((_, i) => i !== idx));
+  };
+
+  // Edit Task Handlers
+  const openEditTask = (task: Task) => {
+    setEditingTask(task);
+    setEditTaskTitle(task.title || '');
+    setEditTaskDescription(task.description || '');
+    setEditTaskAssignedToId(task.assignedTo?._id || (task.assignedTo as any) || '');
+    setEditTaskDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '');
+    setEditTaskPriority(task.priority || 'MEDIUM');
+    setEditTaskEstHours(task.estimatedHours !== undefined ? String(task.estimatedHours) : '2');
+  };
+
+  const handleUpdateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask || !editTaskTitle.trim()) return;
+
+    try {
+      setSavingEditTask(true);
+      const payload: any = {
+        title: editTaskTitle.trim(),
+        description: editTaskDescription.trim(),
+        assignedTo: editTaskAssignedToId || null,
+        dueDate: editTaskDueDate ? new Date(editTaskDueDate).toISOString() : null,
+        priority: editTaskPriority,
+        estimatedHours: parseFloat(editTaskEstHours) || 0,
+      };
+
+      const updated = await apiFetch<Task>(`/tasks/${editingTask._id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+
+      setTasks((prev) => prev.map((t) => (t._id === updated._id ? updated : t)));
+      if (selectedTask?._id === updated._id) {
+        setSelectedTask(updated);
+      }
+      setEditingTask(null);
+      showAlert('Task updated successfully', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update task', { type: 'error' });
+    } finally {
+      setSavingEditTask(false);
+    }
+  };
+
+  // Subtask management inside Selected Task Detail Modal
+  const handleToggleSubtask = async (task: Task, subtaskIdx: number) => {
+    const currentSubtasks = [...(task.subtasks || [])];
+    if (!currentSubtasks[subtaskIdx]) return;
+
+    currentSubtasks[subtaskIdx].completed = !currentSubtasks[subtaskIdx].completed;
+
+    let newStatus = task.status;
+    const allDone = currentSubtasks.length > 0 && currentSubtasks.every((st) => st.completed);
+    if (allDone && task.status !== 'DONE') {
+      newStatus = 'DONE';
+    } else if (!allDone && task.status === 'DONE') {
+      newStatus = 'IN_PROGRESS';
+    }
+
+    const updatedTask = {
+      ...task,
+      subtasks: currentSubtasks,
+      status: newStatus,
+    };
+
+    setTasks((prev) => prev.map((t) => (t._id === task._id ? updatedTask : t)));
+    if (selectedTask?._id === task._id) {
+      setSelectedTask(updatedTask);
+    }
+
+    try {
+      await apiFetch(`/tasks/${task._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          subtasks: currentSubtasks,
+          status: newStatus,
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to toggle subtask', err);
+    }
+  };
+
+  const handleAddSubtaskToSelectedTask = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!selectedTask || !detailSubtaskText.trim()) return;
+
+    const newSubtaskItem = {
+      title: detailSubtaskText.trim(),
+      completed: false,
+    };
+
+    const updatedSubtasks = [...(selectedTask.subtasks || []), newSubtaskItem];
+    const updatedTask: Task = {
+      ...selectedTask,
+      subtasks: updatedSubtasks,
+    };
+
+    setSelectedTask(updatedTask);
+    setTasks((prev) => prev.map((t) => (t._id === selectedTask._id ? updatedTask : t)));
+    setDetailSubtaskText('');
+
+    try {
+      await apiFetch(`/tasks/${selectedTask._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ subtasks: updatedSubtasks }),
+      });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to add subtask', { type: 'error' });
+    }
+  };
+
+  const handleDeleteSubtaskFromSelected = async (subtaskIdx: number) => {
+    if (!selectedTask) return;
+    const updatedSubtasks = (selectedTask.subtasks || []).filter((_, idx) => idx !== subtaskIdx);
+    const updatedTask = { ...selectedTask, subtasks: updatedSubtasks };
+
+    setSelectedTask(updatedTask);
+    setTasks((prev) => prev.map((t) => (t._id === selectedTask._id ? updatedTask : t)));
+
+    try {
+      await apiFetch(`/tasks/${selectedTask._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ subtasks: updatedSubtasks }),
+      });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to remove subtask', { type: 'error' });
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!selectedTask || !commentText.trim()) return;
+
+    const newComment = {
+      text: commentText.trim(),
+      author: {
+        name: 'Abdulaziz',
+        avatar: '',
+      } as any,
+      createdAt: 'Just now',
+    };
+
+    const updatedTask = {
+      ...selectedTask,
+      comments: [...(selectedTask.comments || []), newComment],
+    };
+
+    setSelectedTask(updatedTask);
+    setTasks((prev) => prev.map((t) => (t._id === selectedTask._id ? updatedTask : t)));
+    setCommentText('');
+
+    try {
+      await apiFetch(`/tasks/${selectedTask._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          comments: updatedTask.comments,
+        }),
+      });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to post comment', { type: 'error' });
+    }
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    showConfirm(
+      'Are you sure you want to delete this task? This action cannot be undone.',
+      async () => {
+        setTasks((prev) => prev.filter((t) => t._id !== taskId));
+        if (selectedTask?._id === taskId) {
+          setSelectedTask(null);
+        }
+        try {
+          await apiFetch(`/tasks/${taskId}`, { method: 'DELETE' });
+          showAlert('Task deleted successfully', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to delete task', { type: 'error' });
+        }
+      },
+      {
+        title: 'Delete Task',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
+  };
+
+  // Milestone Edit Handlers
+  const openEditMilestone = (mIdx: number) => {
+    if (!project || !project.milestones || !project.milestones[mIdx]) return;
+    const m = project.milestones[mIdx];
+    setEditingMilestoneIndex(mIdx);
+    setEditMilestoneTitle(m.title || '');
+    setEditMilestoneDueDate(m.dueDate ? new Date(m.dueDate).toISOString().split('T')[0] : '');
+    setEditMilestoneDescription(m.description || '');
+  };
+
+  const handleUpdateMilestone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!project || !project.milestones || editingMilestoneIndex === null || !editMilestoneTitle.trim()) return;
+
+    try {
+      setSavingEditMilestone(true);
+      const updatedMilestones = [...project.milestones];
+      updatedMilestones[editingMilestoneIndex] = {
+        ...updatedMilestones[editingMilestoneIndex],
+        title: editMilestoneTitle.trim(),
+        dueDate: editMilestoneDueDate ? new Date(editMilestoneDueDate).toISOString() : undefined,
+        description: editMilestoneDescription.trim() || undefined,
+      };
+
+      const updated = await apiFetch<Project>(`/projects/${project._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ milestones: updatedMilestones }),
+      });
+
+      setProject(updated);
+      setEditingMilestoneIndex(null);
+      showAlert('Milestone updated successfully', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update milestone', { type: 'error' });
+    } finally {
+      setSavingEditMilestone(false);
+    }
+  };
+
+  // Link Edit Handlers
+  const openEditLink = (index: number) => {
+    if (!project || !project.links || !project.links[index]) return;
+    const l = project.links[index];
+    setEditingLinkIndex(index);
+    setEditLinkTitle(l.title || '');
+    setEditLinkUrl(l.url || '');
+    setEditLinkCategory((l.category as any) || 'OTHER');
+  };
+
+  const handleUpdateLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!project || !project.links || editingLinkIndex === null || !editLinkTitle.trim() || !editLinkUrl.trim()) return;
+
+    try {
+      setSavingEditLink(true);
+      let formattedUrl = editLinkUrl.trim();
+      if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+        formattedUrl = `https://${formattedUrl}`;
+      }
+
+      const updatedLinks = [...project.links];
+      updatedLinks[editingLinkIndex] = {
+        title: editLinkTitle.trim(),
+        url: formattedUrl,
+        category: editLinkCategory,
+      };
+
+      const updated = await apiFetch<Project>(`/projects/${project._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ links: updatedLinks }),
+      });
+
+      setProject(updated);
+      setEditingLinkIndex(null);
+      showAlert('Resource link updated successfully', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update link', { type: 'error' });
+    } finally {
+      setSavingEditLink(false);
     }
   };
 
@@ -1047,8 +1396,16 @@ export default function ProjectDetailPage() {
                         </a>
                         <button
                           type="button"
+                          onClick={() => openEditLink(idx)}
+                          className="p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-300 transition cursor-pointer"
+                          title="Edit link"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => handleDeleteLink(idx)}
-                          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
                           title="Delete link"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1359,6 +1716,15 @@ export default function ProjectDetailPage() {
 
                               <button
                                 type="button"
+                                onClick={() => openEditMilestone(mIdx)}
+                                className="p-1.5 rounded-lg hover:bg-teal-500/10 text-slate-400 hover:text-teal-300 transition cursor-pointer"
+                                title="Edit milestone"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+
+                              <button
+                                type="button"
                                 onClick={() => handleDeleteMilestone(mIdx)}
                                 className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition cursor-pointer"
                                 title="Delete milestone"
@@ -1520,85 +1886,13 @@ export default function ProjectDetailPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setIsAddingTask(!isAddingTask)}
-                    className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-medium flex items-center gap-1.5 transition shadow-sm"
+                    onClick={() => setIsAddingTask(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Create Task for this Project</span>
                   </button>
                 </div>
-
-                {/* Create Task Form */}
-                {isAddingTask && (
-                  <form onSubmit={handleCreateTask} className="p-4 rounded-2xl bg-[#161616] border border-teal-500/30 space-y-3 animate-fade-in">
-                    <h4 className="text-xs font-bold text-teal-300">Create New Project Task</h4>
-                    <input
-                      type="text"
-                      placeholder="Task Title (e.g. Implement JWT authentication & ERP backend APIs)"
-                      value={taskTitle}
-                      onChange={(e) => setTaskTitle(e.target.value)}
-                      required
-                      className="w-full bg-[#101010] border border-[#282828] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-[11px] text-neutral-400 mb-1">Assign Developer</label>
-                        <select
-                          value={taskAssignedToId}
-                          onChange={(e) => setTaskAssignedToId(e.target.value)}
-                          className="w-full bg-[#101010] border border-[#282828] rounded-xl px-2.5 py-1.5 text-xs text-white outline-none"
-                        >
-                          <option value="">-- Unassigned --</option>
-                          {teamMembers.map((m) => (
-                            <option key={m._id || m.id} value={m._id || m.id}>
-                              {m.name} ({m.title})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] text-neutral-400 mb-1">Priority</label>
-                        <select
-                          value={taskPriority}
-                          onChange={(e) => setTaskPriority(e.target.value as any)}
-                          className="w-full bg-[#101010] border border-[#282828] rounded-xl px-2.5 py-1.5 text-xs text-white outline-none"
-                        >
-                          <option value="LOW">Low</option>
-                          <option value="MEDIUM">Medium</option>
-                          <option value="HIGH">High</option>
-                          <option value="URGENT">Urgent</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] text-neutral-400 mb-1">Due Date</label>
-                        <input
-                          type="date"
-                          value={taskDueDate}
-                          onChange={(e) => setTaskDueDate(e.target.value)}
-                          className="w-full bg-[#101010] border border-[#282828] rounded-xl px-2.5 py-1.5 text-xs text-white outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end gap-2 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsAddingTask(false)}
-                        className="px-3.5 py-1.5 rounded-xl text-xs text-neutral-400 hover:text-white"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold"
-                      >
-                        Add Task
-                      </button>
-                    </div>
-                  </form>
-                )}
 
                 {/* Tasks List */}
                 <div className="space-y-2">
@@ -1606,30 +1900,37 @@ export default function ProjectDetailPage() {
                     tasks.map((t) => (
                       <div
                         key={t._id}
-                        className="p-3.5 rounded-xl bg-[#161616] border border-[#242424] hover:border-[#333333] transition flex items-center justify-between"
+                        onClick={() => setSelectedTask(t)}
+                        className="p-4 rounded-2xl bg-[#131d2e] border border-[#1e293b] hover:border-teal-500/50 hover:bg-[#162238] transition flex items-center justify-between cursor-pointer group shadow-xs"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-2.5 h-2.5 rounded-full ${
-                            t.status === 'DONE' ? 'bg-emerald-400' : 'bg-teal-400'
+                        <div className="flex items-center gap-3 min-w-0 pr-3">
+                          <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                            t.status === 'DONE' ? 'bg-emerald-400 ring-2 ring-emerald-500/20' : 'bg-teal-400 ring-2 ring-teal-500/20'
                           }`} />
-                          <div>
-                            <div className="text-xs font-semibold text-white">{t.title}</div>
-                            <div className="flex items-center gap-3 text-[11px] text-neutral-400 mt-1">
+                          <div className="min-w-0">
+                            <div className="text-xs sm:text-sm font-semibold text-white group-hover:text-teal-300 transition truncate">
+                              {t.title}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-400 mt-1">
                               {t.assignedTo && (
-                                <span className="text-neutral-300">
-                                  Assigned: <strong>{t.assignedTo.name}</strong>
+                                <span className="text-slate-300 flex items-center gap-1">
+                                  <Users className="w-3 h-3 text-teal-400" />
+                                  <span>Assigned: <strong className="text-white">{t.assignedTo.name}</strong></span>
                                 </span>
                               )}
                               {t.dueDate && (
-                                <span>Due: {new Date(t.dueDate).toLocaleDateString()}</span>
+                                <span className="flex items-center gap-1 font-mono text-slate-400">
+                                  <Calendar className="w-3 h-3 text-slate-500" />
+                                  <span>Due: {new Date(t.dueDate).toLocaleDateString()}</span>
+                                </span>
                               )}
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                           {t.subtasks && t.subtasks.length > 0 && (
-                            <span className="text-[10px] text-teal-400 font-mono font-medium px-2 py-0.5 rounded bg-teal-500/10 border border-teal-500/20">
+                            <span className="text-[10px] text-teal-400 font-mono font-medium px-2 py-0.5 rounded-lg bg-teal-500/10 border border-teal-500/20 hidden sm:inline-block">
                               ✓ {t.subtasks.filter((s) => s.completed).length}/{t.subtasks.length} subtasks
                             </span>
                           )}
@@ -1637,32 +1938,32 @@ export default function ProjectDetailPage() {
                           <select
                             value={t.status}
                             onChange={(e) => handleTaskStatusChange(t._id, e.target.value as TaskStatus)}
-                            className={`text-[10px] font-bold uppercase px-2 py-1 rounded-lg border outline-none cursor-pointer ${
+                            className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-lg border outline-none cursor-pointer transition ${
                               t.status === 'DONE'
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
                                 : t.status === 'IN_PROGRESS'
-                                ? 'bg-teal-500/10 text-teal-400 border-teal-500/30'
+                                ? 'bg-teal-950/60 text-teal-300 border-teal-500/40 ring-1 ring-teal-500/30'
                                 : t.status === 'REVIEW'
-                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                : 'bg-[#181818] text-neutral-300 border-[#333333]'
+                                ? 'bg-amber-950/60 text-amber-300 border-amber-500/40'
+                                : 'bg-[#0b1320] text-slate-300 border-[#223147]'
                             }`}
                           >
-                            <option value="TODO">To Do</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="REVIEW">Review</option>
-                            <option value="DONE">Done</option>
+                            <option value="TODO" className="bg-[#0f172a] text-slate-300">To Do</option>
+                            <option value="IN_PROGRESS" className="bg-[#0f172a] text-teal-300">In Progress</option>
+                            <option value="REVIEW" className="bg-[#0f172a] text-amber-300">Review</option>
+                            <option value="DONE" className="bg-[#0f172a] text-emerald-300">Done</option>
                           </select>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="p-8 text-center bg-[#161616] rounded-2xl border border-dashed border-[#242424]">
-                      <CheckSquare className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-                      <p className="text-xs text-neutral-400">No tasks created for this project yet.</p>
+                    <div className="p-8 text-center bg-[#131d2e] rounded-2xl border border-dashed border-[#1e293b]">
+                      <CheckSquare className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+                      <p className="text-xs text-slate-400">No tasks created for this project yet.</p>
                       <button
                         type="button"
                         onClick={() => setIsAddingTask(true)}
-                        className="mt-2 text-xs text-teal-400 hover:underline font-semibold"
+                        className="mt-2 text-xs text-teal-400 hover:underline font-semibold cursor-pointer"
                       >
                         Create First Task →
                       </button>
@@ -1886,6 +2187,657 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       </Modal>
+
+      {/* CREATE NEW TASK MODAL */}
+      <Modal isOpen={isAddingTask} onClose={() => setIsAddingTask(false)} title="Create New Task">
+        <form onSubmit={handleCreateTask} className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Task Title *</label>
+            <input
+              type="text"
+              required
+              value={taskTitle}
+              onChange={(e) => setTaskTitle(e.target.value)}
+              placeholder="e.g. Implement JWT authentication & ERP backend APIs"
+              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Description</label>
+            <textarea
+              ref={taskDescriptionRef}
+              rows={2}
+              value={taskDescription}
+              onChange={(e) => {
+                setTaskDescription(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              placeholder="Provide details, deliverables, or acceptance criteria..."
+              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
+              <div className="px-3 py-2 bg-[#141414] border border-[#282828] rounded-xl text-xs text-teal-400 font-semibold truncate">
+                📁 {project.name}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
+              <select
+                value={taskAssignedToId}
+                onChange={(e) => setTaskAssignedToId(e.target.value)}
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              >
+                <option value="">-- Unassigned (Team Backlog) --</option>
+                {teamMembers.map((m) => (
+                  <option key={m._id || m.id} value={m._id || m.id}>
+                    {m.name} ({m.title || 'Developer'})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
+              <input
+                type="date"
+                value={taskDueDate}
+                onChange={(e) => setTaskDueDate(e.target.value)}
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 min-w-0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
+              <select
+                value={taskPriority}
+                onChange={(e) => setTaskPriority(e.target.value as any)}
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              >
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="URGENT">Urgent</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Est. Hours</label>
+              <input
+                type="number"
+                min="0.5"
+                step="0.5"
+                value={taskEstHours}
+                onChange={(e) => setTaskEstHours(e.target.value)}
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              />
+            </div>
+          </div>
+
+          {/* Subtasks Checklist Builder */}
+          <div className="p-3.5 rounded-2xl bg-[#141414] border border-[#262626] space-y-2.5">
+            <span className="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
+              <CheckSquare className="w-3.5 h-3.5 text-teal-400" />
+              Subtasks Checklist ({taskSubtasks.length})
+            </span>
+
+            {/* Subtask Input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={taskSubtaskInput}
+                onChange={(e) => setTaskSubtaskInput(e.target.value)}
+                placeholder="Add subtask and press enter (e.g. Design schema)..."
+                className="flex-1 px-3 py-1.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddDraftTaskSubtask(e);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleAddDraftTaskSubtask}
+                className="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white rounded-xl flex items-center gap-1 transition shrink-0 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add</span>
+              </button>
+            </div>
+
+            {/* List of draft subtasks */}
+            {taskSubtasks.length > 0 && (
+              <div className="space-y-1.5 max-h-36 overflow-y-auto pt-1">
+                {taskSubtasks.map((st, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2 rounded-xl bg-[#181818] border border-[#262626] text-xs text-neutral-300"
+                  >
+                    <span className="truncate pr-2">{st}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDraftTaskSubtask(idx)}
+                      className="text-neutral-500 hover:text-rose-400 p-0.5 rounded cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setIsAddingTask(false)}
+              className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={savingTask}
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:opacity-50 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition cursor-pointer"
+            >
+              {savingTask ? 'Creating...' : 'Create Task'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* TASK DETAILS POPUP MODAL */}
+      {selectedTask && (
+        <Modal
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          title={selectedTask.title}
+        >
+          <div className="space-y-5">
+            {/* Header info bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-[#161616] border border-[#262626]">
+              <div className="flex items-center gap-2">
+                <PriorityBadge priority={selectedTask.priority} />
+                {selectedTask.dueDate && (
+                  <span className="text-xs text-neutral-400 flex items-center gap-1 font-mono">
+                    <Calendar className="w-3.5 h-3.5 text-teal-400" />
+                    {new Date(selectedTask.dueDate).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+
+              {/* Status Dropdown */}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-neutral-400 uppercase">Status:</span>
+                <select
+                  value={selectedTask.status}
+                  onChange={(e) => handleTaskStatusChange(selectedTask._id, e.target.value as TaskStatus)}
+                  className={`text-xs font-bold uppercase px-3 py-1.5 rounded-xl border outline-none cursor-pointer ${
+                    selectedTask.status === 'DONE'
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                      : selectedTask.status === 'IN_PROGRESS'
+                      ? 'bg-teal-500/10 text-teal-400 border-teal-500/30'
+                      : selectedTask.status === 'REVIEW'
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                      : 'bg-[#181818] text-neutral-300 border-[#333333]'
+                  }`}
+                >
+                  <option value="TODO">To Do</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="REVIEW">Review</option>
+                  <option value="DONE">Done</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Project & Assignee */}
+            <div className="flex flex-wrap items-center justify-between text-xs text-neutral-400 gap-2">
+              <div className="flex items-center gap-1.5">
+                <FolderKanban className="w-3.5 h-3.5 text-teal-400" />
+                <span>Project:</span>
+                <strong className="text-white">
+                  {selectedTask.project?.name || project.name}
+                </strong>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-teal-400" />
+                <span>Assignee:</span>
+                <strong className="text-white">{selectedTask.assignedTo?.name || 'Unassigned'}</strong>
+              </div>
+            </div>
+
+            {/* Description */}
+            {selectedTask.description && (
+              <p className="text-xs text-neutral-300 leading-relaxed bg-[#161616] p-3.5 rounded-2xl border border-[#242424] whitespace-pre-wrap break-words">
+                {selectedTask.description}
+              </p>
+            )}
+
+            {/* SUBTASKS CHECKLIST SECTION */}
+            <div className="p-4 rounded-2xl bg-[#141414] border border-[#262626] space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-heading text-xs font-bold text-white flex items-center gap-1.5">
+                  <CheckSquare className="w-4 h-4 text-teal-400" />
+                  Subtasks Checklist ({(selectedTask.subtasks || []).filter((s) => s.completed).length}/
+                  {(selectedTask.subtasks || []).length})
+                </h4>
+                {(selectedTask.subtasks || []).length > 0 && (
+                  <span className="text-xs font-mono font-bold text-teal-400">
+                    {Math.round(
+                      (((selectedTask.subtasks || []).filter((s) => s.completed).length) /
+                        (selectedTask.subtasks || []).length) *
+                        100
+                    )}
+                    %
+                  </span>
+                )}
+              </div>
+
+              {/* Subtasks List */}
+              <div className="space-y-1.5 max-h-56 overflow-y-auto">
+                {(selectedTask.subtasks || []).map((st, idx) => (
+                  <div
+                    key={idx}
+                    className="group flex items-center justify-between p-2.5 rounded-xl bg-[#181818] border border-[#262626] hover:border-[#383838] transition"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleToggleSubtask(selectedTask, idx)}
+                      className="flex items-center gap-2.5 text-left min-w-0 cursor-pointer flex-1"
+                    >
+                      <div
+                        className={`w-4 h-4 rounded flex items-center justify-center transition shrink-0 ${
+                          st.completed
+                            ? 'bg-emerald-500 text-black shadow-sm'
+                            : 'border border-neutral-600 group-hover:border-teal-400'
+                        }`}
+                      >
+                        {st.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                      </div>
+                      <span
+                        className={`text-xs transition truncate ${
+                          st.completed ? 'line-through text-neutral-500' : 'text-neutral-200'
+                        }`}
+                      >
+                        {st.title}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSubtaskFromSelected(idx)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                      title="Delete subtask"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+
+                {(selectedTask.subtasks || []).length === 0 && (
+                  <p className="text-xs text-neutral-600 italic">No subtasks added yet.</p>
+                )}
+              </div>
+
+              {/* Inline Add Subtask Input */}
+              <div className="flex gap-2 pt-1">
+                <input
+                  type="text"
+                  value={detailSubtaskText}
+                  onChange={(e) => setDetailSubtaskText(e.target.value)}
+                  placeholder="Add a new subtask..."
+                  className="flex-1 px-3 py-1.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddSubtaskToSelectedTask(e);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddSubtaskToSelectedTask}
+                  className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white rounded-xl transition cursor-pointer"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* ACTIVITY & COMMENTS SECTION */}
+            <div className="p-4 rounded-2xl bg-[#141414] border border-[#262626] space-y-3">
+              <h4 className="font-heading text-xs font-bold text-white flex items-center gap-1.5">
+                <MessageSquare className="w-4 h-4 text-teal-400" />
+                Notes & Activity ({selectedTask.comments?.length || 0})
+              </h4>
+
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {selectedTask.comments && selectedTask.comments.length > 0 ? (
+                  selectedTask.comments.map((c, i) => (
+                    <div key={i} className="p-2.5 rounded-xl bg-[#161616] border border-[#262626] text-xs">
+                      <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
+                        <span className="font-semibold text-neutral-200">{c.author.name}</span>
+                        <span>{c.createdAt}</span>
+                      </div>
+                      <p className="text-neutral-300">{c.text}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-neutral-600 italic">No notes or comments yet.</p>
+                )}
+              </div>
+
+              {/* Add Comment input */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Write a note..."
+                  className="flex-1 px-3 py-1.5 bg-[#181818] border border-[#262626] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddComment();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddComment}
+                  className="px-3.5 py-1.5 bg-[#202020] hover:bg-teal-600 text-xs font-semibold text-white rounded-xl transition cursor-pointer"
+                >
+                  Reply
+                </button>
+              </div>
+            </div>
+
+            {/* Action Bar (Delete Task, Edit Task, Close) */}
+            <div className="flex justify-between items-center pt-3 border-t border-[#222222]">
+              <button
+                type="button"
+                onClick={() => handleDeleteTask(selectedTask._id)}
+                className="px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Task</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => openEditTask(selectedTask)}
+                  className="px-3.5 py-1.5 bg-teal-600/15 hover:bg-teal-600/25 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-sm"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Edit Task</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTask(null)}
+                  className="px-4 py-1.5 bg-[#181818] hover:bg-[#222222] text-xs text-white rounded-xl font-medium cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* EDIT TASK MODAL */}
+      {editingTask && (
+        <Modal isOpen={!!editingTask} onClose={() => setEditingTask(null)} title="Edit Task">
+          <form onSubmit={handleUpdateTask} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Task Title *</label>
+              <input
+                type="text"
+                required
+                value={editTaskTitle}
+                onChange={(e) => setEditTaskTitle(e.target.value)}
+                placeholder="e.g. Implement JWT authentication & ERP backend APIs"
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Description</label>
+              <textarea
+                ref={editTaskDescRef}
+                rows={2}
+                value={editTaskDescription}
+                onChange={(e) => {
+                  setEditTaskDescription(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+                }}
+                placeholder="Provide details or acceptance criteria..."
+                className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
+                <div className="px-3 py-2 bg-[#141414] border border-[#282828] rounded-xl text-xs text-teal-400 font-semibold truncate">
+                  📁 {project.name}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
+                <select
+                  value={editTaskAssignedToId}
+                  onChange={(e) => setEditTaskAssignedToId(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                >
+                  <option value="">-- Unassigned (Team Backlog) --</option>
+                  {teamMembers.map((m) => (
+                    <option key={m._id || m.id} value={m._id || m.id}>
+                      {m.name} ({m.title || 'Developer'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
+                <input
+                  type="date"
+                  value={editTaskDueDate}
+                  onChange={(e) => setEditTaskDueDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 min-w-0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
+                <select
+                  value={editTaskPriority}
+                  onChange={(e) => setEditTaskPriority(e.target.value as any)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                >
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HIGH">High</option>
+                  <option value="URGENT">Urgent</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Est. Hours</label>
+                <input
+                  type="number"
+                  min="0.5"
+                  step="0.5"
+                  value={editTaskEstHours}
+                  onChange={(e) => setEditTaskEstHours(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+              <button
+                type="button"
+                onClick={() => setEditingTask(null)}
+                className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingEditTask}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:opacity-50 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition cursor-pointer"
+              >
+                {savingEditTask ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* EDIT MILESTONE MODAL */}
+      {editingMilestoneIndex !== null && (
+        <Modal
+          isOpen={editingMilestoneIndex !== null}
+          onClose={() => setEditingMilestoneIndex(null)}
+          title="Edit Milestone / Delivery Phase"
+        >
+          <form onSubmit={handleUpdateMilestone} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Phase Title *</label>
+              <input
+                type="text"
+                required
+                value={editMilestoneTitle}
+                onChange={(e) => setEditMilestoneTitle(e.target.value)}
+                placeholder="e.g. Phase 2: Core MVP Development & APIs"
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Target Deadline</label>
+              <input
+                type="date"
+                value={editMilestoneDueDate}
+                onChange={(e) => setEditMilestoneDueDate(e.target.value)}
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Phase Description</label>
+              <textarea
+                ref={editMilestoneDescRef}
+                rows={2}
+                value={editMilestoneDescription}
+                onChange={(e) => {
+                  setEditMilestoneDescription(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+                }}
+                placeholder="Scope and key objectives for this delivery milestone..."
+                className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+              <button
+                type="button"
+                onClick={() => setEditingMilestoneIndex(null)}
+                className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingEditMilestone}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:opacity-50 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition cursor-pointer"
+              >
+                {savingEditMilestone ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* EDIT LINK MODAL */}
+      {editingLinkIndex !== null && (
+        <Modal
+          isOpen={editingLinkIndex !== null}
+          onClose={() => setEditingLinkIndex(null)}
+          title="Edit Resource Link"
+        >
+          <form onSubmit={handleUpdateLink} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Link Title *</label>
+              <input
+                type="text"
+                required
+                value={editLinkTitle}
+                onChange={(e) => setEditLinkTitle(e.target.value)}
+                placeholder="e.g. Figma Design System"
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">URL *</label>
+              <input
+                type="text"
+                required
+                value={editLinkUrl}
+                onChange={(e) => setEditLinkUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Category</label>
+              <select
+                value={editLinkCategory}
+                onChange={(e) => setEditLinkCategory(e.target.value as any)}
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              >
+                <option value="SRS">SRS & Requirements</option>
+                <option value="GITHUB">GitHub Repository</option>
+                <option value="FIGMA">Figma Design System</option>
+                <option value="LIVE">Live Production App</option>
+                <option value="STAGING">Staging Environment</option>
+                <option value="DRIVE">Google Drive / Docs</option>
+                <option value="OTHER">Other Link</option>
+              </select>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+              <button
+                type="button"
+                onClick={() => setEditingLinkIndex(null)}
+                className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingEditLink}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:opacity-50 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition cursor-pointer"
+              >
+                {savingEditLink ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }

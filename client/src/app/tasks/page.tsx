@@ -31,6 +31,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  Pencil,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
@@ -102,6 +103,25 @@ export default function TasksPage() {
   // Selected Task Detail Subtask & Comment state
   const [detailSubtaskText, setDetailSubtaskText] = useState('');
   const [commentText, setCommentText] = useState('');
+
+  // Edit Task modal state
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editProjectId, setEditProjectId] = useState('');
+  const [editAssignedToId, setEditAssignedToId] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
+  const [editPriority, setEditPriority] = useState<TaskPriority>('MEDIUM');
+  const [editEstimatedHours, setEditEstimatedHours] = useState('2');
+  const [savingEditTask, setSavingEditTask] = useState(false);
+  const editDescriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (editDescriptionRef.current) {
+      editDescriptionRef.current.style.height = 'auto';
+      editDescriptionRef.current.style.height = `${Math.max(68, editDescriptionRef.current.scrollHeight)}px`;
+    }
+  }, [editDescription, editingTask]);
 
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -391,6 +411,52 @@ export default function TasksPage() {
         isDestructive: true,
       }
     );
+  };
+
+  // Edit Task handlers
+  const openEditTask = (task: Task) => {
+    setEditingTask(task);
+    setEditTitle(task.title || '');
+    setEditDescription(task.description || '');
+    setEditProjectId(task.project?._id || (task.project as any) || '');
+    setEditAssignedToId(task.assignedTo?._id || (task.assignedTo as any) || '');
+    setEditDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '');
+    setEditPriority(task.priority || 'MEDIUM');
+    setEditEstimatedHours(task.estimatedHours !== undefined ? String(task.estimatedHours) : '2');
+  };
+
+  const handleUpdateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask || !editTitle.trim()) return;
+
+    try {
+      setSavingEditTask(true);
+      const payload: any = {
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        project: editProjectId || null,
+        assignedTo: editAssignedToId || null,
+        dueDate: editDueDate ? new Date(editDueDate).toISOString() : null,
+        priority: editPriority,
+        estimatedHours: parseFloat(editEstimatedHours) || 0,
+      };
+
+      const updated = await apiFetch<Task>(`/tasks/${editingTask._id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+
+      setTasks((prev) => prev.map((t) => (t._id === updated._id ? updated : t)));
+      if (selectedTask?._id === updated._id) {
+        setSelectedTask(updated);
+      }
+      setEditingTask(null);
+      showAlert('Task updated successfully', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update task', { type: 'error' });
+    } finally {
+      setSavingEditTask(false);
+    }
   };
 
   // Draft subtasks builder in Create Modal
@@ -1940,26 +2006,160 @@ export default function TasksPage() {
               </div>
             </div>
 
-            {/* Action Bar (Delete Task) */}
+            {/* Action Bar (Delete Task, Edit Task, Close) */}
             <div className="flex justify-between items-center pt-3 border-t border-[#222222]">
               <button
                 type="button"
                 onClick={() => handleDeleteTask(selectedTask._id)}
-                className="px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl flex items-center gap-1.5 transition"
+                className="px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete Task</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setSelectedTask(null)}
-                className="px-4 py-1.5 bg-[#181818] hover:bg-[#222222] text-xs text-white rounded-xl font-medium"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => openEditTask(selectedTask)}
+                  className="px-3.5 py-1.5 bg-teal-600/15 hover:bg-teal-600/25 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-sm"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Edit Task</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTask(null)}
+                  className="px-4 py-1.5 bg-[#181818] hover:bg-[#222222] text-xs text-white rounded-xl font-medium cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
+        </Modal>
+      )}
+
+      {/* Edit Task Modal */}
+      {editingTask && (
+        <Modal isOpen={!!editingTask} onClose={() => setEditingTask(null)} title="Edit Task">
+          <form onSubmit={handleUpdateTask} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Task Title *</label>
+              <input
+                type="text"
+                required
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="e.g. Implement JWT authentication & ERP backend APIs"
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Description</label>
+              <textarea
+                ref={editDescriptionRef}
+                rows={2}
+                value={editDescription}
+                onChange={(e) => {
+                  setEditDescription(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+                }}
+                placeholder="Provide details or acceptance criteria..."
+                className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
+                <select
+                  value={editProjectId}
+                  onChange={(e) => setEditProjectId(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                >
+                  <option value="">-- No Project (General) --</option>
+                  {projects.map((p) => (
+                    <option key={p._id} value={p._id}>
+                      {p.name} ({p.clientName || 'Internal'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
+                <select
+                  value={editAssignedToId}
+                  onChange={(e) => setEditAssignedToId(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                >
+                  <option value="">-- Myself (Personal Task) --</option>
+                  {teamMembers.map((m) => (
+                    <option key={(m as any).id || (m as any)._id} value={(m as any).id || (m as any)._id}>
+                      {m.name} ({m.title || 'Developer'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
+                <input
+                  type="date"
+                  value={editDueDate}
+                  onChange={(e) => setEditDueDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 min-w-0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
+                <select
+                  value={editPriority}
+                  onChange={(e) => setEditPriority(e.target.value as TaskPriority)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                >
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HIGH">High</option>
+                  <option value="URGENT">Urgent</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Est. Hours</label>
+                <input
+                  type="number"
+                  min="0.5"
+                  step="0.5"
+                  value={editEstimatedHours}
+                  onChange={(e) => setEditEstimatedHours(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+              <button
+                type="button"
+                onClick={() => setEditingTask(null)}
+                className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingEditTask}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:opacity-50 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition cursor-pointer"
+              >
+                {savingEditTask ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
         </Modal>
       )}
     </div>
