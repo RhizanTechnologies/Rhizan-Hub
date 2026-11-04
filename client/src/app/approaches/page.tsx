@@ -888,6 +888,7 @@ export default function ApproachesPage() {
                   <th className="py-3 px-4">Contact Info</th>
                   <th className="py-3 px-4">Outreach Status</th>
                   <th className="py-3 px-4">Last Contact Date</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-[#1e2a3c]">
@@ -1055,13 +1056,34 @@ export default function ApproachesPage() {
                           );
                         })()}
                       </td>
+                      {/* Actions */}
+                      <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/approaches/${appr._id}`)}
+                            className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-[#1f293d] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+                            title="View details"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setApproachToDelete(appr)}
+                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition cursor-pointer"
+                            title="Delete target"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
 
                 {filteredApproaches.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-neutral-500">
+                    <td colSpan={7} className="py-12 text-center text-neutral-500">
                       <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
                       <p className="text-xs">No outreach targets found matching your filter.</p>
                       <button
@@ -1230,6 +1252,15 @@ export default function ApproachesPage() {
                           <Mail className="w-3.5 h-3.5" />
                         </a>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => setApproachToDelete(appr)}
+                        className="p-2 rounded-xl bg-slate-100 dark:bg-[#202020] hover:bg-rose-500/10 text-slate-500 dark:text-neutral-400 hover:text-rose-400 border border-slate-200 dark:border-[#2d2d2d] transition cursor-pointer"
+                        title="Delete target"
+                        aria-label="Delete target"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 </div>

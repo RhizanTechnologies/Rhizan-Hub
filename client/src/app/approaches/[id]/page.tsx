@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
-import { Approach, ApproachStatus, ContactChannel, Niche, User } from '@/types';
+import { Approach, ApproachStatus, ContactChannel, ContactInteraction, Niche, User } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
   ArrowLeft,
@@ -88,7 +88,7 @@ function formatCleanPhone(raw?: string): string {
 export default function ApproachDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { showAlert } = useAlert();
+  const { showAlert, showConfirm } = useAlert();
   const approachId = params?.id as string;
 
   const [approach, setApproach] = useState<Approach | null>(null);
@@ -333,6 +333,33 @@ export default function ApproachDetailPage() {
     } catch (err: any) {
       showAlert(err.message || 'Failed to delete target', { type: 'error' });
     }
+  };
+
+  const handleDeleteContactLog = (targetEntry: ContactInteraction) => {
+    if (!approach || !approach.contactHistory) return;
+    showConfirm(
+      'Are you sure you want to delete this interaction log?',
+      async () => {
+        const updatedHistory = approach.contactHistory?.filter((item) =>
+          item._id && targetEntry._id ? item._id !== targetEntry._id : item !== targetEntry
+        ) || [];
+        try {
+          const updated = await apiFetch<Approach>(`/approaches/${approach._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ contactHistory: updatedHistory }),
+          });
+          setApproach(updated);
+          showAlert('Interaction log deleted', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to delete log', { type: 'error' });
+        }
+      },
+      {
+        title: 'Delete Interaction Log',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
   };
 
   if (loading) {
@@ -588,11 +615,21 @@ export default function ApproachDetailPage() {
                                 {dateFormatted}
                               </span>
                             </div>
-                            {entry.loggedBy && (
-                              <span className="text-[11px] text-neutral-400 flex items-center gap-1">
-                                Logged by <strong className="text-neutral-300 font-medium">{entry.loggedBy.name}</strong>
-                              </span>
-                            )}
+                            <div className="flex items-center gap-3">
+                              {entry.loggedBy && (
+                                <span className="text-[11px] text-neutral-400 flex items-center gap-1">
+                                  Logged by <strong className="text-neutral-300 font-medium">{entry.loggedBy.name}</strong>
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteContactLog(entry)}
+                                className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition cursor-pointer"
+                                title="Delete interaction log"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
 
                           {/* Notes / Details to remember */}

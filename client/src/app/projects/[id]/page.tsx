@@ -528,6 +528,34 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const handleDeleteComment = (commentIdx: number) => {
+    if (!selectedTask) return;
+    showConfirm(
+      'Are you sure you want to delete this note?',
+      async () => {
+        const updatedComments = (selectedTask.comments || []).filter((_, idx) => idx !== commentIdx);
+        const updatedTask = { ...selectedTask, comments: updatedComments };
+        setSelectedTask(updatedTask);
+        setTasks((prev) => prev.map((t) => (t._id === selectedTask._id ? updatedTask : t)));
+
+        try {
+          await apiFetch(`/tasks/${selectedTask._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ comments: updatedComments }),
+          });
+          showAlert('Note deleted', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to delete note', { type: 'error' });
+        }
+      },
+      {
+        title: 'Delete Note',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
+  };
+
   const handleDeleteTask = (taskId: string) => {
     showConfirm(
       'Are you sure you want to delete this task? This action cannot be undone.',
@@ -1953,6 +1981,14 @@ export default function ProjectDetailPage() {
                             <option value="REVIEW" className="bg-[#0f172a] text-amber-300">Review</option>
                             <option value="DONE" className="bg-[#0f172a] text-emerald-300">Done</option>
                           </select>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTask(t._id)}
+                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 transition cursor-pointer"
+                            title="Delete task"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
                     ))
@@ -2521,12 +2557,22 @@ export default function ProjectDetailPage() {
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {selectedTask.comments && selectedTask.comments.length > 0 ? (
                   selectedTask.comments.map((c, i) => (
-                    <div key={i} className="p-2.5 rounded-xl bg-[#161616] border border-[#262626] text-xs">
+                    <div key={i} className="group/c p-2.5 rounded-xl bg-[#161616] border border-[#262626] text-xs">
                       <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
                         <span className="font-semibold text-neutral-200">{c.author.name}</span>
-                        <span>{c.createdAt}</span>
+                        <div className="flex items-center gap-2">
+                          <span>{c.createdAt}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteComment(i)}
+                            className="opacity-0 group-hover/c:opacity-100 text-neutral-500 hover:text-rose-400 p-0.5 rounded transition cursor-pointer"
+                            title="Delete note"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-neutral-300">{c.text}</p>
+                      <p className="text-neutral-300 whitespace-pre-wrap">{c.text}</p>
                     </div>
                   ))
                 ) : (

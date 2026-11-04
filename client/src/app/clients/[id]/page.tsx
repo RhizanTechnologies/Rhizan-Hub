@@ -34,7 +34,7 @@ import { useAlert } from '@/context/AlertContext';
 export default function ClientDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { showAlert } = useAlert();
+  const { showAlert, showConfirm } = useAlert();
   const clientId = params?.id as string;
 
   const [client, setClient] = useState<Client | null>(null);
@@ -325,19 +325,67 @@ export default function ClientDetailPage() {
     }
   };
 
-  const handleDeleteLink = async (index: number) => {
+  const handleDeleteMeeting = (index: number) => {
     if (!client) return;
-    const updatedLinks = (client.links || []).filter((_, idx) => idx !== index);
+    showConfirm(
+      'Are you sure you want to delete this scheduled meeting?',
+      async () => {
+        const updatedMeetings = (client.meetings || []).filter((_, idx) => idx !== index);
+        try {
+          const updated = await apiFetch<Client>(`/clients/${client._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ meetings: updatedMeetings }),
+          });
+          setClient(updated);
+          showAlert('Meeting removed', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to remove meeting', { type: 'error' });
+        }
+      },
+      { title: 'Delete Meeting', confirmText: 'Delete', isDestructive: true }
+    );
+  };
 
-    try {
-      const updated = await apiFetch<Client>(`/clients/${client._id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ links: updatedLinks }),
-      });
-      setClient(updated);
-    } catch (err: any) {
-      showAlert(err.message || 'Failed to remove link', { type: 'error' });
-    }
+  const handleDeletePayment = (index: number) => {
+    if (!client) return;
+    showConfirm(
+      'Are you sure you want to delete this payment milestone?',
+      async () => {
+        const updatedPayments = (client.payments || []).filter((_, idx) => idx !== index);
+        try {
+          const updated = await apiFetch<Client>(`/clients/${client._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ payments: updatedPayments }),
+          });
+          setClient(updated);
+          showAlert('Payment milestone removed', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to remove payment', { type: 'error' });
+        }
+      },
+      { title: 'Delete Payment Milestone', confirmText: 'Delete', isDestructive: true }
+    );
+  };
+
+  const handleDeleteLink = (index: number) => {
+    if (!client) return;
+    showConfirm(
+      'Are you sure you want to delete this link?',
+      async () => {
+        const updatedLinks = (client.links || []).filter((_, idx) => idx !== index);
+        try {
+          const updated = await apiFetch<Client>(`/clients/${client._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ links: updatedLinks }),
+          });
+          setClient(updated);
+          showAlert('Link removed', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to remove link', { type: 'error' });
+        }
+      },
+      { title: 'Delete Link', confirmText: 'Delete', isDestructive: true }
+    );
   };
 
   if (loading) {
@@ -724,7 +772,7 @@ export default function ClientDetailPage() {
                 {client.meetings!.map((m, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl bg-[#121212] border border-[#222222] flex items-center justify-between"
+                    className="group/m p-4 rounded-2xl bg-[#121212] border border-[#222222] flex items-center justify-between"
                   >
                     <div>
                       <div className="flex items-center gap-2">
@@ -741,6 +789,15 @@ export default function ClientDetailPage() {
                         {m.linkOrLocation && <span>• {m.linkOrLocation}</span>}
                       </div>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteMeeting(idx)}
+                      className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                      title="Delete meeting"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -877,7 +934,7 @@ export default function ClientDetailPage() {
                 {client.payments!.map((p, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl bg-[#121212] border border-[#222222] flex items-center justify-between"
+                    className="group/p p-4 rounded-2xl bg-[#121212] border border-[#222222] flex items-center justify-between"
                   >
                     <div>
                       <div className="flex items-center gap-2">
@@ -910,6 +967,14 @@ export default function ClientDetailPage() {
                       }`}>
                         {p.status}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePayment(idx)}
+                        className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                        title="Delete payment milestone"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -999,7 +1064,7 @@ export default function ClientDetailPage() {
                 {client.links!.map((l, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl bg-[#121212] border border-[#222222] flex items-center justify-between"
+                    className="group/p p-4 rounded-2xl bg-[#121212] border border-[#222222] flex items-center justify-between"
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-xl bg-[#1c1c1c] text-teal-400">

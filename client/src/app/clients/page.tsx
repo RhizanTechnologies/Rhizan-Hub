@@ -32,7 +32,7 @@ import { useAlert } from '@/context/AlertContext';
 
 export default function ClientsPage() {
   const router = useRouter();
-  const { showAlert } = useAlert();
+  const { showAlert, showConfirm } = useAlert();
   const [clients, setClients] = useState<Client[]>([]);
   const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -291,20 +291,70 @@ export default function ClientsPage() {
     }
   };
 
-  const handleDeleteLink = async (linkIndex: number) => {
+  const handleDeleteMeeting = (meetingIndex: number) => {
     if (!selectedClient) return;
-    const updatedLinks = (selectedClient.links || []).filter((_, idx) => idx !== linkIndex);
+    showConfirm(
+      'Are you sure you want to delete this scheduled meeting?',
+      async () => {
+        const updatedMeetings = (selectedClient.meetings || []).filter((_, idx) => idx !== meetingIndex);
+        try {
+          const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ meetings: updatedMeetings }),
+          });
+          setSelectedClient(updated);
+          setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+          showAlert('Meeting removed', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to remove meeting', { type: 'error' });
+        }
+      },
+      { title: 'Delete Meeting', confirmText: 'Delete', isDestructive: true }
+    );
+  };
 
-    try {
-      const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ links: updatedLinks }),
-      });
-      setSelectedClient(updated);
-      setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
-    } catch (err: any) {
-      showAlert(err.message || 'Failed to delete link', { type: 'error' });
-    }
+  const handleDeletePayment = (paymentIndex: number) => {
+    if (!selectedClient) return;
+    showConfirm(
+      'Are you sure you want to delete this payment milestone?',
+      async () => {
+        const updatedPayments = (selectedClient.payments || []).filter((_, idx) => idx !== paymentIndex);
+        try {
+          const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ payments: updatedPayments }),
+          });
+          setSelectedClient(updated);
+          setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+          showAlert('Payment milestone removed', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to remove payment', { type: 'error' });
+        }
+      },
+      { title: 'Delete Payment Milestone', confirmText: 'Delete', isDestructive: true }
+    );
+  };
+
+  const handleDeleteLink = (linkIndex: number) => {
+    if (!selectedClient) return;
+    showConfirm(
+      'Are you sure you want to delete this link?',
+      async () => {
+        const updatedLinks = (selectedClient.links || []).filter((_, idx) => idx !== linkIndex);
+        try {
+          const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ links: updatedLinks }),
+          });
+          setSelectedClient(updated);
+          setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+          showAlert('Link removed', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to delete link', { type: 'error' });
+        }
+      },
+      { title: 'Delete Link', confirmText: 'Delete', isDestructive: true }
+    );
   };
 
   const activeClients = clients.filter(
@@ -438,9 +488,22 @@ export default function ClientsPage() {
                     <Calendar className="w-3 h-3 text-teal-600 dark:text-teal-400" />
                     {meetingsCount} Scheduled Meetings
                   </span>
-                  <span className="text-teal-600 dark:text-teal-400 font-medium group-hover:underline flex items-center gap-1">
-                    View Profile & Details →
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setClientToDelete(client);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 dark:text-neutral-500 hover:text-rose-500 transition rounded cursor-pointer"
+                      title="Delete client"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-teal-600 dark:text-teal-400 font-medium group-hover:underline flex items-center gap-1">
+                      View Profile & Details →
+                    </span>
+                  </div>
                 </div>
               </div>
             );
@@ -677,7 +740,7 @@ export default function ClientsPage() {
                     {selectedClient.meetings!.map((m, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between"
+                        className="group/m p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between"
                       >
                         <div>
                           <div className="flex items-center gap-2">
@@ -694,6 +757,15 @@ export default function ClientsPage() {
                             {m.linkOrLocation && <span>• {m.linkOrLocation}</span>}
                           </div>
                         </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteMeeting(idx)}
+                          className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                          title="Delete meeting"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -786,7 +858,7 @@ export default function ClientsPage() {
                     {selectedClient.payments!.map((p, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between"
+                        className="group/p p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between"
                       >
                         <div>
                           <div className="flex items-center gap-2">
@@ -813,6 +885,14 @@ export default function ClientsPage() {
                           }`}>
                             {p.status}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePayment(idx)}
+                            className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                            title="Delete payment milestone"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
                     ))}

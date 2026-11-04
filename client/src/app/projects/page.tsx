@@ -648,9 +648,22 @@ export default function ProjectsPage() {
                       )}
                     </div>
 
-                    <span className="text-xs text-teal-600 dark:text-teal-400 font-medium group-hover:underline flex items-center gap-1">
-                      Details & Links →
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProjectToDelete(project);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 dark:text-neutral-500 hover:text-rose-500 transition rounded cursor-pointer"
+                        title="Delete project"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="text-xs text-teal-600 dark:text-teal-400 font-medium group-hover:underline flex items-center gap-1">
+                        Details & Links →
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
@@ -809,21 +822,34 @@ export default function ProjectsPage() {
                               <span className="text-slate-400 dark:text-neutral-500 italic">No Lead</span>
                             )}
 
-                            <div className="flex items-center -space-x-1">
-                              {(project.members || []).slice(0, 3).map((m: any, idx: number) => (
-                                <div
-                                  key={idx}
-                                  title={m.name}
-                                  className="w-4 h-4 rounded-full bg-teal-700 text-[8px] text-white font-bold flex items-center justify-center border border-white dark:border-[#141414]"
-                                >
-                                  {m.name?.charAt(0) || 'U'}
-                                </div>
-                              ))}
-                              {(project.members || []).length > 3 && (
-                                <span className="text-[9px] text-slate-400 dark:text-neutral-500 pl-1 font-mono">
-                                  +{project.members.length - 3}
-                                </span>
-                              )}
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setProjectToDelete(project);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 dark:text-neutral-500 hover:text-rose-500 transition rounded cursor-pointer"
+                                title="Delete project"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                              <div className="flex items-center -space-x-1">
+                                {(project.members || []).slice(0, 3).map((m: any, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    title={m.name}
+                                    className="w-4 h-4 rounded-full bg-teal-700 text-[8px] text-white font-bold flex items-center justify-center border border-white dark:border-[#141414]"
+                                  >
+                                    {m.name?.charAt(0) || 'U'}
+                                  </div>
+                                ))}
+                                {(project.members || []).length > 3 && (
+                                  <span className="text-[9px] text-slate-400 dark:text-neutral-500 pl-1 font-mono">
+                                    +{project.members.length - 3}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
 

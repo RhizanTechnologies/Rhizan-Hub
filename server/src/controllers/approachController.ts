@@ -189,7 +189,8 @@ export const updateApproach = async (req: AuthRequest, res: Response): Promise<v
 
     const approach = await Approach.findByIdAndUpdate(id, updateData, { new: true })
       .populate('convertedClientId', 'name status')
-      .populate('assignedTo', 'name email avatar title role');
+      .populate('assignedTo', 'name email avatar title role')
+      .populate('contactHistory.loggedBy', 'name avatar role');
 
     if (!approach) {
       res.status(404).json({ message: 'Approach record not found' });
