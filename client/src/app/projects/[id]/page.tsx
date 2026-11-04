@@ -1135,7 +1135,7 @@ export default function ProjectDetailPage() {
           {/* RIGHT COLUMN: Milestones & Deliverables Roadmap OR Tasks */}
           <div className="lg:col-span-2 space-y-4">
             {activeTab === 'MILESTONES' ? (
-              <div className="p-5 rounded-2xl bg-[#121212] border border-[#222222] space-y-5">
+              <div className="p-5 sm:p-6 rounded-3xl bg-[#0f172a] border border-[#1e293b] space-y-6 shadow-xl">
                 {/* Header & Stats */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
@@ -1143,7 +1143,7 @@ export default function ProjectDetailPage() {
                       <Milestone className="w-4 h-4 text-teal-400" />
                       Milestones & Deliverables Roadmap ({milestones.length})
                     </h3>
-                    <p className="text-xs text-neutral-400 mt-0.5">
+                    <p className="text-xs text-slate-400 mt-0.5">
                       Track delivery phases, client deliverables, and launch sign-offs.
                     </p>
                   </div>
@@ -1152,7 +1152,7 @@ export default function ProjectDetailPage() {
                       <button
                         type="button"
                         onClick={handleLoadStandardPhases}
-                        className="px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 text-xs font-medium flex items-center gap-1.5 transition"
+                        className="px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 text-xs font-medium flex items-center gap-1.5 transition cursor-pointer"
                       >
                         <Sparkles className="w-3.5 h-3.5" />
                         <span>Use 3-Phase Template</span>
@@ -1161,7 +1161,7 @@ export default function ProjectDetailPage() {
                     <button
                       type="button"
                       onClick={() => setIsAddingMilestone(!isAddingMilestone)}
-                      className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
+                      className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Add Milestone</span>
@@ -1171,17 +1171,17 @@ export default function ProjectDetailPage() {
 
                 {/* Milestone Summary Metric Cards */}
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 rounded-xl bg-[#161616] border border-[#242424]">
-                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">Total Phases</span>
-                    <span className="text-base font-extrabold text-white">{milestones.length}</span>
+                  <div className="p-4 rounded-2xl bg-[#131d2e] border border-[#1e293b] shadow-xs">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Total Phases</span>
+                    <span className="text-xl font-extrabold text-white mt-0.5 block">{milestones.length}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#161616] border border-[#242424]">
-                    <span className="text-[10px] uppercase font-bold text-emerald-400 block">Completed Phases</span>
-                    <span className="text-base font-extrabold text-emerald-400">{completedMilestones}</span>
+                  <div className="p-4 rounded-2xl bg-[#131d2e] border border-[#1e293b] shadow-xs">
+                    <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block">Completed Phases</span>
+                    <span className="text-xl font-extrabold text-emerald-400 mt-0.5 block">{completedMilestones}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#161616] border border-[#242424]">
-                    <span className="text-[10px] uppercase font-bold text-teal-400 block">Deliverables Checked</span>
-                    <span className="text-base font-extrabold text-teal-400">{completedDeliverables} / {totalDeliverables}</span>
+                  <div className="p-4 rounded-2xl bg-[#131d2e] border border-[#1e293b] shadow-xs">
+                    <span className="text-[10px] uppercase font-bold text-teal-400 tracking-wider block">Deliverables Checked</span>
+                    <span className="text-xl font-extrabold text-teal-400 mt-0.5 block">{completedDeliverables} / {totalDeliverables}</span>
                   </div>
                 </div>
 
@@ -1189,10 +1189,10 @@ export default function ProjectDetailPage() {
                 {milestones.length > 0 && (
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-neutral-400 font-medium">Roadmap Progress</span>
+                      <span className="text-slate-400 font-medium">Roadmap Progress</span>
                       <span className="font-mono text-teal-400 font-bold">{milestoneProgress}%</span>
                     </div>
-                    <div className="w-full bg-[#1a1a1a] h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-[#0b1320] h-2.5 rounded-full overflow-hidden border border-[#1e293b]">
                       <div
                         className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                         style={{ width: `${milestoneProgress}%` }}
@@ -1203,16 +1203,16 @@ export default function ProjectDetailPage() {
 
                 {/* Add Milestone Form */}
                 {isAddingMilestone && (
-                  <form onSubmit={handleAddMilestone} className="p-4 rounded-2xl bg-[#161616] border border-teal-500/30 space-y-3.5 animate-fade-in">
+                  <form onSubmit={handleAddMilestone} className="p-5 sm:p-6 rounded-2xl bg-[#131d2e] border border-teal-500/40 shadow-xl space-y-4 animate-fade-in">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-teal-300 flex items-center gap-1.5">
-                        <Flag className="w-3.5 h-3.5 text-teal-400" />
+                      <h4 className="text-sm font-bold text-teal-300 flex items-center gap-1.5">
+                        <Flag className="w-4 h-4 text-teal-400" />
                         Create New Milestone / Phase
                       </h4>
                       <button
                         type="button"
                         onClick={() => setIsAddingMilestone(false)}
-                        className="text-xs text-neutral-400 hover:text-white"
+                        className="text-xs text-slate-400 hover:text-white transition cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -1220,48 +1220,61 @@ export default function ProjectDetailPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="md:col-span-2">
-                        <label className="block text-[11px] text-neutral-400 mb-1">Phase Title *</label>
+                        <label className="block text-[11px] text-slate-300 font-medium mb-1">Phase Title *</label>
                         <input
                           type="text"
                           placeholder="e.g. Phase 1: Architecture, UI/UX Design & SRS"
                           value={milestoneTitle}
                           onChange={(e) => setMilestoneTitle(e.target.value)}
                           required
-                          className="w-full bg-[#101010] border border-[#282828] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                          className="w-full bg-[#0b1320] border border-[#223147] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] text-neutral-400 mb-1">Target Deadline</label>
+                        <label className="block text-[11px] text-slate-300 font-medium mb-1">Target Deadline</label>
                         <input
                           type="date"
                           value={milestoneDueDate}
                           onChange={(e) => setMilestoneDueDate(e.target.value)}
-                          className="w-full bg-[#101010] border border-[#282828] rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
+                          className="w-full bg-[#0b1320] border border-[#223147] rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] text-neutral-400 mb-1">Phase Description (Optional)</label>
-                      <input
-                        type="text"
+                      <label className="block text-[11px] text-slate-300 font-medium mb-1">Phase Description (Optional)</label>
+                      <textarea
+                        rows={2}
                         placeholder="Brief summary of goals and scope for this phase"
                         value={milestoneDescription}
-                        onChange={(e) => setMilestoneDescription(e.target.value)}
-                        className="w-full bg-[#101010] border border-[#282828] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                        onChange={(e) => {
+                          setMilestoneDescription(e.target.value);
+                          e.target.style.height = 'auto';
+                          e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+                        }}
+                        className="w-full bg-[#0b1320] border border-[#223147] rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition resize-none leading-relaxed overflow-hidden"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] text-neutral-400 mb-1">
-                        Deliverables Checklist (One deliverable per line)
+                      <label className="block text-[11px] text-slate-300 font-medium mb-1 flex items-center justify-between">
+                        <span>Deliverables Checklist (One deliverable per line)</span>
+                        {milestoneDeliverablesInput.trim() && (
+                          <span className="text-[10px] text-teal-400 font-mono">
+                            {milestoneDeliverablesInput.split('\n').filter((l) => l.trim()).length} deliverables
+                          </span>
+                        )}
                       </label>
                       <textarea
-                        rows={3}
+                        rows={Math.max(4, milestoneDeliverablesInput.split('\n').length)}
                         placeholder={'SRS Requirements Specification document signed off\nFigma interactive wireframes and prototype\nDatabase schema ERD and API contracts'}
                         value={milestoneDeliverablesInput}
-                        onChange={(e) => setMilestoneDeliverablesInput(e.target.value)}
-                        className="w-full bg-[#101010] border border-[#282828] rounded-xl p-2.5 text-xs text-white outline-none focus:border-teal-500 resize-none font-mono"
+                        onChange={(e) => {
+                          setMilestoneDeliverablesInput(e.target.value);
+                          e.target.style.height = 'auto';
+                          e.target.style.height = `${Math.max(100, e.target.scrollHeight)}px`;
+                        }}
+                        className="w-full bg-[#0b1320] border border-[#223147] rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition resize-none font-mono leading-relaxed overflow-hidden"
                       />
                     </div>
 
@@ -1269,14 +1282,14 @@ export default function ProjectDetailPage() {
                       <button
                         type="button"
                         onClick={() => setIsAddingMilestone(false)}
-                        className="px-3.5 py-1.5 rounded-xl text-xs text-neutral-400 hover:text-white"
+                        className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={savingMilestone}
-                        className="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5"
+                        className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-md shadow-teal-900/30"
                       >
                         {savingMilestone ? 'Saving...' : 'Create Milestone'}
                       </button>
@@ -1295,38 +1308,33 @@ export default function ProjectDetailPage() {
                       return (
                         <div
                           key={m._id || mIdx}
-                          className={`p-4 rounded-2xl border transition ${
+                          className={`p-5 rounded-2xl border transition-all shadow-md ${
                             m.status === 'COMPLETED'
-                              ? 'bg-[#151a17] border-emerald-500/30'
+                              ? 'bg-[#0f1d24] border-emerald-500/40 shadow-emerald-950/20'
                               : m.status === 'IN_PROGRESS'
-                              ? 'bg-[#141818] border-teal-500/30'
-                              : 'bg-[#161616] border-[#262626]'
+                              ? 'bg-[#0f1b2c] border-teal-500/40 shadow-teal-950/20 ring-1 ring-teal-500/20'
+                              : 'bg-[#0f172a] border-[#1e293b] hover:border-slate-700'
                           }`}
                         >
-                          {/* Milestone Header */}
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-[#222222]">
-                            <div className="flex items-center gap-2.5">
-                              <span className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center ${
+                          {/* Milestone Header: Title on Left, Date/Status/Delete on Right (Above) */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#1e293b]">
+                            <div className="flex items-center gap-3">
+                              <span className={`w-7 h-7 rounded-xl text-xs font-bold flex items-center justify-center shrink-0 ${
                                 m.status === 'COMPLETED'
-                                  ? 'bg-emerald-500/20 text-emerald-300'
-                                  : 'bg-teal-500/20 text-teal-300'
+                                  ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/30'
+                                  : 'bg-teal-500/20 text-teal-300 ring-1 ring-teal-500/30'
                               }`}>
                                 {mIdx + 1}
                               </span>
-                              <div>
-                                <h4 className="text-xs font-bold text-white flex items-center gap-2">
-                                  {m.title}
-                                </h4>
-                                {m.description && (
-                                  <p className="text-[11px] text-neutral-400 mt-0.5">{m.description}</p>
-                                )}
-                              </div>
+                              <h4 className="text-sm sm:text-base font-bold text-white tracking-wide">
+                                {m.title}
+                              </h4>
                             </div>
 
-                            <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                               {m.dueDate && (
-                                <span className="text-[11px] text-neutral-400 flex items-center gap-1">
-                                  <Calendar className="w-3 h-3 text-neutral-500" />
+                                <span className="text-xs text-slate-300 bg-[#0b1320] border border-[#223147] px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-xs">
+                                  <Calendar className="w-3.5 h-3.5 text-teal-400" />
                                   {new Date(m.dueDate).toLocaleDateString()}
                                 </span>
                               )}
@@ -1335,41 +1343,50 @@ export default function ProjectDetailPage() {
                               <select
                                 value={m.status}
                                 onChange={(e) => handleUpdateMilestoneStatus(mIdx, e.target.value)}
-                                className={`text-[10px] font-bold uppercase px-2 py-1 rounded-lg border outline-none bg-[#111111] cursor-pointer ${
+                                className={`text-[11px] font-bold uppercase px-2.5 py-1 rounded-lg border outline-none cursor-pointer transition ${
                                   m.status === 'COMPLETED'
-                                    ? 'text-emerald-400 border-emerald-500/30'
+                                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
                                     : m.status === 'IN_PROGRESS'
-                                    ? 'text-teal-400 border-teal-500/30'
-                                    : 'text-neutral-400 border-[#2d2d2d]'
+                                    ? 'bg-teal-950/60 text-teal-300 border-teal-500/40 ring-1 ring-teal-500/30'
+                                    : 'bg-[#0b1320] text-slate-300 border-[#223147]'
                                 }`}
                               >
-                                <option value="PENDING">Pending</option>
-                                <option value="IN_PROGRESS">In Progress</option>
-                                <option value="COMPLETED">Completed</option>
-                                <option value="CANCELLED">Cancelled</option>
+                                <option value="PENDING" className="bg-[#0f172a] text-slate-300">Pending</option>
+                                <option value="IN_PROGRESS" className="bg-[#0f172a] text-teal-300">In Progress</option>
+                                <option value="COMPLETED" className="bg-[#0f172a] text-emerald-300">Completed</option>
+                                <option value="CANCELLED" className="bg-[#0f172a] text-rose-300">Cancelled</option>
                               </select>
 
                               <button
                                 type="button"
                                 onClick={() => handleDeleteMilestone(mIdx)}
-                                className="p-1 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                                className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition cursor-pointer"
                                 title="Delete milestone"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </div>
 
+                          {/* Phase Description: Full Width with increased, readable font size */}
+                          {m.description && (
+                            <div className="pt-3 pb-1 w-full">
+                              <p className="text-sm text-slate-200 leading-relaxed font-normal">
+                                {m.description}
+                              </p>
+                            </div>
+                          )}
+
                           {/* Phase Progress Bar */}
                           {deliverables.length > 0 && (
                             <div className="py-2.5">
-                              <div className="flex items-center justify-between text-[11px] mb-1">
-                                <span className="text-neutral-400">
-                                  Deliverables: {doneCount} of {deliverables.length} complete
+                              <div className="flex items-center justify-between text-xs mb-1.5">
+                                <span className="text-slate-400">
+                                  Deliverables: <strong className="text-white">{doneCount}</strong> of <strong className="text-white">{deliverables.length}</strong> complete
                                 </span>
                                 <span className="font-mono text-teal-400 font-bold">{phaseProgress}%</span>
                               </div>
-                              <div className="w-full bg-[#101010] h-1.5 rounded-full overflow-hidden">
+                              <div className="w-full bg-[#0b1320] h-2 rounded-full overflow-hidden border border-[#1e293b]/60">
                                 <div
                                   className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-300"
                                   style={{ width: `${phaseProgress}%` }}
@@ -1379,55 +1396,57 @@ export default function ProjectDetailPage() {
                           )}
 
                           {/* Deliverables Checklist */}
-                          <div className="space-y-1.5 pt-2">
-                            <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                          <div className="space-y-2 pt-2">
+                            <span className="text-[11px] uppercase font-bold text-slate-400 block tracking-wider">
                               Phase Deliverables Checklist:
                             </span>
 
-                            {deliverables.map((d, dIdx) => (
-                              <div
-                                key={d._id || dIdx}
-                                className="group flex items-center justify-between py-1 px-2 rounded-lg hover:bg-[#1a1a1a] transition"
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleDeliverable(mIdx, dIdx)}
-                                  className="flex items-center gap-2.5 text-left min-w-0"
+                            <div className="space-y-1">
+                              {deliverables.map((d, dIdx) => (
+                                <div
+                                  key={d._id || dIdx}
+                                  className="group flex items-center justify-between py-1.5 px-2.5 rounded-xl hover:bg-[#162238]/60 transition"
                                 >
-                                  <div
-                                    className={`w-4 h-4 rounded flex items-center justify-center transition shrink-0 ${
-                                      d.completed
-                                        ? 'bg-emerald-500 text-black shadow-sm'
-                                        : 'border border-neutral-600 hover:border-teal-400'
-                                    }`}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleDeliverable(mIdx, dIdx)}
+                                    className="flex items-center gap-2.5 text-left min-w-0 cursor-pointer flex-1"
                                   >
-                                    {d.completed && <Check className="w-3 h-3 stroke-[3]" />}
-                                  </div>
-                                  <span
-                                    className={`text-xs transition ${
-                                      d.completed
-                                        ? 'line-through text-neutral-500'
-                                        : 'text-neutral-200 group-hover:text-white'
-                                    }`}
-                                  >
-                                    {d.title}
-                                  </span>
-                                </button>
+                                    <div
+                                      className={`w-4 h-4 rounded flex items-center justify-center transition shrink-0 ${
+                                        d.completed
+                                          ? 'bg-emerald-500 text-black shadow-sm ring-1 ring-emerald-400'
+                                          : 'border border-slate-600 group-hover:border-teal-400'
+                                      }`}
+                                    >
+                                      {d.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                                    </div>
+                                    <span
+                                      className={`text-xs sm:text-sm transition ${
+                                        d.completed
+                                          ? 'line-through text-slate-500'
+                                          : 'text-slate-200 group-hover:text-white'
+                                      }`}
+                                    >
+                                      {d.title}
+                                    </span>
+                                  </button>
 
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteDeliverableItem(mIdx, dIdx)}
-                                  className="opacity-0 group-hover:opacity-100 p-1 text-neutral-600 hover:text-rose-400 transition"
-                                  title="Remove deliverable"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            ))}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteDeliverableItem(mIdx, dIdx)}
+                                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 transition cursor-pointer"
+                                    title="Remove deliverable"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
 
                             {/* Inline Add Deliverable Input */}
-                            <div className="mt-2.5 flex items-center rounded-xl bg-[#121212] border border-[#2a2a2a] focus-within:border-teal-500/80 focus-within:ring-1 focus-within:ring-teal-500/40 p-1 pl-3 transition-all">
-                              <Plus className="w-3.5 h-3.5 text-neutral-500 mr-2 shrink-0" />
+                            <div className="mt-3 flex items-center rounded-xl bg-[#0b1320] border border-[#223147] focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500/30 p-1 pl-3 transition-all">
+                              <Plus className="w-3.5 h-3.5 text-slate-500 mr-2 shrink-0" />
                               <input
                                 type="text"
                                 placeholder="Add deliverable to this phase (press Enter)..."
@@ -1441,13 +1460,13 @@ export default function ProjectDetailPage() {
                                     handleAddDeliverableItem(mIdx);
                                   }
                                 }}
-                                className="flex-1 bg-transparent text-xs text-white placeholder-neutral-500 outline-none min-w-0"
+                                className="flex-1 bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 outline-none min-w-0"
                               />
                               <button
                                 type="button"
                                 onClick={() => handleAddDeliverableItem(mIdx)}
                                 disabled={!(deliverableInputMap[mIdx] || '').trim()}
-                                className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-semibold flex items-center gap-1 transition shrink-0 shadow-sm active:scale-95"
+                                className="px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-semibold flex items-center gap-1 transition shrink-0 shadow-sm active:scale-95 cursor-pointer"
                               >
                                 <span>Add</span>
                               </button>
@@ -1457,11 +1476,11 @@ export default function ProjectDetailPage() {
                       );
                     })
                   ) : (
-                    <div className="p-8 text-center bg-[#161616] rounded-2xl border border-dashed border-[#242424] space-y-3">
-                      <Milestone className="w-9 h-9 text-neutral-600 mx-auto" />
+                    <div className="p-8 text-center bg-[#131d2e] rounded-2xl border border-dashed border-[#1e293b] space-y-3">
+                      <Milestone className="w-9 h-9 text-slate-500 mx-auto" />
                       <div className="space-y-1">
-                        <h4 className="text-xs font-bold text-white">No delivery milestones added yet</h4>
-                        <p className="text-[11px] text-neutral-400 max-w-sm mx-auto">
+                        <h4 className="text-sm font-bold text-white">No delivery milestones added yet</h4>
+                        <p className="text-xs text-slate-400 max-w-sm mx-auto">
                           Break your project into clear delivery phases (e.g. SRS & UI/UX, Backend MVP, Testing, and Launch) to keep clients and developers aligned.
                         </p>
                       </div>
@@ -1469,7 +1488,7 @@ export default function ProjectDetailPage() {
                         <button
                           type="button"
                           onClick={handleLoadStandardPhases}
-                          className="px-3.5 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 text-xs font-semibold flex items-center gap-1.5 transition"
+                          className="px-3.5 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
                         >
                           <Sparkles className="w-3.5 h-3.5" />
                           <span>Load 3-Phase Software Template</span>
@@ -1477,7 +1496,7 @@ export default function ProjectDetailPage() {
                         <button
                           type="button"
                           onClick={() => setIsAddingMilestone(true)}
-                          className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+                          className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span>Create Custom Milestone</span>
@@ -1488,14 +1507,14 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
             ) : (
-              <div className="p-5 rounded-2xl bg-[#121212] border border-[#222222] space-y-4">
+              <div className="p-5 sm:p-6 rounded-3xl bg-[#0f172a] border border-[#1e293b] space-y-5 shadow-xl">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-heading text-base font-bold text-white flex items-center gap-2">
                       <CheckSquare className="w-4 h-4 text-teal-400" />
                       Project Tasks ({tasks.length})
                     </h3>
-                    <p className="text-xs text-neutral-400 mt-0.5">
+                    <p className="text-xs text-slate-400 mt-0.5">
                       Break down features into tasks and assign developers.
                     </p>
                   </div>
