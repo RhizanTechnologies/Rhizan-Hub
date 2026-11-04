@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { PriorityBadge } from '@/components/Badge';
 import { Modal } from '@/components/Modal';
@@ -102,6 +102,15 @@ export default function TasksPage() {
   // Selected Task Detail Subtask & Comment state
   const [detailSubtaskText, setDetailSubtaskText] = useState('');
   const [commentText, setCommentText] = useState('');
+
+  const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (descriptionTextareaRef.current) {
+      descriptionTextareaRef.current.style.height = 'auto';
+      descriptionTextareaRef.current.style.height = `${Math.max(68, descriptionTextareaRef.current.scrollHeight)}px`;
+    }
+  }, [description, isNewTaskOpen]);
 
   const loadData = async () => {
     try {
@@ -1568,11 +1577,16 @@ export default function TasksPage() {
           <div>
             <label className="block text-xs font-medium text-neutral-300 mb-1">Description</label>
             <textarea
+              ref={descriptionTextareaRef}
               rows={2}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
               placeholder="Provide details or acceptance criteria..."
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none"
+              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
             />
           </div>
 
@@ -1788,7 +1802,7 @@ export default function TasksPage() {
 
             {/* Description */}
             {selectedTask.description && (
-              <p className="text-xs text-neutral-300 leading-relaxed bg-[#161616] p-3.5 rounded-2xl border border-[#242424]">
+              <p className="text-xs text-neutral-300 leading-relaxed bg-[#161616] p-3.5 rounded-2xl border border-[#242424] whitespace-pre-wrap break-words">
                 {selectedTask.description}
               </p>
             )}

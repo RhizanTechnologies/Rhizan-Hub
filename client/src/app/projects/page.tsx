@@ -1212,10 +1212,14 @@ export default function ProjectsPage() {
             </label>
             <textarea
               value={formDescription}
-              onChange={(e) => setFormDescription(e.target.value)}
+              onChange={(e) => {
+                setFormDescription(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
               placeholder="Describe deliverables, core features, or technical goals..."
               rows={2}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none transition resize-none leading-relaxed overflow-hidden"
             />
           </div>
 
