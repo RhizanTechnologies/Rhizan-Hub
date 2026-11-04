@@ -32,6 +32,7 @@ import {
   Tag,
   Briefcase,
   CheckCircle2,
+  Pencil,
 } from 'lucide-react';
 
 const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
@@ -483,6 +484,59 @@ export default function TimeTrackingPage() {
         isDestructive: true,
       }
     );
+  };
+
+  // EDIT TIME ENTRY STATE & HANDLERS
+  const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
+  const [editProject, setEditProject] = useState('');
+  const [editTask, setEditTask] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editHours, setEditHours] = useState(0);
+  const [editMinutes, setEditMinutes] = useState(0);
+  const [editStartTime, setEditStartTime] = useState('');
+  const [editEndTime, setEditEndTime] = useState('');
+  const [editBillable, setEditBillable] = useState(true);
+
+  const openEditEntry = (entry: TimeEntry) => {
+    setEditingEntry(entry);
+    setEditProject(entry.project?._id || '');
+    setEditTask(entry.task?._id || '');
+    setEditDescription(entry.description || '');
+    setEditDate(entry.date ? new Date(entry.date).toISOString().split('T')[0] : '');
+    setEditHours(entry.hours || 0);
+    setEditMinutes(entry.minutes || 0);
+    setEditStartTime(entry.startTime || '');
+    setEditEndTime(entry.endTime || '');
+    setEditBillable(entry.billable !== false);
+  };
+
+  const handleUpdateEntry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEntry) return;
+
+    try {
+      const updated = await apiFetch<TimeEntry>(`/time/${editingEntry._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          project: editProject || undefined,
+          task: editTask || undefined,
+          description: editDescription.trim(),
+          date: editDate ? new Date(editDate).toISOString() : undefined,
+          hours: Number(editHours) || 0,
+          minutes: Number(editMinutes) || 0,
+          startTime: editStartTime || undefined,
+          endTime: editEndTime || undefined,
+          billable: editBillable,
+        }),
+      });
+
+      setEntries((prev) => prev.map((e) => (e._id === updated._id ? updated : e)));
+      setEditingEntry(null);
+      showAlert('Time entry updated successfully', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update time entry', { type: 'error' });
+    }
   };
 
   // Filter Tasks by Selected Project
@@ -1145,25 +1199,33 @@ export default function TimeTrackingPage() {
                                 {formatDurationText(entry.hours, entry.minutes)}
                               </span>
 
-                              {/* Actions: Restart (▶) & Delete */}
-                              <div className="flex items-center gap-1">
-                                <button
-                                  type="button"
-                                  onClick={() => restartPastTimer(entry)}
-                                  className="p-1.5 rounded-lg bg-[#1e1e1e] hover:bg-teal-600 hover:text-white text-teal-400 transition shadow-sm"
-                                  title="Continue / restart this timer"
-                                >
-                                  <Play className="w-3.5 h-3.5 fill-current" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteEntry(entry._id)}
-                                  className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
-                                  title="Delete time entry"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
+                                {/* Actions: Restart (▶), Edit (✎) & Delete (🗑) */}
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => restartPastTimer(entry)}
+                                    className="p-1.5 rounded-lg bg-[#1e1e1e] hover:bg-teal-600 hover:text-white text-teal-400 transition shadow-sm cursor-pointer"
+                                    title="Continue / restart this timer"
+                                  >
+                                    <Play className="w-3.5 h-3.5 fill-current" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openEditEntry(entry)}
+                                    className="p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                                    title="Edit time entry"
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteEntry(entry._id)}
+                                    className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                                    title="Delete time entry"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                             </div>
                           </div>
                         ))}
@@ -1666,6 +1728,142 @@ export default function TimeTrackingPage() {
                 })}
             </div>
           </div>
+        )}
+      </Modal>
+
+      {/* EDIT TIME ENTRY MODAL */}
+      <Modal
+        isOpen={Boolean(editingEntry)}
+        onClose={() => setEditingEntry(null)}
+        title="Edit Time Entry"
+      >
+        {editingEntry && (
+          <form onSubmit={handleUpdateEntry} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Project *
+              </label>
+              <select
+                value={editProject}
+                onChange={(e) => {
+                  setEditProject(e.target.value);
+                  setEditTask('');
+                }}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                {projects.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.name} {p.clientName ? `(${p.clientName})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {tasks.filter((t) => (t.project as any)?._id === editProject || (t.project as any) === editProject).length > 0 && (
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Associated Task (Optional)
+                </label>
+                <select
+                  value={editTask}
+                  onChange={(e) => setEditTask(e.target.value)}
+                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                >
+                  <option value="">No task linked</option>
+                  {tasks
+                    .filter((t) => (t.project as any)?._id === editProject || (t.project as any) === editProject)
+                    .map((t) => (
+                      <option key={t._id} value={t._id}>
+                        {t.title}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Description / Work Done *
+              </label>
+              <textarea
+                rows={2}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  required
+                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Hours
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="24"
+                  value={editHours}
+                  onChange={(e) => setEditHours(parseInt(e.target.value) || 0)}
+                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none font-mono"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Minutes
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={editMinutes}
+                  onChange={(e) => setEditMinutes(parseInt(e.target.value) || 0)}
+                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-neutral-300">
+                <input
+                  type="checkbox"
+                  checked={editBillable}
+                  onChange={(e) => setEditBillable(e.target.checked)}
+                  className="rounded border-[#333] text-teal-500 focus:ring-0 focus:ring-offset-0 bg-[#181818]"
+                />
+                <span>Billable to client</span>
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+              <button
+                type="button"
+                onClick={() => setEditingEntry(null)}
+                className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
         )}
       </Modal>
     </div>

@@ -362,6 +362,53 @@ export default function ApproachDetailPage() {
     );
   };
 
+  // EDIT INTERACTION LOG STATE & HANDLERS
+  const [editingLog, setEditingLog] = useState<ContactInteraction | null>(null);
+  const [editLogChannel, setEditLogChannel] = useState<ContactChannel>('CALL');
+  const [editLogDate, setEditLogDate] = useState('');
+  const [editLogNotes, setEditLogNotes] = useState('');
+  const [editLogFollowUp, setEditLogFollowUp] = useState('');
+
+  const openEditContactLog = (entry: ContactInteraction) => {
+    setEditingLog(entry);
+    setEditLogChannel(entry.channel || 'CALL');
+    setEditLogDate(entry.date ? new Date(entry.date).toISOString().split('T')[0] : '');
+    setEditLogNotes(entry.notes || '');
+    setEditLogFollowUp(entry.nextFollowUpDate ? new Date(entry.nextFollowUpDate).toISOString().split('T')[0] : '');
+  };
+
+  const handleUpdateContactLog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!approach || !approach.contactHistory || !editingLog) return;
+
+    const updatedHistory = approach.contactHistory.map((item) => {
+      const isMatch = item._id && editingLog._id ? item._id === editingLog._id : item === editingLog;
+      if (!isMatch) return item;
+      return {
+        ...item,
+        channel: editLogChannel,
+        date: editLogDate ? new Date(editLogDate).toISOString() : item.date,
+        notes: editLogNotes.trim(),
+        nextFollowUpDate: editLogFollowUp ? new Date(editLogFollowUp).toISOString() : undefined,
+      };
+    });
+
+    try {
+      const updated = await apiFetch<Approach>(`/approaches/${approach._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          contactHistory: updatedHistory,
+          nextFollowUpDate: editLogFollowUp ? new Date(editLogFollowUp).toISOString() : approach.nextFollowUpDate,
+        }),
+      });
+      setApproach(updated);
+      setEditingLog(null);
+      showAlert('Interaction log updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update log', { type: 'error' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
@@ -621,14 +668,24 @@ export default function ApproachDetailPage() {
                                   Logged by <strong className="text-neutral-300 font-medium">{entry.loggedBy.name}</strong>
                                 </span>
                               )}
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteContactLog(entry)}
-                                className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition cursor-pointer"
-                                title="Delete interaction log"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditContactLog(entry)}
+                                  className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-teal-400 hover:bg-teal-500/10 rounded transition cursor-pointer"
+                                  title="Edit interaction log"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteContactLog(entry)}
+                                  className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition cursor-pointer"
+                                  title="Delete interaction log"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
                           </div>
 
@@ -1371,6 +1428,88 @@ export default function ApproachDetailPage() {
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>{converting ? 'Creating Client...' : 'Confirm & Onboard Client'}</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* EDIT INTERACTION LOG MODAL */}
+      <Modal
+        isOpen={Boolean(editingLog)}
+        onClose={() => setEditingLog(null)}
+        title="Edit Interaction Log"
+      >
+        <form onSubmit={handleUpdateContactLog} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Channel *
+              </label>
+              <select
+                value={editLogChannel}
+                onChange={(e) => setEditLogChannel(e.target.value as ContactChannel)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              >
+                <option value="CALL">Phone Call</option>
+                <option value="WHATSAPP">WhatsApp Message / Call</option>
+                <option value="MEETING">In-Person / Office Meeting</option>
+                <option value="EMAIL">Email Outreach</option>
+                <option value="OTHER">Other Touchpoint</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Interaction Date *
+              </label>
+              <input
+                type="date"
+                value={editLogDate}
+                onChange={(e) => setEditLogDate(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Discussion Notes / Requirements *
+            </label>
+            <textarea
+              rows={3}
+              value={editLogNotes}
+              onChange={(e) => setEditLogNotes(e.target.value)}
+              required
+              placeholder="What did the prospect say? What pricing or features were discussed?"
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Next Follow-Up Date (Optional)
+            </label>
+            <input
+              type="date"
+              value={editLogFollowUp}
+              onChange={(e) => setEditLogFollowUp(e.target.value)}
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setEditingLog(null)}
+              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold transition shadow-md shadow-teal-900/30"
+            >
+              Save Changes
             </button>
           </div>
         </form>

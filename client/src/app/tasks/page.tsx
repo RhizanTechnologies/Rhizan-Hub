@@ -499,6 +499,37 @@ export default function TasksPage() {
     );
   };
 
+  const [editingCommentIdx, setEditingCommentIdx] = useState<number | null>(null);
+  const [editCommentText, setEditCommentText] = useState('');
+
+  const handleStartEditComment = (idx: number, currentText: string) => {
+    setEditingCommentIdx(idx);
+    setEditCommentText(currentText);
+  };
+
+  const handleSaveEditComment = async (commentIdx: number) => {
+    if (!selectedTask || !editCommentText.trim()) return;
+    const updatedComments = [...(selectedTask.comments || [])];
+    updatedComments[commentIdx] = {
+      ...updatedComments[commentIdx],
+      text: editCommentText.trim(),
+    };
+    const updatedTask = { ...selectedTask, comments: updatedComments };
+    setSelectedTask(updatedTask);
+    setTasks((prev) => prev.map((t) => (t._id === selectedTask._id ? updatedTask : t)));
+    setEditingCommentIdx(null);
+
+    try {
+      await apiFetch(`/tasks/${selectedTask._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ comments: updatedComments }),
+      });
+      showAlert('Note updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update note', { type: 'error' });
+    }
+  };
+
   // Create Task Form Submit
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -2015,8 +2046,16 @@ export default function TasksPage() {
                     <div key={i} className="group/c p-2.5 rounded-xl bg-[#161616] border border-[#262626] text-xs">
                       <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
                         <span className="font-semibold text-neutral-200">{c.author.name}</span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <span>{c.createdAt}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleStartEditComment(i, c.text)}
+                            className="opacity-0 group-hover/c:opacity-100 text-neutral-500 hover:text-teal-400 p-0.5 rounded transition cursor-pointer"
+                            title="Edit note"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteComment(i)}
@@ -2027,7 +2066,37 @@ export default function TasksPage() {
                           </button>
                         </div>
                       </div>
-                      <p className="text-neutral-300 whitespace-pre-wrap">{c.text}</p>
+                      {editingCommentIdx === i ? (
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <input
+                            type="text"
+                            value={editCommentText}
+                            onChange={(e) => setEditCommentText(e.target.value)}
+                            className="flex-1 px-2.5 py-1 bg-[#121212] border border-teal-500/50 rounded-lg text-xs text-white outline-none"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveEditComment(i);
+                              if (e.key === 'Escape') setEditingCommentIdx(null);
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSaveEditComment(i)}
+                            className="px-2 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-[11px] font-semibold cursor-pointer"
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingCommentIdx(null)}
+                            className="px-2 py-1 text-neutral-400 hover:text-white text-[11px] cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-neutral-300 whitespace-pre-wrap">{c.text}</p>
+                      )}
                     </div>
                   ))
                 ) : (

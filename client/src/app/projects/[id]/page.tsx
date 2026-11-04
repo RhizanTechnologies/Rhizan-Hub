@@ -556,6 +556,68 @@ export default function ProjectDetailPage() {
     );
   };
 
+  const [editingCommentIdx, setEditingCommentIdx] = useState<number | null>(null);
+  const [editCommentText, setEditCommentText] = useState('');
+
+  const handleStartEditComment = (idx: number, currentText: string) => {
+    setEditingCommentIdx(idx);
+    setEditCommentText(currentText);
+  };
+
+  const handleSaveEditComment = async (commentIdx: number) => {
+    if (!selectedTask || !editCommentText.trim()) return;
+    const updatedComments = [...(selectedTask.comments || [])];
+    updatedComments[commentIdx] = {
+      ...updatedComments[commentIdx],
+      text: editCommentText.trim(),
+    };
+    const updatedTask = { ...selectedTask, comments: updatedComments };
+    setSelectedTask(updatedTask);
+    setTasks((prev) => prev.map((t) => (t._id === selectedTask._id ? updatedTask : t)));
+    setEditingCommentIdx(null);
+
+    try {
+      await apiFetch(`/tasks/${selectedTask._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ comments: updatedComments }),
+      });
+      showAlert('Note updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update note', { type: 'error' });
+    }
+  };
+
+  // INLINE EDIT DELIVERABLE
+  const [editingDeliverable, setEditingDeliverable] = useState<{ mIdx: number; dIdx: number; text: string } | null>(null);
+
+  const handleSaveDeliverableTitle = async (mIdx: number, dIdx: number) => {
+    if (!project || !project.milestones || !editingDeliverable || !editingDeliverable.text.trim()) {
+      setEditingDeliverable(null);
+      return;
+    }
+    const currentMilestones = [...project.milestones];
+    const targetM = { ...currentMilestones[mIdx] };
+    const currentDeliverables = [...(targetM.deliverables || [])];
+    currentDeliverables[dIdx] = {
+      ...currentDeliverables[dIdx],
+      title: editingDeliverable.text.trim(),
+    };
+    targetM.deliverables = currentDeliverables;
+    currentMilestones[mIdx] = targetM;
+    setEditingDeliverable(null);
+
+    try {
+      const updated = await apiFetch<Project>(`/projects/${project._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ milestones: currentMilestones }),
+      });
+      setProject(updated);
+      showAlert('Deliverable updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update deliverable', { type: 'error' });
+    }
+  };
+
   const handleDeleteTask = (taskId: string) => {
     showConfirm(
       'Are you sure you want to delete this task? This action cannot be undone.',
@@ -1801,39 +1863,81 @@ export default function ProjectDetailPage() {
                                   key={d._id || dIdx}
                                   className="group flex items-center justify-between py-1.5 px-2.5 rounded-xl hover:bg-[#162238]/60 transition"
                                 >
-                                  <button
-                                    type="button"
-                                    onClick={() => handleToggleDeliverable(mIdx, dIdx)}
-                                    className="flex items-center gap-2.5 text-left min-w-0 cursor-pointer flex-1"
-                                  >
-                                    <div
-                                      className={`w-4 h-4 rounded flex items-center justify-center transition shrink-0 ${
-                                        d.completed
-                                          ? 'bg-emerald-500 text-black shadow-sm ring-1 ring-emerald-400'
-                                          : 'border border-slate-600 group-hover:border-teal-400'
-                                      }`}
-                                    >
-                                      {d.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                                  {editingDeliverable?.mIdx === mIdx && editingDeliverable?.dIdx === dIdx ? (
+                                    <div className="flex items-center gap-2 flex-1 mr-2">
+                                      <input
+                                        type="text"
+                                        value={editingDeliverable.text}
+                                        onChange={(e) =>
+                                          setEditingDeliverable({ ...editingDeliverable, text: e.target.value })
+                                        }
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') handleSaveDeliverableTitle(mIdx, dIdx);
+                                          if (e.key === 'Escape') setEditingDeliverable(null);
+                                        }}
+                                        autoFocus
+                                        className="flex-1 px-2.5 py-1 bg-[#0b1320] border border-teal-500/50 rounded-lg text-xs text-white outline-none"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSaveDeliverableTitle(mIdx, dIdx)}
+                                        className="px-2.5 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-semibold cursor-pointer"
+                                      >
+                                        Save
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingDeliverable(null)}
+                                        className="px-2 py-1 text-slate-400 hover:text-white text-xs cursor-pointer"
+                                      >
+                                        Cancel
+                                      </button>
                                     </div>
-                                    <span
-                                      className={`text-xs sm:text-sm transition ${
-                                        d.completed
-                                          ? 'line-through text-slate-500'
-                                          : 'text-slate-200 group-hover:text-white'
-                                      }`}
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleDeliverable(mIdx, dIdx)}
+                                      className="flex items-center gap-2.5 text-left min-w-0 cursor-pointer flex-1"
                                     >
-                                      {d.title}
-                                    </span>
-                                  </button>
+                                      <div
+                                        className={`w-4 h-4 rounded flex items-center justify-center transition shrink-0 ${
+                                          d.completed
+                                            ? 'bg-emerald-500 text-black shadow-sm ring-1 ring-emerald-400'
+                                            : 'border border-slate-600 group-hover:border-teal-400'
+                                        }`}
+                                      >
+                                        {d.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                                      </div>
+                                      <span
+                                        className={`text-xs sm:text-sm transition ${
+                                          d.completed
+                                            ? 'line-through text-slate-500'
+                                            : 'text-slate-200 group-hover:text-white'
+                                        }`}
+                                      >
+                                        {d.title}
+                                      </span>
+                                    </button>
+                                  )}
 
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteDeliverableItem(mIdx, dIdx)}
-                                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 transition cursor-pointer"
-                                    title="Remove deliverable"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingDeliverable({ mIdx, dIdx, text: d.title })}
+                                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-teal-400 transition cursor-pointer"
+                                      title="Edit deliverable"
+                                    >
+                                      <Pencil className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteDeliverableItem(mIdx, dIdx)}
+                                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 transition cursor-pointer"
+                                      title="Remove deliverable"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -2560,8 +2664,16 @@ export default function ProjectDetailPage() {
                     <div key={i} className="group/c p-2.5 rounded-xl bg-[#161616] border border-[#262626] text-xs">
                       <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
                         <span className="font-semibold text-neutral-200">{c.author.name}</span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <span>{c.createdAt}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleStartEditComment(i, c.text)}
+                            className="opacity-0 group-hover/c:opacity-100 text-neutral-500 hover:text-teal-400 p-0.5 rounded transition cursor-pointer"
+                            title="Edit note"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteComment(i)}
@@ -2572,7 +2684,37 @@ export default function ProjectDetailPage() {
                           </button>
                         </div>
                       </div>
-                      <p className="text-neutral-300 whitespace-pre-wrap">{c.text}</p>
+                      {editingCommentIdx === i ? (
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <input
+                            type="text"
+                            value={editCommentText}
+                            onChange={(e) => setEditCommentText(e.target.value)}
+                            className="flex-1 px-2.5 py-1 bg-[#121212] border border-teal-500/50 rounded-lg text-xs text-white outline-none"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveEditComment(i);
+                              if (e.key === 'Escape') setEditingCommentIdx(null);
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSaveEditComment(i)}
+                            className="px-2 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-[11px] font-semibold cursor-pointer"
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingCommentIdx(null)}
+                            className="px-2 py-1 text-neutral-400 hover:text-white text-[11px] cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-neutral-300 whitespace-pre-wrap">{c.text}</p>
+                      )}
                     </div>
                   ))
                 ) : (

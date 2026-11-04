@@ -388,6 +388,126 @@ export default function ClientDetailPage() {
     );
   };
 
+  // EDIT SUB-RESOURCES STATE & HANDLERS
+  const [editingMeetingIndex, setEditingMeetingIndex] = useState<number | null>(null);
+  const [editMeetingTitle, setEditMeetingTitle] = useState('');
+  const [editMeetingDate, setEditMeetingDate] = useState('');
+  const [editMeetingTime, setEditMeetingTime] = useState('');
+  const [editMeetingLocation, setEditMeetingLocation] = useState('');
+  const [editMeetingStatus, setEditMeetingStatus] = useState<string>('SCHEDULED');
+  const [editMeetingNotes, setEditMeetingNotes] = useState('');
+
+  const [editingPaymentIndex, setEditingPaymentIndex] = useState<number | null>(null);
+  const [editPaymentTitle, setEditPaymentTitle] = useState('');
+  const [editPaymentAmount, setEditPaymentAmount] = useState('');
+  const [editPaymentDueDate, setEditPaymentDueDate] = useState('');
+  const [editPaymentStatus, setEditPaymentStatus] = useState<'PAID' | 'PENDING' | 'OVERDUE'>('PENDING');
+  const [editPaymentInvoice, setEditPaymentInvoice] = useState('');
+  const [editPaymentProjectId, setEditPaymentProjectId] = useState('');
+
+  const [editingLinkIndex, setEditingLinkIndex] = useState<number | null>(null);
+  const [editLinkTitle, setEditLinkTitle] = useState('');
+  const [editLinkUrl, setEditLinkUrl] = useState('');
+
+  const openEditMeeting = (idx: number, m: ClientMeeting) => {
+    setEditingMeetingIndex(idx);
+    setEditMeetingTitle(m.title);
+    setEditMeetingDate(m.date ? new Date(m.date).toISOString().split('T')[0] : '');
+    setEditMeetingTime(m.time || '');
+    setEditMeetingLocation(m.linkOrLocation || '');
+    setEditMeetingStatus(m.status || 'SCHEDULED');
+    setEditMeetingNotes(m.notes || '');
+  };
+
+  const handleUpdateMeeting = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!client || editingMeetingIndex === null) return;
+    const updatedMeetings = [...(client.meetings || [])];
+    updatedMeetings[editingMeetingIndex] = {
+      title: editMeetingTitle.trim(),
+      date: editMeetingDate,
+      time: editMeetingTime,
+      linkOrLocation: editMeetingLocation.trim(),
+      status: editMeetingStatus as any,
+      notes: editMeetingNotes.trim(),
+    };
+    try {
+      const updated = await apiFetch<Client>(`/clients/${client._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ meetings: updatedMeetings }),
+      });
+      setClient(updated);
+      setEditingMeetingIndex(null);
+      showAlert('Meeting updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update meeting', { type: 'error' });
+    }
+  };
+
+  const openEditPayment = (idx: number, p: ClientPayment) => {
+    setEditingPaymentIndex(idx);
+    setEditPaymentTitle(p.title);
+    setEditPaymentAmount(p.amount ? String(p.amount) : '');
+    setEditPaymentDueDate(p.dueDate ? new Date(p.dueDate).toISOString().split('T')[0] : '');
+    setEditPaymentStatus(p.status || 'PENDING');
+    setEditPaymentInvoice(p.invoiceNumber || '');
+    setEditPaymentProjectId(p.projectId || '');
+  };
+
+  const handleUpdatePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!client || editingPaymentIndex === null) return;
+    const updatedPayments = [...(client.payments || [])];
+    const proj = connectedProjects.find((p) => p._id === editPaymentProjectId);
+    updatedPayments[editingPaymentIndex] = {
+      title: editPaymentTitle.trim(),
+      amount: parseFloat(editPaymentAmount) || 0,
+      invoiceNumber: editPaymentInvoice.trim() || undefined,
+      status: editPaymentStatus,
+      dueDate: editPaymentDueDate || undefined,
+      projectId: editPaymentProjectId || undefined,
+      projectName: proj?.name || undefined,
+    };
+    try {
+      const updated = await apiFetch<Client>(`/clients/${client._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ payments: updatedPayments }),
+      });
+      setClient(updated);
+      setEditingPaymentIndex(null);
+      showAlert('Payment milestone updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update payment', { type: 'error' });
+    }
+  };
+
+  const openEditLink = (idx: number, l: ResourceLink) => {
+    setEditingLinkIndex(idx);
+    setEditLinkTitle(l.title);
+    setEditLinkUrl(l.url);
+  };
+
+  const handleUpdateLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!client || editingLinkIndex === null) return;
+    const updatedLinks = [...(client.links || [])];
+    updatedLinks[editingLinkIndex] = {
+      title: editLinkTitle.trim(),
+      url: editLinkUrl.trim(),
+    };
+    try {
+      const updated = await apiFetch<Client>(`/clients/${client._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ links: updatedLinks }),
+      });
+      setClient(updated);
+      setEditingLinkIndex(null);
+      showAlert('Link updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update link', { type: 'error' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center p-12 text-neutral-400 text-xs">
@@ -790,14 +910,24 @@ export default function ClientDetailPage() {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteMeeting(idx)}
-                      className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
-                      title="Delete meeting"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => openEditMeeting(idx, m)}
+                        className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                        title="Edit meeting"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteMeeting(idx)}
+                        className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                        title="Delete meeting"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -969,6 +1099,14 @@ export default function ClientDetailPage() {
                       </span>
                       <button
                         type="button"
+                        onClick={() => openEditPayment(idx, p)}
+                        className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                        title="Edit payment milestone"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleDeletePayment(idx)}
                         className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
                         title="Delete payment milestone"
@@ -1095,8 +1233,16 @@ export default function ClientDetailPage() {
                       </a>
                       <button
                         type="button"
+                        onClick={() => openEditLink(idx, l)}
+                        className="p-2 rounded-xl hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                        title="Edit link"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleDeleteLink(idx)}
-                        className="p-2 rounded-xl hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                        className="p-2 rounded-xl hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
                         title="Delete link"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -1433,6 +1579,244 @@ export default function ClientDetailPage() {
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* EDIT MEETING MODAL */}
+      <Modal
+        isOpen={editingMeetingIndex !== null}
+        onClose={() => setEditingMeetingIndex(null)}
+        title="Edit Scheduled Meeting"
+      >
+        <form onSubmit={handleUpdateMeeting} className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Meeting Title *</label>
+            <input
+              type="text"
+              value={editMeetingTitle}
+              onChange={(e) => setEditMeetingTitle(e.target.value)}
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Date *</label>
+              <input
+                type="date"
+                value={editMeetingDate}
+                onChange={(e) => setEditMeetingDate(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Time</label>
+              <input
+                type="time"
+                value={editMeetingTime}
+                onChange={(e) => setEditMeetingTime(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
+              <select
+                value={editMeetingStatus}
+                onChange={(e) => setEditMeetingStatus(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                <option value="SCHEDULED">Scheduled</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="RESCHEDULED">Rescheduled</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Location or Link</label>
+              <input
+                type="text"
+                placeholder="Google Meet or Office"
+                value={editMeetingLocation}
+                onChange={(e) => setEditMeetingLocation(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Notes / Agenda</label>
+            <textarea
+              rows={2}
+              value={editMeetingNotes}
+              onChange={(e) => setEditMeetingNotes(e.target.value)}
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setEditingMeetingIndex(null)}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* EDIT PAYMENT MODAL */}
+      <Modal
+        isOpen={editingPaymentIndex !== null}
+        onClose={() => setEditingPaymentIndex(null)}
+        title="Edit Payment Milestone"
+      >
+        <form onSubmit={handleUpdatePayment} className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Milestone Title *</label>
+            <input
+              type="text"
+              value={editPaymentTitle}
+              onChange={(e) => setEditPaymentTitle(e.target.value)}
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Select Project</label>
+            <select
+              value={editPaymentProjectId}
+              onChange={(e) => setEditPaymentProjectId(e.target.value)}
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            >
+              <option value="">General Client Milestone (All Projects)</option>
+              {connectedProjects.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Amount ($) *</label>
+              <input
+                type="number"
+                value={editPaymentAmount}
+                onChange={(e) => setEditPaymentAmount(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Invoice Number</label>
+              <input
+                type="text"
+                placeholder="e.g. INV-2026-001"
+                value={editPaymentInvoice}
+                onChange={(e) => setEditPaymentInvoice(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Payment Status</label>
+              <select
+                value={editPaymentStatus}
+                onChange={(e) => setEditPaymentStatus(e.target.value as any)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                <option value="PENDING">Pending</option>
+                <option value="PAID">Paid / Received</option>
+                <option value="OVERDUE">Overdue</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
+              <input
+                type="date"
+                value={editPaymentDueDate}
+                onChange={(e) => setEditPaymentDueDate(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setEditingPaymentIndex(null)}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* EDIT LINK MODAL */}
+      <Modal
+        isOpen={editingLinkIndex !== null}
+        onClose={() => setEditingLinkIndex(null)}
+        title="Edit Attached Link"
+      >
+        <form onSubmit={handleUpdateLink} className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Title *</label>
+            <input
+              type="text"
+              value={editLinkTitle}
+              onChange={(e) => setEditLinkTitle(e.target.value)}
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">URL *</label>
+            <input
+              type="url"
+              value={editLinkUrl}
+              onChange={(e) => setEditLinkUrl(e.target.value)}
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setEditingLinkIndex(null)}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
       </Modal>
     </div>
   );
