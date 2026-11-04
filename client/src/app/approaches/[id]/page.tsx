@@ -871,11 +871,15 @@ export default function ApproachDetailPage() {
             </label>
             <textarea
               required
-              rows={4}
+              rows={3}
               value={logNotes}
-              onChange={(e) => setLogNotes(e.target.value)}
+              onChange={(e) => {
+                setLogNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(80, e.target.scrollHeight)}px`;
+              }}
               placeholder="e.g. Owner expressed interest in POS & inventory module. Wants us to prepare a quote for 2 branches. Call back on Friday afternoon."
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1073,10 +1077,15 @@ export default function ApproachDetailPage() {
               General Background Notes
             </label>
             <textarea
-              rows={3}
+              rows={2}
               value={formNotes}
-              onChange={(e) => setFormNotes(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              onChange={(e) => {
+                setFormNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              placeholder="Background context, key contacts, or initial impressions..."
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1298,10 +1307,15 @@ export default function ApproachDetailPage() {
               Contract & Onboarding Notes
             </label>
             <textarea
-              rows={3}
+              rows={2}
               value={convertNotes}
-              onChange={(e) => setConvertNotes(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              onChange={(e) => {
+                setConvertNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              placeholder="Final agreed scope, payment milestones, or kickoff instructions..."
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 

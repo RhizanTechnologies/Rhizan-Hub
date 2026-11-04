@@ -1129,10 +1129,14 @@ export default function ClientDetailPage() {
             <label className="block text-xs font-medium text-neutral-300 mb-1">Description / Deliverables Scope</label>
             <textarea
               value={newProjectDescription}
-              onChange={(e) => setNewProjectDescription(e.target.value)}
-              rows={3}
+              onChange={(e) => {
+                setNewProjectDescription(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              rows={2}
               placeholder="Key project goals, specifications, or deliverables..."
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1307,9 +1311,14 @@ export default function ClientDetailPage() {
             <label className="block text-xs font-medium text-neutral-300 mb-1">Notes</label>
             <textarea
               value={formNotes}
-              onChange={(e) => setFormNotes(e.target.value)}
+              onChange={(e) => {
+                setFormNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
               rows={2}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              placeholder="Notes on client requirements or account details..."
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 

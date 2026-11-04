@@ -1109,10 +1109,14 @@ export default function ClientsPage() {
             </label>
             <textarea
               value={formNotes}
-              onChange={(e) => setFormNotes(e.target.value)}
+              onChange={(e) => {
+                setFormNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
               placeholder="Notes on client requirements, deliverables, or agreements..."
               rows={2}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none transition resize-none leading-relaxed overflow-hidden"
             />
           </div>
 

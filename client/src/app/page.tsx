@@ -1381,9 +1381,13 @@ export default function DashboardPage() {
             <textarea
               rows={2}
               value={manualDescription}
-              onChange={(e) => setManualDescription(e.target.value)}
+              onChange={(e) => {
+                setManualDescription(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
               placeholder="What deliverables did you complete in this session?"
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-teal-500 outline-none resize-none"
+              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-teal-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1538,9 +1542,13 @@ export default function DashboardPage() {
               rows={3}
               required
               value={standupCompleted}
-              onChange={(e) => setStandupCompleted(e.target.value)}
+              onChange={(e) => {
+                setStandupCompleted(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(84, e.target.scrollHeight)}px`;
+              }}
               placeholder="e.g. Completed client onboarding wireframes, fixed API auth bug..."
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed"
+              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1552,9 +1560,13 @@ export default function DashboardPage() {
               rows={2}
               required
               value={standupPriorities}
-              onChange={(e) => setStandupPriorities(e.target.value)}
+              onChange={(e) => {
+                setStandupPriorities(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
               placeholder="e.g. Deliverable review with Nebiyu, deploy production hotfix..."
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed"
+              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 

@@ -1456,11 +1456,15 @@ export default function ApproachesPage() {
               Notes & What to Remember
             </label>
             <textarea
-              rows={3}
+              rows={2}
               placeholder="e.g. Wants POS and multi-store inventory. Budget around 150k ETB. Prefers WhatsApp communication."
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              onChange={(e) => {
+                setNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1689,11 +1693,15 @@ export default function ApproachesPage() {
             </label>
             <textarea
               required
-              rows={3}
+              rows={2}
               placeholder="e.g. Called owner, they want a demo next Tuesday. Follow up on Monday."
               value={quickNotes}
-              onChange={(e) => setQuickNotes(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              onChange={(e) => {
+                setQuickNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
