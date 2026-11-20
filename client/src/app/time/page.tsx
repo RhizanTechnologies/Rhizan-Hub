@@ -31,6 +31,8 @@ import {
   Tag,
   Briefcase,
   CheckCircle2,
+  Pencil,
+  X,
 } from 'lucide-react';
 
 const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
@@ -78,6 +80,11 @@ export default function TimeTrackingPage() {
   // Notification / success message
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
+  // Inline Start/End Time editing state (Clockify inline editing)
+  const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
+  const [inlineStartTime, setInlineStartTime] = useState<string>('');
+  const [inlineEndTime, setInlineEndTime] = useState<string>('');
+
   // Week navigation and detailed timesheet states
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedMemberForDetails, setSelectedMemberForDetails] = useState<WeeklyTeamMemberSummary | null>(null);
@@ -100,9 +107,82 @@ export default function TimeTrackingPage() {
     return { start, end, label };
   }, [weekOffset]);
 
-  // Helper to format 12-hour clock (e.g. 09:30 AM)
+  // Helper to format 24-hour clock (e.g. 18:17) Clockify style
   const formatClockTime = (dateObj: Date): string => {
-    return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const hrs = dateObj.getHours().toString().padStart(2, '0');
+    const mins = dateObj.getMinutes().toString().padStart(2, '0');
+    return `${hrs}:${mins}`;
+  };
+
+  // Convert any time string (12h or 24h) into standard 24h HH:mm format
+  const to24Hour = (timeStr?: string): string => {
+    if (!timeStr) return '';
+    const trimmed = timeStr.trim();
+    if (/^\d{1,2}:\d{2}$/.test(trimmed)) {
+      const [h, m] = trimmed.split(':');
+      return `${h.padStart(2, '0')}:${m}`;
+    }
+    const match = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (match) {
+      let h = parseInt(match[1], 10);
+      const m = match[2];
+      const modifier = match[3]?.toUpperCase();
+      if (modifier === 'PM' && h < 12) h += 12;
+      if (modifier === 'AM' && h === 12) h = 0;
+      return `${h.toString().padStart(2, '0')}:${m}`;
+    }
+    return trimmed;
+  };
+
+  // Calculate hours and minutes duration between two 24h HH:mm time strings
+  const calcDurationFromRange = (start: string, end: string) => {
+    const [sH, sM] = start.split(':').map(Number);
+    const [eH, eM] = end.split(':').map(Number);
+    const startMins = sH * 60 + sM;
+    const endMins = eH * 60 + eM;
+    const diffMins = Math.max(1, endMins >= startMins ? endMins - startMins : 24 * 60 - startMins + endMins);
+    return {
+      hours: Math.floor(diffMins / 60),
+      minutes: diffMins % 60,
+    };
+  };
+
+  // Start editing inline start/end times
+  const startEditingTimeRange = (entry: TimeEntry) => {
+    setEditingTimeEntryId(entry._id);
+    const s = to24Hour(entry.startTime) || '09:00';
+    const e = to24Hour(entry.endTime) || '10:00';
+    setInlineStartTime(s);
+    setInlineEndTime(e);
+  };
+
+  // Save inline start/end time updates
+  const saveInlineTimeRange = async (entryId: string) => {
+    if (!inlineStartTime || !inlineEndTime) {
+      setEditingTimeEntryId(null);
+      return;
+    }
+
+    const { hours, minutes } = calcDurationFromRange(inlineStartTime, inlineEndTime);
+
+    try {
+      const updated = await apiFetch<TimeEntry>(`/time/${entryId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          startTime: inlineStartTime,
+          endTime: inlineEndTime,
+          hours,
+          minutes,
+        }),
+      });
+
+      setEntries((prev) => prev.map((e) => (e._id === updated._id ? updated : e)));
+      setEditingTimeEntryId(null);
+      setSuccessToast(`Updated time to ${inlineStartTime} – ${inlineEndTime} (${formatDurationText(hours, minutes)})`);
+      setTimeout(() => setSuccessToast(null), 3000);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update time range');
+    }
   };
 
   // Helper to format seconds into HH:MM:SS
@@ -1059,16 +1139,65 @@ export default function TimeTrackingPage() {
                             </div>
 
                             {/* Right: Time Range, Duration, Restart & Delete */}
-                            <div className="flex items-center justify-between md:justify-end gap-4 shrink-0">
-                              {/* Time Interval e.g. 09:30 AM - 11:45 AM */}
-                              {entry.startTime && entry.endTime && (
-                                <span className="text-[11px] text-neutral-400 font-mono hidden sm:inline-block">
-                                  {entry.startTime} - {entry.endTime}
-                                </span>
+                            <div className="flex items-center justify-between md:justify-end gap-2.5 sm:gap-4 shrink-0">
+                              {/* Time Interval e.g. 18:17 - 19:29 (Clockify Style Inline Editable) */}
+                              {editingTimeEntryId === entry._id ? (
+                                <div className="flex items-center gap-1.5 bg-[#181818] border border-teal-500/50 rounded-xl px-2 py-1 shadow-md">
+                                  <input
+                                    type="time"
+                                    value={inlineStartTime}
+                                    onChange={(e) => setInlineStartTime(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') saveInlineTimeRange(entry._id);
+                                      if (e.key === 'Escape') setEditingTimeEntryId(null);
+                                    }}
+                                    className="bg-[#202020] border border-[#333333] text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-400"
+                                    autoFocus
+                                  />
+                                  <span className="text-neutral-400 font-mono text-xs">-</span>
+                                  <input
+                                    type="time"
+                                    value={inlineEndTime}
+                                    onChange={(e) => setInlineEndTime(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') saveInlineTimeRange(entry._id);
+                                      if (e.key === 'Escape') setEditingTimeEntryId(null);
+                                    }}
+                                    className="bg-[#202020] border border-[#333333] text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-400"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => saveInlineTimeRange(entry._id)}
+                                    className="p-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white transition shadow-sm cursor-pointer ml-1"
+                                    title="Save start & end time"
+                                  >
+                                    <Check className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingTimeEntryId(null)}
+                                    className="p-1 rounded-lg bg-[#242424] hover:bg-[#2e2e2e] text-neutral-400 hover:text-white transition cursor-pointer"
+                                    title="Cancel"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => startEditingTimeRange(entry)}
+                                  className="group/time flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-[#242424] hover:border-teal-500/40 border-l border-l-dotted border-l-neutral-700/60 transition text-left cursor-pointer"
+                                  title="Click to edit start & end time"
+                                >
+                                  <span className="font-mono text-xs text-neutral-300 group-hover/time:text-teal-300 font-medium tracking-wider">
+                                    {to24Hour(entry.startTime) || '--:--'}&nbsp;&nbsp;-&nbsp;&nbsp;{to24Hour(entry.endTime) || '--:--'}
+                                  </span>
+                                  <Pencil className="w-2.5 h-2.5 text-neutral-500 group-hover/time:text-teal-400 opacity-0 group-hover/time:opacity-100 transition-opacity ml-0.5" />
+                                </button>
                               )}
 
                               {/* Duration */}
-                              <span className="font-mono text-xs font-bold text-white min-w-[55px] text-right">
+                              <span className="font-mono text-xs font-bold text-white min-w-[50px] text-right">
                                 {formatDurationText(entry.hours, entry.minutes)}
                               </span>
 
@@ -1077,7 +1206,7 @@ export default function TimeTrackingPage() {
                                 <button
                                   type="button"
                                   onClick={() => restartPastTimer(entry)}
-                                  className="p-1.5 rounded-lg bg-[#1e1e1e] hover:bg-teal-600 hover:text-white text-teal-400 transition shadow-sm"
+                                  className="p-1.5 rounded-lg bg-[#1e1e1e] hover:bg-teal-600 hover:text-white text-teal-400 transition shadow-sm cursor-pointer"
                                   title="Continue / restart this timer"
                                 >
                                   <Play className="w-3.5 h-3.5 fill-current" />
@@ -1085,7 +1214,7 @@ export default function TimeTrackingPage() {
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteEntry(entry._id)}
-                                  className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                                  className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
                                   title="Delete time entry"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
