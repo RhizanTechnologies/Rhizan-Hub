@@ -178,10 +178,10 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         aria-expanded={isOpen}
         className={`w-full flex items-center justify-between border transition-all select-none outline-none font-medium ${sizeStyles} ${
           disabled
-            ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-[#141414] border-slate-200 dark:border-[#222222] text-slate-400 dark:text-neutral-500'
+            ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-[#101724] border-slate-200 dark:border-[#1e2a3c] text-slate-400 dark:text-neutral-500'
             : isOpen
-            ? 'border-teal-500/80 bg-white dark:bg-[#161616] text-slate-900 dark:text-white shadow-lg shadow-teal-500/10 ring-1 ring-teal-500/30'
-            : 'border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] hover:bg-slate-50 dark:hover:bg-[#181818] hover:border-slate-300 dark:hover:border-[#333333] text-slate-700 dark:text-neutral-200 cursor-pointer'
+            ? 'border-teal-500/80 bg-white dark:bg-[#151d2a] text-slate-900 dark:text-white shadow-lg shadow-teal-500/10 ring-1 ring-teal-500/30'
+            : 'border-slate-200 dark:border-[#1e2a3c] bg-white dark:bg-[#101724] hover:bg-slate-50 dark:hover:bg-[#151d2a] hover:border-slate-300 dark:hover:border-[#222e42] text-slate-700 dark:text-neutral-200 cursor-pointer'
         } ${className}`}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -211,14 +211,14 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         <div
           role="listbox"
           tabIndex={-1}
-          className={`absolute z-50 w-full min-w-[200px] bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#2a2a2a] rounded-2xl shadow-2xl p-1.5 backdrop-blur-xl animate-fade-in ${
+          className={`absolute z-50 w-full min-w-[200px] bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl shadow-2xl p-1.5 backdrop-blur-xl animate-fade-in ${
             openUpwards ? 'bottom-full mb-1.5 origin-bottom' : 'top-full mt-1.5 origin-top'
           } ${align === 'right' ? 'right-0' : 'left-0'} ${dropdownClassName}`}
           style={{ maxHeight: '280px' }}
         >
           {/* Search input inside dropdown if enabled */}
           {isSearchable && (
-            <div className="p-1 pb-1.5 border-b border-slate-100 dark:border-[#222222] mb-1">
+            <div className="p-1 pb-1.5 border-b border-slate-100 dark:border-[#1e2a3c] mb-1">
               <div className="relative flex items-center">
                 <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 absolute left-2.5 pointer-events-none" />
                 <input
@@ -232,7 +232,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                       setIsOpen(false);
                     }
                   }}
-                  className="w-full bg-slate-50 dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#2e2e2e] focus:border-teal-500 rounded-xl pl-8 pr-7 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
+                  className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl pl-8 pr-7 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
                 />
                 {searchQuery && (
                   <button
@@ -257,7 +257,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
               Object.entries(groupedOptions).map(([groupName, groupOpts]) => (
                 <div key={groupName} className="space-y-0.5">
                   {groupName && (
-                    <div className="px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:text-neutral-500 uppercase tracking-wider bg-slate-100/70 dark:bg-[#101010]/50 rounded-md mt-1">
+                    <div className="px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider bg-slate-100/70 dark:bg-[#101724]/70 rounded-md mt-1">
                       {groupName}
                     </div>
                   )}
@@ -283,7 +283,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                             ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-neutral-500'
                             : isSelected
                             ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 font-semibold border border-teal-500/30'
-                            : 'text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-[#1f1f1f] hover:text-slate-900 dark:hover:text-white border border-transparent'
+                            : 'text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-[#1e2a3c] hover:text-slate-900 dark:hover:text-white border border-transparent'
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -327,7 +327,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                         ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-neutral-500'
                         : isSelected
                         ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 font-semibold border border-teal-500/30'
-                        : 'text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-[#1f1f1f] hover:text-slate-900 dark:hover:text-white border border-transparent'
+                        : 'text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-[#1e2a3c] hover:text-slate-900 dark:hover:text-white border border-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">

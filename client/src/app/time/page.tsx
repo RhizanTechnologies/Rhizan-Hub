@@ -871,20 +871,20 @@ export default function TimeTrackingPage() {
 
       <div className="p-3 sm:p-6 max-w-7xl mx-auto w-full space-y-4 sm:space-y-6 overflow-x-hidden">
         {/* Navigation Switcher: Personal Tracker vs Team Timesheet */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1e2a3c] pb-3">
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setViewTab('TRACKER')}
               className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
                 viewTab === 'TRACKER'
-                  ? 'bg-teal-500/10 text-teal-300 border border-teal-500/30 shadow-sm'
-                  : 'text-neutral-400 hover:text-white hover:bg-[#181818] border border-transparent'
+                  ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/30 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-[#101724] border border-transparent'
               }`}
             >
-              <Clock className="w-4 h-4 text-teal-400" />
+              <Clock className="w-4 h-4 text-teal-600 dark:text-teal-400" />
               <span>Personal Tracker</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#222222] text-neutral-300">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-[#151d2a] text-slate-700 dark:text-neutral-300">
                 {myEntries.length}
               </span>
             </button>
@@ -894,13 +894,13 @@ export default function TimeTrackingPage() {
               onClick={() => setViewTab('TEAM_TIMESHEET')}
               className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
                 viewTab === 'TEAM_TIMESHEET'
-                  ? 'bg-teal-500/10 text-teal-300 border border-teal-500/30 shadow-sm'
-                  : 'text-neutral-400 hover:text-white hover:bg-[#181818] border border-transparent'
+                  ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/30 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-[#101724] border border-transparent'
               }`}
             >
-              <Users className="w-4 h-4 text-teal-400" />
+              <Users className="w-4 h-4 text-teal-600 dark:text-teal-400" />
               <span>Team Timesheet</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#222222] text-neutral-300">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-[#151d2a] text-slate-700 dark:text-neutral-300">
                 {weeklySummaries.length}
               </span>
             </button>
@@ -909,16 +909,16 @@ export default function TimeTrackingPage() {
           {/* Quick Metrics Pills */}
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs font-mono">
             {/* Daily tracked metric with percentage and visual progress bar */}
-            <div className="flex items-center gap-2 bg-[#141414] px-2.5 sm:px-3 py-1.5 rounded-xl border border-[#242424] shadow-sm">
+            <div className="flex items-center gap-2 bg-white dark:bg-[#151d2a] px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#222e42] shadow-sm">
               <div className="flex items-center gap-1.5">
-                <span className="text-neutral-400">Today:</span>
-                <span className="font-bold text-amber-300">{hoursToday}h {minutesToday}m</span>
-                <span className="text-neutral-500 text-[11px]">/ 8h</span>
-                <span className="text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.2 rounded text-[10px]">
+                <span className="text-slate-500 dark:text-neutral-400">Today:</span>
+                <span className="font-bold text-amber-600 dark:text-amber-300">{hoursToday}h {minutesToday}m</span>
+                <span className="text-slate-400 dark:text-neutral-500 text-[11px]">/ 8h</span>
+                <span className="text-amber-700 dark:text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.2 rounded text-[10px]">
                   {dailyPercent}%
                 </span>
               </div>
-              <div className="w-12 sm:w-16 bg-[#202020] h-1.5 rounded-full overflow-hidden hidden xs:block">
+              <div className="w-12 sm:w-16 bg-slate-200 dark:bg-[#101724] h-1.5 rounded-full overflow-hidden hidden xs:block">
                 <div
                   className="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full transition-all duration-500"
                   style={{ width: `${dailyPercent}%` }}
@@ -927,16 +927,16 @@ export default function TimeTrackingPage() {
             </div>
 
             {/* Weekly tracked metric with capacity percentage and progress bar */}
-            <div className="flex items-center gap-2 bg-[#141414] px-2.5 sm:px-3 py-1.5 rounded-xl border border-[#242424] shadow-sm">
+            <div className="flex items-center gap-2 bg-white dark:bg-[#151d2a] px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#222e42] shadow-sm">
               <div className="flex items-center gap-1.5">
-                <span className="text-neutral-400">Week:</span>
-                <span className="font-bold text-teal-400">{hoursThisWeek}h</span>
-                <span className="text-neutral-500 text-[11px]">/ {targetWeeklyHours}h</span>
-                <span className="text-teal-300 font-bold bg-teal-500/10 border border-teal-500/20 px-1.5 py-0.2 rounded text-[10px]">
+                <span className="text-slate-500 dark:text-neutral-400">Week:</span>
+                <span className="font-bold text-teal-600 dark:text-teal-400">{hoursThisWeek}h</span>
+                <span className="text-slate-400 dark:text-neutral-500 text-[11px]">/ {targetWeeklyHours}h</span>
+                <span className="text-teal-700 dark:text-teal-300 font-bold bg-teal-500/10 border border-teal-500/20 px-1.5 py-0.2 rounded text-[10px]">
                   {capacityPercent}%
                 </span>
               </div>
-              <div className="w-12 sm:w-16 bg-[#202020] h-1.5 rounded-full overflow-hidden hidden xs:block">
+              <div className="w-12 sm:w-16 bg-slate-200 dark:bg-[#101724] h-1.5 rounded-full overflow-hidden hidden xs:block">
                 <div
                   className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                   style={{ width: `${capacityPercent}%` }}
@@ -949,18 +949,18 @@ export default function TimeTrackingPage() {
         {viewTab === 'TRACKER' ? (
           <>
             {/* CLOCKIFY TOP TIME TRACKER BAR */}
-            <div className="p-4 rounded-3xl bg-[#121212] border border-[#242424] shadow-xl backdrop-blur-md space-y-3">
+            <div className="p-4 rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xl backdrop-blur-md space-y-3">
               {/* Tracker Mode Toggle & Billable Icon */}
               <div className="flex items-center justify-between text-xs pb-1">
                 <div className="flex items-center gap-2">
-                  <div className="p-0.5 rounded-xl bg-[#181818] border border-[#282828] flex items-center">
+                  <div className="p-0.5 rounded-xl bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex items-center">
                     <button
                       type="button"
                       onClick={() => setEntryMode('TIMER')}
                       className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
                         entryMode === 'TIMER'
                           ? 'bg-teal-600 text-white shadow-sm'
-                          : 'text-neutral-400 hover:text-white'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white'
                       }`}
                     >
                       <Clock className="w-3.5 h-3.5" />
@@ -972,7 +972,7 @@ export default function TimeTrackingPage() {
                       className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
                         entryMode === 'MANUAL'
                           ? 'bg-teal-600 text-white shadow-sm'
-                          : 'text-neutral-400 hover:text-white'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white'
                       }`}
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -988,8 +988,8 @@ export default function TimeTrackingPage() {
                     onClick={() => setIsBillable(!isBillable)}
                     className={`px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition border ${
                       isBillable
-                        ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
-                        : 'bg-[#181818] text-neutral-500 border-[#282828]'
+                        ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30'
+                        : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-[#101724] dark:text-neutral-400 dark:border-[#1e2a3c]'
                     }`}
                     title={isBillable ? 'Client Work' : 'Internal Work'}
                   >
@@ -1008,7 +1008,7 @@ export default function TimeTrackingPage() {
                     placeholder="What are you working on right now?"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-2xl px-4 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition shadow-inner font-medium"
+                    className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-2xl px-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition shadow-inner font-medium"
                   />
                 </div>
 
@@ -1026,7 +1026,7 @@ export default function TimeTrackingPage() {
                       label: p.name,
                       sublabel: p.clientName || 'Internal',
                     }))}
-                    className="rounded-2xl py-2.5 bg-[#181818] border-[#2a2a2a]"
+                    className="rounded-2xl py-2.5 bg-slate-50 dark:bg-[#101724] border-slate-200 dark:border-[#1e2a3c]"
                   />
                 </div>
 
@@ -1043,7 +1043,7 @@ export default function TimeTrackingPage() {
                         label: t.title,
                       })),
                     ]}
-                    className="rounded-2xl py-2.5 bg-[#181818] border-[#2a2a2a]"
+                    className="rounded-2xl py-2.5 bg-slate-50 dark:bg-[#101724] border-slate-200 dark:border-[#1e2a3c]"
                   />
                 </div>
 
@@ -1055,7 +1055,7 @@ export default function TimeTrackingPage() {
                       {isEditingStartTime ? (
                         <div
                           ref={startTimeEditRef}
-                          className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#181818] border border-teal-500 rounded-xl px-2.5 py-1.5 shadow-xl animate-fade-in shrink-0"
+                          className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#101724] border border-teal-500 rounded-xl px-2.5 py-1.5 shadow-xl animate-fade-in shrink-0"
                         >
                           <div className="flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
@@ -1068,7 +1068,7 @@ export default function TimeTrackingPage() {
                                 if (e.key === 'Escape') setIsEditingStartTime(false);
                               }}
                               autoFocus
-                              className="w-[90px] bg-white dark:bg-[#222222] border border-slate-200 dark:border-[#333333] text-slate-900 dark:text-white text-xs font-mono rounded-lg px-2 py-0.5 outline-none focus:border-teal-500"
+                              className="w-[90px] bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] text-slate-900 dark:text-white text-xs font-mono rounded-lg px-2 py-0.5 outline-none focus:border-teal-500"
                             />
                           </div>
                           <button
@@ -1082,7 +1082,7 @@ export default function TimeTrackingPage() {
                           <button
                             type="button"
                             onClick={() => setIsEditingStartTime(false)}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 dark:bg-[#242424] dark:hover:bg-[#2e2e2e] dark:text-neutral-400 dark:hover:text-white transition cursor-pointer shrink-0"
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 dark:bg-[#1e2a3c] dark:hover:bg-[#25334a] dark:text-neutral-400 dark:hover:text-white transition cursor-pointer shrink-0"
                             title="Cancel"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -1097,7 +1097,7 @@ export default function TimeTrackingPage() {
                             setCustomStartTime(formatClockTime(s));
                             setIsEditingStartTime(true);
                           }}
-                          className="group/timer flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-[#181818] border border-transparent hover:border-slate-200 dark:hover:border-[#2a2a2a] transition cursor-pointer shrink-0"
+                          className="group/timer flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-[#101724] border border-transparent hover:border-slate-200 dark:hover:border-[#1e2a3c] transition cursor-pointer shrink-0"
                           title="Click on count time to edit start time (Clockify style)"
                         >
                           <span
@@ -1149,27 +1149,27 @@ export default function TimeTrackingPage() {
 
               {/* Extra Row for Manual Mode: Date & Time range / hours */}
               {entryMode === 'MANUAL' && (
-                <div className="pt-3 border-t border-[#1e1e1e] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs animate-fade-in">
+                <div className="pt-3 border-t border-slate-200 dark:border-[#1e2a3c] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs animate-fade-in">
                   <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                     {/* Date */}
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-neutral-400">Date:</span>
+                      <span className="text-slate-500 dark:text-neutral-400">Date:</span>
                       <input
                         type="date"
                         value={manualDate}
                         onChange={(e) => setManualDate(e.target.value)}
-                        className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2.5 py-1 text-white text-xs outline-none focus:border-teal-500"
+                        className="bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-2.5 py-1 text-slate-900 dark:text-white text-xs outline-none focus:border-teal-500"
                       />
                     </div>
 
                     {/* Toggle Range */}
-                    <div className="flex items-center gap-1.5 pl-0 sm:pl-2 border-l-0 sm:border-l sm:border-[#262626] shrink-0">
-                      <label className="flex items-center gap-1.5 cursor-pointer text-neutral-300">
+                    <div className="flex items-center gap-1.5 pl-0 sm:pl-2 border-l-0 sm:border-l sm:border-slate-200 dark:sm:border-[#1e2a3c] shrink-0">
+                      <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-neutral-300">
                         <input
                           type="checkbox"
                           checked={manualUseTimeRange}
                           onChange={(e) => setManualUseTimeRange(e.target.checked)}
-                          className="rounded bg-[#181818] border-[#333333] text-teal-500"
+                          className="rounded bg-slate-50 dark:bg-[#101724] border-slate-300 dark:border-[#1e2a3c] text-teal-500"
                         />
                         <span>Enter Range</span>
                       </label>
@@ -1182,14 +1182,14 @@ export default function TimeTrackingPage() {
                           type="time"
                           value={manualStartTime}
                           onChange={(e) => setManualStartTime(e.target.value)}
-                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none focus:border-teal-500"
+                          className="bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:border-teal-500"
                         />
-                        <span className="text-neutral-500">-</span>
+                        <span className="text-slate-400 dark:text-neutral-500">-</span>
                         <input
                           type="time"
                           value={manualEndTime}
                           onChange={(e) => setManualEndTime(e.target.value)}
-                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none focus:border-teal-500"
+                          className="bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-2 py-1 text-slate-900 dark:text-white text-xs outline-none focus:border-teal-500"
                         />
                       </div>
                     ) : (
@@ -1201,9 +1201,9 @@ export default function TimeTrackingPage() {
                             max="24"
                             value={manualHours}
                             onChange={(e) => setManualHours(e.target.value)}
-                            className="w-12 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center focus:border-teal-500"
+                            className="w-12 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-2 py-1 text-slate-900 dark:text-white text-xs outline-none text-center focus:border-teal-500"
                           />
-                          <span className="text-neutral-400">h</span>
+                          <span className="text-slate-500 dark:text-neutral-400">h</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <input
@@ -1213,33 +1213,33 @@ export default function TimeTrackingPage() {
                             step="5"
                             value={manualMinutes}
                             onChange={(e) => setManualMinutes(e.target.value)}
-                            className="w-12 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center focus:border-teal-500"
+                            className="w-12 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-2 py-1 text-slate-900 dark:text-white text-xs outline-none text-center focus:border-teal-500"
                           />
-                          <span className="text-neutral-400">m</span>
+                          <span className="text-slate-500 dark:text-neutral-400">m</span>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <span className="text-[11px] text-neutral-500 pt-1 md:pt-0 shrink-0">
-                    Logged under: <strong className="text-neutral-300">{user?.name || 'Me'}</strong>
+                  <span className="text-[11px] text-slate-500 dark:text-neutral-500 pt-1 md:pt-0 shrink-0">
+                    Logged under: <strong className="text-slate-700 dark:text-neutral-300">{user?.name || 'Me'}</strong>
                   </span>
                 </div>
               )}
             </div>
 
             {/* Filter and Search Ribbon */}
-            <div className="bg-[#121212] border border-[#222222] rounded-2xl p-3 sm:p-3.5 space-y-3">
+            <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3 sm:p-3.5 space-y-3">
               <div className="flex items-center justify-between gap-2.5">
                 {/* Search Bar */}
                 <div className="relative flex-1">
-                  <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     placeholder="Search time logs..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+                    className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition"
                   />
                 </div>
 
@@ -1249,19 +1249,19 @@ export default function TimeTrackingPage() {
                   onClick={() => setIsFiltersOpen((prev) => !prev)}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition shrink-0 ${
                     isFiltersOpen || projectFilter !== 'ALL' || dateRangeFilter !== 'ALL'
-                      ? 'bg-teal-500/15 text-teal-300 border-teal-500/40'
-                      : 'bg-[#181818] text-neutral-400 hover:text-white border-[#282828]'
+                      ? 'bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/40'
+                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200 dark:bg-[#101724] dark:text-neutral-400 dark:hover:text-white dark:border-[#1e2a3c]'
                   }`}
                   title="Toggle filter controls"
                 >
-                  <Filter className="w-3.5 h-3.5 text-teal-400" />
+                  <Filter className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                   <span className="hidden xs:inline">Filters</span>
                   {(projectFilter !== 'ALL' || dateRangeFilter !== 'ALL') && (
-                    <span className="w-2 h-2 rounded-full bg-teal-400" />
+                    <span className="w-2 h-2 rounded-full bg-teal-500" />
                   )}
                   <ChevronDown
                     className={`w-3 h-3 transition-transform duration-200 ${
-                      isFiltersOpen ? 'rotate-180 text-teal-400' : 'text-neutral-500'
+                      isFiltersOpen ? 'rotate-180 text-teal-600 dark:text-teal-400' : 'text-slate-400 dark:text-neutral-500'
                     }`}
                   />
                 </button>
@@ -1269,11 +1269,11 @@ export default function TimeTrackingPage() {
 
               {/* Collapsible Filter Body */}
               {isFiltersOpen && (
-                <div className="pt-2.5 border-t border-[#202020] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+                <div className="pt-2.5 border-t border-slate-200 dark:border-[#1e2a3c] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
                   <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
                     {/* Project Filter */}
                     <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                      <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider shrink-0">
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider shrink-0">
                         Project:
                       </span>
                       <div className="flex-1 sm:flex-none sm:w-48">
@@ -1294,7 +1294,7 @@ export default function TimeTrackingPage() {
 
                     {/* Date Range Filter */}
                     <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 no-scrollbar">
-                      <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider shrink-0">
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider shrink-0">
                         Date:
                       </span>
                       {(['ALL', 'TODAY', 'YESTERDAY', 'THIS_WEEK', 'THIS_MONTH'] as const).map((mode) => (
@@ -1304,8 +1304,8 @@ export default function TimeTrackingPage() {
                           onClick={() => setDateRangeFilter(mode)}
                           className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
                             dateRangeFilter === mode
-                              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
-                              : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#262626]'
+                              ? 'bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/40'
+                              : 'bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200 dark:bg-[#101724] dark:text-neutral-400 dark:hover:text-white dark:border-[#1e2a3c]'
                           }`}
                         >
                           {mode === 'ALL'
@@ -1331,7 +1331,7 @@ export default function TimeTrackingPage() {
                         setDateRangeFilter('ALL');
                         setSearchQuery('');
                       }}
-                      className="text-[11px] text-teal-400 hover:text-teal-300 underline font-medium"
+                      className="text-[11px] text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 underline font-medium"
                     >
                       Reset Filters
                     </button>
@@ -1350,51 +1350,51 @@ export default function TimeTrackingPage() {
                   return (
                     <div
                       key={dayGroup.dateKey}
-                      className="rounded-3xl bg-[#111111] border border-[#222222] overflow-hidden shadow-sm"
+                      className="rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] overflow-hidden shadow-sm"
                     >
                       {/* Day Group Header (Clockify Style) */}
-                      <div className="px-5 py-3 bg-[#151515] border-b border-[#222222] flex items-center justify-between">
+                      <div className="px-5 py-3 bg-slate-50 dark:bg-[#101724] border-b border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-teal-400" />
-                          <h3 className="font-heading text-xs font-bold text-white tracking-wide">
+                          <Calendar className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                          <h3 className="font-heading text-xs font-bold text-slate-900 dark:text-white tracking-wide">
                             {dayGroup.dateLabel}
                           </h3>
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-neutral-400">Total:</span>
-                          <span className="font-mono text-sm font-bold text-teal-400">
+                          <span className="text-[11px] text-slate-500 dark:text-neutral-400">Total:</span>
+                          <span className="font-mono text-sm font-bold text-teal-700 dark:text-teal-400">
                             {formatDurationText(dayHours, dayMins)}
                           </span>
-                          <span className="text-[10px] text-neutral-500 font-mono hidden sm:inline">/ 8h</span>
-                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.2 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                          <span className="text-[10px] text-slate-400 dark:text-neutral-500 font-mono hidden sm:inline">/ 8h</span>
+                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.2 rounded bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20">
                             {Math.min(100, Math.round((dayGroup.totalMinutes / 480) * 100))}%
                           </span>
                         </div>
                       </div>
 
                       {/* Entries List for this Day */}
-                      <div className="divide-y divide-[#1e1e1e]">
+                      <div className="divide-y divide-slate-100 dark:divide-[#1e2a3c]">
                         {dayGroup.entries.map((entry) => (
                           <div
                             key={entry._id}
-                            className="p-3.5 hover:bg-[#161616] transition flex flex-col md:flex-row md:items-center justify-between gap-3 group"
+                            className="p-3.5 hover:bg-slate-50 dark:hover:bg-[#101724] transition flex flex-col md:flex-row md:items-center justify-between gap-3 group"
                           >
                             {/* Left: Description & Tags */}
                             <div className="flex-1 min-w-0 space-y-1">
                               <div className="flex items-center gap-2.5">
-                                <span className="text-xs font-semibold text-white truncate">
+                                <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">
                                   {entry.description || 'Task execution'}
                                 </span>
                               </div>
 
                               <div className="flex flex-wrap items-center gap-2 text-[11px]">
                                 {/* Project Tag */}
-                                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-teal-300 font-medium">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-teal-700 dark:text-teal-300 font-medium">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
                                   <span>{entry.project?.name || 'Project'}</span>
                                   {entry.project?.clientName && (
-                                    <span className="text-neutral-500 font-normal">
+                                    <span className="text-slate-500 dark:text-neutral-400 font-normal">
                                       • {entry.project.clientName}
                                     </span>
                                   )}
@@ -1402,14 +1402,14 @@ export default function TimeTrackingPage() {
 
                                 {/* Task Tag if linked */}
                                 {entry.task?.title && (
-                                  <span className="text-neutral-400 bg-[#181818] px-2 py-0.5 rounded border border-[#262626]">
+                                  <span className="text-slate-600 dark:text-neutral-400 bg-slate-100 dark:bg-[#101724] px-2 py-0.5 rounded border border-slate-200 dark:border-[#1e2a3c]">
                                     Task: {entry.task.title}
                                   </span>
                                 )}
 
                                 {/* Billable indicator */}
                                 {entry.billable !== false && (
-                                  <span className="text-emerald-400 font-bold px-1.5 py-0.2 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px]" title="Billable time">
+                                  <span className="text-emerald-700 dark:text-emerald-400 font-bold px-1.5 py-0.2 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px]" title="Billable time">
                                     $
                                   </span>
                                 )}
@@ -1420,7 +1420,7 @@ export default function TimeTrackingPage() {
                             <div className="flex items-center justify-between md:justify-end gap-2.5 sm:gap-4 shrink-0">
                               {/* Time Interval e.g. 18:17 - 19:29 (Clockify Style Inline Editable) */}
                               {editingTimeEntryId === entry._id ? (
-                                <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#181818] border border-teal-500/50 rounded-xl px-2 py-1 shadow-md">
+                                <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#101724] border border-teal-500/50 rounded-xl px-2 py-1 shadow-md">
                                   <input
                                     type="time"
                                     value={inlineStartTime}
@@ -1429,7 +1429,7 @@ export default function TimeTrackingPage() {
                                       if (e.key === 'Enter') saveInlineTimeRange(entry._id);
                                       if (e.key === 'Escape') setEditingTimeEntryId(null);
                                     }}
-                                    className="bg-white dark:bg-[#202020] border border-slate-200 dark:border-[#333333] text-slate-900 dark:text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-500"
+                                    className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] text-slate-900 dark:text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-500"
                                     autoFocus
                                   />
                                   <span className="text-slate-400 dark:text-neutral-400 font-mono text-xs">-</span>
@@ -1441,7 +1441,7 @@ export default function TimeTrackingPage() {
                                       if (e.key === 'Enter') saveInlineTimeRange(entry._id);
                                       if (e.key === 'Escape') setEditingTimeEntryId(null);
                                     }}
-                                    className="bg-white dark:bg-[#202020] border border-slate-200 dark:border-[#333333] text-slate-900 dark:text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-500"
+                                    className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] text-slate-900 dark:text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-500"
                                   />
                                   <button
                                     type="button"
@@ -1454,7 +1454,7 @@ export default function TimeTrackingPage() {
                                   <button
                                     type="button"
                                     onClick={() => setEditingTimeEntryId(null)}
-                                    className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 dark:bg-[#242424] dark:hover:bg-[#2e2e2e] dark:text-neutral-400 dark:hover:text-white transition cursor-pointer"
+                                    className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 dark:bg-[#1e2a3c] dark:hover:bg-[#25334a] dark:text-neutral-400 dark:hover:text-white transition cursor-pointer"
                                     title="Cancel"
                                   >
                                     <X className="w-3.5 h-3.5" />
@@ -1464,7 +1464,7 @@ export default function TimeTrackingPage() {
                                 <button
                                   type="button"
                                   onClick={() => startEditingTimeRange(entry)}
-                                  className="group/time flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#141414] hover:bg-slate-100 dark:hover:bg-[#1a1a1a] border border-slate-200 dark:border-[#242424] hover:border-teal-500/40 border-l border-l-dotted border-l-slate-300 dark:border-l-neutral-700/60 transition text-left cursor-pointer"
+                                  className="group/time flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#101724] hover:bg-slate-100 dark:hover:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/40 border-l border-l-dotted border-l-slate-300 dark:border-l-teal-500/30 transition text-left cursor-pointer"
                                   title="Click to edit start & end time"
                                 >
                                   <span className="font-mono text-xs text-slate-700 dark:text-neutral-300 group-hover/time:text-teal-600 dark:group-hover/time:text-teal-300 font-medium tracking-wider">
@@ -1475,7 +1475,7 @@ export default function TimeTrackingPage() {
                               )}
 
                               {/* Duration */}
-                              <span className="font-mono text-xs font-bold text-white min-w-[50px] text-right">
+                              <span className="font-mono text-xs font-bold text-slate-900 dark:text-white min-w-[50px] text-right">
                                 {formatDurationText(entry.hours, entry.minutes)}
                               </span>
 
@@ -1484,7 +1484,7 @@ export default function TimeTrackingPage() {
                                 <button
                                   type="button"
                                   onClick={() => restartPastTimer(entry)}
-                                  className="p-1.5 rounded-lg bg-[#1e1e1e] hover:bg-teal-600 hover:text-white text-teal-400 transition shadow-sm cursor-pointer"
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-teal-600 hover:text-white text-teal-600 dark:bg-[#101724] dark:hover:bg-teal-600 dark:text-teal-400 transition shadow-sm cursor-pointer"
                                   title="Continue / restart this timer"
                                 >
                                   <Play className="w-3.5 h-3.5 fill-current" />
@@ -1492,7 +1492,7 @@ export default function TimeTrackingPage() {
                                 <button
                                   type="button"
                                   onClick={() => openEditEntry(entry)}
-                                  className="p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                                  className="p-1.5 rounded-lg hover:bg-teal-500/10 text-slate-400 hover:text-teal-600 dark:text-neutral-400 dark:hover:text-teal-400 transition cursor-pointer"
                                   title="Edit time entry"
                                 >
                                   <Pencil className="w-3.5 h-3.5" />
@@ -1500,7 +1500,7 @@ export default function TimeTrackingPage() {
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteEntry(entry._id)}
-                                  className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                                  className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 dark:text-neutral-400 dark:hover:text-rose-400 transition cursor-pointer"
                                   title="Delete time entry"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -1514,11 +1514,11 @@ export default function TimeTrackingPage() {
                   );
                 })
               ) : (
-                <div className="p-12 text-center bg-[#111111] rounded-3xl border border-dashed border-[#242424] space-y-3">
-                  <Clock className="w-10 h-10 text-neutral-600 mx-auto" />
+                <div className="p-12 text-center bg-white dark:bg-[#151d2a] rounded-3xl border border-dashed border-slate-200 dark:border-[#222e42] space-y-3">
+                  <Clock className="w-10 h-10 text-slate-400 dark:text-neutral-500 mx-auto" />
                   <div className="space-y-1">
-                    <h4 className="text-xs font-bold text-white">No time entries recorded</h4>
-                    <p className="text-[11px] text-neutral-400 max-w-sm mx-auto">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">No time entries recorded</h4>
+                    <p className="text-[11px] text-slate-500 dark:text-neutral-400 max-w-sm mx-auto">
                       Start the live timer above or use manual mode to log hours spent on client projects.
                     </p>
                   </div>
@@ -1536,18 +1536,18 @@ export default function TimeTrackingPage() {
 
             {/* Pagination Controls Bar */}
             {groupedDays.length > 0 && (
-              <div className="p-4 rounded-2xl bg-[#111111] border border-[#222222] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+              <div className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
                 {/* Count indicator */}
-                <div className="text-xs text-neutral-400 text-center sm:text-left">
-                  Showing days <span className="font-semibold text-white font-mono">{daysPerPage === -1 ? 1 : Math.min((currentPage - 1) * daysPerPage + 1, totalDays)}</span> to{' '}
-                  <span className="font-semibold text-white font-mono">{daysPerPage === -1 ? totalDays : Math.min(currentPage * daysPerPage, totalDays)}</span> of{' '}
-                  <span className="font-semibold text-teal-400 font-mono">{totalDays}</span> days{' '}
-                  <span className="text-neutral-500 font-mono">({filteredEntries.length} logged entries)</span>
+                <div className="text-xs text-slate-500 dark:text-neutral-400 text-center sm:text-left">
+                  Showing days <span className="font-semibold text-slate-900 dark:text-white font-mono">{daysPerPage === -1 ? 1 : Math.min((currentPage - 1) * daysPerPage + 1, totalDays)}</span> to{' '}
+                  <span className="font-semibold text-slate-900 dark:text-white font-mono">{daysPerPage === -1 ? totalDays : Math.min(currentPage * daysPerPage, totalDays)}</span> of{' '}
+                  <span className="font-semibold text-teal-600 dark:text-teal-400 font-mono">{totalDays}</span> days{' '}
+                  <span className="text-slate-400 dark:text-neutral-500 font-mono">({filteredEntries.length} logged entries)</span>
                 </div>
 
                 {/* Page Navigation & Page Size */}
                 <div className="flex items-center gap-3 flex-wrap justify-center">
-                  <div className="flex items-center gap-1.5 text-xs text-neutral-400">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400">
                     <span>Days per page:</span>
                     <div className="w-24">
                       <CustomSelect
@@ -1574,21 +1574,21 @@ export default function TimeTrackingPage() {
                         type="button"
                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-[#1e2a3c] bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#151d2a] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-slate-700 dark:text-white transition flex items-center gap-1"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Prev</span>
                       </button>
 
-                      <div className="px-2.5 py-1 text-xs font-mono text-neutral-300">
-                        Page <strong className="text-teal-400 font-bold">{currentPage}</strong> of <strong>{totalPages}</strong>
+                      <div className="px-2.5 py-1 text-xs font-mono text-slate-600 dark:text-neutral-300">
+                        Page <strong className="text-teal-600 dark:text-teal-400 font-bold">{currentPage}</strong> of <strong>{totalPages}</strong>
                       </div>
 
                       <button
                         type="button"
                         onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
-                        className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-[#1e2a3c] bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#151d2a] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-slate-700 dark:text-white transition flex items-center gap-1"
                       >
                         <span className="hidden sm:inline">Next</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -1602,36 +1602,36 @@ export default function TimeTrackingPage() {
         ) : (
           /* TEAM WEEKLY TIMESHEET & REPORTS TAB */
           <div className="space-y-6">
-            <div className="p-5 rounded-3xl bg-[#121212] border border-[#222222] space-y-4">
+            <div className="p-5 rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="font-heading text-sm font-bold text-white flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-teal-400" />
+                  <h3 className="font-heading text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                     Weekly Team Timesheets & Capacity Burn
                   </h3>
-                  <p className="text-xs text-neutral-400 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
                     Live timesheet rollup for selected week. Click any member card to view day-by-day tracked details.
                   </p>
                 </div>
 
                 {/* Week Navigation Controls */}
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <div className="flex items-center bg-[#161616] border border-[#262626] rounded-xl p-1 text-xs shadow-sm">
+                  <div className="flex items-center bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl p-1 text-xs shadow-sm">
                     <button
                       type="button"
                       onClick={() => setWeekOffset((prev) => prev - 1)}
-                      className="p-1.5 hover:bg-[#222222] text-neutral-400 hover:text-white rounded-lg transition"
+                      className="p-1.5 hover:bg-slate-200 dark:hover:bg-[#1e2a3c] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white rounded-lg transition"
                       title="Previous week"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <span className="px-3 font-semibold text-white text-xs whitespace-nowrap">
+                    <span className="px-3 font-semibold text-slate-900 dark:text-white text-xs whitespace-nowrap">
                       {weekRange.label}
                     </span>
                     <button
                       type="button"
                       onClick={() => setWeekOffset((prev) => prev + 1)}
-                      className="p-1.5 hover:bg-[#222222] text-neutral-400 hover:text-white rounded-lg transition"
+                      className="p-1.5 hover:bg-slate-200 dark:hover:bg-[#1e2a3c] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white rounded-lg transition"
                       title="Next week"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -1642,14 +1642,14 @@ export default function TimeTrackingPage() {
                     <button
                       type="button"
                       onClick={() => setWeekOffset(0)}
-                      className="text-xs font-semibold text-teal-400 hover:text-teal-300 hover:underline px-2 py-1 transition"
+                      className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 hover:underline px-2 py-1 transition"
                     >
                       Current Week
                     </button>
                   )}
 
-                  <div className="text-xs text-neutral-400 font-mono hidden md:block border-l border-[#262626] pl-3">
-                    Target: <strong className="text-teal-400">48h / member</strong> <span className="text-neutral-500 text-[11px]">(6 days × 8h)</span>
+                  <div className="text-xs text-slate-500 dark:text-neutral-400 font-mono hidden md:block border-l border-slate-200 dark:border-[#1e2a3c] pl-3">
+                    Target: <strong className="text-teal-600 dark:text-teal-400">48h / member</strong> <span className="text-slate-400 dark:text-neutral-500 text-[11px]">(6 days × 8h)</span>
                   </div>
                 </div>
               </div>
@@ -1664,7 +1664,7 @@ export default function TimeTrackingPage() {
                     <div
                       key={summary.user.id}
                       onClick={() => setSelectedMemberForDetails(summary)}
-                      className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-3 shadow-sm hover:border-teal-500/50 hover:bg-[#191919] transition cursor-pointer group"
+                      className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-3 shadow-sm hover:border-teal-500/50 hover:bg-slate-100 dark:hover:bg-[#151d2a] transition cursor-pointer group"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
@@ -1672,28 +1672,28 @@ export default function TimeTrackingPage() {
                             {summary.user.name.charAt(0)}
                           </div>
                           <div>
-                            <div className="text-xs font-bold text-white group-hover:text-teal-300 transition">
+                            <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition">
                               {summary.user.name}
                             </div>
-                            <div className="text-[11px] text-teal-400">{summary.user.title || 'Team Member'}</div>
+                            <div className="text-[11px] text-teal-600 dark:text-teal-400">{summary.user.title || 'Team Member'}</div>
                           </div>
                         </div>
 
                         <div className="text-right">
-                          <span className="font-heading text-sm font-bold text-white font-mono">
+                          <span className="font-heading text-sm font-bold text-slate-900 dark:text-white font-mono">
                             {summary.totalHours}h
                           </span>
-                          <span className="text-[11px] text-neutral-500 block">/ {target}h</span>
+                          <span className="text-[11px] text-slate-400 dark:text-neutral-500 block">/ {target}h</span>
                         </div>
                       </div>
 
                       {/* Capacity Burn Progress Bar */}
                       <div className="space-y-1">
-                        <div className="flex justify-between text-[10px] text-neutral-400">
+                        <div className="flex justify-between text-[10px] text-slate-500 dark:text-neutral-400">
                           <span>Capacity Burn</span>
-                          <span className="font-mono text-teal-300 font-bold">{pct}%</span>
+                          <span className="font-mono text-teal-700 dark:text-teal-300 font-bold">{pct}%</span>
                         </div>
-                        <div className="w-full bg-[#101010] h-2 rounded-full overflow-hidden">
+                        <div className="w-full bg-slate-200 dark:bg-[#151d2a] h-2 rounded-full overflow-hidden border border-slate-200 dark:border-[#222e42]">
                           <div
                             className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                             style={{ width: `${pct}%` }}
@@ -1703,18 +1703,18 @@ export default function TimeTrackingPage() {
 
                       {/* Project Breakdown Pills */}
                       {summary.projectBreakdown && summary.projectBreakdown.length > 0 && (
-                        <div className="pt-2 border-t border-[#222222] space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-neutral-500 block">
+                        <div className="pt-2 border-t border-slate-200 dark:border-[#1e2a3c] space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-neutral-400 block">
                             Project Distribution:
                           </span>
                           <div className="space-y-1">
                             {summary.projectBreakdown.map((pb, idx) => (
                               <div
                                 key={idx}
-                                className="flex items-center justify-between text-[11px] text-neutral-300"
+                                className="flex items-center justify-between text-[11px] text-slate-700 dark:text-neutral-300"
                               >
                                 <span className="truncate max-w-[150px]">{pb.projectName}</span>
-                                <span className="font-mono text-neutral-400">{pb.hours}h</span>
+                                <span className="font-mono text-slate-500 dark:text-neutral-400">{pb.hours}h</span>
                               </div>
                             ))}
                           </div>
@@ -1722,12 +1722,12 @@ export default function TimeTrackingPage() {
                       )}
 
                       {/* Interactive Trigger Banner */}
-                      <div className="pt-2.5 border-t border-[#222222] flex items-center justify-between text-xs text-teal-400 group-hover:text-teal-300 font-medium">
+                      <div className="pt-2.5 border-t border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between text-xs text-teal-600 dark:text-teal-400 group-hover:text-teal-700 dark:group-hover:text-teal-300 font-medium">
                         <span className="flex items-center gap-1.5">
                           <CalendarDays className="w-3.5 h-3.5" />
                           View Day-by-Day Logs
                         </span>
-                        <span className="text-[10px] text-neutral-500 group-hover:text-teal-400 group-hover:translate-x-0.5 transition font-mono">
+                        <span className="text-[10px] text-slate-400 dark:text-neutral-500 group-hover:text-teal-600 dark:group-hover:text-teal-400 group-hover:translate-x-0.5 transition font-mono">
                           {(summary.entries || []).length} log{(summary.entries || []).length === 1 ? '' : 's'} →
                         </span>
                       </div>
@@ -1753,20 +1753,20 @@ export default function TimeTrackingPage() {
         {selectedMemberForDetails && (
           <div className="space-y-5">
             {/* Member Profile & Metrics Header */}
-            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-3">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-md shadow-teal-950/30">
                     {selectedMemberForDetails.user.name.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="font-heading text-sm sm:text-base font-bold text-white leading-tight">
+                    <h4 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
                       {selectedMemberForDetails.user.name}
                     </h4>
-                    <p className="text-xs text-teal-400 font-medium">
+                    <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">
                       {selectedMemberForDetails.user.title || 'Team Member'}
                       {selectedMemberForDetails.user.email && (
-                        <span className="text-neutral-500 ml-1.5 font-normal">
+                        <span className="text-slate-400 dark:text-neutral-500 ml-1.5 font-normal">
                           • {selectedMemberForDetails.user.email}
                         </span>
                       )}
@@ -1774,16 +1774,16 @@ export default function TimeTrackingPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-[#111111] px-3.5 py-2 rounded-xl border border-[#222222] self-start sm:self-center">
+                <div className="flex items-center gap-3 bg-white dark:bg-[#151d2a] px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#222e42] self-start sm:self-center">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">Total Logged</span>
-                    <span className="font-heading text-lg font-bold text-white font-mono">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-neutral-400 block">Total Logged</span>
+                    <span className="font-heading text-lg font-bold text-slate-900 dark:text-white font-mono">
                       {selectedMemberForDetails.totalHours}h
                     </span>
                   </div>
-                  <div className="border-l border-[#262626] pl-3">
-                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">Capacity</span>
-                    <span className="text-xs font-mono text-teal-300">
+                  <div className="border-l border-slate-200 dark:border-[#1e2a3c] pl-3">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-neutral-400 block">Capacity</span>
+                    <span className="text-xs font-mono text-teal-600 dark:text-teal-300">
                       {(() => {
                         const target = selectedMemberForDetails.user.capacity === 40 ? 48 : (selectedMemberForDetails.user.capacity || 48);
                         const pct = Math.min(100, Math.round((selectedMemberForDetails.totalHours / target) * 100));
@@ -1795,38 +1795,38 @@ export default function TimeTrackingPage() {
               </div>
 
               {/* Sub-metrics: Client vs Internal & Week Range */}
-              <div className="pt-2 border-t border-[#222222] flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="pt-2 border-t border-slate-200 dark:border-[#1e2a3c] flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-3">
-                  <span className="text-neutral-400 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    Client: <strong className="text-emerald-400 font-mono">{selectedMemberStats.billableHours}h</strong>
+                  <span className="text-slate-600 dark:text-neutral-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    Client: <strong className="text-emerald-700 dark:text-emerald-400 font-mono">{selectedMemberStats.billableHours}h</strong>
                   </span>
-                  <span className="text-neutral-400 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-neutral-500" />
-                    Internal: <strong className="text-neutral-300 font-mono">{selectedMemberStats.nonBillableHours}h</strong>
+                  <span className="text-slate-600 dark:text-neutral-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-neutral-500" />
+                    Internal: <strong className="text-slate-700 dark:text-neutral-300 font-mono">{selectedMemberStats.nonBillableHours}h</strong>
                   </span>
-                  <span className="text-neutral-500">
+                  <span className="text-slate-400 dark:text-neutral-500">
                     • {selectedMemberStats.totalEntries} time log{selectedMemberStats.totalEntries === 1 ? '' : 's'}
                   </span>
                 </div>
 
-                <div className="text-[11px] text-neutral-400 font-mono">
-                  Week of <span className="text-neutral-200">{weekRange.label}</span>
+                <div className="text-[11px] text-slate-500 dark:text-neutral-400 font-mono">
+                  Week of <span className="text-slate-800 dark:text-neutral-200">{weekRange.label}</span>
                 </div>
               </div>
 
               {/* Project breakdown pills */}
               {selectedMemberForDetails.projectBreakdown && selectedMemberForDetails.projectBreakdown.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[10px] text-neutral-500 uppercase font-semibold mr-1">Projects:</span>
+                  <span className="text-[10px] text-slate-500 dark:text-neutral-500 uppercase font-semibold mr-1">Projects:</span>
                   {selectedMemberForDetails.projectBreakdown.map((pb, idx) => (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#1f1f1f] text-neutral-300 text-[11px] border border-[#2a2a2a]"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white dark:bg-[#151d2a] text-slate-700 dark:text-neutral-300 text-[11px] border border-slate-200 dark:border-[#222e42]"
                     >
-                      <FolderKanban className="w-2.5 h-2.5 text-teal-400" />
+                      <FolderKanban className="w-2.5 h-2.5 text-teal-600 dark:text-teal-400" />
                       <span>{pb.projectName}</span>
-                      <strong className="text-teal-300 font-mono text-[10px]">{pb.hours}h</strong>
+                      <strong className="text-teal-600 dark:text-teal-300 font-mono text-[10px]">{pb.hours}h</strong>
                     </span>
                   ))}
                 </div>
@@ -1835,13 +1835,13 @@ export default function TimeTrackingPage() {
 
             {/* Day Filter Pills */}
             <div className="space-y-1.5">
-              <div className="text-xs font-semibold text-neutral-300 flex items-center justify-between">
+              <div className="text-xs font-semibold text-slate-700 dark:text-neutral-300 flex items-center justify-between">
                 <span>Daily Breakdown (Monday – Sunday):</span>
                 {selectedDayFilter !== 'ALL' && (
                   <button
                     type="button"
                     onClick={() => setSelectedDayFilter('ALL')}
-                    className="text-[11px] text-teal-400 hover:underline font-medium"
+                    className="text-[11px] text-teal-600 dark:text-teal-400 hover:underline font-medium"
                   >
                     Show all days
                   </button>
@@ -1855,7 +1855,7 @@ export default function TimeTrackingPage() {
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
                     selectedDayFilter === 'ALL'
                       ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                      : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#242424]'
+                      : 'bg-slate-100 dark:bg-[#101724] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c]'
                   }`}
                 >
                   All Days ({selectedMemberForDetails.totalHours}h)
@@ -1869,8 +1869,8 @@ export default function TimeTrackingPage() {
                       selectedDayFilter === day.dayName
                         ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
                         : day.totalMinutes > 0
-                        ? 'bg-[#181818] text-neutral-300 hover:text-white border border-[#262626]'
-                        : 'bg-[#141414] text-neutral-500 hover:text-neutral-400 border border-[#1f1f1f]'
+                        ? 'bg-slate-100 dark:bg-[#101724] text-slate-800 dark:text-neutral-300 hover:text-slate-950 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c]'
+                        : 'bg-slate-50 dark:bg-[#101724]/60 text-slate-400 dark:text-neutral-500 hover:text-slate-600 dark:hover:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c]/60'
                     }`}
                   >
                     <span>{day.dayName.slice(0, 3)}</span>
@@ -1879,8 +1879,8 @@ export default function TimeTrackingPage() {
                         selectedDayFilter === day.dayName
                           ? 'bg-black/30 text-white'
                           : day.totalMinutes > 0
-                          ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20'
-                          : 'bg-[#202020] text-neutral-600'
+                          ? 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20'
+                          : 'bg-slate-200 dark:bg-[#151d2a] text-slate-500 dark:text-neutral-500'
                       }`}
                     >
                       {day.formattedDuration}
@@ -1898,19 +1898,19 @@ export default function TimeTrackingPage() {
                   return (
                     <div
                       key={day.dayName}
-                      className="rounded-2xl bg-[#141414] border border-[#222222] overflow-hidden"
+                      className="rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] overflow-hidden"
                     >
                       {/* Day Header */}
-                      <div className="py-2.5 px-4 bg-[#181818]/70 border-b border-[#222222] flex items-center justify-between">
+                      <div className="py-2.5 px-4 bg-slate-100 dark:bg-[#151d2a] border-b border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="font-heading text-xs font-bold text-white">
+                          <span className="font-heading text-xs font-bold text-slate-900 dark:text-white">
                             {day.dayName}
                           </span>
-                          <span className="text-xs text-neutral-400 font-mono">
+                          <span className="text-xs text-slate-500 dark:text-neutral-400 font-mono">
                             {day.dateFormatted}
                           </span>
                           {day.isToday && (
-                            <span className="px-1.5 py-0.2 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[9px] uppercase font-bold tracking-wider">
+                            <span className="px-1.5 py-0.2 rounded bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-500/20 text-[9px] uppercase font-bold tracking-wider">
                               Today
                             </span>
                           )}
@@ -1920,8 +1920,8 @@ export default function TimeTrackingPage() {
                           <span
                             className={`text-xs font-mono font-bold px-2 py-0.5 rounded-lg ${
                               day.totalMinutes > 0
-                                ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20'
-                                : 'text-neutral-500'
+                                ? 'bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-500/20'
+                                : 'text-slate-400 dark:text-neutral-500'
                             }`}
                           >
                             {day.totalMinutes > 0 ? `${day.formattedDuration} logged` : '0h / No logs'}
@@ -1932,27 +1932,27 @@ export default function TimeTrackingPage() {
                       {/* Day Entries List */}
                       <div className="p-3 space-y-2">
                         {day.entries.length === 0 ? (
-                          <div className="py-3 text-center text-xs text-neutral-500 italic">
+                          <div className="py-3 text-center text-xs text-slate-400 dark:text-neutral-500 italic">
                             No time entries logged on {day.dayName}.
                           </div>
                         ) : (
                           day.entries.map((entry) => (
                             <div
                               key={entry._id}
-                              className="p-3 rounded-xl bg-[#181818] border border-[#242424] hover:border-[#333333] transition space-y-2"
+                              className="p-3 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/40 transition space-y-2"
                             >
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                 <div className="flex items-start gap-2.5">
-                                  <div className="w-7 h-7 rounded-lg bg-teal-500/10 text-teal-400 border border-teal-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                                  <div className="w-7 h-7 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 flex items-center justify-center shrink-0 mt-0.5">
                                     <Clock className="w-3.5 h-3.5" />
                                   </div>
                                   <div>
-                                    <span className="font-medium text-white text-xs block leading-snug">
+                                    <span className="font-medium text-slate-900 dark:text-white text-xs block leading-snug">
                                       {entry.description || (entry.task as any)?.title || 'Work log'}
                                     </span>
                                     {(entry.task as any)?.title && entry.description && (
-                                      <span className="text-[11px] text-neutral-400 flex items-center gap-1 mt-0.5">
-                                        <CheckCircle2 className="w-3 h-3 text-teal-500 shrink-0" />
+                                      <span className="text-[11px] text-slate-500 dark:text-neutral-400 flex items-center gap-1 mt-0.5">
+                                        <CheckCircle2 className="w-3 h-3 text-teal-600 dark:text-teal-400 shrink-0" />
                                         Task: {(entry.task as any).title}
                                       </span>
                                     )}
@@ -1961,32 +1961,32 @@ export default function TimeTrackingPage() {
 
                                 <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
                                   {entry.startTime && entry.endTime && (
-                                    <span className="text-[11px] font-mono text-neutral-400 bg-[#202020] px-2 py-0.5 rounded border border-[#2a2a2a]">
+                                    <span className="text-[11px] font-mono text-slate-700 dark:text-neutral-300 bg-slate-100 dark:bg-[#101724] px-2 py-0.5 rounded border border-slate-200 dark:border-[#1e2a3c]">
                                       {entry.startTime} – {entry.endTime}
                                     </span>
                                   )}
-                                  <span className="text-xs font-mono font-bold text-teal-300 bg-teal-500/10 px-2.5 py-0.5 rounded-lg border border-teal-500/20">
+                                  <span className="text-xs font-mono font-bold text-teal-700 dark:text-teal-300 bg-teal-500/10 px-2.5 py-0.5 rounded-lg border border-teal-500/20">
                                     {formatDurationText(entry.hours, entry.minutes)}
                                   </span>
                                 </div>
                               </div>
 
                               {/* Badges: Project, Client, Tag, Billable */}
-                              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#202020] text-[11px]">
-                                <span className="inline-flex items-center gap-1 text-neutral-300 bg-[#202020] px-2 py-0.5 rounded border border-[#2a2a2a]">
-                                  <FolderKanban className="w-3 h-3 text-teal-400" />
+                              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100 dark:border-[#1e2a3c] text-[11px]">
+                                <span className="inline-flex items-center gap-1 text-slate-700 dark:text-neutral-300 bg-slate-100 dark:bg-[#101724] px-2 py-0.5 rounded border border-slate-200 dark:border-[#1e2a3c]">
+                                  <FolderKanban className="w-3 h-3 text-teal-600 dark:text-teal-400" />
                                   {(entry.project as any)?.name || 'Project'}
                                 </span>
 
                                 {(entry.project as any)?.clientName && (
-                                  <span className="text-neutral-500 text-[11px]">
+                                  <span className="text-slate-500 dark:text-neutral-400 text-[11px]">
                                     Client: {(entry.project as any).clientName}
                                   </span>
                                 )}
 
                                 {entry.tag && (
-                                  <span className="inline-flex items-center gap-1 text-neutral-400 bg-[#1c1c1c] px-2 py-0.5 rounded">
-                                    <Tag className="w-2.5 h-2.5 text-neutral-500" />
+                                  <span className="inline-flex items-center gap-1 text-slate-500 dark:text-neutral-400 bg-slate-100 dark:bg-[#101724] px-2 py-0.5 rounded border border-slate-200 dark:border-[#1e2a3c]">
+                                    <Tag className="w-2.5 h-2.5 text-slate-400 dark:text-neutral-500" />
                                     {entry.tag}
                                   </span>
                                 )}
@@ -1994,8 +1994,8 @@ export default function TimeTrackingPage() {
                                 <span
                                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-medium text-[10px] ${
                                     entry.billable
-                                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                      : 'bg-neutral-800 text-neutral-400 border border-neutral-700/50'
+                                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
+                                      : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-[#101724] dark:text-neutral-400 dark:border-[#1e2a3c]'
                                   }`}
                                 >
                                   <DollarSign className="w-2.5 h-2.5" />
@@ -2023,7 +2023,7 @@ export default function TimeTrackingPage() {
         {editingEntry && (
           <form onSubmit={handleUpdateEntry} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Project *
               </label>
               <CustomSelect
@@ -2043,7 +2043,7 @@ export default function TimeTrackingPage() {
 
             {tasks.filter((t) => (t.project as any)?._id === editProject || (t.project as any) === editProject).length > 0 && (
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                   Associated Task (Optional)
                 </label>
                 <CustomSelect
@@ -2064,7 +2064,7 @@ export default function TimeTrackingPage() {
             )}
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Description / Work Done *
               </label>
               <textarea
@@ -2072,13 +2072,13 @@ export default function TimeTrackingPage() {
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
                 required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none resize-none"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                   Date
                 </label>
                 <input
@@ -2086,11 +2086,11 @@ export default function TimeTrackingPage() {
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
                   required
-                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                  className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                   Hours
                 </label>
                 <input
@@ -2099,11 +2099,11 @@ export default function TimeTrackingPage() {
                   max="24"
                   value={editHours}
                   onChange={(e) => setEditHours(parseInt(e.target.value) || 0)}
-                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none font-mono"
+                  className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none font-mono"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                   Minutes
                 </label>
                 <input
@@ -2112,28 +2112,28 @@ export default function TimeTrackingPage() {
                   max="59"
                   value={editMinutes}
                   onChange={(e) => setEditMinutes(parseInt(e.target.value) || 0)}
-                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none font-mono"
+                  className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none font-mono"
                 />
               </div>
             </div>
 
             <div className="flex items-center gap-2 pt-1">
-              <label className="flex items-center gap-2 cursor-pointer text-xs text-neutral-300">
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-neutral-300">
                 <input
                   type="checkbox"
                   checked={editBillable}
                   onChange={(e) => setEditBillable(e.target.checked)}
-                  className="rounded border-[#333] text-teal-500 focus:ring-0 focus:ring-offset-0 bg-[#181818]"
+                  className="rounded border-slate-300 dark:border-[#222e42] text-teal-600 focus:ring-0 focus:ring-offset-0 bg-slate-50 dark:bg-[#101724]"
                 />
                 <span>Billable to client</span>
               </label>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
               <button
                 type="button"
                 onClick={() => setEditingEntry(null)}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
               >
                 Cancel
               </button>

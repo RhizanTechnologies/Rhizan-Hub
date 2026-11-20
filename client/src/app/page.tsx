@@ -707,7 +707,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/time"
-                className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 flex items-center gap-1 transition px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#181818] dark:hover:bg-[#262626] border border-slate-200 dark:border-[#262626]"
+                className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 flex items-center gap-1 transition px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c]"
               >
                 <span>View Full Timesheet</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -717,7 +717,7 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column: Live Stopwatch & Quick Logging (6 Cols) */}
-            <div className="lg:col-span-6 bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] rounded-2xl p-5 space-y-4">
+            <div className="lg:col-span-6 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-2xl p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span
@@ -742,7 +742,7 @@ export default function DashboardPage() {
                   placeholder="What are you working on right now?"
                   value={timerDescription}
                   onChange={(e) => setTimerDescription(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#2a2a2a] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+                  className="w-full px-3.5 py-2.5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition"
                 />
               </div>
 
@@ -780,7 +780,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Timer Controls & Quick Presets */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-[#222222]">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-[#1e2a3c]">
                 <div className="flex items-center gap-2">
                   {!isRunning ? (
                     <button
@@ -808,7 +808,7 @@ export default function DashboardPage() {
                     className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1 transition ${
                       timerBillable
                         ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
-                        : 'bg-slate-100 dark:bg-[#181818] border-slate-200 dark:border-[#2a2a2a] text-slate-600 dark:text-neutral-400'
+                        : 'bg-slate-100 dark:bg-[#151d2a] border-slate-200 dark:border-[#222e42] text-slate-600 dark:text-neutral-400'
                     }`}
                     title={timerBillable ? 'Client Work (Billable)' : 'Internal Work'}
                   >
@@ -823,21 +823,21 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => handleQuickPresetLog(15)}
-                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#111111] hover:bg-slate-100 dark:hover:bg-[#202020] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#2a2a2a] text-[10px] font-mono transition"
+                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#222e42] text-[10px] font-mono transition"
                   >
                     +15m
                   </button>
                   <button
                     type="button"
                     onClick={() => handleQuickPresetLog(30)}
-                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#111111] hover:bg-slate-100 dark:hover:bg-[#202020] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#2a2a2a] text-[10px] font-mono transition"
+                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#222e42] text-[10px] font-mono transition"
                   >
                     +30m
                   </button>
                   <button
                     type="button"
                     onClick={() => handleQuickPresetLog(60)}
-                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#111111] hover:bg-slate-100 dark:hover:bg-[#202020] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#2a2a2a] text-[10px] font-mono transition"
+                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#222e42] text-[10px] font-mono transition"
                   >
                     +1h
                   </button>
@@ -848,7 +848,7 @@ export default function DashboardPage() {
             {/* Right Column: Daily Capacity Dial & Today's Logged Entries (6 Cols) */}
             <div className="lg:col-span-6 space-y-4">
               {/* Daily Capacity Meter Card */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Target className="w-4 h-4 text-teal-600 dark:text-teal-400" />
@@ -861,7 +861,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full bg-slate-200 dark:bg-[#111111] h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-[#2a2a2a]">
+                <div className="w-full bg-slate-200 dark:bg-[#151d2a] h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-[#222e42]">
                   <div
                     className={`h-full rounded-full transition-all duration-700 ${
                       todayProgressPercent >= 100
@@ -884,8 +884,8 @@ export default function DashboardPage() {
               </div>
 
               {/* Today's Logged Sessions List */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] space-y-2.5">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#242424]">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-2.5">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#1e2a3c]">
                   <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                     <span>Today's Logged Work ({todayEntries.length})</span>
@@ -905,7 +905,7 @@ export default function DashboardPage() {
                     todayEntries.map((entry) => (
                       <div
                         key={entry._id}
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#262626] hover:border-teal-500/40 transition text-xs group shadow-xs"
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/40 transition text-xs group shadow-xs"
                       >
                         <div className="min-w-0 flex-1 pr-2">
                           <div className="flex items-center gap-1.5">
@@ -926,7 +926,7 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="font-mono text-xs font-bold text-slate-800 dark:text-white bg-slate-100 dark:bg-[#1a1a1a] px-2 py-0.5 rounded-md border border-slate-200 dark:border-[#2e2e2e]">
+                          <span className="font-mono text-xs font-bold text-slate-800 dark:text-white bg-slate-100 dark:bg-[#101724] px-2 py-0.5 rounded-md border border-slate-200 dark:border-[#1e2a3c]">
                             {formatDurationText(entry.hours, entry.minutes)}
                           </span>
                           <button
@@ -981,7 +981,7 @@ export default function DashboardPage() {
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className="block p-4 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] hover:border-teal-500/40 transition group"
+                    className="block p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/40 transition group"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2 min-w-0">
@@ -998,7 +998,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="w-full bg-slate-200 dark:bg-[#111111] h-2 rounded-full overflow-hidden border border-slate-200 dark:border-[#282828]">
+                    <div className="w-full bg-slate-200 dark:bg-[#151d2a] h-2 rounded-full overflow-hidden border border-slate-200 dark:border-[#222e42]">
                       <div
                         className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                         style={{ width: `${project.progress}%` }}
@@ -1022,7 +1022,7 @@ export default function DashboardPage() {
           {/* My Tasks with 1-Click Timer Integration (5 columns) */}
           <div className="lg:col-span-5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222] mb-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#1e2a3c] mb-3">
                 <div>
                   <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <CheckSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -1048,8 +1048,8 @@ export default function DashboardPage() {
                         key={task._id}
                         className={`p-3 rounded-2xl border transition flex items-start gap-3 select-none ${
                           isDone
-                            ? 'bg-slate-100/60 dark:bg-[#141414] border-slate-200 dark:border-[#1e1e1e] opacity-60'
-                            : 'bg-slate-50 dark:bg-[#161616] border-slate-200 dark:border-[#262626] hover:border-teal-500/40'
+                            ? 'bg-slate-100/60 dark:bg-[#101724]/60 border-slate-200 dark:border-[#1e2a3c] opacity-60'
+                            : 'bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/40'
                         }`}
                       >
                         <button
@@ -1089,7 +1089,7 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => startTrackingForTask(task)}
-                            className="p-1.5 rounded-lg bg-white dark:bg-[#1a1a1a] hover:bg-teal-600 hover:text-white text-slate-500 dark:text-neutral-400 border border-slate-200 dark:border-[#2a2a2a] transition shrink-0"
+                            className="p-1.5 rounded-lg bg-white dark:bg-[#151d2a] hover:bg-teal-600 hover:text-white text-slate-500 dark:text-neutral-400 border border-slate-200 dark:border-[#222e42] transition shrink-0"
                             title="Start timer for this task"
                           >
                             <Play className="w-3 h-3 fill-current" />
@@ -1108,7 +1108,7 @@ export default function DashboardPage() {
 
             <Link
               href="/tasks"
-              className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#181818] dark:hover:bg-[#222222] text-xs font-semibold text-slate-700 dark:text-neutral-200 text-center transition block border border-slate-200 dark:border-[#282828]"
+              className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#151d2a] text-xs font-semibold text-slate-700 dark:text-neutral-200 text-center transition block border border-slate-200 dark:border-[#1e2a3c]"
             >
               Open Full Task Board
             </Link>
@@ -1121,7 +1121,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Team Weekly Status (5 cols) - 48h Weekly Target */}
           <div className="lg:col-span-5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#1e2a3c]">
               <div>
                 <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <Users className="w-4 h-4 text-teal-600 dark:text-teal-400" />
@@ -1146,7 +1146,7 @@ export default function DashboardPage() {
                 <Link
                   key={member.id}
                   href={`/team/${member.id}`}
-                  className="block p-3.5 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] hover:border-teal-500/40 transition group"
+                  className="block p-3.5 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/40 transition group"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -1168,7 +1168,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Capacity Progress Bar */}
-                  <div className="w-full bg-slate-200 dark:bg-[#111111] h-1.5 rounded-full overflow-hidden border border-slate-200 dark:border-[#242424]">
+                  <div className="w-full bg-slate-200 dark:bg-[#151d2a] h-1.5 rounded-full overflow-hidden border border-slate-200 dark:border-[#222e42]">
                     <div
                       className="bg-teal-500 h-full rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, member.percentage || 0)}%` }}
@@ -1181,7 +1181,7 @@ export default function DashboardPage() {
 
           {/* Recent Activity Feed (7 cols) */}
           <div className="lg:col-span-7 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#1e2a3c]">
               <div>
                 <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-teal-600 dark:text-teal-400" />
@@ -1197,7 +1197,7 @@ export default function DashboardPage() {
                   <div
                     key={act._id}
                     onClick={() => setSelectedActivityLog(act)}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] hover:border-teal-500/50 cursor-pointer active:scale-[0.99] transition text-xs gap-3 group"
+                    className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/50 cursor-pointer active:scale-[0.99] transition text-xs gap-3 group"
                     title="Click to view details"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -1231,7 +1231,7 @@ export default function DashboardPage() {
       <Modal isOpen={isLogTimeOpen} onClose={() => setIsLogTimeOpen(false)} title="Log Time for Today">
         <form onSubmit={handleManualLogSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1">Project *</label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Project *</label>
             <CustomSelect
               value={manualProjectId}
               onChange={(val) => setManualProjectId(val)}
@@ -1247,7 +1247,7 @@ export default function DashboardPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1">Task (Optional)</label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Task (Optional)</label>
             <CustomSelect
               value={manualTaskId}
               onChange={(val) => setManualTaskId(val)}
@@ -1268,31 +1268,31 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 mb-1">Hours *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Hours *</label>
               <input
                 type="number"
                 min="0"
                 max="24"
                 value={manualHours}
                 onChange={(e) => setManualHours(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:border-teal-500 outline-none"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:border-teal-500 outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 mb-1">Minutes *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Minutes *</label>
               <input
                 type="number"
                 min="0"
                 max="59"
                 value={manualMinutes}
                 onChange={(e) => setManualMinutes(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:border-teal-500 outline-none"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:border-teal-500 outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1">Work Description</label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Work Description</label>
             <textarea
               rows={2}
               value={manualDescription}
@@ -1302,17 +1302,17 @@ export default function DashboardPage() {
                 e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
               }}
               placeholder="What deliverables did you complete in this session?"
-              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-teal-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
+              className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-teal-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
-          <div className="flex items-center justify-between pt-3 border-t border-[#222222]">
-            <label className="flex items-center gap-2 cursor-pointer text-xs text-neutral-300">
+          <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-[#1e2a3c]">
+            <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-neutral-300">
               <input
                 type="checkbox"
                 checked={manualBillable}
                 onChange={(e) => setManualBillable(e.target.checked)}
-                className="rounded border-[#333333] text-teal-600 focus:ring-0"
+                className="rounded border-slate-300 dark:border-[#222e42] text-teal-600 focus:ring-0"
               />
               <span className="font-medium text-xs">
                 {manualBillable ? 'Client Work (Billable)' : 'Internal Work'}
@@ -1323,7 +1323,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setIsLogTimeOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
               >
                 Cancel
               </button>
@@ -1344,20 +1344,20 @@ export default function DashboardPage() {
       <Modal isOpen={isNewTaskOpen} onClose={() => setIsNewTaskOpen(false)} title="Create New Task">
         <form onSubmit={handleCreateTaskSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1">Task Title *</label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Task Title *</label>
             <input
               type="text"
               required
               value={taskTitle}
               onChange={(e) => setTaskTitle(e.target.value)}
               placeholder="e.g. Prepare API schema documentation"
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-teal-500 outline-none"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-teal-500 outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 mb-1">Project</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Project</label>
               <CustomSelect
                 value={taskProjectId}
                 onChange={(val) => setTaskProjectId(val)}
@@ -1375,7 +1375,7 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 mb-1">Priority</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Priority</label>
               <CustomSelect
                 value={taskPriority}
                 onChange={(val) => setTaskPriority(val as any)}
@@ -1393,33 +1393,33 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 mb-1">Due Date</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Due Date</label>
               <input
                 type="date"
                 value={taskDueDate}
                 onChange={(e) => setTaskDueDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:border-teal-500 outline-none"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:border-teal-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 mb-1">Estimated Hours</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">Estimated Hours</label>
               <input
                 type="number"
                 step="0.5"
                 min="0"
                 value={taskEstimatedHours}
                 onChange={(e) => setTaskEstimatedHours(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:border-teal-500 outline-none"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:border-teal-500 outline-none"
               />
             </div>
           </div>
 
-          <div className="sticky bottom-0 bg-[#121212] flex items-center justify-end gap-2 pt-3 pb-1 border-t border-[#222222] z-10">
+          <div className="sticky bottom-0 bg-white dark:bg-[#151d2a] flex items-center justify-end gap-2 pt-3 pb-1 border-t border-slate-100 dark:border-[#1e2a3c] z-10">
             <button
               type="button"
               onClick={() => setIsNewTaskOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -1442,19 +1442,19 @@ export default function DashboardPage() {
         title={myStandup ? "Update Today's EOD Standup" : "Daily EOD Standup Check-in (Optional)"}
       >
         <form onSubmit={handleStandupSubmit} className="space-y-4">
-          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-700 dark:text-indigo-300 flex items-center justify-between">
             <span className="font-medium">
               💡 Asynchronous end-of-day summary to keep team members aligned without meetings.
             </span>
             {myHoursToday > 0 && (
-              <span className="font-mono font-bold text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20 shrink-0 ml-2">
+              <span className="font-mono font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20 shrink-0 ml-2">
                 {myHoursToday}h logged today
               </span>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">
               1. What did you accomplish today? *
             </label>
             <textarea
@@ -1467,12 +1467,12 @@ export default function DashboardPage() {
                 e.target.style.height = `${Math.max(84, e.target.scrollHeight)}px`;
               }}
               placeholder="e.g. Completed client onboarding wireframes, fixed API auth bug..."
-              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
+              className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">
               2. What are your key priorities for tomorrow? *
             </label>
             <textarea
@@ -1485,12 +1485,12 @@ export default function DashboardPage() {
                 e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
               }}
               placeholder="e.g. Deliverable review with Nebiyu, deploy production hotfix..."
-              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
+              className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-indigo-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-neutral-300 mb-1">
               3. Any blockers or dependencies? (Optional)
             </label>
             <input
@@ -1498,15 +1498,15 @@ export default function DashboardPage() {
               value={standupBlockers}
               onChange={(e) => setStandupBlockers(e.target.value)}
               placeholder="e.g. Waiting on client API credentials, need feedback on proposal..."
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:border-indigo-500 outline-none"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-indigo-500 outline-none"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setIsStandupModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -1540,7 +1540,7 @@ export default function DashboardPage() {
                 <div
                   key={act._id}
                   onClick={() => setSelectedActivityLog(act)}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] hover:border-teal-500/50 cursor-pointer active:scale-[0.99] transition text-xs gap-3 group"
+                  className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/50 cursor-pointer active:scale-[0.99] transition text-xs gap-3 group"
                   title="Click to view full details"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -1577,7 +1577,7 @@ export default function DashboardPage() {
       >
         {selectedActivityLog && (
           <div className="space-y-4 text-xs">
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626]">
+            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c]">
               <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold text-sm shrink-0">
                 {selectedActivityLog.userName?.charAt(0) || 'U'}
               </div>
@@ -1595,7 +1595,7 @@ export default function DashboardPage() {
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-neutral-400">
                 Action
               </label>
-              <div className="p-3 rounded-xl bg-slate-100 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] font-medium text-slate-800 dark:text-neutral-200">
+              <div className="p-3 rounded-xl bg-slate-100 dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] font-medium text-slate-800 dark:text-neutral-200">
                 {selectedActivityLog.action}
               </div>
             </div>
@@ -1613,7 +1613,7 @@ export default function DashboardPage() {
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-neutral-400">
                 Timestamp
               </label>
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] text-slate-600 dark:text-neutral-400 font-mono text-[11px]">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] text-slate-600 dark:text-neutral-400 font-mono text-[11px]">
                 {selectedActivityLog.createdAt}
               </div>
             </div>
@@ -1622,7 +1622,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setSelectedActivityLog(null)}
-                className="w-full py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202020] dark:hover:bg-[#282828] text-slate-800 dark:text-white font-semibold transition"
+                className="w-full py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#1e2a3c] dark:hover:bg-[#25334a] text-slate-800 dark:text-white font-semibold transition"
               >
                 Close Details
               </button>

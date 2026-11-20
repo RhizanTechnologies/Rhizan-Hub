@@ -120,7 +120,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             type="email"
             value={user?.email || ''}
             disabled
-            className="w-full bg-slate-100 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] rounded-xl px-3 py-2 text-xs text-slate-500 dark:text-neutral-500 cursor-not-allowed outline-none"
+            className="w-full bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-500 dark:text-neutral-400 cursor-not-allowed outline-none"
           />
           <p className="text-[10px] text-slate-400 dark:text-neutral-500 mt-1">
             Account email is fixed and associated with workspace authorization.
@@ -138,7 +138,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Abdulaziz Isa"
             required
-            className="w-full bg-slate-50 dark:bg-[#181818] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
+            className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
           />
         </div>
 
@@ -175,7 +175,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Founder & CEO"
-            className="w-full bg-slate-50 dark:bg-[#181818] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
+            className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
           />
 
           {/* Quick Founder Preset Buttons */}
@@ -197,7 +197,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 className={`text-[10px] px-2 py-0.5 rounded-lg border transition ${
                   title === preset.titleVal
                     ? 'bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30 font-semibold'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-[#181818] dark:text-neutral-400 border-slate-200 dark:border-[#262626] dark:hover:text-white dark:hover:border-[#383838]'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-[#101724] dark:text-neutral-400 border-slate-200 dark:border-[#1e2a3c] dark:hover:text-white dark:hover:border-[#222e42]'
                 }`}
               >
                 {preset.label}
@@ -238,17 +238,17 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               onChange={(e) => setWeeklyCapacityHours(parseInt(e.target.value, 10) || 48)}
               min="10"
               max="120"
-              className="w-full bg-slate-50 dark:bg-[#181818] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none transition font-mono"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none transition font-mono"
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="pt-3 border-t border-slate-200 dark:border-[#222222] flex items-center justify-end gap-2">
+        <div className="pt-3 border-t border-slate-200 dark:border-[#1e2a3c] flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-[#1c1c1c] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#252525] border border-slate-200 dark:border-[#2c2c2c] transition font-medium"
+            className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#25334a] border border-slate-200 dark:border-[#222e42] transition font-medium text-xs"
           >
             Cancel
           </button>
