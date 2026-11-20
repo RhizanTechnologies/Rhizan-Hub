@@ -9,7 +9,21 @@ export const getTimeEntries = async (req: AuthRequest, res: Response): Promise<v
     const { userId, projectId, startDate, endDate } = req.query;
     const filter: any = {};
 
-    if (userId && userId !== 'ALL') filter.user = userId;
+    // By default, personal tracker only retrieves the authenticated user's entries.
+    // If userId === 'ALL', only admins are allowed to retrieve across all users.
+    // If a specific userId is requested, allow if caller is ADMIN or requesting their own ID.
+    if (userId === 'ALL' && req.user?.role === 'ADMIN') {
+      // all users (admin only)
+    } else if (userId && userId !== 'ALL' && userId !== 'me') {
+      if (req.user?.role === 'ADMIN' || req.user?.id === userId) {
+        filter.user = userId;
+      } else {
+        filter.user = req.user?.id;
+      }
+    } else {
+      filter.user = req.user?.id;
+    }
+
     if (projectId && projectId !== 'ALL') filter.project = projectId;
 
     if (startDate || endDate) {
@@ -74,6 +88,21 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response): Promise<
     const { id } = req.params;
     const { project, task, description, date, startTime, endTime, hours, minutes, billable, tag } = req.body;
 
+    const existing = await TimeEntry.findById(id);
+    if (!existing) {
+      res.status(404).json({ message: 'Time entry not found' });
+      return;
+    }
+
+    // Strict ownership: only the owner or an ADMIN can update a time entry
+    const isOwner = existing.user.toString() === req.user?.id;
+    const isAdmin = req.user?.role === 'ADMIN';
+
+    if (!isOwner && !isAdmin) {
+      res.status(403).json({ message: 'You are only authorized to edit your own time entries.' });
+      return;
+    }
+
     const updated = await TimeEntry.findByIdAndUpdate(
       id,
       {
@@ -94,11 +123,6 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response): Promise<
       .populate('project', 'name clientName')
       .populate('task', 'title');
 
-    if (!updated) {
-      res.status(404).json({ message: 'Time entry not found' });
-      return;
-    }
-
     res.json(updated);
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to update time entry', error: error.message });
@@ -108,12 +132,23 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response): Promise<
 export const deleteTimeEntry = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const deleted = await TimeEntry.findByIdAndDelete(id);
+    const existing = await TimeEntry.findById(id);
 
-    if (!deleted) {
+    if (!existing) {
       res.status(404).json({ message: 'Time entry not found' });
       return;
     }
+
+    // Strict ownership: only the owner or an ADMIN can delete a time entry
+    const isOwner = existing.user.toString() === req.user?.id;
+    const isAdmin = req.user?.role === 'ADMIN';
+
+    if (!isOwner && !isAdmin) {
+      res.status(403).json({ message: 'You are only authorized to delete your own time entries.' });
+      return;
+    }
+
+    await TimeEntry.findByIdAndDelete(id);
 
     res.json({ message: 'Time entry deleted successfully', id });
   } catch (error: any) {

@@ -208,7 +208,7 @@ export default function TimeTrackingPage() {
     try {
       setLoading(true);
       const [entriesData, projectsData, tasksData] = await Promise.all([
-        apiFetch<TimeEntry[]>('/time'),
+        apiFetch<TimeEntry[]>('/time?userId=me'),
         apiFetch<Project[]>('/projects'),
         apiFetch<Task[]>('/tasks'),
       ]);
@@ -464,6 +464,19 @@ export default function TimeTrackingPage() {
     }
   };
 
+  // Strictly isolate current user's personal entries for the Personal Tracker
+  const myEntries = useMemo(() => {
+    const currentUserId = user?.id;
+    if (!currentUserId) return entries;
+    return entries.filter((entry) => {
+      const entryUserId =
+        typeof entry.user === 'object' && entry.user !== null
+          ? (entry.user as any)._id || (entry.user as any).id
+          : entry.user;
+      return !entryUserId || entryUserId.toString() === currentUserId.toString();
+    });
+  }, [entries, user?.id]);
+
   // Filter Tasks by Selected Project
   const projectTasks = tasks.filter((t) => {
     if (!selectedProjectId) return false;
@@ -472,7 +485,7 @@ export default function TimeTrackingPage() {
   });
 
   // Filter Entries for Current User and Filter Controls
-  const filteredEntries = entries.filter((entry) => {
+  const filteredEntries = myEntries.filter((entry) => {
     // Project filter
     if (projectFilter !== 'ALL') {
       const pId = typeof entry.project === 'object' ? entry.project?._id : entry.project;
@@ -557,8 +570,8 @@ export default function TimeTrackingPage() {
     return Object.values(groups).sort((a, b) => b.dateKey.localeCompare(a.dateKey));
   }, [filteredEntries]);
 
-  // Overall Metrics
-  const todayEntries = entries.filter((e) => {
+  // Overall Metrics - strictly personal
+  const todayEntries = myEntries.filter((e) => {
     const d = new Date(e.date);
     if (isNaN(d.getTime())) return false;
     const now = new Date();
@@ -577,7 +590,7 @@ export default function TimeTrackingPage() {
   const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
   const startOfWeek = new Date(now.getFullYear(), now.getMonth(), diffToMonday, 0, 0, 0, 0);
 
-  const thisWeekEntries = entries.filter((e) => {
+  const thisWeekEntries = myEntries.filter((e) => {
     const d = new Date(e.date);
     return !isNaN(d.getTime()) && d >= startOfWeek;
   });
@@ -590,7 +603,7 @@ export default function TimeTrackingPage() {
     <div className="flex-1 flex flex-col min-h-screen">
       <Header
         title="Time Tracker"
-        subtitle="Clockify-grade live timer, daily timesheets, and weekly team capacity burn"
+        subtitle="Your personal Clockify live timer and daily log. View team capacity and member timesheets in Team Timesheet."
       />
 
       {/* Success Floating Toast */}
@@ -617,7 +630,7 @@ export default function TimeTrackingPage() {
               <Clock className="w-4 h-4 text-teal-400" />
               <span>Personal Tracker</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#222222] text-neutral-300">
-                {entries.length}
+                {myEntries.length}
               </span>
             </button>
 
