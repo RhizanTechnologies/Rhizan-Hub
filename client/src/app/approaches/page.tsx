@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
+import { CustomSelect } from '@/components/CustomSelect';
 import { Approach, ApproachStatus, ContactChannel, Niche } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
@@ -746,21 +747,24 @@ export default function ApproachesPage() {
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <Tag className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 ml-1" />
                 <span className="text-xs text-slate-600 dark:text-neutral-400 font-medium shrink-0">Filter by Niche:</span>
-                <select
-                  value={selectedNiche}
-                  onChange={(e) => setSelectedNiche(e.target.value)}
-                  className="bg-slate-50 dark:bg-[#121824] border border-slate-200 dark:border-[#222e42] rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 cursor-pointer w-full max-w-xs"
-                >
-                  <option value="All Niches">All Niches ({approaches.length})</option>
-                  {niches.map((n) => {
-                    const count = approaches.filter((a) => a.niche === n.name).length;
-                    return (
-                      <option key={n._id} value={n.name}>
-                        {n.name} {count > 0 ? `(${count})` : ''}
-                      </option>
-                    );
-                  })}
-                </select>
+                <div className="w-full max-w-xs">
+                  <CustomSelect
+                    value={selectedNiche}
+                    onChange={(val) => setSelectedNiche(val)}
+                    options={[
+                      { value: 'All Niches', label: `All Niches (${approaches.length})` },
+                      ...niches.map((n) => {
+                        const count = approaches.filter((a) => a.niche === n.name).length;
+                        return {
+                          value: n.name,
+                          label: `${n.name} ${count > 0 ? `(${count})` : ''}`,
+                        };
+                      }),
+                    ]}
+                    size="sm"
+                    className="w-full"
+                  />
+                </div>
               </div>
             )}
 
@@ -797,38 +801,41 @@ export default function ApproachesPage() {
               {/* Status Filter */}
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium">Status:</span>
-                <select
+                <CustomSelect
                   value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-teal-500 shadow-xs"
-                >
-                  <option value="ALL">All Statuses</option>
-                  <option value="PROSPECT">Prospect</option>
-                  <option value="CONTACTED">Contacted</option>
-                  <option value="PITCHED">Pitched / Demo Sent</option>
-                  <option value="IN_DISCUSSION">In Discussion</option>
-                  <option value="DEAL_WON">Deal Won (Client)</option>
-                  <option value="NOT_INTERESTED">Not Interested</option>
-                </select>
+                  onChange={(val) => setSelectedStatus(val)}
+                  options={[
+                    { value: 'ALL', label: 'All Statuses' },
+                    { value: 'PROSPECT', label: 'Prospect' },
+                    { value: 'CONTACTED', label: 'Contacted' },
+                    { value: 'PITCHED', label: 'Pitched / Demo Sent' },
+                    { value: 'IN_DISCUSSION', label: 'In Discussion' },
+                    { value: 'DEAL_WON', label: 'Deal Won (Client)' },
+                    { value: 'NOT_INTERESTED', label: 'Not Interested' },
+                  ]}
+                  size="sm"
+                  className="min-w-[130px]"
+                />
               </div>
 
               {/* Responsible Lead Owner Filter */}
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium">Responsible:</span>
-                <select
+                <CustomSelect
                   value={selectedOwner}
-                  onChange={(e) => setSelectedOwner(e.target.value)}
-                  className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-teal-500 cursor-pointer shadow-xs"
-                >
-                  <option value="ALL">All Leads</option>
-                  <option value="ME">👤 Assigned to Me</option>
-                  <option value="UNASSIGNED">🌐 Open (Unassigned)</option>
-                  {teamMembers.map((m) => (
-                    <option key={m.id || m._id} value={m.id || m._id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setSelectedOwner(val)}
+                  options={[
+                    { value: 'ALL', label: 'All Leads' },
+                    { value: 'ME', label: '👤 Assigned to Me' },
+                    { value: 'UNASSIGNED', label: '🌐 Open (Unassigned)' },
+                    ...teamMembers.map((m) => ({
+                      value: m.id || m._id,
+                      label: m.name,
+                    })),
+                  ]}
+                  size="sm"
+                  className="min-w-[140px]"
+                />
               </div>
 
               {/* Follow-up Attention Filter Button */}
@@ -1340,18 +1347,17 @@ export default function ApproachesPage() {
                   </button>
                 </div>
               ) : (
-                <select
+                <CustomSelect
                   value={niche}
-                  onChange={(e) => setNiche(e.target.value)}
-                  className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                >
-                  {niches.map((n) => (
-                    <option key={n._id} value={n.name}>
-                      {n.name}
-                    </option>
-                  ))}
-                  {niches.length === 0 && <option value="General">General</option>}
-                </select>
+                  onChange={(val) => setNiche(val)}
+                  options={
+                    niches.length > 0
+                      ? niches.map((n) => ({ value: n.name, label: n.name }))
+                      : [{ value: 'General', label: 'General' }]
+                  }
+                  size="md"
+                  className="w-full"
+                />
               )}
             </div>
 
@@ -1359,18 +1365,20 @@ export default function ApproachesPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Outreach Status
               </label>
-              <select
+              <CustomSelect
                 value={status}
-                onChange={(e) => setStatus(e.target.value as ApproachStatus)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                <option value="PROSPECT">Prospect</option>
-                <option value="CONTACTED">Contacted</option>
-                <option value="PITCHED">Pitched / Demo Sent</option>
-                <option value="IN_DISCUSSION">In Discussion</option>
-                <option value="DEAL_WON">Deal Won (Client)</option>
-                <option value="NOT_INTERESTED">Not Interested</option>
-              </select>
+                onChange={(val) => setStatus(val as ApproachStatus)}
+                options={[
+                  { value: 'PROSPECT', label: 'Prospect' },
+                  { value: 'CONTACTED', label: 'Contacted' },
+                  { value: 'PITCHED', label: 'Pitched / Demo Sent' },
+                  { value: 'IN_DISCUSSION', label: 'In Discussion' },
+                  { value: 'DEAL_WON', label: 'Deal Won (Client)' },
+                  { value: 'NOT_INTERESTED', label: 'Not Interested' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1462,21 +1470,20 @@ export default function ApproachesPage() {
               <span>Responsible Person (Lead Follow-up)</span>
               <span className="text-[10px] text-neutral-500 font-normal lowercase">(optional)</span>
             </label>
-            <div className="relative">
-              <select
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer"
-              >
-                <option value="">-- Open for Everyone (Unassigned) --</option>
-                {teamMembers.map((member) => (
-                  <option key={member.id || member._id} value={member.id || member._id}>
-                    👤 {member.name} {member.title ? `(${member.title})` : ''}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
+            <CustomSelect
+              value={assignedTo}
+              onChange={(val) => setAssignedTo(val)}
+              placeholder="-- Open for Everyone (Unassigned) --"
+              options={[
+                { value: '', label: '-- Open for Everyone (Unassigned) --' },
+                ...teamMembers.map((member) => ({
+                  value: member.id || member._id,
+                  label: `👤 ${member.name} ${member.title ? `(${member.title})` : ''}`,
+                })),
+              ]}
+              size="md"
+              className="w-full"
+            />
             <p className="text-[10px] text-neutral-500 mt-1">
               Assign one person to manage follow-up calls and meetings, or leave open for the entire team.
             </p>
@@ -1691,17 +1698,19 @@ export default function ApproachesPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Channel / Method
               </label>
-              <select
+              <CustomSelect
                 value={quickChannel}
-                onChange={(e) => setQuickChannel(e.target.value as ContactChannel)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                <option value="CALL">Phone Call</option>
-                <option value="WHATSAPP">WhatsApp</option>
-                <option value="EMAIL">Email</option>
-                <option value="MEETING">In-Person Meeting</option>
-                <option value="OTHER">Other / Social Media</option>
-              </select>
+                onChange={(val) => setQuickChannel(val as ContactChannel)}
+                options={[
+                  { value: 'CALL', label: '📞 Phone Call' },
+                  { value: 'WHATSAPP', label: '💬 WhatsApp' },
+                  { value: 'EMAIL', label: '✉️ Email' },
+                  { value: 'MEETING', label: '🤝 In-Person Meeting' },
+                  { value: 'OTHER', label: '🌐 Other / Social Media' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div>
@@ -1753,18 +1762,21 @@ export default function ApproachesPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Update Status To
               </label>
-              <select
+              <CustomSelect
                 value={quickUpdateStatus}
-                onChange={(e) => setQuickUpdateStatus(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                <option value="">Keep current ({quickLogTarget?.status})</option>
-                <option value="CONTACTED">Contacted</option>
-                <option value="PITCHED">Pitched / Demo Sent</option>
-                <option value="IN_DISCUSSION">In Discussion</option>
-                <option value="DEAL_WON">Deal Won</option>
-                <option value="NOT_INTERESTED">Not Interested</option>
-              </select>
+                onChange={(val) => setQuickUpdateStatus(val as any)}
+                placeholder={`Keep current (${quickLogTarget?.status})`}
+                options={[
+                  { value: '', label: `Keep current (${quickLogTarget?.status})` },
+                  { value: 'CONTACTED', label: 'Contacted' },
+                  { value: 'PITCHED', label: 'Pitched / Demo Sent' },
+                  { value: 'IN_DISCUSSION', label: 'In Discussion' },
+                  { value: 'DEAL_WON', label: 'Deal Won' },
+                  { value: 'NOT_INTERESTED', label: 'Not Interested' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 

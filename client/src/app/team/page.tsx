@@ -6,6 +6,7 @@ import { Header } from '@/components/Header';
 import { StatCard } from '@/components/StatCard';
 import { Modal } from '@/components/Modal';
 import { PriorityBadge } from '@/components/Badge';
+import { CustomSelect } from '@/components/CustomSelect';
 import { apiFetch } from '@/lib/api';
 import {
   Clock,
@@ -834,23 +835,25 @@ export default function TeamPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Company Role
               </label>
-              <select
+              <CustomSelect
                 value={inviteRole}
-                onChange={(e) => {
-                  const r = e.target.value as any;
+                onChange={(val) => {
+                  const r = val as any;
                   setInviteRole(r);
                   if (r === 'CEO') setInviteTitle('Founder & CEO');
                   else if (r === 'CTO') setInviteTitle('Founder & CTO');
                   else if (r === 'COO') setInviteTitle('Founder & COO');
                   else setInviteTitle('Founder');
                 }}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-medium"
-              >
-                <option value="CEO">👑 CEO — Chief Executive Officer</option>
-                <option value="CTO">⚡ CTO — Chief Technology Officer</option>
-                <option value="COO">📊 COO — Chief Operating Officer</option>
-                <option value="MEMBER">👤 Member — Team Member</option>
-              </select>
+                options={[
+                  { value: 'CEO', label: '👑 CEO — Chief Executive Officer' },
+                  { value: 'CTO', label: '⚡ CTO — Chief Technology Officer' },
+                  { value: 'COO', label: '📊 COO — Chief Operating Officer' },
+                  { value: 'MEMBER', label: '👤 Member — Team Member' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
