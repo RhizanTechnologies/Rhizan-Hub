@@ -9,7 +9,21 @@ export const getTimeEntries = async (req: AuthRequest, res: Response): Promise<v
     const { userId, projectId, startDate, endDate, page, limit, pagination } = req.query;
     const filter: any = {};
 
-    if (userId && userId !== 'ALL') filter.user = userId;
+    // By default, personal tracker only retrieves the authenticated user's entries.
+    // If userId === 'ALL', only admins are allowed to retrieve across all users.
+    // If a specific userId is requested, allow if caller is ADMIN or requesting their own ID.
+    if (userId === 'ALL' && req.user?.role === 'ADMIN') {
+      // all users (admin only)
+    } else if (userId && userId !== 'ALL' && userId !== 'me') {
+      if (req.user?.role === 'ADMIN' || req.user?.id === userId) {
+        filter.user = userId;
+      } else {
+        filter.user = req.user?.id;
+      }
+    } else {
+      filter.user = req.user?.id;
+    }
+
     if (projectId && projectId !== 'ALL') filter.project = projectId;
 
     if (startDate || endDate) {
@@ -118,7 +132,7 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response): Promise<
     const isOwner = existing.user.toString() === callerId;
     const isAdmin = isExecutiveOrAdmin(req.user?.role);
     if (!isOwner && !isAdmin) {
-      res.status(403).json({ message: 'You are only authorized to update your own time entries.' });
+      res.status(403).json({ message: 'You are only authorized to edit your own time entries.' });
       return;
     }
 

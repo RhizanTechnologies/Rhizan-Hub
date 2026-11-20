@@ -21,6 +21,11 @@
   --accent-glow: rgba(15, 118, 110, 0.12);
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 [data-theme="rhizan-dark"] {
   --background: #0f141c;
   --surface: #171f2b;

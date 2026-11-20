@@ -33,6 +33,7 @@ import {
   Briefcase,
   CheckCircle2,
   Pencil,
+  X,
 } from 'lucide-react';
 
 const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
@@ -57,6 +58,9 @@ export default function TimeTrackingPage() {
   // Live Timer states
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [activeStartTimestamp, setActiveStartTimestamp] = useState<number | null>(null);
+  const [isEditingStartTime, setIsEditingStartTime] = useState(false);
+  const [customStartTime, setCustomStartTime] = useState('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Top Bar Form fields
@@ -86,6 +90,11 @@ export default function TimeTrackingPage() {
   // Notification / success message
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
+  // Inline Start/End Time editing state (Clockify inline editing)
+  const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
+  const [inlineStartTime, setInlineStartTime] = useState<string>('');
+  const [inlineEndTime, setInlineEndTime] = useState<string>('');
+
   // Week navigation and detailed timesheet states
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedMemberForDetails, setSelectedMemberForDetails] = useState<WeeklyTeamMemberSummary | null>(null);
@@ -108,9 +117,82 @@ export default function TimeTrackingPage() {
     return { start, end, label };
   }, [weekOffset]);
 
-  // Helper to format 12-hour clock (e.g. 09:30 AM)
+  // Helper to format 24-hour clock (e.g. 18:17) Clockify style
   const formatClockTime = (dateObj: Date): string => {
-    return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const hrs = dateObj.getHours().toString().padStart(2, '0');
+    const mins = dateObj.getMinutes().toString().padStart(2, '0');
+    return `${hrs}:${mins}`;
+  };
+
+  // Convert any time string (12h or 24h) into standard 24h HH:mm format
+  const to24Hour = (timeStr?: string): string => {
+    if (!timeStr) return '';
+    const trimmed = timeStr.trim();
+    if (/^\d{1,2}:\d{2}$/.test(trimmed)) {
+      const [h, m] = trimmed.split(':');
+      return `${h.padStart(2, '0')}:${m}`;
+    }
+    const match = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (match) {
+      let h = parseInt(match[1], 10);
+      const m = match[2];
+      const modifier = match[3]?.toUpperCase();
+      if (modifier === 'PM' && h < 12) h += 12;
+      if (modifier === 'AM' && h === 12) h = 0;
+      return `${h.toString().padStart(2, '0')}:${m}`;
+    }
+    return trimmed;
+  };
+
+  // Calculate hours and minutes duration between two 24h HH:mm time strings
+  const calcDurationFromRange = (start: string, end: string) => {
+    const [sH, sM] = start.split(':').map(Number);
+    const [eH, eM] = end.split(':').map(Number);
+    const startMins = sH * 60 + sM;
+    const endMins = eH * 60 + eM;
+    const diffMins = Math.max(1, endMins >= startMins ? endMins - startMins : 24 * 60 - startMins + endMins);
+    return {
+      hours: Math.floor(diffMins / 60),
+      minutes: diffMins % 60,
+    };
+  };
+
+  // Start editing inline start/end times
+  const startEditingTimeRange = (entry: TimeEntry) => {
+    setEditingTimeEntryId(entry._id);
+    const s = to24Hour(entry.startTime) || '09:00';
+    const e = to24Hour(entry.endTime) || '10:00';
+    setInlineStartTime(s);
+    setInlineEndTime(e);
+  };
+
+  // Save inline start/end time updates
+  const saveInlineTimeRange = async (entryId: string) => {
+    if (!inlineStartTime || !inlineEndTime) {
+      setEditingTimeEntryId(null);
+      return;
+    }
+
+    const { hours, minutes } = calcDurationFromRange(inlineStartTime, inlineEndTime);
+
+    try {
+      const updated = await apiFetch<TimeEntry>(`/time/${entryId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          startTime: inlineStartTime,
+          endTime: inlineEndTime,
+          hours,
+          minutes,
+        }),
+      });
+
+      setEntries((prev) => prev.map((e) => (e._id === updated._id ? updated : e)));
+      setEditingTimeEntryId(null);
+      setSuccessToast(`Updated time to ${inlineStartTime} – ${inlineEndTime} (${formatDurationText(hours, minutes)})`);
+      setTimeout(() => setSuccessToast(null), 3000);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update time range');
+    }
   };
 
   // Helper to format seconds into HH:MM:SS
@@ -216,7 +298,7 @@ export default function TimeTrackingPage() {
     try {
       setLoading(true);
       const [entriesData, projectsData, tasksData] = await Promise.all([
-        apiFetch<any>('/time'),
+        apiFetch<any>('/time?userId=me'),
         apiFetch<Project[]>('/projects'),
         apiFetch<any>('/tasks'),
       ]);
@@ -257,6 +339,7 @@ export default function TimeTrackingPage() {
           const elapsed = Math.max(0, Math.floor((now - parsed.startTimestamp) / 1000));
           setElapsedSeconds(elapsed);
           setIsRunning(true);
+          setActiveStartTimestamp(parsed.startTimestamp);
           if (parsed.description) setDescription(parsed.description);
           if (parsed.projectId) setSelectedProjectId(parsed.projectId);
           if (parsed.taskId) setSelectedTaskId(parsed.taskId);
@@ -282,6 +365,10 @@ export default function TimeTrackingPage() {
     const now = Date.now();
     setIsRunning(true);
     setElapsedSeconds(0);
+    setActiveStartTimestamp(now);
+    setIsEditingStartTime(false);
+    setActiveStartTimestamp(now);
+    setIsEditingStartTime(false);
 
     const timerData = {
       isRunning: true,
@@ -319,6 +406,8 @@ export default function TimeTrackingPage() {
     }
     localStorage.removeItem(TIMER_STORAGE_KEY);
     setIsRunning(false);
+    setActiveStartTimestamp(null);
+    setIsEditingStartTime(false);
 
     const now = new Date();
     const startDateObj = new Date(startTimestamp);
@@ -385,6 +474,8 @@ export default function TimeTrackingPage() {
     const now = Date.now();
     setIsRunning(true);
     setElapsedSeconds(0);
+    setActiveStartTimestamp(now);
+    setIsEditingStartTime(false);
 
     const timerData = {
       isRunning: true,
@@ -402,6 +493,61 @@ export default function TimeTrackingPage() {
     }, 1000);
 
     setSuccessToast(`Timer restarted for "${entry.description || 'Task'}"`);
+    setTimeout(() => setSuccessToast(null), 3000);
+  };
+
+  // Adjust live timer start time on-the-fly by clicking the counting timer (Clockify feature)
+  const handleApplyStartTime = () => {
+    if (!customStartTime) {
+      setIsEditingStartTime(false);
+      return;
+    }
+
+    const [hrs, mins] = customStartTime.split(':').map(Number);
+    const targetDate = new Date();
+    targetDate.setHours(hrs, mins, 0, 0);
+
+    let newStartTimestamp = targetDate.getTime();
+    if (newStartTimestamp > Date.now()) {
+      if (newStartTimestamp - Date.now() > 5 * 60 * 1000) {
+        targetDate.setDate(targetDate.getDate() - 1);
+        newStartTimestamp = targetDate.getTime();
+      } else {
+        newStartTimestamp = Date.now();
+      }
+    }
+
+    const newElapsed = Math.max(0, Math.floor((Date.now() - newStartTimestamp) / 1000));
+    setActiveStartTimestamp(newStartTimestamp);
+    setElapsedSeconds(newElapsed);
+
+    const saved = localStorage.getItem(TIMER_STORAGE_KEY);
+    let parsed: any = {};
+    if (saved) {
+      try { parsed = JSON.parse(saved); } catch (e) {}
+    }
+
+    const updatedTimerData = {
+      ...parsed,
+      isRunning: true,
+      startTimestamp: newStartTimestamp,
+      description: description || parsed.description || '',
+      projectId: selectedProjectId || parsed.projectId || '',
+      taskId: selectedTaskId || parsed.taskId || '',
+      billable: isBillable,
+    };
+    localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(updatedTimerData));
+
+    if (!isRunning) setIsRunning(true);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      const currentElapsed = Math.max(0, Math.floor((Date.now() - newStartTimestamp) / 1000));
+      setElapsedSeconds(currentElapsed);
+    }, 1000);
+
+    setIsEditingStartTime(false);
+    setSuccessToast(`Start time adjusted to ${customStartTime} (${formatDurationText(Math.floor(newElapsed / 60), newElapsed % 60)} elapsed)`);
     setTimeout(() => setSuccessToast(null), 3000);
   };
 
@@ -539,6 +685,19 @@ export default function TimeTrackingPage() {
     }
   };
 
+  // Strictly isolate current user's personal entries for the Personal Tracker
+  const myEntries = useMemo(() => {
+    const currentUserId = user?.id;
+    if (!currentUserId) return entries;
+    return entries.filter((entry) => {
+      const entryUserId =
+        typeof entry.user === 'object' && entry.user !== null
+          ? (entry.user as any)._id || (entry.user as any).id
+          : entry.user;
+      return !entryUserId || entryUserId.toString() === currentUserId.toString();
+    });
+  }, [entries, user?.id]);
+
   // Filter Tasks by Selected Project
   const projectTasks = tasks.filter((t) => {
     if (!selectedProjectId) return false;
@@ -547,7 +706,7 @@ export default function TimeTrackingPage() {
   });
 
   // Filter Entries for Current User and Filter Controls
-  const filteredEntries = entries.filter((entry) => {
+  const filteredEntries = myEntries.filter((entry) => {
     // Project filter
     if (projectFilter !== 'ALL') {
       const pId = typeof entry.project === 'object' ? entry.project?._id : entry.project;
@@ -652,8 +811,8 @@ export default function TimeTrackingPage() {
     return groupedDays.slice(startIndex, startIndex + daysPerPage);
   }, [groupedDays, currentPage, daysPerPage]);
 
-  // Overall Metrics
-  const todayEntries = entries.filter((e) => {
+  // Overall Metrics - strictly personal
+  const todayEntries = myEntries.filter((e) => {
     const d = new Date(e.date);
     if (isNaN(d.getTime())) return false;
     const now = new Date();
@@ -672,7 +831,7 @@ export default function TimeTrackingPage() {
   const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
   const startOfWeek = new Date(now.getFullYear(), now.getMonth(), diffToMonday, 0, 0, 0, 0);
 
-  const thisWeekEntries = entries.filter((e) => {
+  const thisWeekEntries = myEntries.filter((e) => {
     const d = new Date(e.date);
     return !isNaN(d.getTime()) && d >= startOfWeek;
   });
@@ -685,7 +844,7 @@ export default function TimeTrackingPage() {
     <div className="flex-1 flex flex-col min-h-screen">
       <Header
         title="Time Tracker"
-        subtitle="Clockify-grade live timer, daily timesheets, and weekly team capacity burn"
+        subtitle="Your personal Clockify live timer and daily log. View team capacity and member timesheets in Team Timesheet."
       />
 
       {/* Success Floating Toast */}
@@ -696,7 +855,7 @@ export default function TimeTrackingPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
+      <div className="p-3 sm:p-6 max-w-7xl mx-auto w-full space-y-4 sm:space-y-6 overflow-x-hidden">
         {/* Navigation Switcher: Personal Tracker vs Team Timesheet */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -712,7 +871,7 @@ export default function TimeTrackingPage() {
               <Clock className="w-4 h-4 text-teal-400" />
               <span>Personal Tracker</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#222222] text-neutral-300">
-                {entries.length}
+                {myEntries.length}
               </span>
             </button>
 
@@ -880,12 +1039,61 @@ export default function TimeTrackingPage() {
                 <div className="lg:col-span-2 flex items-center justify-between sm:justify-end gap-3 pt-1 lg:pt-0">
                   {entryMode === 'TIMER' ? (
                     <>
-                      {/* Big Digital Stopwatch */}
-                      <span className={`font-mono font-extrabold text-base tracking-wider ${
-                        isRunning ? 'text-amber-300 animate-pulse' : 'text-neutral-300'
-                      }`}>
-                        {formatStopwatch(elapsedSeconds)}
-                      </span>
+                      {/* Big Digital Stopwatch - Click to edit start time (Clockify Style) */}
+                      {isEditingStartTime ? (
+                        <div className="flex items-center gap-1.5 bg-[#181818] border border-teal-500 rounded-xl px-2 py-1 shadow-xl animate-fade-in">
+                          <input
+                            type="time"
+                            value={customStartTime}
+                            onChange={(e) => setCustomStartTime(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleApplyStartTime();
+                              if (e.key === 'Escape') setIsEditingStartTime(false);
+                            }}
+                            autoFocus
+                            className="bg-[#222222] border border-[#333333] text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-400"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleApplyStartTime}
+                            className="p-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white transition cursor-pointer"
+                            title="Apply new start time"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingStartTime(false)}
+                            className="p-1 rounded-lg bg-[#242424] hover:bg-[#2e2e2e] text-neutral-400 hover:text-white transition cursor-pointer"
+                            title="Cancel"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const now = new Date();
+                            const s = activeStartTimestamp ? new Date(activeStartTimestamp) : now;
+                            setCustomStartTime(formatClockTime(s));
+                            setIsEditingStartTime(true);
+                          }}
+                          className="group/timer flex items-center gap-1.5 px-2 py-1 rounded-xl hover:bg-[#181818] border border-transparent hover:border-[#2a2a2a] transition cursor-pointer"
+                          title="Click on count time to edit start time (Clockify style)"
+                        >
+                          <span
+                            className={`font-mono font-extrabold text-base tracking-wider transition ${
+                              isRunning
+                                ? 'text-amber-300 animate-pulse group-hover/timer:text-amber-200'
+                                : 'text-neutral-300 group-hover/timer:text-white'
+                            }`}
+                          >
+                            {formatStopwatch(elapsedSeconds)}
+                          </span>
+                          <Pencil className="w-3 h-3 text-neutral-500 group-hover/timer:text-teal-400 opacity-0 group-hover/timer:opacity-100 transition-opacity shrink-0" />
+                        </button>
+                      )}
 
                       {/* Start / Stop Button */}
                       {isRunning ? (
@@ -923,19 +1131,21 @@ export default function TimeTrackingPage() {
 
               {/* Extra Row for Manual Mode: Date & Time range / hours */}
               {entryMode === 'MANUAL' && (
-                <div className="pt-2.5 border-t border-[#1e1e1e] flex flex-wrap items-center justify-between gap-3 text-xs animate-fade-in">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
+                <div className="pt-3 border-t border-[#1e1e1e] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs animate-fade-in">
+                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                    {/* Date */}
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-neutral-400">Date:</span>
                       <input
                         type="date"
                         value={manualDate}
                         onChange={(e) => setManualDate(e.target.value)}
-                        className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2.5 py-1 text-white text-xs outline-none"
+                        className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2.5 py-1 text-white text-xs outline-none focus:border-teal-500"
                       />
                     </div>
 
-                    <div className="flex items-center gap-2 border-l border-[#262626] pl-3">
+                    {/* Toggle Range */}
+                    <div className="flex items-center gap-1.5 pl-0 sm:pl-2 border-l-0 sm:border-l sm:border-[#262626] shrink-0">
                       <label className="flex items-center gap-1.5 cursor-pointer text-neutral-300">
                         <input
                           type="checkbox"
@@ -943,28 +1153,29 @@ export default function TimeTrackingPage() {
                           onChange={(e) => setManualUseTimeRange(e.target.checked)}
                           className="rounded bg-[#181818] border-[#333333] text-teal-500"
                         />
-                        <span>Enter Start/End Time</span>
+                        <span>Enter Range</span>
                       </label>
                     </div>
 
+                    {/* Range or Hours/Minutes */}
                     {manualUseTimeRange ? (
-                      <div className="flex items-center gap-1.5 pl-2">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <input
                           type="time"
                           value={manualStartTime}
                           onChange={(e) => setManualStartTime(e.target.value)}
-                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none"
+                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none focus:border-teal-500"
                         />
                         <span className="text-neutral-500">-</span>
                         <input
                           type="time"
                           value={manualEndTime}
                           onChange={(e) => setManualEndTime(e.target.value)}
-                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none"
+                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none focus:border-teal-500"
                         />
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 pl-2">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <div className="flex items-center gap-1">
                           <input
                             type="number"
@@ -972,7 +1183,7 @@ export default function TimeTrackingPage() {
                             max="24"
                             value={manualHours}
                             onChange={(e) => setManualHours(e.target.value)}
-                            className="w-14 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center"
+                            className="w-12 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center focus:border-teal-500"
                           />
                           <span className="text-neutral-400">h</span>
                         </div>
@@ -984,7 +1195,7 @@ export default function TimeTrackingPage() {
                             step="5"
                             value={manualMinutes}
                             onChange={(e) => setManualMinutes(e.target.value)}
-                            className="w-14 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center"
+                            className="w-12 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center focus:border-teal-500"
                           />
                           <span className="text-neutral-400">m</span>
                         </div>
@@ -992,7 +1203,7 @@ export default function TimeTrackingPage() {
                     )}
                   </div>
 
-                  <span className="text-[11px] text-neutral-500">
+                  <span className="text-[11px] text-neutral-500 pt-1 md:pt-0 shrink-0">
                     Logged under: <strong className="text-neutral-300">{user?.name || 'Me'}</strong>
                   </span>
                 </div>
@@ -1186,46 +1397,95 @@ export default function TimeTrackingPage() {
                             </div>
 
                             {/* Right: Time Range, Duration, Restart & Delete */}
-                            <div className="flex items-center justify-between md:justify-end gap-4 shrink-0">
-                              {/* Time Interval e.g. 09:30 AM - 11:45 AM */}
-                              {entry.startTime && entry.endTime && (
-                                <span className="text-[11px] text-neutral-400 font-mono hidden sm:inline-block">
-                                  {entry.startTime} - {entry.endTime}
-                                </span>
+                            <div className="flex items-center justify-between md:justify-end gap-2.5 sm:gap-4 shrink-0">
+                              {/* Time Interval e.g. 18:17 - 19:29 (Clockify Style Inline Editable) */}
+                              {editingTimeEntryId === entry._id ? (
+                                <div className="flex items-center gap-1.5 bg-[#181818] border border-teal-500/50 rounded-xl px-2 py-1 shadow-md">
+                                  <input
+                                    type="time"
+                                    value={inlineStartTime}
+                                    onChange={(e) => setInlineStartTime(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') saveInlineTimeRange(entry._id);
+                                      if (e.key === 'Escape') setEditingTimeEntryId(null);
+                                    }}
+                                    className="bg-[#202020] border border-[#333333] text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-400"
+                                    autoFocus
+                                  />
+                                  <span className="text-neutral-400 font-mono text-xs">-</span>
+                                  <input
+                                    type="time"
+                                    value={inlineEndTime}
+                                    onChange={(e) => setInlineEndTime(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') saveInlineTimeRange(entry._id);
+                                      if (e.key === 'Escape') setEditingTimeEntryId(null);
+                                    }}
+                                    className="bg-[#202020] border border-[#333333] text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-400"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => saveInlineTimeRange(entry._id)}
+                                    className="p-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white transition shadow-sm cursor-pointer ml-1"
+                                    title="Save start & end time"
+                                  >
+                                    <Check className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingTimeEntryId(null)}
+                                    className="p-1 rounded-lg bg-[#242424] hover:bg-[#2e2e2e] text-neutral-400 hover:text-white transition cursor-pointer"
+                                    title="Cancel"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => startEditingTimeRange(entry)}
+                                  className="group/time flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-[#242424] hover:border-teal-500/40 border-l border-l-dotted border-l-neutral-700/60 transition text-left cursor-pointer"
+                                  title="Click to edit start & end time"
+                                >
+                                  <span className="font-mono text-xs text-neutral-300 group-hover/time:text-teal-300 font-medium tracking-wider">
+                                    {to24Hour(entry.startTime) || '--:--'}&nbsp;&nbsp;-&nbsp;&nbsp;{to24Hour(entry.endTime) || '--:--'}
+                                  </span>
+                                  <Pencil className="w-2.5 h-2.5 text-neutral-500 group-hover/time:text-teal-400 opacity-0 group-hover/time:opacity-100 transition-opacity ml-0.5" />
+                                </button>
                               )}
 
                               {/* Duration */}
-                              <span className="font-mono text-xs font-bold text-white min-w-[55px] text-right">
+                              <span className="font-mono text-xs font-bold text-white min-w-[50px] text-right">
                                 {formatDurationText(entry.hours, entry.minutes)}
                               </span>
 
-                                {/* Actions: Restart (▶), Edit (✎) & Delete (🗑) */}
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => restartPastTimer(entry)}
-                                    className="p-1.5 rounded-lg bg-[#1e1e1e] hover:bg-teal-600 hover:text-white text-teal-400 transition shadow-sm cursor-pointer"
-                                    title="Continue / restart this timer"
-                                  >
-                                    <Play className="w-3.5 h-3.5 fill-current" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => openEditEntry(entry)}
-                                    className="p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
-                                    title="Edit time entry"
-                                  >
-                                    <Pencil className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteEntry(entry._id)}
-                                    className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
-                                    title="Delete time entry"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
+                              {/* Actions: Restart (▶), Edit (✎) & Delete (🗑) */}
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => restartPastTimer(entry)}
+                                  className="p-1.5 rounded-lg bg-[#1e1e1e] hover:bg-teal-600 hover:text-white text-teal-400 transition shadow-sm cursor-pointer"
+                                  title="Continue / restart this timer"
+                                >
+                                  <Play className="w-3.5 h-3.5 fill-current" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => openEditEntry(entry)}
+                                  className="p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                                  title="Edit time entry"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteEntry(entry._id)}
+                                  className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                                  title="Delete time entry"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         ))}
