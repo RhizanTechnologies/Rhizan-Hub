@@ -113,24 +113,24 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
         {/* Read-only Email Field */}
         <div>
-          <label className="block text-xs font-medium text-neutral-400 mb-1">
+          <label className="block text-xs font-medium text-slate-500 dark:text-neutral-400 mb-1">
             Email Address
           </label>
           <input
             type="email"
             value={user?.email || ''}
             disabled
-            className="w-full bg-[#161616] border border-[#262626] rounded-xl px-3 py-2 text-xs text-neutral-500 cursor-not-allowed outline-none"
+            className="w-full bg-slate-100 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] rounded-xl px-3 py-2 text-xs text-slate-500 dark:text-neutral-500 cursor-not-allowed outline-none"
           />
-          <p className="text-[10px] text-neutral-500 mt-1">
+          <p className="text-[10px] text-slate-400 dark:text-neutral-500 mt-1">
             Account email is fixed and associated with workspace authorization.
           </p>
         </div>
 
         {/* Full Name */}
         <div>
-          <label className="block text-xs font-medium text-neutral-300 mb-1">
-            Full Name <span className="text-red-400">*</span>
+          <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
+            Full Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -138,15 +138,15 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Abdulaziz Isa"
             required
-            className="w-full bg-[#181818] border border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+            className="w-full bg-slate-50 dark:bg-[#181818] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
           />
         </div>
 
         {/* Role Selection Dropdown (CEO, CTO, COO, Member) */}
         <div>
-          <label className="block text-xs font-medium text-neutral-300 mb-1 flex items-center justify-between">
+          <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1 flex items-center justify-between">
             <span>Executive / Company Role</span>
-            <span className="text-[10px] text-teal-400 font-semibold">Options: 👑 CEO, ⚡ CTO, 📊 COO, 👤 Member</span>
+            <span className="text-[10px] text-teal-600 dark:text-teal-400 font-semibold">Options: 👑 CEO, ⚡ CTO, 📊 COO, 👤 Member</span>
           </label>
           <CustomSelect
             value={role}
@@ -160,14 +160,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             size="md"
             className="w-full"
           />
-          <p className="text-[10px] text-neutral-400 mt-1">
+          <p className="text-[10px] text-slate-400 dark:text-neutral-400 mt-1">
             CEO, CTO, and COO roles automatically possess full workspace executive privileges.
           </p>
         </div>
 
         {/* Job Title / Department */}
         <div>
-          <label className="block text-xs font-medium text-neutral-300 mb-1">
+          <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
             Job Title / Position
           </label>
           <input
@@ -175,7 +175,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Founder & CEO"
-            className="w-full bg-[#181818] border border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+            className="w-full bg-slate-50 dark:bg-[#181818] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
           />
 
           {/* Quick Founder Preset Buttons */}
@@ -196,8 +196,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 }}
                 className={`text-[10px] px-2 py-0.5 rounded-lg border transition ${
                   title === preset.titleVal
-                    ? 'bg-teal-500/20 text-teal-300 border-teal-500/30 font-semibold'
-                    : 'bg-[#181818] text-neutral-400 border-[#262626] hover:text-white hover:border-[#383838]'
+                    ? 'bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30 font-semibold'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-[#181818] dark:text-neutral-400 border-slate-200 dark:border-[#262626] dark:hover:text-white dark:hover:border-[#383838]'
                 }`}
               >
                 {preset.label}
@@ -209,7 +209,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
         {/* Status and Weekly Capacity in 2 columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Active Status
             </label>
             <CustomSelect
@@ -227,10 +227,10 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-neutral-300">
+              <label className="text-xs font-medium text-slate-700 dark:text-neutral-300">
                 Weekly Capacity
               </label>
-              <span className="text-[10px] text-teal-400 font-mono">48h (Rhizan)</span>
+              <span className="text-[10px] text-teal-600 dark:text-teal-400 font-mono">48h (Rhizan)</span>
             </div>
             <input
               type="number"
@@ -238,17 +238,17 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               onChange={(e) => setWeeklyCapacityHours(parseInt(e.target.value, 10) || 48)}
               min="10"
               max="120"
-              className="w-full bg-[#181818] border border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-mono"
+              className="w-full bg-slate-50 dark:bg-[#181818] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none transition font-mono"
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="pt-3 border-t border-[#222222] flex items-center justify-end gap-2">
+        <div className="pt-3 border-t border-slate-200 dark:border-[#222222] flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-[#1c1c1c] text-neutral-300 hover:text-white hover:bg-[#252525] border border-[#2c2c2c] transition font-medium"
+            className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-[#1c1c1c] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#252525] border border-slate-200 dark:border-[#2c2c2c] transition font-medium"
           >
             Cancel
           </button>

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ========================================================================= */
 /* THEME COLOR SCHEMES & CSS CUSTOM PROPERTIES                               */
@@ -197,11 +198,15 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* Layout containers, AppShell & Canvas wells */
 [data-theme="clean-light"] .bg-\[\#080808\],
 [data-theme="clean-light"] .bg-\[\#0a0a0a\],
+[data-theme="clean-light"] .bg-\[\#0a0f16\],
+[data-theme="clean-light"] .bg-\[\#0b1320\],
 [data-theme="clean-light"] .bg-\[\#0c0c0c\],
 [data-theme="clean-light"] .bg-\[\#0d0d0d\],
 [data-theme="clean-light"] .bg-\[\#0e0e0e\],
 .light .bg-\[\#080808\],
 .light .bg-\[\#0a0a0a\],
+.light .bg-\[\#0a0f16\],
+.light .bg-\[\#0b1320\],
 .light .bg-\[\#0c0c0c\],
 .light .bg-\[\#0d0d0d\],
 .light .bg-\[\#0e0e0e\] {
@@ -210,9 +215,53 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 /* Kanban column containers & recessed wells */
 [data-theme="clean-light"] .bg-\[\#0f0f0f\],
+[data-theme="clean-light"] .bg-\[\#0f172a\],
+[data-theme="clean-light"] .bg-\[\#0f1b2c\],
+[data-theme="clean-light"] .bg-\[\#0f1d24\],
 [data-theme="clean-light"] .bg-\[\#101010\],
+[data-theme="clean-light"] .bg-\[\#10241e\],
+[data-theme="clean-light"] .bg-\[\#121824\],
+[data-theme="clean-light"] .bg-\[\#121926\],
+[data-theme="clean-light"] .bg-\[\#131313\],
+[data-theme="clean-light"] .bg-\[\#131d2e\],
+[data-theme="clean-light"] .bg-\[\#151e28\],
+[data-theme="clean-light"] .bg-\[\#16202e\],
+[data-theme="clean-light"] .bg-\[\#162238\],
+[data-theme="clean-light"] .bg-\[\#182130\],
+[data-theme="clean-light"] .bg-\[\#1a2332\],
+[data-theme="clean-light"] .bg-\[\#1a2434\],
+[data-theme="clean-light"] .bg-\[\#1b2634\],
+[data-theme="clean-light"] .bg-\[\#1e2a3c\],
+[data-theme="clean-light"] .bg-\[\#1f293d\],
+[data-theme="clean-light"] .bg-\[\#202c3e\],
+[data-theme="clean-light"] .bg-\[\#291417\],
+[data-theme="clean-light"] .bg-\[\#2c2c2c\],
+[data-theme="clean-light"] .bg-\[\#2e2e2e\],
+[data-theme="clean-light"] .bg-\[\#303030\],
 .light .bg-\[\#0f0f0f\],
-.light .bg-\[\#101010\] {
+.light .bg-\[\#0f172a\],
+.light .bg-\[\#0f1b2c\],
+.light .bg-\[\#0f1d24\],
+.light .bg-\[\#101010\],
+.light .bg-\[\#10241e\],
+.light .bg-\[\#121824\],
+.light .bg-\[\#121926\],
+.light .bg-\[\#131313\],
+.light .bg-\[\#131d2e\],
+.light .bg-\[\#151e28\],
+.light .bg-\[\#16202e\],
+.light .bg-\[\#162238\],
+.light .bg-\[\#182130\],
+.light .bg-\[\#1a2332\],
+.light .bg-\[\#1a2434\],
+.light .bg-\[\#1b2634\],
+.light .bg-\[\#1e2a3c\],
+.light .bg-\[\#1f293d\],
+.light .bg-\[\#202c3e\],
+.light .bg-\[\#291417\],
+.light .bg-\[\#2c2c2c\],
+.light .bg-\[\#2e2e2e\],
+.light .bg-\[\#303030\] {
   background-color: #f1f5f9 !important;
   border-color: #e2e8f0 !important;
 }
@@ -314,20 +363,30 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 [data-theme="clean-light"] .hover\:bg-\[\#161616\]:hover,
 [data-theme="clean-light"] .hover\:bg-\[\#181818\]:hover,
 [data-theme="clean-light"] .hover\:bg-\[\#1a1a1a\]:hover,
+[data-theme="clean-light"] .hover\:bg-\[\#1c1c1c\]:hover,
+[data-theme="clean-light"] .hover\:bg-\[\#1e1e1e\]:hover,
+[data-theme="clean-light"] .hover\:bg-\[\#1e2a3c\]:hover,
 [data-theme="clean-light"] .hover\:bg-\[\#1f1f1f\]:hover,
 [data-theme="clean-light"] .hover\:bg-\[\#202020\]:hover,
 [data-theme="clean-light"] .hover\:bg-\[\#222222\]:hover,
 [data-theme="clean-light"] .hover\:bg-\[\#252525\]:hover,
 [data-theme="clean-light"] .hover\:bg-\[\#282828\]:hover,
+[data-theme="clean-light"] .hover\:bg-\[\#2a2a2a\]:hover,
+[data-theme="clean-light"] .hover\:bg-\[\#2e2e2e\]:hover,
 [data-theme="clean-light"] .hover\:bg-\[\#333333\]:hover,
 .light .hover\:bg-\[\#161616\]:hover,
 .light .hover\:bg-\[\#181818\]:hover,
 .light .hover\:bg-\[\#1a1a1a\]:hover,
+.light .hover\:bg-\[\#1c1c1c\]:hover,
+.light .hover\:bg-\[\#1e1e1e\]:hover,
+.light .hover\:bg-\[\#1e2a3c\]:hover,
 .light .hover\:bg-\[\#1f1f1f\]:hover,
 .light .hover\:bg-\[\#202020\]:hover,
 .light .hover\:bg-\[\#222222\]:hover,
 .light .hover\:bg-\[\#252525\]:hover,
 .light .hover\:bg-\[\#282828\]:hover,
+.light .hover\:bg-\[\#2a2a2a\]:hover,
+.light .hover\:bg-\[\#2e2e2e\]:hover,
 .light .hover\:bg-\[\#333333\]:hover {
   background-color: #f1f5f9 !important;
   color: #0f172a !important;
@@ -336,17 +395,31 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* Border overrides */
 [data-theme="clean-light"] .border-\[\#121212\],
 [data-theme="clean-light"] .border-\[\#141414\],
+[data-theme="clean-light"] .border-\[\#1c1c1c\],
+[data-theme="clean-light"] .border-\[\#1d1d1d\],
 [data-theme="clean-light"] .border-\[\#1e1e1e\],
+[data-theme="clean-light"] .border-\[\#1e293b\],
+[data-theme="clean-light"] .border-\[\#1e2a3c\],
 [data-theme="clean-light"] .border-\[\#1f1f1f\],
 [data-theme="clean-light"] .border-\[\#202020\],
+[data-theme="clean-light"] .border-\[\#202c3e\],
 [data-theme="clean-light"] .border-\[\#222222\],
+[data-theme="clean-light"] .border-\[\#222e42\],
+[data-theme="clean-light"] .border-\[\#223147\],
+[data-theme="clean-light"] .border-\[\#232323\],
+[data-theme="clean-light"] .border-\[\#233142\],
 [data-theme="clean-light"] .border-\[\#242424\],
+[data-theme="clean-light"] .border-\[\#243347\],
+[data-theme="clean-light"] .border-\[\#253346\],
 [data-theme="clean-light"] .border-\[\#262626\],
 [data-theme="clean-light"] .border-\[\#282828\],
+[data-theme="clean-light"] .border-\[\#28384e\],
 [data-theme="clean-light"] .border-\[\#2a2a2a\],
+[data-theme="clean-light"] .border-\[\#2c2c2c\],
 [data-theme="clean-light"] .border-\[\#2d2d2d\],
 [data-theme="clean-light"] .border-\[\#2e2e2e\],
 [data-theme="clean-light"] .border-\[\#303030\],
+[data-theme="clean-light"] .border-\[\#333\],
 [data-theme="clean-light"] .border-\[\#333333\],
 [data-theme="clean-light"] .border-\[\#383838\],
 [data-theme="clean-light"] .border-\[\#404040\],
@@ -354,17 +427,31 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 [data-theme="clean-light"] .border-neutral-800,
 .light .border-\[\#121212\],
 .light .border-\[\#141414\],
+.light .border-\[\#1c1c1c\],
+.light .border-\[\#1d1d1d\],
 .light .border-\[\#1e1e1e\],
+.light .border-\[\#1e293b\],
+.light .border-\[\#1e2a3c\],
 .light .border-\[\#1f1f1f\],
 .light .border-\[\#202020\],
+.light .border-\[\#202c3e\],
 .light .border-\[\#222222\],
+.light .border-\[\#222e42\],
+.light .border-\[\#223147\],
+.light .border-\[\#232323\],
+.light .border-\[\#233142\],
 .light .border-\[\#242424\],
+.light .border-\[\#243347\],
+.light .border-\[\#253346\],
 .light .border-\[\#262626\],
 .light .border-\[\#282828\],
+.light .border-\[\#28384e\],
 .light .border-\[\#2a2a2a\],
+.light .border-\[\#2c2c2c\],
 .light .border-\[\#2d2d2d\],
 .light .border-\[\#2e2e2e\],
 .light .border-\[\#303030\],
+.light .border-\[\#333\],
 .light .border-\[\#333333\],
 .light .border-\[\#383838\],
 .light .border-\[\#404040\],
@@ -378,6 +465,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 [data-theme="clean-light"] .divide-\[\#1e1e1e\] > :not([hidden]) ~ :not([hidden]),
 [data-theme="clean-light"] .divide-\[\#202020\] > :not([hidden]) ~ :not([hidden]),
 [data-theme="clean-light"] .divide-\[\#222222\] > :not([hidden]) ~ :not([hidden]),
+[data-theme="clean-light"] .divide-\[\#222e42\] > :not([hidden]) ~ :not([hidden]),
+[data-theme="clean-light"] .divide-\[\#223147\] > :not([hidden]) ~ :not([hidden]),
 [data-theme="clean-light"] .divide-\[\#242424\] > :not([hidden]) ~ :not([hidden]),
 [data-theme="clean-light"] .divide-\[\#262626\] > :not([hidden]) ~ :not([hidden]),
 [data-theme="clean-light"] .divide-\[\#282828\] > :not([hidden]) ~ :not([hidden]),
@@ -385,6 +474,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .light .divide-\[\#1e1e1e\] > :not([hidden]) ~ :not([hidden]),
 .light .divide-\[\#202020\] > :not([hidden]) ~ :not([hidden]),
 .light .divide-\[\#222222\] > :not([hidden]) ~ :not([hidden]),
+.light .divide-\[\#222e42\] > :not([hidden]) ~ :not([hidden]),
+.light .divide-\[\#223147\] > :not([hidden]) ~ :not([hidden]),
 .light .divide-\[\#242424\] > :not([hidden]) ~ :not([hidden]),
 .light .divide-\[\#262626\] > :not([hidden]) ~ :not([hidden]),
 .light .divide-\[\#282828\] > :not([hidden]) ~ :not([hidden]) {
@@ -397,20 +488,109 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   color: #0f172a !important;
 }
 
+/* Solid action buttons preserve crisp white text in Clean Light */
+[data-theme="clean-light"] .bg-teal-600.text-white,
+[data-theme="clean-light"] .bg-teal-500.text-white,
+[data-theme="clean-light"] .bg-emerald-600.text-white,
+[data-theme="clean-light"] .bg-rose-600.text-white,
+[data-theme="clean-light"] .bg-amber-600.text-white,
+[data-theme="clean-light"] .bg-indigo-600.text-white,
+[data-theme="clean-light"] .bg-blue-600.text-white,
+[data-theme="clean-light"] [class*="bg-teal-600"] .text-white,
+[data-theme="clean-light"] [class*="bg-teal-500"] .text-white,
+[data-theme="clean-light"] [class*="bg-emerald-600"] .text-white,
+[data-theme="clean-light"] [class*="bg-rose-600"] .text-white,
+[data-theme="clean-light"] button.bg-teal-600,
+[data-theme="clean-light"] button.bg-teal-500,
+[data-theme="clean-light"] button.bg-rose-600,
+[data-theme="clean-light"] button.bg-emerald-600,
+.light .bg-teal-600.text-white,
+.light .bg-teal-500.text-white,
+.light .bg-emerald-600.text-white,
+.light .bg-rose-600.text-white,
+.light .bg-amber-600.text-white,
+.light .bg-indigo-600.text-white,
+.light .bg-blue-600.text-white,
+.light [class*="bg-teal-600"] .text-white,
+.light [class*="bg-teal-500"] .text-white,
+.light [class*="bg-emerald-600"] .text-white,
+.light [class*="bg-rose-600"] .text-white,
+.light button.bg-teal-600,
+.light button.bg-teal-500,
+.light button.bg-rose-600,
+.light button.bg-emerald-600 {
+  color: #ffffff !important;
+}
+
 [data-theme="clean-light"] .text-neutral-100,
 [data-theme="clean-light"] .text-neutral-200,
 [data-theme="clean-light"] .text-neutral-300,
+[data-theme="clean-light"] .text-slate-100,
+[data-theme="clean-light"] .text-slate-200,
+[data-theme="clean-light"] .text-slate-300,
 .light .text-neutral-100,
 .light .text-neutral-200,
-.light .text-neutral-300 {
+.light .text-neutral-300,
+.light .text-slate-100,
+.light .text-slate-200,
+.light .text-slate-300 {
   color: #1e293b !important;
 }
 
 [data-theme="clean-light"] .text-neutral-400,
 [data-theme="clean-light"] .text-neutral-500,
+[data-theme="clean-light"] .text-slate-400,
 .light .text-neutral-400,
-.light .text-neutral-500 {
+.light .text-neutral-500,
+.light .text-slate-400 {
   color: #64748b !important;
+}
+
+/* Colored accent badges and highlights in Clean Light */
+[data-theme="clean-light"] .text-teal-300,
+[data-theme="clean-light"] .text-teal-400,
+.light .text-teal-300,
+.light .text-teal-400 {
+  color: #0f766e !important;
+}
+
+[data-theme="clean-light"] .text-emerald-300,
+[data-theme="clean-light"] .text-emerald-400,
+.light .text-emerald-300,
+.light .text-emerald-400 {
+  color: #047857 !important;
+}
+
+[data-theme="clean-light"] .text-amber-300,
+[data-theme="clean-light"] .text-amber-400,
+.light .text-amber-300,
+.light .text-amber-400 {
+  color: #b45309 !important;
+}
+
+[data-theme="clean-light"] .text-rose-300,
+[data-theme="clean-light"] .text-rose-400,
+.light .text-rose-300,
+.light .text-rose-400 {
+  color: #be123c !important;
+}
+
+[data-theme="clean-light"] .text-sky-300,
+[data-theme="clean-light"] .text-sky-400,
+[data-theme="clean-light"] .text-blue-300,
+[data-theme="clean-light"] .text-blue-400,
+.light .text-sky-300,
+.light .text-sky-400,
+.light .text-blue-300,
+.light .text-blue-400 {
+  color: #0284c7 !important;
+}
+
+[data-theme="clean-light"] .text-indigo-300,
+[data-theme="clean-light"] .text-indigo-400,
+.light .text-indigo-300,
+.light .text-indigo-400 {
+  color: #4338ca !important;
 }
 
 [data-theme="clean-light"] .hover\:text-white:hover,
@@ -507,33 +687,76 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 [data-theme="rhizan-dark"] .bg-\[\#101010\],
 [data-theme="rhizan-dark"] .bg-\[\#111111\],
-[data-theme="rhizan-dark"] .bg-\[\#121212\] {
+[data-theme="rhizan-dark"] .bg-\[\#121212\],
+[data-theme="rhizan-dark"] .bg-\[\#0b1320\],
+[data-theme="rhizan-dark"] .bg-\[\#0f172a\],
+[data-theme="rhizan-dark"] .bg-\[\#0f1b2c\],
+[data-theme="rhizan-dark"] .bg-\[\#0f1d24\],
+[data-theme="rhizan-dark"] .bg-\[\#10241e\],
+[data-theme="rhizan-dark"] .bg-\[\#121824\],
+[data-theme="rhizan-dark"] .bg-\[\#121926\],
+[data-theme="rhizan-dark"] .bg-\[\#131313\],
+[data-theme="rhizan-dark"] .bg-\[\#131d2e\],
+[data-theme="rhizan-dark"] .bg-\[\#151e28\],
+[data-theme="rhizan-dark"] .bg-\[\#16202e\],
+[data-theme="rhizan-dark"] .bg-\[\#162238\] {
   background-color: #171f2b !important;
 }
 
 [data-theme="rhizan-dark"] .bg-\[\#141414\],
+[data-theme="rhizan-dark"] .bg-\[\#151d2a\],
 [data-theme="rhizan-dark"] .bg-\[\#161616\],
-[data-theme="rhizan-dark"] .bg-\[\#181818\] {
+[data-theme="rhizan-dark"] .bg-\[\#181818\],
+[data-theme="rhizan-dark"] .bg-\[\#182130\],
+[data-theme="rhizan-dark"] .bg-\[\#1a2332\],
+[data-theme="rhizan-dark"] .bg-\[\#1a2434\],
+[data-theme="rhizan-dark"] .bg-\[\#1b2634\] {
   background-color: #1c2534 !important;
 }
 
 [data-theme="rhizan-dark"] .bg-\[\#1a1a1a\],
+[data-theme="rhizan-dark"] .bg-\[\#1e2a3c\],
 [data-theme="rhizan-dark"] .bg-\[\#1f1f1f\],
+[data-theme="rhizan-dark"] .bg-\[\#1f293d\],
 [data-theme="rhizan-dark"] .bg-\[\#202020\],
+[data-theme="rhizan-dark"] .bg-\[\#202c3e\],
 [data-theme="rhizan-dark"] .bg-\[\#222222\],
 [data-theme="rhizan-dark"] .bg-\[\#242424\],
 [data-theme="rhizan-dark"] .bg-\[\#252525\],
-[data-theme="rhizan-dark"] .bg-\[\#282828\] {
+[data-theme="rhizan-dark"] .bg-\[\#282828\],
+[data-theme="rhizan-dark"] .bg-\[\#291417\],
+[data-theme="rhizan-dark"] .bg-\[\#2c2c2c\],
+[data-theme="rhizan-dark"] .bg-\[\#2e2e2e\],
+[data-theme="rhizan-dark"] .bg-\[\#303030\] {
   background-color: #242f42 !important;
 }
 
+[data-theme="rhizan-dark"] .border-\[\#1c1c1c\],
+[data-theme="rhizan-dark"] .border-\[\#1d1d1d\],
 [data-theme="rhizan-dark"] .border-\[\#1e1e1e\],
+[data-theme="rhizan-dark"] .border-\[\#1e293b\],
+[data-theme="rhizan-dark"] .border-\[\#1e2a3c\],
 [data-theme="rhizan-dark"] .border-\[\#1f1f1f\],
 [data-theme="rhizan-dark"] .border-\[\#202020\],
+[data-theme="rhizan-dark"] .border-\[\#202c3e\],
 [data-theme="rhizan-dark"] .border-\[\#222222\],
+[data-theme="rhizan-dark"] .border-\[\#222e42\],
+[data-theme="rhizan-dark"] .border-\[\#223147\],
+[data-theme="rhizan-dark"] .border-\[\#232323\],
+[data-theme="rhizan-dark"] .border-\[\#233142\],
 [data-theme="rhizan-dark"] .border-\[\#242424\],
+[data-theme="rhizan-dark"] .border-\[\#243347\],
+[data-theme="rhizan-dark"] .border-\[\#253346\],
 [data-theme="rhizan-dark"] .border-\[\#262626\],
-[data-theme="rhizan-dark"] .border-\[\#282828\] {
+[data-theme="rhizan-dark"] .border-\[\#282828\],
+[data-theme="rhizan-dark"] .border-\[\#28384e\],
+[data-theme="rhizan-dark"] .border-\[\#2a2a2a\],
+[data-theme="rhizan-dark"] .border-\[\#2c2c2c\],
+[data-theme="rhizan-dark"] .border-\[\#2d2d2d\],
+[data-theme="rhizan-dark"] .border-\[\#2e2e2e\],
+[data-theme="rhizan-dark"] .border-\[\#303030\],
+[data-theme="rhizan-dark"] .border-\[\#333\],
+[data-theme="rhizan-dark"] .border-\[\#333333\] {
   border-color: #283549 !important;
 }
 

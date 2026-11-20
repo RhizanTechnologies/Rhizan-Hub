@@ -178,30 +178,30 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         aria-expanded={isOpen}
         className={`w-full flex items-center justify-between border transition-all select-none outline-none font-medium ${sizeStyles} ${
           disabled
-            ? 'opacity-40 cursor-not-allowed bg-[#141414] border-[#222222] text-neutral-500'
+            ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-[#141414] border-slate-200 dark:border-[#222222] text-slate-400 dark:text-neutral-500'
             : isOpen
-            ? 'border-teal-500/80 bg-[#161616] text-white shadow-lg shadow-teal-950/20 ring-1 ring-teal-500/30'
-            : 'border-[#262626] bg-[#141414] hover:bg-[#181818] hover:border-[#333333] text-neutral-200 cursor-pointer'
+            ? 'border-teal-500/80 bg-white dark:bg-[#161616] text-slate-900 dark:text-white shadow-lg shadow-teal-500/10 ring-1 ring-teal-500/30'
+            : 'border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] hover:bg-slate-50 dark:hover:bg-[#181818] hover:border-slate-300 dark:hover:border-[#333333] text-slate-700 dark:text-neutral-200 cursor-pointer'
         } ${className}`}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          {icon && <span className="shrink-0 text-teal-400">{icon}</span>}
+          {icon && <span className="shrink-0 text-teal-600 dark:text-teal-400">{icon}</span>}
           {selectedOption?.icon && <span className="shrink-0">{selectedOption.icon}</span>}
 
-          <span className={`truncate text-left block ${!selectedOption ? 'text-neutral-500' : 'text-neutral-100'}`}>
+          <span className={`truncate text-left block ${!selectedOption ? 'text-slate-400 dark:text-neutral-500' : 'text-slate-800 dark:text-neutral-100'}`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
 
           {selectedOption?.sublabel && (
-            <span className="text-[10px] text-neutral-400 font-normal truncate hidden sm:inline">
+            <span className="text-[10px] text-slate-400 dark:text-neutral-400 font-normal truncate hidden sm:inline">
               ({selectedOption.sublabel})
             </span>
           )}
         </div>
 
         <ChevronDown
-          className={`w-3.5 h-3.5 text-neutral-400 shrink-0 transition-transform duration-200 ml-1.5 ${
-            isOpen ? 'rotate-180 text-teal-400' : ''
+          className={`w-3.5 h-3.5 text-slate-400 dark:text-neutral-400 shrink-0 transition-transform duration-200 ml-1.5 ${
+            isOpen ? 'rotate-180 text-teal-600 dark:text-teal-400' : ''
           }`}
         />
       </button>
@@ -211,16 +211,16 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         <div
           role="listbox"
           tabIndex={-1}
-          className={`absolute z-50 w-full min-w-[200px] bg-[#141414] border border-[#2a2a2a] rounded-2xl shadow-2xl p-1.5 backdrop-blur-xl animate-fade-in ${
+          className={`absolute z-50 w-full min-w-[200px] bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#2a2a2a] rounded-2xl shadow-2xl p-1.5 backdrop-blur-xl animate-fade-in ${
             openUpwards ? 'bottom-full mb-1.5 origin-bottom' : 'top-full mt-1.5 origin-top'
           } ${align === 'right' ? 'right-0' : 'left-0'} ${dropdownClassName}`}
           style={{ maxHeight: '280px' }}
         >
           {/* Search input inside dropdown if enabled */}
           {isSearchable && (
-            <div className="p-1 pb-1.5 border-b border-[#222222] mb-1">
+            <div className="p-1 pb-1.5 border-b border-slate-100 dark:border-[#222222] mb-1">
               <div className="relative flex items-center">
-                <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-2.5 pointer-events-none" />
+                <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 absolute left-2.5 pointer-events-none" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -232,13 +232,13 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                       setIsOpen(false);
                     }
                   }}
-                  className="w-full bg-[#1c1c1c] border border-[#2e2e2e] focus:border-teal-500/70 rounded-xl pl-8 pr-7 py-1.5 text-xs text-white placeholder-neutral-500 outline-none transition"
+                  className="w-full bg-slate-50 dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#2e2e2e] focus:border-teal-500 rounded-xl pl-8 pr-7 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2 p-0.5 text-neutral-400 hover:text-white"
+                    className="absolute right-2 p-0.5 text-slate-400 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-white"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -250,14 +250,14 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
           {/* Options List */}
           <div className="overflow-y-auto max-h-[220px] space-y-0.5 no-scrollbar py-0.5">
             {filteredOptions.length === 0 ? (
-              <div className="p-3 text-center text-xs text-neutral-500">
+              <div className="p-3 text-center text-xs text-slate-400 dark:text-neutral-500">
                 No matching options found
               </div>
             ) : groupedOptions ? (
               Object.entries(groupedOptions).map(([groupName, groupOpts]) => (
                 <div key={groupName} className="space-y-0.5">
                   {groupName && (
-                    <div className="px-2.5 py-1 text-[10px] font-bold text-neutral-500 uppercase tracking-wider bg-[#101010]/50 rounded-md mt-1">
+                    <div className="px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:text-neutral-500 uppercase tracking-wider bg-slate-100/70 dark:bg-[#101010]/50 rounded-md mt-1">
                       {groupName}
                     </div>
                   )}
@@ -280,24 +280,24 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                         }}
                         className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition text-left cursor-pointer select-none ${
                           opt.disabled
-                            ? 'opacity-30 cursor-not-allowed text-neutral-500'
+                            ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-neutral-500'
                             : isSelected
-                            ? 'bg-teal-500/15 text-teal-300 font-semibold border border-teal-500/30'
-                            : 'text-neutral-300 hover:bg-[#1f1f1f] hover:text-white border border-transparent'
+                            ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 font-semibold border border-teal-500/30'
+                            : 'text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-[#1f1f1f] hover:text-slate-900 dark:hover:text-white border border-transparent'
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           {opt.icon && <span className="shrink-0">{opt.icon}</span>}
                           <span className="truncate">{opt.label}</span>
                           {opt.sublabel && (
-                            <span className="text-[10px] text-neutral-400 font-normal truncate">
+                            <span className="text-[10px] text-slate-400 dark:text-neutral-400 font-normal truncate">
                               • {opt.sublabel}
                             </span>
                           )}
                         </div>
 
                         {isSelected && (
-                          <Check className="w-3.5 h-3.5 text-teal-400 shrink-0 ml-2" />
+                          <Check className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0 ml-2" />
                         )}
                       </button>
                     );
@@ -324,24 +324,24 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                     }}
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition text-left cursor-pointer select-none ${
                       opt.disabled
-                        ? 'opacity-30 cursor-not-allowed text-neutral-500'
+                        ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-neutral-500'
                         : isSelected
-                        ? 'bg-teal-500/15 text-teal-300 font-semibold border border-teal-500/30'
-                        : 'text-neutral-300 hover:bg-[#1f1f1f] hover:text-white border border-transparent'
+                        ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 font-semibold border border-teal-500/30'
+                        : 'text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-[#1f1f1f] hover:text-slate-900 dark:hover:text-white border border-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       {opt.icon && <span className="shrink-0">{opt.icon}</span>}
                       <span className="truncate">{opt.label}</span>
                       {opt.sublabel && (
-                        <span className="text-[10px] text-neutral-400 font-normal truncate">
+                        <span className="text-[10px] text-slate-400 dark:text-neutral-400 font-normal truncate">
                           • {opt.sublabel}
                         </span>
                       )}
                     </div>
 
                     {isSelected && (
-                      <Check className="w-3.5 h-3.5 text-teal-400 shrink-0 ml-2" />
+                      <Check className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0 ml-2" />
                     )}
                   </button>
                 );
