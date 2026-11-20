@@ -1,9 +1,11 @@
+export type UserRole = 'CEO' | 'CTO' | 'COO' | 'ADMIN' | 'MEMBER';
+
 export interface User {
   _id?: string;
   id?: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'MEMBER';
+  role: UserRole;
   title: string;
   weeklyCapacityHours: number;
   status: 'ACTIVE' | 'AWAY' | 'OFFLINE';
@@ -301,7 +303,26 @@ export interface DashboardSummary {
     activeClientsCount: number;
     teamMembersCount: number;
     hoursThisWeek: number;
+    myHoursToday?: number;
+    teamHoursToday?: number;
+    dailyTargetHours?: number;
   };
+  todayTimeTracking?: {
+    myHoursToday: number;
+    myMinutesToday: number;
+    myEntriesToday: TimeEntry[];
+    teamHoursToday: number;
+    dailyTargetHours: number;
+    percentage: number;
+  };
+  teamWeeklyBreakdown?: Array<{
+    id: string;
+    name: string;
+    role: string;
+    hours: number;
+    capacity: number;
+    percentage: number;
+  }>;
   activeProjects: Array<{
     id: string;
     name: string;
@@ -314,4 +335,131 @@ export interface DashboardSummary {
   myTasks: Task[];
   recentActivities: Activity[];
   upcomingDeadlines: Task[];
+}
+
+export interface WeeklyReportData {
+  weekRange: {
+    start: string;
+    end: string;
+    label: string;
+  };
+  summary: {
+    totalTeamHours: number;
+    expectedCapacityTotal: number;
+    capacityUtilization: number;
+    billableHours: number;
+    nonBillableHours: number;
+    billablePercentage: number;
+    tasksCompletedCount: number;
+    activeProjectsCount: number;
+    newApproachesCount: number;
+    dealsWonCount: number;
+    overdueCount: number;
+  };
+  teamPerformance: Array<{
+    id: string;
+    name: string;
+    role: string;
+    avatar?: string;
+    hoursLogged: number;
+    targetHours: number;
+    utilizationPercent: number;
+    billableHours: number;
+    dailyHours: Array<{
+      day: string;
+      date: string;
+      hours: number;
+    }>;
+    topProjects: Array<{
+      name: string;
+      hours: number;
+    }>;
+  }>;
+  projectDeliverables: Array<{
+    id: string;
+    name: string;
+    clientName: string;
+    status: string;
+    progress: number;
+    weeklyHours: number;
+    totalTasks: number;
+    doneTasks: number;
+    completedThisWeek: Array<{
+      _id: string;
+      title: string;
+      priority: string;
+      assignedTo?: any;
+    }>;
+    inProgressTasks: Array<{
+      _id: string;
+      title: string;
+      priority: string;
+      assignedTo?: any;
+    }>;
+    deadline?: string;
+  }>;
+  completedTasksThisWeek: Task[];
+  plannedNextWeek: Task[];
+  overdueTasks: Task[];
+  businessDevelopment: {
+    newApproachesCount: number;
+    dealsWonCount: number;
+    totalActiveApproaches: number;
+    recentApproaches: Approach[];
+  };
+}
+
+export interface Standup {
+  _id: string;
+  user: User;
+  userName: string;
+  userRole?: string;
+  userAvatar?: string;
+  date: string;
+  completedToday: string;
+  prioritiesTomorrow: string;
+  blockers?: string;
+  hoursWorked?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type NotificationType =
+  | 'OUTREACH_FOLLOWUP'
+  | 'OUTREACH_ASSIGNED'
+  | 'DEAL_WON'
+  | 'TASK_ASSIGNED'
+  | 'TASK_DUE'
+  | 'TASK_REVIEW'
+  | 'TASK_COMMENT'
+  | 'WIP_LIMIT'
+  | 'PROJECT_DEADLINE'
+  | 'PROJECT_ASSIGNED'
+  | 'MILESTONE_COMPLETED'
+  | 'CLIENT_MEETING'
+  | 'PAYMENT_DUE'
+  | 'PAYMENT_RECEIVED'
+  | 'STANDUP_REMINDER'
+  | 'CAPACITY_ALERT'
+  | 'SYSTEM';
+
+export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+export interface AppNotification {
+  _id: string;
+  recipient: string;
+  actor?: {
+    id?: string;
+    name?: string;
+  };
+  type: NotificationType;
+  title: string;
+  message: string;
+  link: string;
+  read: boolean;
+  priority: NotificationPriority;
+  metadata?: Record<string, any>;
+  dedupKey?: string;
+  createdAt: string;
+  updatedAt: string;
 }

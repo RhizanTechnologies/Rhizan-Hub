@@ -2,8 +2,10 @@ import { Response } from 'express';
 import mongoose from 'mongoose';
 import { Approach } from '../models/Approach';
 import { Client } from '../models/Client';
+import { User } from '../models/User';
 import { Activity } from '../models/Activity';
 import { AuthRequest } from '../middlewares/auth';
+import { createNotification, notifyUsers } from '../utils/notificationHelper';
 
 export const getApproaches = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -101,6 +103,18 @@ export const createApproach = async (req: AuthRequest, res: Response): Promise<v
       });
     }
 
+    if (approach.assignedTo && approach.assignedTo._id?.toString() !== req.user?.id) {
+      await createNotification({
+        recipient: approach.assignedTo._id || approach.assignedTo,
+        actor: { id: req.user?.id, name: req.user?.name },
+        type: 'OUTREACH_ASSIGNED',
+        title: `Outreach Lead Assigned: ${approach.businessName}`,
+        message: `${req.user?.name || 'A teammate'} assigned lead "${approach.businessName}" to you (${approach.niche || 'General'}).`,
+        link: `/approaches/${approach._id}`,
+        priority: 'high',
+      });
+    }
+
     res.status(201).json(approach);
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to create approach', error: error.message });
@@ -175,11 +189,27 @@ export const updateApproach = async (req: AuthRequest, res: Response): Promise<v
 
     const approach = await Approach.findByIdAndUpdate(id, updateData, { new: true })
       .populate('convertedClientId', 'name status')
-      .populate('assignedTo', 'name email avatar title role');
+      .populate('assignedTo', 'name email avatar title role')
+      .populate('contactHistory.loggedBy', 'name avatar role');
 
     if (!approach) {
       res.status(404).json({ message: 'Approach record not found' });
       return;
+    }
+
+    if (
+      updateData.assignedTo &&
+      updateData.assignedTo.toString() !== req.user?.id
+    ) {
+      await createNotification({
+        recipient: updateData.assignedTo,
+        actor: { id: req.user?.id, name: req.user?.name },
+        type: 'OUTREACH_ASSIGNED',
+        title: `Outreach Lead Assigned: ${approach.businessName}`,
+        message: `${req.user?.name || 'A teammate'} assigned lead "${approach.businessName}" to you.`,
+        link: `/approaches/${approach._id}`,
+        priority: 'high',
+      });
     }
 
     res.json(approach);
@@ -258,6 +288,23 @@ export const convertToClient = async (req: AuthRequest, res: Response): Promise<
         entityType: 'CLIENT',
         entityTitle: client.name,
       });
+
+      try {
+        const activeUsers = await User.find({ status: 'ACTIVE' }, '_id');
+        const recipientIds = activeUsers.map((u) => u._id.toString());
+        await notifyUsers(recipientIds, {
+          actor: { id: req.user.id, name: req.user.name },
+          type: 'DEAL_WON',
+          title: `Deal Won: ${client.name}!`,
+          message: `${req.user.name} successfully converted "${approach.businessName}" into an active client (${client.dealValue > 0 ? `${client.dealValue.toLocaleString()} ${client.currency}` : 'Deal Closed'})!`,
+          link: `/clients/${client._id}`,
+          priority: 'high',
+          metadata: { clientId: client._id.toString(), approachId: approach._id.toString() },
+          dedupKey: `deal-won-${approach._id}`,
+        });
+      } catch (notifErr) {
+        console.error('Failed to broadcast DEAL_WON notification:', notifErr);
+      }
     }
 
     res.json({

@@ -2,10 +2,11 @@ import { Response } from 'express';
 import { Task } from '../models/Task';
 import { Activity } from '../models/Activity';
 import { AuthRequest } from '../middlewares/auth';
+import { createNotification } from '../utils/notificationHelper';
 
 export const getTasks = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { status, project, assignedTo, dueDate, dateFilter } = req.query;
+    const { status, project, assignedTo, dueDate, dateFilter, page, limit, pagination } = req.query;
     const filter: any = {};
 
     if (status && status !== 'ALL') filter.status = status;
@@ -39,6 +40,41 @@ export const getTasks = async (req: AuthRequest, res: Response): Promise<void> =
         filter.dueDate = { $lt: startOfDay };
         filter.status = { $ne: 'DONE' };
       }
+    }
+
+    const shouldPaginate = page !== undefined || limit !== undefined || pagination === 'true';
+
+    if (shouldPaginate) {
+      const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+      const limitNum = Math.max(1, Math.min(100, parseInt(limit as string, 10) || 20));
+      const skip = (pageNum - 1) * limitNum;
+
+      const [tasks, total] = await Promise.all([
+        Task.find(filter)
+          .populate('assignedTo', 'name email title avatar')
+          .populate('project', 'name clientName status')
+          .populate('createdBy', 'name email')
+          .populate('comments.author', 'name email avatar')
+          .sort({ dueDate: 1, createdAt: -1 })
+          .skip(skip)
+          .limit(limitNum),
+        Task.countDocuments(filter),
+      ]);
+
+      const totalPages = Math.ceil(total / limitNum) || 1;
+
+      res.json({
+        tasks,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages,
+          hasNext: pageNum < totalPages,
+          hasPrev: pageNum > 1,
+        },
+      });
+      return;
     }
 
     const tasks = await Task.find(filter)
@@ -82,6 +118,19 @@ export const createTask = async (req: AuthRequest, res: Response): Promise<void>
       });
     }
 
+    // Trigger notification for assignee
+    if (task.assignedTo && task.assignedTo.toString() !== req.user?.id) {
+      await createNotification({
+        recipient: task.assignedTo,
+        actor: { id: req.user?.id, name: req.user?.name },
+        type: 'TASK_ASSIGNED',
+        title: `Task Assigned: ${task.title}`,
+        message: `${req.user?.name || 'A teammate'} assigned "${task.title}" to you (${task.priority} priority).`,
+        link: '/tasks',
+        priority: task.priority === 'URGENT' ? 'urgent' : 'high',
+      });
+    }
+
     const populatedTask = await Task.findById(task._id)
       .populate('assignedTo', 'name email title avatar')
       .populate('project', 'name clientName status');
@@ -117,6 +166,39 @@ export const updateTask = async (req: AuthRequest, res: Response): Promise<void>
         entityType: 'TASK',
         entityTitle: updatedTask?.title || 'task',
       });
+    }
+
+    // Trigger notification on reassignment
+    if (
+      req.body.assignedTo &&
+      req.body.assignedTo.toString() !== req.user?.id &&
+      req.body.assignedTo.toString() !== existingTask.assignedTo?.toString()
+    ) {
+      await createNotification({
+        recipient: req.body.assignedTo,
+        actor: { id: req.user?.id, name: req.user?.name },
+        type: 'TASK_ASSIGNED',
+        title: `Task Assigned: ${updatedTask?.title || 'Task'}`,
+        message: `${req.user?.name || 'A teammate'} assigned "${updatedTask?.title}" to you.`,
+        link: '/tasks',
+        priority: 'high',
+      });
+    }
+
+    // Trigger notification if moved to REVIEW
+    if (req.body.status === 'REVIEW' && oldStatus !== 'REVIEW') {
+      const recipientId = existingTask.createdBy || (updatedTask?.project as any)?.lead;
+      if (recipientId && recipientId.toString() !== req.user?.id) {
+        await createNotification({
+          recipient: recipientId,
+          actor: { id: req.user?.id, name: req.user?.name },
+          type: 'TASK_REVIEW',
+          title: `Ready for QA/Review: ${updatedTask?.title}`,
+          message: `${req.user?.name || 'A developer'} marked "${updatedTask?.title}" ready for QA/Review.`,
+          link: '/tasks',
+          priority: 'medium',
+        });
+      }
     }
 
     res.json(updatedTask);
@@ -174,6 +256,26 @@ export const addComment = async (req: AuthRequest, res: Response): Promise<void>
     });
 
     await task.save();
+
+    // Trigger notification for assignee or task creator
+    const notifyRecipient =
+      task.assignedTo && task.assignedTo.toString() !== req.user?.id
+        ? task.assignedTo
+        : task.createdBy && task.createdBy.toString() !== req.user?.id
+        ? task.createdBy
+        : null;
+
+    if (notifyRecipient) {
+      await createNotification({
+        recipient: notifyRecipient,
+        actor: { id: req.user?.id, name: req.user?.name },
+        type: 'TASK_COMMENT',
+        title: `Comment on: ${task.title}`,
+        message: `${req.user?.name || 'A teammate'}: "${text.trim().slice(0, 80)}${text.trim().length > 80 ? '...' : ''}"`,
+        link: '/tasks',
+        priority: 'medium',
+      });
+    }
 
     const populatedTask = await Task.findById(id)
       .populate('assignedTo', 'name email title avatar')

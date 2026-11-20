@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
 import { useAuth } from '@/context/AuthContext';
+import { useAlert } from '@/context/AlertContext';
 import { TimeEntry, Project, Task, WeeklyTeamMemberSummary } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
@@ -39,6 +40,7 @@ const TIMER_STORAGE_KEY = 'rhizan_active_timer_state';
 
 export default function TimeTrackingPage() {
   const { user } = useAuth();
+  const { showAlert, showConfirm } = useAlert();
 
   // Data states
   const [entries, setEntries] = useState<TimeEntry[]>([]);
@@ -79,6 +81,11 @@ export default function TimeTrackingPage() {
   const [projectFilter, setProjectFilter] = useState<string>('ALL');
   const [dateRangeFilter, setDateRangeFilter] = useState<'ALL' | 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'THIS_MONTH'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  // Pagination states
+  const [daysPerPage, setDaysPerPage] = useState<number>(5);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Notification / success message
   const [successToast, setSuccessToast] = useState<string | null>(null);
@@ -291,19 +298,25 @@ export default function TimeTrackingPage() {
     try {
       setLoading(true);
       const [entriesData, projectsData, tasksData] = await Promise.all([
-        apiFetch<TimeEntry[]>('/time?userId=me'),
+        apiFetch<any>('/time?userId=me'),
         apiFetch<Project[]>('/projects'),
-        apiFetch<Task[]>('/tasks'),
+        apiFetch<any>('/tasks'),
       ]);
 
-      if (entriesData) setEntries(entriesData);
+      if (entriesData) {
+        const loadedEntries = Array.isArray(entriesData) ? entriesData : (entriesData.entries || []);
+        setEntries(loadedEntries);
+      }
       if (projectsData) {
         setProjects(projectsData);
         if (projectsData.length > 0 && !selectedProjectId) {
           setSelectedProjectId(projectsData[0]._id);
         }
       }
-      if (tasksData) setTasks(tasksData);
+      if (tasksData) {
+        const loadedTasks = Array.isArray(tasksData) ? tasksData : (tasksData.tasks || []);
+        setTasks(loadedTasks);
+      }
     } catch (err) {
       console.error('Failed to load time tracking data', err);
     } finally {
@@ -409,7 +422,7 @@ export default function TimeTrackingPage() {
     const fallbackProjectId = selectedProjectId || (projects.length > 0 ? projects[0]._id : undefined);
 
     if (!fallbackProjectId) {
-      alert('Please create or select a project before logging time.');
+      showAlert('Please create or select a project before logging time.', { type: 'warning' });
       setElapsedSeconds(0);
       return;
     }
@@ -438,7 +451,7 @@ export default function TimeTrackingPage() {
       setSuccessToast(`Logged ${formatDurationText(hours, minutes)} successfully!`);
       setTimeout(() => setSuccessToast(null), 3500);
     } catch (err: any) {
-      alert(err.message || 'Failed to save time entry');
+      showAlert(err.message || 'Failed to save time entry', { type: 'error' });
     }
   };
 
@@ -544,7 +557,7 @@ export default function TimeTrackingPage() {
     const fallbackProjectId = selectedProjectId || (projects.length > 0 ? projects[0]._id : undefined);
 
     if (!fallbackProjectId) {
-      alert('Please select a project before logging time.');
+      showAlert('Please select a project before logging time.', { type: 'warning' });
       return;
     }
 
@@ -594,20 +607,81 @@ export default function TimeTrackingPage() {
       setSuccessToast(`Logged ${formatDurationText(hoursToSave, minutesToSave)} manually!`);
       setTimeout(() => setSuccessToast(null), 3500);
     } catch (err: any) {
-      alert(err.message || 'Failed to save manual time entry');
+      showAlert(err.message || 'Failed to save manual time entry', { type: 'error' });
     }
   };
 
   // DELETE TIME ENTRY
-  const handleDeleteEntry = async (entryId: string) => {
-    if (!confirm('Are you sure you want to delete this time entry?')) return;
+  const handleDeleteEntry = (entryId: string) => {
+    showConfirm(
+      'Are you sure you want to delete this time entry? This cannot be undone.',
+      async () => {
+        setEntries((prev) => prev.filter((e) => e._id !== entryId));
 
-    setEntries((prev) => prev.filter((e) => e._id !== entryId));
+        try {
+          await apiFetch(`/time/${entryId}`, { method: 'DELETE' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to delete time entry', { type: 'error' });
+        }
+      },
+      {
+        title: 'Delete Time Entry',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
+  };
+
+  // EDIT TIME ENTRY STATE & HANDLERS
+  const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
+  const [editProject, setEditProject] = useState('');
+  const [editTask, setEditTask] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editHours, setEditHours] = useState(0);
+  const [editMinutes, setEditMinutes] = useState(0);
+  const [editStartTime, setEditStartTime] = useState('');
+  const [editEndTime, setEditEndTime] = useState('');
+  const [editBillable, setEditBillable] = useState(true);
+
+  const openEditEntry = (entry: TimeEntry) => {
+    setEditingEntry(entry);
+    setEditProject(entry.project?._id || '');
+    setEditTask(entry.task?._id || '');
+    setEditDescription(entry.description || '');
+    setEditDate(entry.date ? new Date(entry.date).toISOString().split('T')[0] : '');
+    setEditHours(entry.hours || 0);
+    setEditMinutes(entry.minutes || 0);
+    setEditStartTime(entry.startTime || '');
+    setEditEndTime(entry.endTime || '');
+    setEditBillable(entry.billable !== false);
+  };
+
+  const handleUpdateEntry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEntry) return;
 
     try {
-      await apiFetch(`/time/${entryId}`, { method: 'DELETE' });
+      const updated = await apiFetch<TimeEntry>(`/time/${editingEntry._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          project: editProject || undefined,
+          task: editTask || undefined,
+          description: editDescription.trim(),
+          date: editDate ? new Date(editDate).toISOString() : undefined,
+          hours: Number(editHours) || 0,
+          minutes: Number(editMinutes) || 0,
+          startTime: editStartTime || undefined,
+          endTime: editEndTime || undefined,
+          billable: editBillable,
+        }),
+      });
+
+      setEntries((prev) => prev.map((e) => (e._id === updated._id ? updated : e)));
+      setEditingEntry(null);
+      showAlert('Time entry updated successfully', { type: 'success' });
     } catch (err: any) {
-      alert(err.message || 'Failed to delete time entry');
+      showAlert(err.message || 'Failed to update time entry', { type: 'error' });
     }
   };
 
@@ -716,6 +790,26 @@ export default function TimeTrackingPage() {
 
     return Object.values(groups).sort((a, b) => b.dateKey.localeCompare(a.dateKey));
   }, [filteredEntries]);
+
+  // Reset pagination to page 1 on filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [projectFilter, dateRangeFilter, searchQuery]);
+
+  const totalDays = groupedDays.length;
+  const totalPages = daysPerPage === -1 ? 1 : Math.max(1, Math.ceil(totalDays / daysPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedDays = useMemo(() => {
+    if (daysPerPage === -1) return groupedDays;
+    const startIndex = (currentPage - 1) * daysPerPage;
+    return groupedDays.slice(startIndex, startIndex + daysPerPage);
+  }, [groupedDays, currentPage, daysPerPage]);
 
   // Overall Metrics - strictly personal
   const todayEntries = myEntries.filter((e) => {
@@ -874,7 +968,7 @@ export default function TimeTrackingPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {/* Billable toggle */}
+                  {/* Client vs Internal toggle */}
                   <button
                     type="button"
                     onClick={() => setIsBillable(!isBillable)}
@@ -883,10 +977,10 @@ export default function TimeTrackingPage() {
                         ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
                         : 'bg-[#181818] text-neutral-500 border-[#282828]'
                     }`}
-                    title={isBillable ? 'Billable Time ($)' : 'Non-billable Time'}
+                    title={isBillable ? 'Client Work' : 'Internal Work'}
                   >
                     <DollarSign className="w-3.5 h-3.5" />
-                    <span>{isBillable ? 'Billable' : 'Non-billable'}</span>
+                    <span>{isBillable ? 'Client' : 'Internal'}</span>
                   </button>
                 </div>
               </div>
@@ -912,7 +1006,7 @@ export default function TimeTrackingPage() {
                       setSelectedProjectId(e.target.value);
                       setSelectedTaskId('');
                     }}
-                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-2xl px-3.5 py-2.5 pr-8 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer font-medium"
+                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-2xl px-3.5 py-2.5 pr-9 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer font-medium truncate"
                   >
                     <option value="">-- Choose Project --</option>
                     {projects.map((p) => (
@@ -1117,71 +1211,119 @@ export default function TimeTrackingPage() {
             </div>
 
             {/* Filter and Search Ribbon */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#121212] border border-[#222222] rounded-2xl">
-              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1.5 pl-1 shrink-0">
-                  <Filter className="w-3.5 h-3.5 text-teal-400" />
-                  Filter:
-                </span>
-
-                {/* Project Filter */}
-                <select
-                  value={projectFilter}
-                  onChange={(e) => setProjectFilter(e.target.value)}
-                  className="bg-[#181818] border border-[#2a2a2a] text-white text-xs rounded-xl px-2.5 py-1.5 outline-none cursor-pointer max-w-[150px] truncate"
-                >
-                  <option value="ALL">All Projects</option>
-                  {projects.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Date Range Filter */}
-                <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-1 no-scrollbar">
-                  {(['ALL', 'TODAY', 'YESTERDAY', 'THIS_WEEK', 'THIS_MONTH'] as const).map((mode) => (
-                    <button
-                      key={mode}
-                      type="button"
-                      onClick={() => setDateRangeFilter(mode)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                        dateRangeFilter === mode
-                          ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
-                          : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#262626]'
-                      }`}
-                    >
-                      {mode === 'ALL'
-                        ? 'All Time'
-                        : mode === 'TODAY'
-                        ? 'Today'
-                        : mode === 'YESTERDAY'
-                        ? 'Yesterday'
-                        : mode === 'THIS_WEEK'
-                        ? 'This Week'
-                        : 'This Month'}
-                    </button>
-                  ))}
+            <div className="bg-[#121212] border border-[#222222] rounded-2xl p-3 sm:p-3.5 space-y-3">
+              <div className="flex items-center justify-between gap-2.5">
+                {/* Search Bar */}
+                <div className="relative flex-1">
+                  <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search time logs..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+                  />
                 </div>
+
+                {/* Filter Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsFiltersOpen((prev) => !prev)}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition shrink-0 ${
+                    isFiltersOpen || projectFilter !== 'ALL' || dateRangeFilter !== 'ALL'
+                      ? 'bg-teal-500/15 text-teal-300 border-teal-500/40'
+                      : 'bg-[#181818] text-neutral-400 hover:text-white border-[#282828]'
+                  }`}
+                  title="Toggle filter controls"
+                >
+                  <Filter className="w-3.5 h-3.5 text-teal-400" />
+                  <span className="hidden xs:inline">Filters</span>
+                  {(projectFilter !== 'ALL' || dateRangeFilter !== 'ALL') && (
+                    <span className="w-2 h-2 rounded-full bg-teal-400" />
+                  )}
+                  <ChevronDown
+                    className={`w-3 h-3 transition-transform duration-200 ${
+                      isFiltersOpen ? 'rotate-180 text-teal-400' : 'text-neutral-500'
+                    }`}
+                  />
+                </button>
               </div>
 
-              {/* Keyword Search */}
-              <div className="relative w-full sm:w-60">
-                <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search time logs..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-[#181818] border border-[#2a2a2a] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
-                />
-              </div>
+              {/* Collapsible Filter Body */}
+              {isFiltersOpen && (
+                <div className="pt-2.5 border-t border-[#202020] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+                  <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                    {/* Project Filter */}
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                      <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider shrink-0">
+                        Project:
+                      </span>
+                      <select
+                        value={projectFilter}
+                        onChange={(e) => setProjectFilter(e.target.value)}
+                        className="bg-[#181818] border border-[#2a2a2a] text-white text-xs rounded-xl px-3 py-1.5 outline-none cursor-pointer flex-1 sm:flex-none sm:w-48"
+                      >
+                        <option value="ALL">All Projects</option>
+                        {projects.map((p) => (
+                          <option key={p._id} value={p._id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Date Range Filter */}
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 no-scrollbar">
+                      <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider shrink-0">
+                        Date:
+                      </span>
+                      {(['ALL', 'TODAY', 'YESTERDAY', 'THIS_WEEK', 'THIS_MONTH'] as const).map((mode) => (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() => setDateRangeFilter(mode)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
+                            dateRangeFilter === mode
+                              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+                              : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#262626]'
+                          }`}
+                        >
+                          {mode === 'ALL'
+                            ? 'All Time'
+                            : mode === 'TODAY'
+                            ? 'Today'
+                            : mode === 'YESTERDAY'
+                            ? 'Yesterday'
+                            : mode === 'THIS_WEEK'
+                            ? 'This Week'
+                            : 'This Month'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Reset Filters button if any active */}
+                  {(projectFilter !== 'ALL' || dateRangeFilter !== 'ALL' || searchQuery) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProjectFilter('ALL');
+                        setDateRangeFilter('ALL');
+                        setSearchQuery('');
+                      }}
+                      className="text-[11px] text-teal-400 hover:text-teal-300 underline font-medium"
+                    >
+                      Reset Filters
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* CLOCKIFY GROUPED ENTRIES BY DAY */}
             <div className="space-y-5">
               {groupedDays.length > 0 ? (
-                groupedDays.map((dayGroup) => {
+                paginatedDays.map((dayGroup) => {
                   const dayHours = Math.floor(dayGroup.totalMinutes / 60);
                   const dayMins = dayGroup.totalMinutes % 60;
 
@@ -1317,7 +1459,7 @@ export default function TimeTrackingPage() {
                                 {formatDurationText(entry.hours, entry.minutes)}
                               </span>
 
-                              {/* Actions: Restart (▶) & Delete */}
+                              {/* Actions: Restart (▶), Edit (✎) & Delete (🗑) */}
                               <div className="flex items-center gap-1">
                                 <button
                                   type="button"
@@ -1326,6 +1468,14 @@ export default function TimeTrackingPage() {
                                   title="Continue / restart this timer"
                                 >
                                   <Play className="w-3.5 h-3.5 fill-current" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => openEditEntry(entry)}
+                                  className="p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                                  title="Edit time entry"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   type="button"
@@ -1363,6 +1513,68 @@ export default function TimeTrackingPage() {
                 </div>
               )}
             </div>
+
+            {/* Pagination Controls Bar */}
+            {groupedDays.length > 0 && (
+              <div className="p-4 rounded-2xl bg-[#111111] border border-[#222222] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+                {/* Count indicator */}
+                <div className="text-xs text-neutral-400 text-center sm:text-left">
+                  Showing days <span className="font-semibold text-white font-mono">{daysPerPage === -1 ? 1 : Math.min((currentPage - 1) * daysPerPage + 1, totalDays)}</span> to{' '}
+                  <span className="font-semibold text-white font-mono">{daysPerPage === -1 ? totalDays : Math.min(currentPage * daysPerPage, totalDays)}</span> of{' '}
+                  <span className="font-semibold text-teal-400 font-mono">{totalDays}</span> days{' '}
+                  <span className="text-neutral-500 font-mono">({filteredEntries.length} logged entries)</span>
+                </div>
+
+                {/* Page Navigation & Page Size */}
+                <div className="flex items-center gap-3 flex-wrap justify-center">
+                  <div className="flex items-center gap-1.5 text-xs text-neutral-400">
+                    <span>Days per page:</span>
+                    <select
+                      value={daysPerPage}
+                      onChange={(e) => {
+                        setDaysPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="bg-[#181818] border border-[#282828] text-white text-xs rounded-lg px-2 py-1 outline-none focus:border-teal-500"
+                    >
+                      <option value="3">3</option>
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="20">20</option>
+                      <option value="-1">All</option>
+                    </select>
+                  </div>
+
+                  {daysPerPage !== -1 && totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Prev</span>
+                      </button>
+
+                      <div className="px-2.5 py-1 text-xs font-mono text-neutral-300">
+                        Page <strong className="text-teal-400 font-bold">{currentPage}</strong> of <strong>{totalPages}</strong>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                      >
+                        <span className="hidden sm:inline">Next</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         ) : (
           /* TEAM WEEKLY TIMESHEET & REPORTS TAB */
@@ -1559,16 +1771,16 @@ export default function TimeTrackingPage() {
                 </div>
               </div>
 
-              {/* Sub-metrics: Billable vs Non-Billable & Week Range */}
+              {/* Sub-metrics: Client vs Internal & Week Range */}
               <div className="pt-2 border-t border-[#222222] flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-3">
                   <span className="text-neutral-400 flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    Billable: <strong className="text-emerald-400 font-mono">{selectedMemberStats.billableHours}h</strong>
+                    Client: <strong className="text-emerald-400 font-mono">{selectedMemberStats.billableHours}h</strong>
                   </span>
                   <span className="text-neutral-400 flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-neutral-500" />
-                    Non-billable: <strong className="text-neutral-300 font-mono">{selectedMemberStats.nonBillableHours}h</strong>
+                    Internal: <strong className="text-neutral-300 font-mono">{selectedMemberStats.nonBillableHours}h</strong>
                   </span>
                   <span className="text-neutral-500">
                     • {selectedMemberStats.totalEntries} time log{selectedMemberStats.totalEntries === 1 ? '' : 's'}
@@ -1764,7 +1976,7 @@ export default function TimeTrackingPage() {
                                   }`}
                                 >
                                   <DollarSign className="w-2.5 h-2.5" />
-                                  {entry.billable ? 'Billable' : 'Non-billable'}
+                                  {entry.billable ? 'Client' : 'Internal'}
                                 </span>
                               </div>
                             </div>
@@ -1776,6 +1988,142 @@ export default function TimeTrackingPage() {
                 })}
             </div>
           </div>
+        )}
+      </Modal>
+
+      {/* EDIT TIME ENTRY MODAL */}
+      <Modal
+        isOpen={Boolean(editingEntry)}
+        onClose={() => setEditingEntry(null)}
+        title="Edit Time Entry"
+      >
+        {editingEntry && (
+          <form onSubmit={handleUpdateEntry} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Project *
+              </label>
+              <select
+                value={editProject}
+                onChange={(e) => {
+                  setEditProject(e.target.value);
+                  setEditTask('');
+                }}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                {projects.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.name} {p.clientName ? `(${p.clientName})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {tasks.filter((t) => (t.project as any)?._id === editProject || (t.project as any) === editProject).length > 0 && (
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Associated Task (Optional)
+                </label>
+                <select
+                  value={editTask}
+                  onChange={(e) => setEditTask(e.target.value)}
+                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                >
+                  <option value="">No task linked</option>
+                  {tasks
+                    .filter((t) => (t.project as any)?._id === editProject || (t.project as any) === editProject)
+                    .map((t) => (
+                      <option key={t._id} value={t._id}>
+                        {t.title}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Description / Work Done *
+              </label>
+              <textarea
+                rows={2}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  required
+                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Hours
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="24"
+                  value={editHours}
+                  onChange={(e) => setEditHours(parseInt(e.target.value) || 0)}
+                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none font-mono"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Minutes
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={editMinutes}
+                  onChange={(e) => setEditMinutes(parseInt(e.target.value) || 0)}
+                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-neutral-300">
+                <input
+                  type="checkbox"
+                  checked={editBillable}
+                  onChange={(e) => setEditBillable(e.target.checked)}
+                  className="rounded border-[#333] text-teal-500 focus:ring-0 focus:ring-offset-0 bg-[#181818]"
+                />
+                <span>Billable to client</span>
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+              <button
+                type="button"
+                onClick={() => setEditingEntry(null)}
+                className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
         )}
       </Modal>
     </div>

@@ -1,0 +1,473 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Header } from '@/components/Header';
+import { useTheme, THEMES_LIST, FONTS_LIST, AppTheme, AppFont } from '@/context/ThemeContext';
+import {
+  Palette,
+  Type,
+  Check,
+  Sparkles,
+  RotateCcw,
+  Sun,
+  Moon,
+  Laptop,
+  CheckCircle2,
+  Sliders,
+  FolderKanban,
+  Clock,
+  ArrowRight,
+  Download,
+  Smartphone,
+  Wifi,
+  ShieldCheck,
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePwa } from '@/context/PwaContext';
+import { useAuth } from '@/context/AuthContext';
+import { EditProfileModal } from '@/components/EditProfileModal';
+import { UserCog } from 'lucide-react';
+
+export default function SettingsPage() {
+  const { user } = useAuth();
+  const { theme, setTheme, font, setFont, themesList, fontsList } = useTheme();
+  const { isInstallable, isInstalled, isOffline, installPwa } = usePwa();
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [sampleText, setSampleText] = useState('Rhizan Operations Platform 2026 • 48h Weekly Sprints');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  const handleSelectTheme = (tId: AppTheme) => {
+    setTheme(tId);
+    const chosen = themesList.find((t) => t.id === tId);
+    showToast(`🎨 Theme changed to "${chosen?.name}"`);
+  };
+
+  const handleSelectFont = (fId: AppFont) => {
+    setFont(fId);
+    const chosen = fontsList.find((f) => f.id === fId);
+    showToast(`🔤 Font changed to "${chosen?.name}"`);
+  };
+
+  const handleResetDefaults = () => {
+    setTheme('clean-light');
+    setFont('inter');
+    showToast('✨ Appearance reset to Clean Light & Inter (Light & Crisp)');
+  };
+
+  const currentTheme = themesList.find((t) => t.id === theme) || themesList[0];
+  const currentFont = fontsList.find((f) => f.id === font) || fontsList[0];
+
+  return (
+    <div className="flex-1 flex flex-col min-w-0 pb-16">
+      <Header
+        title="Settings & Appearance"
+        subtitle="Customize theme colors, fonts, and visual experience across Rhizan Hub"
+      />
+
+      {/* Floating Notification Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl bg-neutral-900 border border-neutral-700 text-white text-xs font-semibold shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-200 flex items-center gap-2">
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
+        {/* Top Control Bar with Quick Reset */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-3xl bg-[#111111] border border-[#222222]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center shrink-0">
+              <Sliders className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>Personalized Workspace</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-bold">
+                  Active
+                </span>
+              </h2>
+              <p className="text-xs text-neutral-400">
+                Preferences are automatically saved to your browser and sync across all pages
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={handleResetDefaults}
+              className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#282828] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset to Defaults</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* SECTION 0: MY PROFILE & ROLE                                              */}
+        {/* ========================================================================= */}
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#121212] border border-[#262626] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 w-full md:w-auto">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-lg sm:text-xl flex items-center justify-center shadow-lg shadow-teal-900/20 shrink-0 font-heading">
+              {user?.name?.charAt(0) || 'A'}
+            </div>
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-bold text-white truncate">{user?.name}</h3>
+                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
+                  user?.role === 'CEO'
+                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                    : user?.role === 'CTO'
+                    ? 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+                    : user?.role === 'COO'
+                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                    : user?.role === 'ADMIN'
+                    ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
+                    : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+                }`}>
+                  {user?.role === 'CEO' ? '👑 CEO' : user?.role === 'CTO' ? '⚡ CTO' : user?.role === 'COO' ? '📊 COO' : user?.role === 'ADMIN' ? '🛡️ Admin' : '👤 Member'}
+                </span>
+                <span className="text-[10px] text-teal-400 font-mono shrink-0">• {user?.weeklyCapacityHours || 48}h Weekly Target</span>
+              </div>
+              <p className="text-xs text-neutral-400 truncate">
+                {user?.title || 'Executive Leadership'} • <span className="text-neutral-500">{user?.email}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">
+            <button
+              type="button"
+              onClick={() => setIsEditProfileOpen(true)}
+              className="w-full md:w-auto px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold shadow-md shadow-teal-900/30 flex items-center justify-center gap-2 transition"
+            >
+              <UserCog className="w-4 h-4" />
+              <span>Edit Profile & Role</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* SECTION 1: THEME PICKER                                                   */}
+        {/* ========================================================================= */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 pb-2 border-b border-[#222222]">
+            <div className="flex items-center gap-2 min-w-0">
+              <Palette className="w-4 h-4 text-teal-400 shrink-0" />
+              <h3 className="font-heading text-sm sm:text-base font-bold text-white truncate">Color Themes</h3>
+              <span className="text-xs text-neutral-400 font-normal shrink-0">({themesList.length} options)</span>
+            </div>
+            <div className="text-xs text-neutral-400 shrink-0">
+              Active: <strong className="text-teal-300 font-semibold">{currentTheme.name}</strong>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {themesList.map((t) => {
+              const isSelected = theme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => handleSelectTheme(t.id)}
+                  className={`text-left p-4 rounded-2xl border transition-all duration-200 relative group flex flex-col justify-between h-44 ${
+                    isSelected
+                      ? 'border-teal-400 ring-2 ring-teal-500/30 shadow-xl'
+                      : 'border-[#262626] hover:border-[#383838]'
+                  }`}
+                  style={{
+                    backgroundColor: t.bgHex,
+                  }}
+                >
+                  {/* Selected Badge */}
+                  {isSelected && (
+                    <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-md">
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    </div>
+                  )}
+
+                  {/* Header */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span
+                        className="w-3 h-3 rounded-full shrink-0 shadow-sm"
+                        style={{ backgroundColor: t.accentColor }}
+                      />
+                      <span
+                        className={`text-xs font-bold truncate ${
+                          t.isDark ? 'text-white' : 'text-slate-900'
+                        }`}
+                      >
+                        {t.name}
+                      </span>
+                    </div>
+
+                    <p
+                      className={`text-[11px] leading-relaxed line-clamp-2 ${
+                        t.isDark ? 'text-neutral-400' : 'text-slate-600'
+                      }`}
+                    >
+                      {t.tagline}
+                    </p>
+                  </div>
+
+                  {/* Mock Card Preview */}
+                  <div
+                    className="p-2.5 rounded-xl border space-y-1.5"
+                    style={{
+                      backgroundColor: t.cardHex,
+                      borderColor: t.isDark ? '#2e2e2e' : '#e2e8f0',
+                    }}
+                  >
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className={t.isDark ? 'text-neutral-400' : 'text-slate-600'}>Preview Card</span>
+                      <span
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ backgroundColor: t.accentColor }}
+                      />
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-black/20 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ backgroundColor: t.accentColor, width: '65%' }}
+                      />
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* SECTION 2: FONT SELECTOR                                                  */}
+        {/* ========================================================================= */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 pb-2 border-b border-[#222222]">
+            <div className="flex items-center gap-2 min-w-0">
+              <Type className="w-4 h-4 text-teal-400 shrink-0" />
+              <h3 className="font-heading text-sm sm:text-base font-bold text-white truncate">Typography & Fonts</h3>
+              <span className="text-xs text-neutral-400 font-normal shrink-0">({fontsList.length} fonts)</span>
+            </div>
+            <div className="text-xs text-neutral-400 shrink-0">
+              Active: <strong className="text-teal-300 font-semibold">{currentFont.name}</strong>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {fontsList.map((f) => {
+              const isSelected = font === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => handleSelectFont(f.id)}
+                  className={`text-left p-4 rounded-2xl bg-[#141414] border transition-all duration-200 relative group flex flex-col justify-between ${
+                    isSelected
+                      ? 'border-teal-400 ring-2 ring-teal-500/30 shadow-xl'
+                      : 'border-[#262626] hover:border-[#383838]'
+                  }`}
+                >
+                  {/* Selected Badge */}
+                  {isSelected && (
+                    <div className="absolute top-3.5 right-3.5 w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-md">
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    </div>
+                  )}
+
+                  <div className="space-y-1 mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white">{f.name}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1e1e1e] text-neutral-400 border border-[#2a2a2a]">
+                        {f.category}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-400 leading-relaxed">
+                      {f.description}
+                    </p>
+                  </div>
+
+                  {/* Font Specimen Box */}
+                  <div className="p-3 rounded-xl bg-[#0e0e0e] border border-[#242424] space-y-1">
+                    <span className="text-[10px] text-neutral-500 font-mono block uppercase">
+                      Specimen Preview:
+                    </span>
+                    <div className="text-xs font-semibold text-neutral-200 truncate">
+                      {sampleText}
+                    </div>
+                    <div className="text-[11px] text-neutral-400">
+                      0123456789 • ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* SECTION 3: LIVE PLAYGROUND PREVIEW                                        */}
+        {/* ========================================================================= */}
+        <div className="bg-[#111111] border border-[#222222] rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#222222]">
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-4 h-4 text-teal-400 shrink-0" />
+              <h3 className="font-heading text-sm sm:text-base font-bold text-white">
+                Live Component Preview
+              </h3>
+            </div>
+            <span className="text-xs font-mono font-bold text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20 self-start sm:self-auto truncate max-w-full">
+              {currentTheme.name} • {currentFont.name}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Card 1: Live Interactive Typography Input */}
+            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-2">
+              <span className="text-xs font-bold text-white block">Test Typography String:</span>
+              <input
+                type="text"
+                value={sampleText}
+                onChange={(e) => setSampleText(e.target.value)}
+                placeholder="Type custom text to preview font..."
+                className="w-full px-3 py-2 bg-[#101010] border border-[#2a2a2a] rounded-xl text-xs text-white focus:border-teal-500 outline-none transition"
+              />
+              <p className="text-[10px] text-neutral-500">
+                Type here to see how your chosen font renders custom text
+              </p>
+            </div>
+
+            {/* Card 2: Mock KPI Metric */}
+            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-neutral-400">Weekly Team Capacity</span>
+                <Clock className="w-4 h-4 text-teal-400" />
+              </div>
+              <div className="my-2">
+                <span className="text-xl font-bold text-white">48h Target</span>
+                <div className="w-full bg-[#111111] h-2 rounded-full overflow-hidden mt-1.5 border border-[#282828]">
+                  <div
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{ backgroundColor: currentTheme.accentColor, width: '75%' }}
+                  />
+                </div>
+              </div>
+              <span className="text-[10px] text-neutral-400">6 working days × 8h per day</span>
+            </div>
+
+            {/* Card 3: Mock Quick Action Button */}
+            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] flex flex-col justify-between space-y-3">
+              <div>
+                <span className="text-xs font-bold text-white block">Interactive Buttons</span>
+                <p className="text-[11px] text-neutral-400 mt-0.5">
+                  Styled with your active theme's primary accent
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  style={{ backgroundColor: currentTheme.accentColor }}
+                  className="px-4 py-2 rounded-xl text-white font-bold text-xs shadow-md transition flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Primary Action</span>
+                </button>
+                <Link
+                  href="/"
+                  className="px-3.5 py-2 rounded-xl bg-[#181818] hover:bg-[#202020] text-neutral-300 text-xs font-semibold border border-[#282828] flex items-center gap-1 transition"
+                >
+                  <span>Dashboard</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* PWA & Application Card */}
+        <div className="p-6 rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] shadow-xl relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20 flex items-center justify-center">
+                <Smartphone className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-heading font-semibold text-[var(--foreground)]">
+                  Progressive Web App (PWA)
+                </h3>
+                <p className="text-xs text-[var(--muted)]">
+                  Install RHIZAN Hub on desktop or mobile for quick launch, native windowing, and offline access
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {isInstalled ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 text-xs font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-teal-400" />
+                  <span>Standalone App Active</span>
+                </span>
+              ) : isInstallable ? (
+                <button
+                  type="button"
+                  onClick={() => installPwa()}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 active:scale-[0.98] text-white text-xs font-semibold shadow-md shadow-teal-700/20 transition cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Install App</span>
+                </button>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--surface-elevated)] text-[var(--muted)] border border-[var(--border)] text-xs font-medium">
+                  <span>PWA Ready in Browser</span>
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+            <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground)]">
+                <Wifi className="w-4 h-4 text-teal-400" />
+                <span>Offline Support</span>
+              </div>
+              <p className="text-[11px] text-[var(--muted)]">
+                {isOffline ? 'Offline view currently active' : 'Service Worker active with precached fallback'}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground)]">
+                <Laptop className="w-4 h-4 text-indigo-400" />
+                <span>Cross Platform</span>
+              </div>
+              <p className="text-[11px] text-[var(--muted)]">
+                Installs as a native standalone app on macOS, Windows, Linux, Android, and iOS
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[var(--surface-elevated)] border border-[var(--border)] flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground)]">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Modern Security</span>
+              </div>
+              <p className="text-[11px] text-[var(--muted)]">
+                Isolated sandbox execution with strict token validation and safe background sync
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+      />
+    </div>
+  );
+}

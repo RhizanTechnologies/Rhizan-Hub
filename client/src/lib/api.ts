@@ -29,6 +29,20 @@ export async function apiFetch<T>(
     } catch {
       errorMessage = `Error ${response.status}: ${response.statusText}`;
     }
+
+    // If unauthorized or token invalid (e.g., user deleted or session expired)
+    // Avoid triggering logout when intentionally trying to log in with bad password
+    if ((response.status === 401 || response.status === 403) && !endpoint.includes('/auth/login')) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('rhizan_token');
+        localStorage.removeItem('rhizan_user');
+        window.dispatchEvent(new CustomEvent('rhizan_auth_invalidated', { detail: { message: errorMessage } }));
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.href = `/login?error=${encodeURIComponent(errorMessage || 'Session terminated')}`;
+        }
+      }
+    }
+
     throw new Error(errorMessage);
   }
 

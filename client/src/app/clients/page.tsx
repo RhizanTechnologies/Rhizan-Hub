@@ -23,28 +23,19 @@ import {
   Building2,
   Link as LinkIcon,
   ChevronRight,
-  TrendingUp,
   Receipt,
   Users,
   Briefcase,
 } from 'lucide-react';
 import Link from 'next/link';
-
-const PIPELINE_STAGES: { id: ClientStatus; label: string; accent: string }[] = [
-  { id: 'LEAD', label: 'Leads', accent: 'border-[#262626]' },
-  { id: 'CONTACTED', label: 'Contacted', accent: 'border-blue-500/40' },
-  { id: 'MEETING', label: 'Meeting', accent: 'border-teal-500/40' },
-  { id: 'PROPOSAL', label: 'Proposal', accent: 'border-amber-500/40' },
-  { id: 'ACTIVE', label: 'Active Client', accent: 'border-emerald-500/40' },
-  { id: 'COMPLETED', label: 'Completed', accent: 'border-purple-500/40' },
-];
+import { useAlert } from '@/context/AlertContext';
 
 export default function ClientsPage() {
   const router = useRouter();
+  const { showAlert, showConfirm } = useAlert();
   const [clients, setClients] = useState<Client[]>([]);
   const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'ACCOUNTS' | 'PIPELINE'>('ACCOUNTS');
 
   // Client Selection for Detail Modal
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -177,7 +168,7 @@ export default function ClientsPage() {
       }
       await loadData();
     } catch (err: any) {
-      alert(err.message || 'Error saving client');
+      showAlert(err.message || 'Error saving client', { type: 'error' });
     }
   };
 
@@ -191,7 +182,7 @@ export default function ClientsPage() {
       }
       setClientToDelete(null);
     } catch (err: any) {
-      alert(err.message || 'Error deleting client');
+      showAlert(err.message || 'Error deleting client', { type: 'error' });
     }
   };
 
@@ -224,7 +215,7 @@ export default function ClientsPage() {
       setNewMeetingLocation('');
       setNewMeetingNotes('');
     } catch (err: any) {
-      alert(err.message || 'Failed to add meeting');
+      showAlert(err.message || 'Failed to add meeting', { type: 'error' });
     }
   };
 
@@ -264,7 +255,7 @@ export default function ClientsPage() {
       setNewPaymentInvoice('');
       setNewPaymentDueDate('');
     } catch (err: any) {
-      alert(err.message || 'Failed to record payment');
+      showAlert(err.message || 'Failed to record payment', { type: 'error' });
     }
   };
 
@@ -296,14 +287,180 @@ export default function ClientsPage() {
       setNewLinkTitle('');
       setNewLinkUrl('');
     } catch (err: any) {
-      alert(err.message || 'Failed to add link');
+      showAlert(err.message || 'Failed to add link', { type: 'error' });
     }
   };
 
-  const handleDeleteLink = async (linkIndex: number) => {
+  const handleDeleteMeeting = (meetingIndex: number) => {
     if (!selectedClient) return;
-    const updatedLinks = (selectedClient.links || []).filter((_, idx) => idx !== linkIndex);
+    showConfirm(
+      'Are you sure you want to delete this scheduled meeting?',
+      async () => {
+        const updatedMeetings = (selectedClient.meetings || []).filter((_, idx) => idx !== meetingIndex);
+        try {
+          const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ meetings: updatedMeetings }),
+          });
+          setSelectedClient(updated);
+          setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+          showAlert('Meeting removed', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to remove meeting', { type: 'error' });
+        }
+      },
+      { title: 'Delete Meeting', confirmText: 'Delete', isDestructive: true }
+    );
+  };
 
+  const handleDeletePayment = (paymentIndex: number) => {
+    if (!selectedClient) return;
+    showConfirm(
+      'Are you sure you want to delete this payment milestone?',
+      async () => {
+        const updatedPayments = (selectedClient.payments || []).filter((_, idx) => idx !== paymentIndex);
+        try {
+          const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ payments: updatedPayments }),
+          });
+          setSelectedClient(updated);
+          setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+          showAlert('Payment milestone removed', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to remove payment', { type: 'error' });
+        }
+      },
+      { title: 'Delete Payment Milestone', confirmText: 'Delete', isDestructive: true }
+    );
+  };
+
+  const handleDeleteLink = (linkIndex: number) => {
+    if (!selectedClient) return;
+    showConfirm(
+      'Are you sure you want to delete this link?',
+      async () => {
+        const updatedLinks = (selectedClient.links || []).filter((_, idx) => idx !== linkIndex);
+        try {
+          const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ links: updatedLinks }),
+          });
+          setSelectedClient(updated);
+          setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+          showAlert('Link removed', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to delete link', { type: 'error' });
+        }
+      },
+      { title: 'Delete Link', confirmText: 'Delete', isDestructive: true }
+    );
+  };
+
+  // EDIT SUB-RESOURCES STATE & HANDLERS
+  const [editingMeetingIndex, setEditingMeetingIndex] = useState<number | null>(null);
+  const [editMeetingTitle, setEditMeetingTitle] = useState('');
+  const [editMeetingDate, setEditMeetingDate] = useState('');
+  const [editMeetingTime, setEditMeetingTime] = useState('');
+  const [editMeetingLocation, setEditMeetingLocation] = useState('');
+  const [editMeetingStatus, setEditMeetingStatus] = useState<string>('SCHEDULED');
+  const [editMeetingNotes, setEditMeetingNotes] = useState('');
+
+  const [editingPaymentIndex, setEditingPaymentIndex] = useState<number | null>(null);
+  const [editPaymentTitle, setEditPaymentTitle] = useState('');
+  const [editPaymentAmount, setEditPaymentAmount] = useState('');
+  const [editPaymentDueDate, setEditPaymentDueDate] = useState('');
+  const [editPaymentStatus, setEditPaymentStatus] = useState<'PAID' | 'PENDING' | 'OVERDUE'>('PENDING');
+  const [editPaymentInvoice, setEditPaymentInvoice] = useState('');
+
+  const [editingLinkIndex, setEditingLinkIndex] = useState<number | null>(null);
+  const [editLinkTitle, setEditLinkTitle] = useState('');
+  const [editLinkUrl, setEditLinkUrl] = useState('');
+
+  const openEditMeeting = (idx: number, m: ClientMeeting) => {
+    setEditingMeetingIndex(idx);
+    setEditMeetingTitle(m.title);
+    setEditMeetingDate(m.date ? new Date(m.date).toISOString().split('T')[0] : '');
+    setEditMeetingTime(m.time || '');
+    setEditMeetingLocation(m.linkOrLocation || '');
+    setEditMeetingStatus(m.status || 'SCHEDULED');
+    setEditMeetingNotes(m.notes || '');
+  };
+
+  const handleUpdateMeeting = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedClient || editingMeetingIndex === null) return;
+    const updatedMeetings = [...(selectedClient.meetings || [])];
+    updatedMeetings[editingMeetingIndex] = {
+      title: editMeetingTitle.trim(),
+      date: editMeetingDate,
+      time: editMeetingTime,
+      linkOrLocation: editMeetingLocation.trim(),
+      status: editMeetingStatus as any,
+      notes: editMeetingNotes.trim(),
+    };
+    try {
+      const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ meetings: updatedMeetings }),
+      });
+      setSelectedClient(updated);
+      setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+      setEditingMeetingIndex(null);
+      showAlert('Meeting updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update meeting', { type: 'error' });
+    }
+  };
+
+  const openEditPayment = (idx: number, p: ClientPayment) => {
+    setEditingPaymentIndex(idx);
+    setEditPaymentTitle(p.title);
+    setEditPaymentAmount(p.amount ? String(p.amount) : '');
+    setEditPaymentDueDate(p.dueDate ? new Date(p.dueDate).toISOString().split('T')[0] : '');
+    setEditPaymentStatus(p.status || 'PENDING');
+    setEditPaymentInvoice(p.invoiceNumber || '');
+  };
+
+  const handleUpdatePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedClient || editingPaymentIndex === null) return;
+    const updatedPayments = [...(selectedClient.payments || [])];
+    updatedPayments[editingPaymentIndex] = {
+      title: editPaymentTitle.trim(),
+      amount: parseFloat(editPaymentAmount) || 0,
+      invoiceNumber: editPaymentInvoice.trim() || undefined,
+      status: editPaymentStatus,
+      dueDate: editPaymentDueDate || undefined,
+    };
+    try {
+      const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ payments: updatedPayments }),
+      });
+      setSelectedClient(updated);
+      setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+      setEditingPaymentIndex(null);
+      showAlert('Payment milestone updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update payment', { type: 'error' });
+    }
+  };
+
+  const openEditLink = (idx: number, l: ResourceLink) => {
+    setEditingLinkIndex(idx);
+    setEditLinkTitle(l.title);
+    setEditLinkUrl(l.url);
+  };
+
+  const handleUpdateLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedClient || editingLinkIndex === null) return;
+    const updatedLinks = [...(selectedClient.links || [])];
+    updatedLinks[editingLinkIndex] = {
+      title: editLinkTitle.trim(),
+      url: editLinkUrl.trim(),
+    };
     try {
       const updated = await apiFetch<Client>(`/clients/${selectedClient._id}`, {
         method: 'PUT',
@@ -311,8 +468,10 @@ export default function ClientsPage() {
       });
       setSelectedClient(updated);
       setClients((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+      setEditingLinkIndex(null);
+      showAlert('Link updated', { type: 'success' });
     } catch (err: any) {
-      alert(err.message || 'Failed to delete link');
+      showAlert(err.message || 'Failed to update link', { type: 'error' });
     }
   };
 
@@ -332,196 +491,142 @@ export default function ClientsPage() {
       />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
-        {/* Navigation Switcher */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setActiveTab('ACCOUNTS')}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
-                activeTab === 'ACCOUNTS'
-                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#262626]'
-              }`}
-            >
-              <Briefcase className="w-3.5 h-3.5" />
-              <span>Active Deal Clients ({activeClients.length})</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('PIPELINE')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
-                activeTab === 'PIPELINE'
-                  ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                  : 'bg-[#141414] text-neutral-400 hover:text-white border border-[#262626]'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>CRM Sales Pipeline ({clients.length})</span>
-            </button>
+        {/* Navigation & Status Filter Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#222e42] pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+              <Briefcase className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="font-heading font-bold text-sm text-slate-900 dark:text-white">Client Accounts ({clients.length})</h2>
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400">Contracted partners, deal values, and scheduled meetings</p>
+            </div>
           </div>
 
-          <div className="text-xs text-neutral-400">
-            Total Contracted: <span className="font-bold text-white">${clients.reduce((s, c) => s + (c.dealValue || 0), 0).toLocaleString()}</span>
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-slate-500 dark:text-neutral-400">
+              Total Contracted: <span className="font-bold text-slate-900 dark:text-white font-mono">${clients.reduce((s, c) => s + (c.dealValue || 0), 0).toLocaleString()}</span>
+            </div>
           </div>
         </div>
 
-        {/* TAB 1: ACTIVE DEAL CLIENTS (Card Grid) */}
-        {activeTab === 'ACCOUNTS' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {activeClients.map((client) => {
-              const totalVal = client.dealValue || 0;
-              const paidVal = client.paidAmount || 0;
-              const pendingVal = Math.max(0, totalVal - paidVal);
-              const paidPercent = totalVal > 0 ? Math.min(100, Math.round((paidVal / totalVal) * 100)) : 0;
-              const linkedProjects = client.projects || [];
-              const meetingsCount = client.meetings?.length || 0;
+        {/* Client Accounts Card Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {clients.map((client) => {
+            const totalVal = client.dealValue || 0;
+            const paidVal = client.paidAmount || 0;
+            const pendingVal = Math.max(0, totalVal - paidVal);
+            const paidPercent = totalVal > 0 ? Math.min(100, Math.round((paidVal / totalVal) * 100)) : 0;
+            const linkedProjects = client.projects || [];
+            const meetingsCount = client.meetings?.length || 0;
 
-              return (
-                <div
-                  key={client._id}
-                  onClick={() => router.push(`/clients/${client._id}`)}
-                  className="bg-[#121212] border border-[#222222] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-xl hover:shadow-teal-950/20 group flex flex-col justify-between"
-                >
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-heading font-bold text-base text-white group-hover:text-teal-300 transition flex items-center gap-1.5">
-                          {client.name}
-                          <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-400" />
-                        </h3>
-                        <p className="text-xs text-neutral-400 mt-0.5">{client.contactPerson || 'Direct Client'}</p>
-                      </div>
-
-                      <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border ${
-                        client.status === 'ACTIVE'
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                          : 'bg-teal-500/10 text-teal-400 border-teal-500/30'
-                      }`}>
-                        {client.status}
-                      </span>
+            return (
+              <div
+                key={client._id}
+                onClick={() => router.push(`/clients/${client._id}`)}
+                className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/50 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-lg shadow-xs group flex flex-col justify-between"
+              >
+                <div>
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-heading font-semibold text-base text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition flex items-center gap-1.5">
+                        {client.name}
+                        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-500" />
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">{client.contactPerson || 'Direct Client'}</p>
                     </div>
 
-                    {/* Contact Pills */}
-                    <div className="flex flex-wrap gap-2 text-[11px] text-neutral-400 mb-4">
-                      {client.email && (
-                        <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#181818] border border-[#262626]">
-                          <Mail className="w-3 h-3 text-neutral-500" /> {client.email}
-                        </span>
-                      )}
-                      {client.phone && (
-                        <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#181818] border border-[#262626]">
-                          <Phone className="w-3 h-3 text-neutral-500" /> {client.phone}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Linked Projects Section */}
-                    <div className="mb-4 p-3 rounded-xl bg-[#171717] border border-[#242424]">
-                      <div className="text-[11px] font-semibold text-neutral-300 flex items-center justify-between mb-2">
-                        <span className="flex items-center gap-1.5">
-                          <FolderKanban className="w-3.5 h-3.5 text-teal-400" /> Linked Projects
-                        </span>
-                        <span className="text-[10px] text-teal-400 font-bold">{linkedProjects.length}</span>
-                      </div>
-
-                      {linkedProjects.length > 0 ? (
-                        <div className="space-y-1.5">
-                          {linkedProjects.slice(0, 3).map((p) => (
-                            <div key={p._id} className="flex items-center justify-between text-[11px]">
-                              <span className="text-neutral-200 font-medium truncate pr-2">{p.name}</span>
-                              <span className="text-[10px] text-teal-400 font-mono">{p.progress || 0}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-[11px] text-neutral-500 italic">No linked projects yet</p>
-                      )}
-                    </div>
-
-                    {/* Financial Summary */}
-                    <div className="space-y-1.5 mb-4">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-neutral-400">Payment Status ({paidPercent}%)</span>
-                        <span className="font-semibold text-white">
-                          ${paidVal.toLocaleString()} / <span className="text-neutral-400">${totalVal.toLocaleString()}</span>
-                        </span>
-                      </div>
-                      <div className="w-full bg-[#242424] h-2 rounded-full overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
-                          style={{ width: `${paidPercent}%` }}
-                        />
-                      </div>
-                    </div>
+                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border ${
+                      client.status === 'ACTIVE'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30'
+                        : 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30'
+                    }`}>
+                      {client.status}
+                    </span>
                   </div>
 
-                  {/* Card Footer */}
-                  <div className="pt-3 border-t border-[#1f1f1f] flex items-center justify-between text-[11px] text-neutral-400">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-teal-400" />
-                      {meetingsCount} Scheduled Meetings
-                    </span>
-                    <span className="text-teal-400 font-medium group-hover:underline">
+                  {/* Contact Pills */}
+                  <div className="flex flex-wrap gap-2 text-[11px] text-slate-600 dark:text-neutral-400 mb-4">
+                    {client.email && (
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#182130] border border-slate-200 dark:border-[#243347] text-slate-700 dark:text-neutral-300">
+                        <Mail className="w-3 h-3 text-slate-400 dark:text-neutral-500" /> {client.email}
+                      </span>
+                    )}
+                    {client.phone && (
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#182130] border border-slate-200 dark:border-[#243347] text-slate-700 dark:text-neutral-300">
+                        <Phone className="w-3 h-3 text-slate-400 dark:text-neutral-500" /> {client.phone}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Linked Projects Section */}
+                  <div className="mb-4 p-3 rounded-xl bg-slate-50 dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                    <div className="text-[11px] font-semibold text-slate-700 dark:text-neutral-300 flex items-center justify-between mb-2">
+                      <span className="flex items-center gap-1.5">
+                        <FolderKanban className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> Linked Projects
+                      </span>
+                      <span className="text-[10px] text-teal-600 dark:text-teal-400 font-bold">{linkedProjects.length}</span>
+                    </div>
+
+                    {linkedProjects.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {linkedProjects.slice(0, 3).map((p) => (
+                          <div key={p._id} className="flex items-center justify-between text-[11px]">
+                            <span className="text-slate-800 dark:text-neutral-200 font-medium truncate pr-2">{p.name}</span>
+                            <span className="text-[10px] text-teal-600 dark:text-teal-400 font-mono">{p.progress || 0}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 dark:text-neutral-500 italic">No linked projects yet</p>
+                    )}
+                  </div>
+
+                  {/* Financial Summary */}
+                  <div className="space-y-1.5 mb-4">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500 dark:text-neutral-400">Payment Status ({paidPercent}%)</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">
+                        ${paidVal.toLocaleString()} / <span className="text-slate-500 dark:text-neutral-400">${totalVal.toLocaleString()}</span>
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-100 dark:bg-[#1e2a3c] h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
+                        style={{ width: `${paidPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Footer */}
+                <div className="pt-3 border-t border-slate-100 dark:border-[#1e2a3c] flex items-center justify-between text-[11px] text-slate-500 dark:text-neutral-400">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-teal-600 dark:text-teal-400" />
+                    {meetingsCount} Scheduled Meetings
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setClientToDelete(client);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 dark:text-neutral-500 hover:text-rose-500 transition rounded cursor-pointer"
+                      title="Delete client"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-teal-600 dark:text-teal-400 font-medium group-hover:underline flex items-center gap-1">
                       View Profile & Details →
                     </span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* TAB 2: CRM SALES PIPELINE (Kanban View) */}
-        {activeTab === 'PIPELINE' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3.5 overflow-x-auto pb-4">
-            {PIPELINE_STAGES.map((stage) => {
-              const stageClients = clients.filter((c) => c.status === stage.id);
-              const stageTotal = stageClients.reduce((sum, c) => sum + (c.dealValue || 0), 0);
-
-              return (
-                <div
-                  key={stage.id}
-                  className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-2xl p-3 flex flex-col min-h-[500px]"
-                >
-                  <div className="flex items-center justify-between pb-3 border-b border-[#1f1f1f] mb-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-white">{stage.label}</span>
-                      <span className="w-5 h-5 rounded-full bg-[#1c1c1c] text-[10px] text-neutral-400 font-bold flex items-center justify-center">
-                        {stageClients.length}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-teal-400 font-semibold font-mono">
-                      ${stageTotal.toLocaleString()}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2.5 flex-1">
-                    {stageClients.map((client) => (
-                      <div
-                        key={client._id}
-                        onClick={() => router.push(`/clients/${client._id}`)}
-                        className="p-3 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-[#242424] hover:border-teal-500/40 cursor-pointer transition shadow-sm space-y-2"
-                      >
-                        <div className="font-heading text-xs font-bold text-white truncate">
-                          {client.name}
-                        </div>
-                        <div className="text-[11px] text-neutral-400 truncate">
-                          {client.contactPerson || client.serviceInterested}
-                        </div>
-                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-[#1e1e1e]">
-                          <span className="text-emerald-400 font-bold font-mono">
-                            ${(client.dealValue || 0).toLocaleString()}
-                          </span>
-                          <span className="text-neutral-500">{(client.projects || []).length} projects</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* CLIENT DETAIL MODAL / DRAWER */}
@@ -533,16 +638,16 @@ export default function ClientsPage() {
         {selectedClient && (
           <div className="space-y-5">
             {/* Top Overview & Action Buttons */}
-            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-heading text-base font-bold text-white">{selectedClient.name}</h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                  <h3 className="font-heading text-base font-bold text-slate-900 dark:text-white">{selectedClient.name}</h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
                     {selectedClient.status}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-1.5">
-                  <span>Contact: <strong className="text-neutral-200">{selectedClient.contactPerson || 'N/A'}</strong></span>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-neutral-400 mt-1.5">
+                  <span>Contact: <strong className="text-slate-800 dark:text-neutral-200">{selectedClient.contactPerson || 'N/A'}</strong></span>
                   {selectedClient.email && <span>• {selectedClient.email}</span>}
                   {selectedClient.phone && <span>• {selectedClient.phone}</span>}
                 </div>
@@ -552,7 +657,7 @@ export default function ClientsPage() {
                 <button
                   type="button"
                   onClick={() => openEditModal(selectedClient)}
-                  className="px-3 py-1.5 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#222222] text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#243347] bg-white hover:bg-slate-100 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   <span>Edit Client</span>
@@ -560,7 +665,7 @@ export default function ClientsPage() {
                 <button
                   type="button"
                   onClick={() => setClientToDelete(selectedClient)}
-                  className="px-3 py-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete</span>
@@ -569,29 +674,29 @@ export default function ClientsPage() {
             </div>
 
             {/* Financial Overview Cards */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
-                <span className="text-[10px] text-neutral-400 uppercase font-semibold block">Total Deal Value</span>
-                <span className="text-base font-bold text-white font-mono mt-0.5 block">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+              <div className="p-3 rounded-xl bg-white dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                <span className="text-[10px] text-slate-500 dark:text-neutral-400 uppercase font-semibold block">Total Deal Value</span>
+                <span className="text-base font-bold text-slate-900 dark:text-white font-mono mt-0.5 block">
                   ${(selectedClient.dealValue || 0).toLocaleString()}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
-                <span className="text-[10px] text-emerald-400 uppercase font-semibold block">Paid Amount</span>
-                <span className="text-base font-bold text-emerald-400 font-mono mt-0.5 block">
+              <div className="p-3 rounded-xl bg-white dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-semibold block">Paid Amount</span>
+                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block">
                   ${(selectedClient.paidAmount || 0).toLocaleString()}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
-                <span className="text-[10px] text-amber-400 uppercase font-semibold block">Balance Outstanding</span>
-                <span className="text-base font-bold text-amber-400 font-mono mt-0.5 block">
+              <div className="p-3 rounded-xl bg-white dark:bg-[#121824] border border-slate-200 dark:border-[#1e2a3c]">
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-semibold block">Balance Outstanding</span>
+                <span className="text-base font-bold text-amber-600 dark:text-amber-400 font-mono mt-0.5 block">
                   ${Math.max(0, (selectedClient.dealValue || 0) - (selectedClient.paidAmount || 0)).toLocaleString()}
                 </span>
               </div>
             </div>
 
             {/* Detail Tabs */}
-            <div className="flex items-center gap-1 border-b border-[#222222] pb-2">
+            <div className="flex items-center gap-1 border-b border-[#222222] pb-2 overflow-x-auto no-scrollbar">
               {[
                 { id: 'PROJECTS', label: `Projects (${(selectedClient.projects || []).length})`, icon: FolderKanban },
                 { id: 'MEETINGS', label: `Meetings (${(selectedClient.meetings || []).length})`, icon: Calendar },
@@ -603,7 +708,7 @@ export default function ClientsPage() {
                   <button
                     key={t.id}
                     onClick={() => setDetailTab(t.id as any)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition shrink-0 whitespace-nowrap ${
                       detailTab === t.id
                         ? 'bg-teal-600 text-white'
                         : 'text-neutral-400 hover:text-white hover:bg-[#1a1a1a]'
@@ -753,7 +858,7 @@ export default function ClientsPage() {
                     {selectedClient.meetings!.map((m, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between"
+                        className="group/m p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between"
                       >
                         <div>
                           <div className="flex items-center gap-2">
@@ -769,6 +874,25 @@ export default function ClientsPage() {
                             </span>
                             {m.linkOrLocation && <span>• {m.linkOrLocation}</span>}
                           </div>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => openEditMeeting(idx, m)}
+                            className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                            title="Edit meeting"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMeeting(idx)}
+                            className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                            title="Delete meeting"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -862,7 +986,7 @@ export default function ClientsPage() {
                     {selectedClient.payments!.map((p, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between"
+                        className="group/p p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between"
                       >
                         <div>
                           <div className="flex items-center gap-2">
@@ -889,6 +1013,22 @@ export default function ClientsPage() {
                           }`}>
                             {p.status}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => openEditPayment(idx, p)}
+                            className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                            title="Edit payment milestone"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePayment(idx)}
+                            className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                            title="Delete payment milestone"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -1001,8 +1141,17 @@ export default function ClientsPage() {
                           </a>
                           <button
                             type="button"
+                            onClick={() => openEditLink(idx, l)}
+                            className="p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                            title="Edit link"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => handleDeleteLink(idx)}
-                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                            title="Delete link"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1185,10 +1334,14 @@ export default function ClientsPage() {
             </label>
             <textarea
               value={formNotes}
-              onChange={(e) => setFormNotes(e.target.value)}
+              onChange={(e) => {
+                setFormNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
               placeholder="Notes on client requirements, deliverables, or agreements..."
               rows={2}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none transition resize-none leading-relaxed overflow-hidden"
             />
           </div>
 
@@ -1243,6 +1396,228 @@ export default function ClientsPage() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* EDIT MEETING MODAL */}
+      <Modal
+        isOpen={editingMeetingIndex !== null}
+        onClose={() => setEditingMeetingIndex(null)}
+        title="Edit Scheduled Meeting"
+      >
+        <form onSubmit={handleUpdateMeeting} className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Meeting Title *</label>
+            <input
+              type="text"
+              value={editMeetingTitle}
+              onChange={(e) => setEditMeetingTitle(e.target.value)}
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Date *</label>
+              <input
+                type="date"
+                value={editMeetingDate}
+                onChange={(e) => setEditMeetingDate(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Time</label>
+              <input
+                type="time"
+                value={editMeetingTime}
+                onChange={(e) => setEditMeetingTime(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
+              <select
+                value={editMeetingStatus}
+                onChange={(e) => setEditMeetingStatus(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                <option value="SCHEDULED">Scheduled</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="RESCHEDULED">Rescheduled</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Location or Link</label>
+              <input
+                type="text"
+                placeholder="Google Meet or Office"
+                value={editMeetingLocation}
+                onChange={(e) => setEditMeetingLocation(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Notes / Agenda</label>
+            <textarea
+              rows={2}
+              value={editMeetingNotes}
+              onChange={(e) => setEditMeetingNotes(e.target.value)}
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setEditingMeetingIndex(null)}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* EDIT PAYMENT MODAL */}
+      <Modal
+        isOpen={editingPaymentIndex !== null}
+        onClose={() => setEditingPaymentIndex(null)}
+        title="Edit Payment Milestone"
+      >
+        <form onSubmit={handleUpdatePayment} className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Milestone Title *</label>
+            <input
+              type="text"
+              value={editPaymentTitle}
+              onChange={(e) => setEditPaymentTitle(e.target.value)}
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Amount ($) *</label>
+              <input
+                type="number"
+                value={editPaymentAmount}
+                onChange={(e) => setEditPaymentAmount(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Invoice Number</label>
+              <input
+                type="text"
+                placeholder="e.g. INV-2026-001"
+                value={editPaymentInvoice}
+                onChange={(e) => setEditPaymentInvoice(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Payment Status</label>
+              <select
+                value={editPaymentStatus}
+                onChange={(e) => setEditPaymentStatus(e.target.value as any)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              >
+                <option value="PENDING">Pending</option>
+                <option value="PAID">Paid / Received</option>
+                <option value="OVERDUE">Overdue</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
+              <input
+                type="date"
+                value={editPaymentDueDate}
+                onChange={(e) => setEditPaymentDueDate(e.target.value)}
+                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setEditingPaymentIndex(null)}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* EDIT LINK MODAL */}
+      <Modal
+        isOpen={editingLinkIndex !== null}
+        onClose={() => setEditingLinkIndex(null)}
+        title="Edit Attached Link"
+      >
+        <form onSubmit={handleUpdateLink} className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">Title *</label>
+            <input
+              type="text"
+              value={editLinkTitle}
+              onChange={(e) => setEditLinkTitle(e.target.value)}
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">URL *</label>
+            <input
+              type="url"
+              value={editLinkUrl}
+              onChange={(e) => setEditLinkUrl(e.target.value)}
+              required
+              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setEditingLinkIndex(null)}
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-md shadow-teal-900/30"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
       </Modal>
     </div>
   );

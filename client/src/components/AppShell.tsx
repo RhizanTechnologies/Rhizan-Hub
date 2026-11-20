@@ -42,9 +42,9 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   // Loading state with Rhizan branding
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full bg-[#0a0a0a] flex flex-col items-center justify-center">
+      <div className="min-h-screen w-full bg-[var(--background)] text-[var(--foreground)] flex flex-col items-center justify-center">
         <div className="relative flex flex-col items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-white p-2.5 flex items-center justify-center shadow-2xl shadow-teal-500/20 animate-pulse">
+          <div className="w-14 h-14 rounded-2xl bg-white p-2.5 flex items-center justify-center shadow-xl shadow-teal-500/10 border border-[#e2e8f0] animate-pulse">
             <Image
               src="/logo_minimal.png"
               alt="RHIZAN Logo"
@@ -54,7 +54,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
+            <span className="w-2 h-2 rounded-full bg-teal-500 animate-ping"></span>
             <span className="text-xs font-heading font-medium tracking-wider text-neutral-400 uppercase">
               Loading RHIZAN Hub...
             </span>
@@ -64,21 +64,57 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
     );
   }
 
-  // Auth pages (login, change password) - full screen, no workspace sidebar
-  if (isAuthRoute || !token || !user || user.mustChangePassword) {
+  // Unauthenticated user
+  if (!token || !user) {
+    if (pathname === '/login') {
+      return (
+        <main className="min-h-screen w-full bg-[var(--background)] text-[var(--foreground)] flex flex-col">
+          {children}
+        </main>
+      );
+    }
+
+    // Redirecting to login, do not mount protected children
     return (
-      <main className="min-h-screen w-full bg-[#0a0a0a] text-neutral-100 flex flex-col">
-        {children}
-      </main>
+      <div className="min-h-screen w-full bg-[var(--background)] text-[var(--foreground)] flex flex-col items-center justify-center">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-teal-500 animate-ping"></span>
+          <span className="text-xs font-heading font-medium tracking-wider text-neutral-400 uppercase">
+            Redirecting to login...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged in user must change password
+  if (user.mustChangePassword) {
+    if (pathname === '/change-password') {
+      return (
+        <main className="min-h-screen w-full bg-[var(--background)] text-[var(--foreground)] flex flex-col">
+          {children}
+        </main>
+      );
+    }
+
+    return (
+      <div className="min-h-screen w-full bg-[var(--background)] text-[var(--foreground)] flex flex-col items-center justify-center">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-teal-500 animate-ping"></span>
+          <span className="text-xs font-heading font-medium tracking-wider text-neutral-400 uppercase">
+            Redirecting to password setup...
+          </span>
+        </div>
+      </div>
     );
   }
 
   // Authenticated workspace
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full max-w-full bg-[#0a0a0a] overflow-x-hidden">
+      <div className="flex min-h-screen w-full max-w-full bg-[var(--background)] text-[var(--foreground)] overflow-x-hidden">
         <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0 w-full max-w-full min-h-screen bg-[#0a0a0a] overflow-x-hidden">
+        <div className="flex-1 flex flex-col min-w-0 w-full max-w-full min-h-screen bg-[var(--background)] text-[var(--foreground)] overflow-x-hidden">
           {children}
         </div>
       </div>

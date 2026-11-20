@@ -54,7 +54,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           <Icon className="w-4 h-4" />
         </div>
       </div>
-      <div className={`font-heading text-2xl font-bold tracking-tight ${variantStyles.valueColor}`}>
+      <div className={`font-heading text-2xl font-semibold tracking-tight ${variantStyles.valueColor}`}>
         {value}
       </div>
       {subtitle && <p className="text-[11px] text-neutral-500 mt-1">{subtitle}</p>}

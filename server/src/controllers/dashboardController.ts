@@ -73,6 +73,54 @@ export const getDashboardSummary = async (
     );
     const hoursThisWeek = Math.round((totalWeeklyMinutes / 60) * 10) / 10;
 
+    // 4b. Today's Time Tracking
+    const todayEntries = await TimeEntry.find({
+      date: { $gte: todayStart, $lte: todayEnd },
+    })
+      .populate('project', 'name clientName')
+      .populate('task', 'title')
+      .populate('user', 'name avatar email');
+
+    let myTodayEntries: any[] = [];
+    if (req.user?.id) {
+      myTodayEntries = todayEntries.filter(
+        (e) =>
+          e.user &&
+          (e.user._id?.toString() === req.user?.id ||
+            (e.user as any).id === req.user?.id ||
+            (typeof e.user === 'string' && e.user === req.user?.id))
+      );
+    }
+    const myTodayTotalMinutes = myTodayEntries.reduce(
+      (sum, e) => sum + (e.hours * 60 + e.minutes),
+      0
+    );
+    const myTodayHours = Math.round((myTodayTotalMinutes / 60) * 10) / 10;
+
+    const teamTodayTotalMinutes = todayEntries.reduce(
+      (sum, e) => sum + (e.hours * 60 + e.minutes),
+      0
+    );
+    const teamTodayHours = Math.round((teamTodayTotalMinutes / 60) * 10) / 10;
+
+    // Team weekly members breakdown (48h capacity)
+    const allUsers = await User.find({ status: { $ne: 'INACTIVE' } }).select('name role title avatar');
+    const teamWeeklyBreakdown = allUsers.map((member) => {
+      const memberWeekly = weeklyEntries.filter(
+        (e) => e.user && e.user.toString() === member._id.toString()
+      );
+      const mMinutes = memberWeekly.reduce((sum, e) => sum + (e.hours * 60 + e.minutes), 0);
+      const mHours = Math.round((mMinutes / 60) * 10) / 10;
+      return {
+        id: member._id,
+        name: member.name,
+        role: member.title || member.role || 'Member',
+        hours: mHours,
+        capacity: 48,
+        percentage: Math.min(100, Math.round((mHours / 48) * 100)),
+      };
+    });
+
     // 5. Logged-in user's tasks ("My Tasks")
     let myTasks: any[] = [];
     if (req.user?.id) {
@@ -109,7 +157,19 @@ export const getDashboardSummary = async (
         activeClientsCount,
         teamMembersCount,
         hoursThisWeek,
+        myHoursToday: myTodayHours,
+        teamHoursToday: teamTodayHours,
+        dailyTargetHours: 8,
       },
+      todayTimeTracking: {
+        myHoursToday: myTodayHours,
+        myMinutesToday: myTodayTotalMinutes,
+        myEntriesToday: myTodayEntries,
+        teamHoursToday: teamTodayHours,
+        dailyTargetHours: 8,
+        percentage: Math.min(100, Math.round((myTodayHours / 8) * 100)),
+      },
+      teamWeeklyBreakdown,
       activeProjects,
       myTasks,
       recentActivities,

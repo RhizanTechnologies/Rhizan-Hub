@@ -9,10 +9,12 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<User>;
   logout: () => void;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   updateUser: (updatedUser: Partial<User>) => void;
+  updateProfile: (data: Partial<User>) => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,30 +27,92 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
 
   useEffect(() => {
-    const initializeAuth = () => {
+    let isMounted = true;
+
+    const initializeAuth = async () => {
       const savedToken = localStorage.getItem('rhizan_token');
       const savedUser = localStorage.getItem('rhizan_user');
 
       if (savedToken && savedUser) {
         try {
           const parsedUser = JSON.parse(savedUser) as User;
-          setToken(savedToken);
-          setUser(parsedUser);
+          if (isMounted) {
+            setToken(savedToken);
+            setUser(parsedUser);
+          }
+
+          // Verify with server whether user account still exists in database
+          try {
+            const verified = await apiFetch<User>('/auth/me');
+            if (isMounted) {
+              setUser(verified);
+              localStorage.setItem('rhizan_user', JSON.stringify(verified));
+            }
+          } catch {
+            // Account deleted or token invalid -> clear and kick to login
+            if (isMounted) {
+              localStorage.removeItem('rhizan_token');
+              localStorage.removeItem('rhizan_user');
+              setToken(null);
+              setUser(null);
+              if (pathname !== '/login') {
+                router.replace('/login');
+              }
+            }
+          }
         } catch {
           localStorage.removeItem('rhizan_token');
           localStorage.removeItem('rhizan_user');
+          if (isMounted) {
+            setToken(null);
+            setUser(null);
+          }
+        }
+      } else {
+        if (isMounted) {
           setToken(null);
           setUser(null);
         }
-      } else {
-        setToken(null);
-        setUser(null);
       }
-      setIsLoading(false);
+      if (isMounted) {
+        setIsLoading(false);
+      }
     };
 
     initializeAuth();
-  }, []);
+
+    // Listen for 401/403 invalidation dispatched by apiFetch
+    const handleAuthInvalidated = () => {
+      if (isMounted) {
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem('rhizan_token');
+        localStorage.removeItem('rhizan_user');
+      }
+    };
+
+    // Periodic heartbeat check: if user was deleted while idle, terminate session
+    const checkActiveSession = async () => {
+      const currentToken = localStorage.getItem('rhizan_token');
+      if (!currentToken) return;
+      try {
+        await apiFetch('/auth/me');
+      } catch {
+        // apiFetch automatically purges credentials and triggers login redirect
+      }
+    };
+
+    const heartbeatInterval = setInterval(checkActiveSession, 15000);
+    window.addEventListener('focus', checkActiveSession);
+    window.addEventListener('rhizan_auth_invalidated', handleAuthInvalidated);
+
+    return () => {
+      isMounted = false;
+      clearInterval(heartbeatInterval);
+      window.removeEventListener('focus', checkActiveSession);
+      window.removeEventListener('rhizan_auth_invalidated', handleAuthInvalidated);
+    };
+  }, [pathname, router]);
 
   const login = async (email: string, password: string): Promise<User> => {
     try {
@@ -87,11 +151,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const isAdmin = ['CEO', 'CTO', 'COO', 'ADMIN'].includes(user?.role || '');
+
   const updateUser = (updatedFields: Partial<User>) => {
     if (!user) return;
     const updated = { ...user, ...updatedFields };
     setUser(updated);
     localStorage.setItem('rhizan_user', JSON.stringify(updated));
+  };
+
+  const updateProfile = async (data: Partial<User>): Promise<User> => {
+    const res = await apiFetch<{ message: string; token: string; user: User }>('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+
+    if (res.token) {
+      setToken(res.token);
+      localStorage.setItem('rhizan_token', res.token);
+    }
+    if (res.user) {
+      setUser(res.user);
+      localStorage.setItem('rhizan_user', JSON.stringify(res.user));
+    }
+    return res.user;
   };
 
   const logout = () => {
@@ -108,10 +191,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         token,
         isLoading,
+        isAdmin,
         login,
         logout,
         changePassword,
         updateUser,
+        updateProfile,
       }}
     >
       {children}

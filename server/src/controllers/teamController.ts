@@ -1,9 +1,12 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import { User } from '../models/User';
 import { Task } from '../models/Task';
 import { Project } from '../models/Project';
 import { TimeEntry } from '../models/TimeEntry';
-import { AuthRequest } from '../middlewares/auth';
+import { Approach } from '../models/Approach';
+import { Client } from '../models/Client';
+import { AuthRequest, isExecutiveOrAdmin } from '../middlewares/auth';
 
 export const getTeam = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -12,8 +15,7 @@ export const getTeam = async (req: AuthRequest, res: Response): Promise<void> =>
     const now = new Date();
     const day = now.getDay();
     const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
-    const startOfWeek = new Date(now.setDate(diffToMonday));
-    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), diffToMonday, 0, 0, 0, 0);
 
     const teamData = await Promise.all(
       users.map(async (user) => {
@@ -23,11 +25,11 @@ export const getTeam = async (req: AuthRequest, res: Response): Promise<void> =>
           status: { $ne: 'DONE' },
         }).populate('project', 'name');
 
-        // Find primary active project
+        // Find projects where member is assigned or is lead
         const memberProjects = await Project.find({
-          members: user._id,
-          status: 'IN_PROGRESS',
-        }).select('name');
+          $or: [{ members: user._id }, { lead: user._id }],
+          status: { $in: ['IN_PROGRESS', 'PLANNING'] },
+        }).select('_id name status clientName');
 
         // Calculate hours worked this week
         const weeklyEntries = await TimeEntry.find({
@@ -48,16 +50,22 @@ export const getTeam = async (req: AuthRequest, res: Response): Promise<void> =>
           role: user.role,
           title: user.title,
           status: user.status,
-          weeklyCapacityHours: user.weeklyCapacityHours,
+          mustChangePassword: Boolean(user.mustChangePassword),
+          weeklyCapacityHours: user.weeklyCapacityHours === 40 ? 48 : (user.weeklyCapacityHours || 48),
           activeTaskCount: activeTasks.length,
-          tasks: activeTasks.slice(0, 5).map((t) => ({
+          tasks: activeTasks.map((t) => ({
             id: t._id,
             title: t.title,
             status: t.status,
             priority: t.priority,
             projectName: (t.project as any)?.name || 'General',
           })),
-          activeProjects: memberProjects.map((p) => p.name),
+          activeProjects: memberProjects.map((p) => ({
+            id: p._id,
+            name: p.name,
+            status: p.status,
+            clientName: p.clientName,
+          })),
           thisWeekHours,
         };
       })
@@ -66,5 +74,173 @@ export const getTeam = async (req: AuthRequest, res: Response): Promise<void> =>
     res.json(teamData);
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to fetch team data', error: error.message });
+  }
+};
+
+export const getTeamMemberDetails = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id)) {
+      res.status(404).json({ message: 'Team member not found' });
+      return;
+    }
+
+    const user = await User.findById(id).select('-password');
+    if (!user) {
+      res.status(404).json({ message: 'Team member not found' });
+      return;
+    }
+
+    // Current week calculation
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), diffToMonday, 0, 0, 0, 0);
+
+    // 1. Projects
+    const projects = await Project.find({
+      $or: [{ members: user._id }, { lead: user._id }],
+    })
+      .select('name description status priority deadline clientName budget lead techStack')
+      .populate('lead', 'name email');
+
+    // 2. Tasks
+    const tasks = await Task.find({ assignedTo: user._id })
+      .populate('project', 'name clientName')
+      .sort({ updatedAt: -1 });
+
+    // 3. Time Entries (Recent 30 entries & current week)
+    const timeEntries = await TimeEntry.find({ user: user._id })
+      .populate('project', 'name clientName')
+      .populate('task', 'title')
+      .sort({ date: -1, createdAt: -1 })
+      .limit(30);
+
+    const weeklyEntries = await TimeEntry.find({
+      user: user._id,
+      date: { $gte: startOfWeek },
+    });
+
+    const totalMinutesThisWeek = weeklyEntries.reduce(
+      (sum, entry) => sum + (entry.hours * 60 + entry.minutes),
+      0
+    );
+    const thisWeekHours = Math.round((totalMinutesThisWeek / 60) * 10) / 10;
+
+    const allTimeMinutes = await TimeEntry.aggregate([
+      { $match: { user: user._id } },
+      { $group: { _id: null, total: { $sum: { $add: [{ $multiply: ['$hours', 60] }, '$minutes'] } } } },
+    ]);
+    const allTimeHours = allTimeMinutes.length > 0 ? Math.round((allTimeMinutes[0].total / 60) * 10) / 10 : 0;
+
+    // 4. Outreach / Approaches assigned to this member
+    const approaches = await Approach.find({ assignedTo: user._id })
+      .select('businessName contactPerson email phone status niche location lastContactDate nextFollowUpDate')
+      .sort({ updatedAt: -1 });
+
+    const capacity = user.weeklyCapacityHours === 40 ? 48 : (user.weeklyCapacityHours || 48);
+
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        title: user.title,
+        status: user.status,
+        weeklyCapacityHours: capacity,
+        createdAt: user.createdAt,
+      },
+      stats: {
+        thisWeekHours,
+        allTimeHours,
+        capacity,
+        capacityPercent: Math.min(100, Math.round((thisWeekHours / capacity) * 100)),
+        totalTasks: tasks.length,
+        pendingTasks: tasks.filter((t) => t.status !== 'DONE').length,
+        completedTasks: tasks.filter((t) => t.status === 'DONE').length,
+        activeProjectsCount: projects.filter((p) => p.status === 'IN_PROGRESS' || p.status === 'PLANNING').length,
+        assignedApproachesCount: approaches.length,
+      },
+      projects,
+      tasks,
+      timeEntries,
+      approaches,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to fetch team member details', error: error.message });
+  }
+};
+
+export const updateTeamMember = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const callerId = (req.user as any)?._id?.toString() || (req.user as any)?.id?.toString();
+    const isSelf = callerId === id;
+    const isExec = isExecutiveOrAdmin(req.user?.role);
+
+    if (!isSelf && !isExec) {
+      res.status(403).json({ message: 'Executive (CEO/CTO/COO) or Admin privileges required to update other members' });
+      return;
+    }
+
+    const { name, role, title, weeklyCapacityHours, status } = req.body;
+
+    const validRoles = ['CEO', 'CTO', 'COO', 'ADMIN', 'MEMBER'];
+
+    const updated = await User.findByIdAndUpdate(
+      id,
+      {
+        ...(name && { name: name.trim() }),
+        ...(role && validRoles.includes(role) && { role }),
+        ...(title !== undefined && { title: title.trim() }),
+        ...(weeklyCapacityHours !== undefined && { weeklyCapacityHours: Number(weeklyCapacityHours) || 48 }),
+        ...(status && { status }),
+      },
+      { new: true }
+    ).select('-password');
+
+    if (!updated) {
+      res.status(404).json({ message: 'Team member not found' });
+      return;
+    }
+
+    res.json(updated);
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to update team member', error: error.message });
+  }
+};
+
+export const deleteTeamMember = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const callerId = (req.user as any)?._id?.toString() || (req.user as any)?.id?.toString();
+    if (callerId === id) {
+      res.status(400).json({ message: 'You cannot delete your own account.' });
+      return;
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(404).json({ message: 'Team member not found' });
+      return;
+    }
+
+    // Clean up references in other collections
+    await Task.updateMany({ assignedTo: id }, { $unset: { assignedTo: '' } });
+    await Project.updateMany({ members: id }, { $pull: { members: id } });
+    if (callerId) {
+      await Project.updateMany({ lead: id }, { $set: { lead: callerId } });
+    }
+    await Approach.updateMany({ assignedTo: id }, { $unset: { assignedTo: '' } });
+    await Client.updateMany({ assignedTo: id }, { $unset: { assignedTo: '' } });
+
+    await User.findByIdAndDelete(id);
+
+    res.json({ message: `Team member ${user.name} deleted successfully.` });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to delete team member', error: error.message });
   }
 };

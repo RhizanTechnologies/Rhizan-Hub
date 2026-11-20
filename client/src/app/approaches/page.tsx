@@ -36,9 +36,11 @@ import {
   ChevronLeft,
   ChevronRight,
   SlidersHorizontal,
+  AlertTriangle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { useAlert } from '@/context/AlertContext';
 
 const STATUS_CONFIG: Record<ApproachStatus, { label: string; color: string; dot: string }> = {
   PROSPECT: {
@@ -81,6 +83,7 @@ function formatCleanPhone(raw?: string): string {
 export default function ApproachesPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const { showAlert } = useAlert();
   const [approaches, setApproaches] = useState<Approach[]>([]);
   const [niches, setNiches] = useState<Niche[]>([]);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -91,6 +94,7 @@ export default function ApproachesPage() {
   const [selectedNiche, setSelectedNiche] = useState('All Niches');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedOwner, setSelectedOwner] = useState<string>('ALL');
+  const [followUpFilter, setFollowUpFilter] = useState<'ALL' | 'ATTENTION'>('ALL');
   const [nicheDisplayMode, setNicheDisplayMode] = useState<'tabs' | 'dropdown'>('tabs');
   const tabsRef = React.useRef<HTMLDivElement>(null);
 
@@ -247,7 +251,7 @@ export default function ApproachesPage() {
       setInlineNewNiche(false);
       setInlineNicheName('');
     } catch (err: any) {
-      alert(err.message || 'Failed to create niche');
+      showAlert(err.message || 'Failed to create niche', { type: 'error' });
     }
   };
 
@@ -300,7 +304,7 @@ export default function ApproachesPage() {
       }
       setIsModalOpen(false);
     } catch (err: any) {
-      alert(err.message || 'Failed to save approach record');
+      showAlert(err.message || 'Failed to save approach record', { type: 'error' });
     }
   };
 
@@ -314,7 +318,7 @@ export default function ApproachesPage() {
         prev.map((a) => (a._id === appr._id ? { ...a, status: updated.status } : a))
       );
     } catch (err: any) {
-      alert(err.message || 'Failed to update status');
+      showAlert(err.message || 'Failed to update status', { type: 'error' });
     }
   };
 
@@ -325,7 +329,7 @@ export default function ApproachesPage() {
       setApproaches((prev) => prev.filter((a) => a._id !== approachToDelete._id));
       setApproachToDelete(null);
     } catch (err: any) {
-      alert(err.message || 'Failed to delete record');
+      showAlert(err.message || 'Failed to delete record', { type: 'error' });
     }
   };
 
@@ -340,7 +344,7 @@ export default function ApproachesPage() {
       setApproaches((prev) => prev.map((a) => (a._id === approach._id ? res.approach : a)));
       router.push(`/clients/${res.client._id}`);
     } catch (err: any) {
-      alert(err.message || 'Failed to convert to client');
+      showAlert(err.message || 'Failed to convert to client', { type: 'error' });
     } finally {
       setConvertingId(null);
     }
@@ -381,7 +385,7 @@ export default function ApproachesPage() {
       setApproaches((prev) => prev.map((a) => (a._id === updated._id ? updated : a)));
       setQuickLogTarget(null);
     } catch (err: any) {
-      alert(err.message || 'Failed to log contact interaction');
+      showAlert(err.message || 'Failed to log contact interaction', { type: 'error' });
     } finally {
       setSubmittingQuickLog(false);
     }
@@ -432,7 +436,7 @@ export default function ApproachesPage() {
       setNicheNameInput('');
       setNicheDescInput('');
     } catch (err: any) {
-      alert(err.message || 'Failed to save niche');
+      showAlert(err.message || 'Failed to save niche', { type: 'error' });
     } finally {
       setSavingNiche(false);
     }
@@ -460,14 +464,53 @@ export default function ApproachesPage() {
       }
       setNicheToDelete(null);
     } catch (err: any) {
-      alert(err.message || 'Failed to delete niche');
+      showAlert(err.message || 'Failed to delete niche', { type: 'error' });
     }
   };
+
+  // Check follow up status (Overdue vs Today)
+  const getFollowUpStatus = (dateStr?: string) => {
+    if (!dateStr) return null;
+    const target = new Date(dateStr);
+    const today = new Date();
+    target.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return { type: 'OVERDUE', text: `${Math.abs(diffDays)}d overdue`, days: diffDays };
+    if (diffDays === 0) return { type: 'TODAY', text: 'Today', days: 0 };
+    if (diffDays === 1) return { type: 'TOMORROW', text: 'Tomorrow', days: 1 };
+    return { type: 'UPCOMING', text: `In ${diffDays}d`, days: diffDays };
+  };
+
+  const overdueFollowUpsCount = approaches.filter((a) => {
+    if (a.status === 'DEAL_WON' || a.status === 'NOT_INTERESTED' || !a.nextFollowUpDate) return false;
+    const st = getFollowUpStatus(a.nextFollowUpDate);
+    return st?.type === 'OVERDUE';
+  }).length;
+
+  const todayFollowUpsCount = approaches.filter((a) => {
+    if (a.status === 'DEAL_WON' || a.status === 'NOT_INTERESTED' || !a.nextFollowUpDate) return false;
+    const st = getFollowUpStatus(a.nextFollowUpDate);
+    return st?.type === 'TODAY';
+  }).length;
 
   // Filter list
   const filteredApproaches = approaches.filter((a) => {
     const matchesNiche = selectedNiche === 'All Niches' || a.niche === selectedNiche;
     const matchesStatus = selectedStatus === 'ALL' || a.status === selectedStatus;
+
+    // Follow-up attention filter
+    if (followUpFilter === 'ATTENTION') {
+      const st = getFollowUpStatus(a.nextFollowUpDate);
+      if (
+        a.status === 'DEAL_WON' ||
+        a.status === 'NOT_INTERESTED' ||
+        (st?.type !== 'OVERDUE' && st?.type !== 'TODAY')
+      ) {
+        return false;
+      }
+    }
 
     // Filter by Owner
     let matchesOwner = true;
@@ -501,7 +544,12 @@ export default function ApproachesPage() {
   return (
     <div className="flex-1 flex flex-col min-h-screen pb-16">
       <Header
-        title="Business Outreach & Approaches"
+        title={
+          <>
+            <span className="sm:hidden">Business Outreach</span>
+            <span className="hidden sm:inline">Business Outreach & Approaches</span>
+          </>
+        }
         subtitle="Track targeted leads, contact history, and turn outreach prospects into paying clients"
         actionButton={{
           label: 'Add Outreach Target',
@@ -511,74 +559,114 @@ export default function ApproachesPage() {
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
         {/* TOP STAT METRIC CARDS */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
-                Total Outreach Targets
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
+                Total Targets
               </span>
-              <span className="text-2xl font-bold font-heading text-white mt-1 block">
+              <span className="text-xl sm:text-2xl font-bold font-heading text-slate-900 dark:text-white mt-1 block">
                 {metrics.total}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center border border-teal-500/20 shrink-0">
-              <Target className="w-5 h-5" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center border border-teal-500/20 shrink-0">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
 
-          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
+          <div
+            onClick={() => setFollowUpFilter(followUpFilter === 'ATTENTION' ? 'ALL' : 'ATTENTION')}
+            className={`cursor-pointer transition border rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between ${
+              overdueFollowUpsCount > 0
+                ? 'bg-rose-50/70 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 hover:border-rose-400 dark:hover:border-rose-500/50'
+                : todayFollowUpsCount > 0
+                ? 'bg-amber-50/70 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30 hover:border-amber-400 dark:hover:border-amber-500/50'
+                : 'bg-white dark:bg-[#151d2a] border-slate-200 dark:border-[#222e42] hover:border-teal-500/50'
+            }`}
+          >
             <div>
-              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
-                Active Discussions
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
+                Follow-Ups
               </span>
-              <span className="text-2xl font-bold font-heading text-amber-400 mt-1 block">
+              <span
+                className={`text-xl sm:text-2xl font-bold font-heading mt-1 block ${
+                  overdueFollowUpsCount > 0
+                    ? 'text-rose-600 dark:text-rose-400'
+                    : todayFollowUpsCount > 0
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-slate-900 dark:text-white'
+                }`}
+              >
+                {overdueFollowUpsCount + todayFollowUpsCount}
+              </span>
+              <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-neutral-500">
+                {overdueFollowUpsCount} overdue • {todayFollowUpsCount} today
+              </span>
+            </div>
+            <div
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border shrink-0 ${
+                overdueFollowUpsCount > 0
+                  ? 'bg-rose-100 dark:bg-rose-500/20 border-rose-300 dark:border-rose-500/40 text-rose-600 dark:text-rose-400'
+                  : 'bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/40 text-amber-600 dark:text-amber-400'
+              }`}
+            >
+              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
+            <div>
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
+                Discussions
+              </span>
+              <span className="text-xl sm:text-2xl font-bold font-heading text-amber-600 dark:text-amber-400 mt-1 block">
                 {metrics.inProgress}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 shrink-0">
-              <TrendingUp className="w-5 h-5" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20 shrink-0">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
 
-          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
-                Deals Won (Clients)
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
+                Deals Won
               </span>
-              <span className="text-2xl font-bold font-heading text-emerald-400 mt-1 block">
+              <span className="text-xl sm:text-2xl font-bold font-heading text-emerald-600 dark:text-emerald-400 mt-1 block">
                 {metrics.dealsWon}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 shrink-0">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
 
-          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
-                Not Interested
-              </span>
-              <span className="text-2xl font-bold font-heading text-rose-400 mt-1 block">
-                {metrics.notInterested}
-              </span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20 shrink-0">
-              <XCircle className="w-5 h-5" />
-            </div>
-          </div>
-
-          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-4 shadow-sm flex items-center justify-between col-span-2 sm:col-span-1">
-            <div>
-              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
                 Needs Follow-Up
               </span>
-              <span className="text-2xl font-bold font-heading text-orange-400 mt-1 block">
+              <span className="text-xl sm:text-2xl font-bold font-heading text-orange-600 dark:text-orange-400 mt-1 block">
                 {metrics.needsFollowUp}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center border border-orange-500/20 shrink-0">
-              <AlertCircle className="w-5 h-5" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center border border-orange-500/20 shrink-0">
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-3.5 sm:p-4 shadow-xs flex items-center justify-between">
+            <div>
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
+                Not Interested
+              </span>
+              <span className="text-xl sm:text-2xl font-bold font-heading text-rose-600 dark:text-rose-400 mt-1 block">
+                {metrics.notInterested}
+              </span>
+            </div>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20 shrink-0">
+              <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
         </div>
@@ -586,14 +674,14 @@ export default function ApproachesPage() {
         {/* CONTROLS: NICHE FILTER, MANAGE NICHES & SEARCH BAR */}
         <div className="space-y-3">
           {/* Niche Filter Bar (Scrollable Tabs or Dropdown) */}
-          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-sm">
+          <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
             {nicheDisplayMode === 'tabs' ? (
               <div className="flex items-center gap-1.5 min-w-0 flex-1 relative">
                 {/* Scroll Left Button */}
                 <button
                   type="button"
                   onClick={() => scrollTabs('left')}
-                  className="w-7 h-7 rounded-lg bg-[#161616] hover:bg-[#222222] text-neutral-400 hover:text-white flex items-center justify-center shrink-0 border border-[#262626] transition shadow-sm"
+                  className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white flex items-center justify-center shrink-0 border border-slate-200 dark:border-[#243347] transition shadow-xs"
                   title="Scroll left"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -609,7 +697,7 @@ export default function ApproachesPage() {
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 whitespace-nowrap transition ${
                       selectedNiche === 'All Niches'
                         ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                        : 'bg-[#161616] text-neutral-400 hover:text-white border border-[#242424]'
+                        : 'bg-slate-100 dark:bg-[#182130] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#243347]'
                     }`}
                   >
                     All Niches ({approaches.length})
@@ -623,7 +711,7 @@ export default function ApproachesPage() {
                         className={`px-3 py-1.5 rounded-xl text-xs font-medium shrink-0 whitespace-nowrap transition flex items-center gap-1.5 ${
                           selectedNiche === n.name
                             ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                            : 'bg-[#161616] text-neutral-400 hover:text-white border border-[#242424]'
+                            : 'bg-slate-100 dark:bg-[#182130] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#243347]'
                         }`}
                       >
                         <span>{n.name}</span>
@@ -631,8 +719,8 @@ export default function ApproachesPage() {
                           <span
                             className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
                               selectedNiche === n.name
-                                ? 'bg-black/30 text-white'
-                                : 'bg-[#222222] text-neutral-400'
+                                ? 'bg-black/25 text-white'
+                                : 'bg-slate-200 dark:bg-[#202c3e] text-slate-600 dark:text-neutral-400'
                             }`}
                           >
                             {count}
@@ -647,7 +735,7 @@ export default function ApproachesPage() {
                 <button
                   type="button"
                   onClick={() => scrollTabs('right')}
-                  className="w-7 h-7 rounded-lg bg-[#161616] hover:bg-[#222222] text-neutral-400 hover:text-white flex items-center justify-center shrink-0 border border-[#262626] transition shadow-sm"
+                  className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white flex items-center justify-center shrink-0 border border-slate-200 dark:border-[#243347] transition shadow-xs"
                   title="Scroll right"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -656,12 +744,12 @@ export default function ApproachesPage() {
             ) : (
               /* Dropdown Mode */
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <Tag className="w-4 h-4 text-teal-400 shrink-0 ml-1" />
-                <span className="text-xs text-neutral-400 font-medium shrink-0">Filter by Niche:</span>
+                <Tag className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 ml-1" />
+                <span className="text-xs text-slate-600 dark:text-neutral-400 font-medium shrink-0">Filter by Niche:</span>
                 <select
                   value={selectedNiche}
                   onChange={(e) => setSelectedNiche(e.target.value)}
-                  className="bg-[#161616] border border-[#262626] rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-teal-500 cursor-pointer w-full max-w-xs"
+                  className="bg-slate-50 dark:bg-[#121824] border border-slate-200 dark:border-[#222e42] rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 cursor-pointer w-full max-w-xs"
                 >
                   <option value="All Niches">All Niches ({approaches.length})</option>
                   {niches.map((n) => {
@@ -682,10 +770,10 @@ export default function ApproachesPage() {
               <button
                 type="button"
                 onClick={() => setNicheDisplayMode((prev) => (prev === 'tabs' ? 'dropdown' : 'tabs'))}
-                className="px-2.5 py-1.5 rounded-xl bg-[#161616] hover:bg-[#222222] text-neutral-400 hover:text-white border border-[#262626] text-xs font-medium flex items-center gap-1.5 transition"
+                className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white border border-slate-200 dark:border-[#243347] text-xs font-medium flex items-center gap-1.5 transition"
                 title={nicheDisplayMode === 'tabs' ? 'Switch to dropdown view' : 'Switch to scrollable tabs view'}
               >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-teal-400" />
+                <SlidersHorizontal className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                 <span className="hidden sm:inline">
                   {nicheDisplayMode === 'tabs' ? 'Dropdown View' : 'Tabs View'}
                 </span>
@@ -694,10 +782,10 @@ export default function ApproachesPage() {
               {/* Manage Niches Trigger Button */}
               <button
                 onClick={openManageNichesModal}
-                className="px-3 py-1.5 rounded-xl bg-[#161616] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#262626] text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
+                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#182130] dark:hover:bg-[#1e2a3c] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white border border-slate-200 dark:border-[#243347] text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
                 title="Add, edit or delete industry niches"
               >
-                <Settings2 className="w-3.5 h-3.5 text-teal-400" />
+                <Settings2 className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                 <span>Manage Niches</span>
               </button>
             </div>
@@ -708,11 +796,11 @@ export default function ApproachesPage() {
             <div className="flex flex-wrap items-center gap-3">
               {/* Status Filter */}
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-neutral-400 font-medium">Status:</span>
+                <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium">Status:</span>
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="bg-[#141414] border border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
+                  className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-teal-500 shadow-xs"
                 >
                   <option value="ALL">All Statuses</option>
                   <option value="PROSPECT">Prospect</option>
@@ -726,11 +814,11 @@ export default function ApproachesPage() {
 
               {/* Responsible Lead Owner Filter */}
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-neutral-400 font-medium">Responsible:</span>
+                <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium">Responsible:</span>
                 <select
                   value={selectedOwner}
                   onChange={(e) => setSelectedOwner(e.target.value)}
-                  className="bg-[#141414] border border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500 cursor-pointer"
+                  className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-teal-500 cursor-pointer shadow-xs"
                 >
                   <option value="ALL">All Leads</option>
                   <option value="ME">👤 Assigned to Me</option>
@@ -742,51 +830,68 @@ export default function ApproachesPage() {
                   ))}
                 </select>
               </div>
+
+              {/* Follow-up Attention Filter Button */}
+              <button
+                type="button"
+                onClick={() => setFollowUpFilter(followUpFilter === 'ATTENTION' ? 'ALL' : 'ATTENTION')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition border ${
+                  followUpFilter === 'ATTENTION'
+                    ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-500/40 shadow-xs'
+                    : 'bg-white dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 border-slate-200 dark:border-[#222e42] hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Filter leads that need follow-up today or are overdue"
+              >
+                <AlertTriangle className={`w-3.5 h-3.5 ${overdueFollowUpsCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'}`} />
+                <span>Follow-ups ({overdueFollowUpsCount + todayFollowUpsCount})</span>
+              </button>
             </div>
 
             {/* Search Input */}
             <div className="relative w-full md:w-72">
-              <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search business, contact, owner, or area..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#141414] border border-[#262626] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+                className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 shadow-xs"
               />
             </div>
           </div>
         </div>
 
         {/* APPROACHES TABLE */}
-        <div className="bg-[#111111] border border-[#222222] rounded-3xl overflow-hidden shadow-xl">
-          <div className="p-4 border-b border-[#222222] flex items-center justify-between">
+        <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl overflow-hidden shadow-xs">
+          <div className="p-4 border-b border-slate-200 dark:border-[#222e42] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-heading text-xs font-bold text-white uppercase tracking-wider">
+              <span className="font-heading text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 Approached Businesses Pipeline
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1a1a1a] text-neutral-400 border border-[#282828] font-mono">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#121824] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#202c3e] font-mono">
                 {filteredApproaches.length} targets
               </span>
             </div>
-            <span className="text-[11px] text-neutral-500 hidden sm:inline">
+            <span className="text-[11px] text-slate-400 dark:text-neutral-500 hidden sm:inline">
               Click any row to view full details, history & actions
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* DESKTOP TABLE VIEW */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#1f1f1f] bg-[#141414]/80 text-[11px] text-neutral-400 font-semibold uppercase tracking-wider">
+                <tr className="border-b border-slate-200 dark:border-[#222e42] bg-slate-50 dark:bg-[#121824]/90 text-[11px] text-slate-500 dark:text-neutral-400 font-semibold uppercase tracking-wider">
                   <th className="py-3 px-4">Business Name</th>
                   <th className="py-3 px-4">Contact Person & Lead Owner</th>
                   <th className="py-3 px-4">Location</th>
                   <th className="py-3 px-4">Contact Info</th>
                   <th className="py-3 px-4">Outreach Status</th>
                   <th className="py-3 px-4">Last Contact Date</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1c1c1c]">
+              <tbody className="divide-y divide-slate-100 dark:divide-[#1e2a3c]">
                 {filteredApproaches.map((appr) => {
                   const statusConf = STATUS_CONFIG[appr.status] || STATUS_CONFIG.PROSPECT;
                   const cleanPhone = formatCleanPhone(appr.phone);
@@ -795,25 +900,25 @@ export default function ApproachesPage() {
                     <tr
                       key={appr._id}
                       onClick={() => router.push(`/approaches/${appr._id}`)}
-                      className="hover:bg-[#181818] transition group cursor-pointer"
+                      className="hover:bg-slate-50/80 dark:hover:bg-[#182130] transition group cursor-pointer"
                     >
                       {/* Business Name & Niche */}
-                      <td className="py-3.5 px-4 font-semibold text-white">
+                      <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-[#202020] group-hover:bg-teal-500/15 group-hover:border-teal-500/30 border border-[#2a2a2a] text-teal-400 font-bold flex items-center justify-center shrink-0 transition">
+                          <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#182130] group-hover:bg-teal-500/15 group-hover:border-teal-500/30 border border-slate-200 dark:border-[#243347] text-teal-600 dark:text-teal-400 font-bold flex items-center justify-center shrink-0 transition">
                             {appr.businessName.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0 max-w-[210px]">
-                            <span className="block truncate font-heading font-medium text-white group-hover:text-teal-400 transition">
+                            <span className="block truncate font-heading font-medium text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition">
                               {appr.businessName}
                             </span>
                             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-medium shrink-0">
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-[10px] font-medium shrink-0">
                                 <Tag className="w-2.5 h-2.5" />
                                 {appr.niche}
                               </span>
                               {appr.contactHistory && appr.contactHistory.length > 0 && (
-                                <span className="text-[10px] text-neutral-500 font-normal text-[10px]">
+                                <span className="text-[10px] text-slate-400 dark:text-neutral-500 font-normal">
                                   • {appr.contactHistory.length} log{appr.contactHistory.length > 1 ? 's' : ''}
                                 </span>
                               )}
@@ -904,33 +1009,73 @@ export default function ApproachesPage() {
                         </span>
                       </td>
 
-                      {/* Last Contact Date */}
+                      {/* Last Contact Date & Follow Up Alert */}
                       <td className="py-3.5 px-4">
-                        {appr.lastContactDate ? (
-                          <div className="space-y-0.5">
-                            <span className="text-neutral-200 font-medium flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-neutral-500" />
-                              {new Date(appr.lastContactDate).toLocaleDateString(undefined, {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
-                            </span>
-                            {appr.nextFollowUpDate && (
-                              <span className="text-[10px] text-amber-400 flex items-center gap-1">
-                                Follow-up:{' '}
-                                {new Date(appr.nextFollowUpDate).toLocaleDateString(undefined, {
-                                  month: 'short',
-                                  day: 'numeric',
-                                })}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-amber-500/80 font-medium text-[11px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                            Never Contacted
-                          </span>
-                        )}
+                        {(() => {
+                          const followUpStatus = getFollowUpStatus(appr.nextFollowUpDate);
+                          return (
+                            <div className="space-y-1">
+                              {appr.lastContactDate ? (
+                                <span className="text-neutral-200 font-medium flex items-center gap-1 text-[11px]">
+                                  <Clock className="w-3 h-3 text-neutral-500" />
+                                  {new Date(appr.lastContactDate).toLocaleDateString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric',
+                                  })}
+                                </span>
+                              ) : (
+                                <span className="text-neutral-500 text-[10px] italic">Not contacted</span>
+                              )}
+
+                              {appr.nextFollowUpDate && (
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  <span
+                                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded border flex items-center gap-1 ${
+                                      followUpStatus?.type === 'OVERDUE'
+                                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
+                                        : followUpStatus?.type === 'TODAY'
+                                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                        : 'bg-[#181818] text-neutral-400 border-[#282828]'
+                                    }`}
+                                  >
+                                    <Calendar className="w-2.5 h-2.5" />
+                                    <span>
+                                      {followUpStatus?.type === 'OVERDUE'
+                                        ? `⚠️ ${followUpStatus.text}`
+                                        : followUpStatus?.type === 'TODAY'
+                                        ? '⚡ Today'
+                                        : new Date(appr.nextFollowUpDate).toLocaleDateString(undefined, {
+                                            month: 'short',
+                                            day: 'numeric',
+                                          })}
+                                    </span>
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      {/* Actions */}
+                      <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/approaches/${appr._id}`)}
+                            className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-[#1f293d] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+                            title="View details"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setApproachToDelete(appr)}
+                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition cursor-pointer"
+                            title="Delete target"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -938,7 +1083,7 @@ export default function ApproachesPage() {
 
                 {filteredApproaches.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-neutral-500">
+                    <td colSpan={7} className="py-12 text-center text-neutral-500">
                       <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
                       <p className="text-xs">No outreach targets found matching your filter.</p>
                       <button
@@ -953,6 +1098,188 @@ export default function ApproachesPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* MOBILE NICE CARD VIEW */}
+          <div className="md:hidden p-3 space-y-3">
+            {filteredApproaches.map((appr) => {
+              const statusConf = STATUS_CONFIG[appr.status] || STATUS_CONFIG.PROSPECT;
+              const cleanPhone = formatCleanPhone(appr.phone);
+              const followUpStatus = getFollowUpStatus(appr.nextFollowUpDate);
+
+              return (
+                <div
+                  key={appr._id}
+                  onClick={() => router.push(`/approaches/${appr._id}`)}
+                  className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] active:bg-slate-50 dark:active:bg-[#182130] hover:border-teal-500/50 transition-all space-y-3 shadow-xs cursor-pointer"
+                >
+                  {/* Card Header: Avatar + Business Name + Niche + Status Badge */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#182130] border border-slate-200 dark:border-[#243347] text-teal-600 dark:text-teal-400 font-bold flex items-center justify-center shrink-0">
+                        {appr.businessName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1">
+                          <span className="font-heading font-bold text-sm text-slate-900 dark:text-white truncate block">
+                            {appr.businessName}
+                          </span>
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 shrink-0" />
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-[10px] font-medium shrink-0">
+                            <Tag className="w-2.5 h-2.5" />
+                            {appr.niche}
+                          </span>
+                          {appr.contactHistory && appr.contactHistory.length > 0 && (
+                            <span className="text-[10px] text-slate-400 dark:text-neutral-500">
+                              • {appr.contactHistory.length} log{appr.contactHistory.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <span
+                      className={`inline-flex items-center gap-1 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border shrink-0 ${statusConf.color}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${statusConf.dot}`} />
+                      {statusConf.label}
+                    </span>
+                  </div>
+
+                  {/* Lead Info Grid */}
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 dark:bg-[#121824] p-2.5 rounded-xl border border-slate-200 dark:border-[#1e2a3c]">
+                    <div>
+                      <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase font-semibold block">Contact</span>
+                      <span className="text-slate-800 dark:text-white font-medium truncate block">
+                        {appr.contactPerson || '—'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase font-semibold block">Lead Owner</span>
+                      {appr.assignedTo ? (
+                        <span className="text-teal-600 dark:text-teal-400 font-medium inline-flex items-center gap-1 truncate">
+                          <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />
+                          {typeof appr.assignedTo === 'object' ? (appr.assignedTo as any).name : 'Assigned'}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 dark:text-neutral-500 italic text-[11px]">Unassigned</span>
+                      )}
+                    </div>
+                    {appr.location && (
+                      <div className="col-span-2 flex items-center gap-1 text-[11px] text-slate-600 dark:text-neutral-400 pt-1.5 border-t border-slate-200 dark:border-[#1e2a3c]">
+                        <MapPin className="w-3 h-3 text-slate-400 dark:text-neutral-500 shrink-0" />
+                        <span className="truncate">{appr.location}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bottom Row: Dates + Touch Action Buttons */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-[#1e2a3c] text-xs">
+                    {/* Follow-up / Last contact date */}
+                    <div className="min-w-0 flex-1">
+                      {followUpStatus ? (
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md border inline-flex items-center gap-1 ${
+                            followUpStatus?.type === 'OVERDUE'
+                              ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40 animate-pulse'
+                              : followUpStatus?.type === 'TODAY'
+                              ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40'
+                              : 'bg-slate-100 dark:bg-[#182130] text-slate-700 dark:text-neutral-300 border-slate-200 dark:border-[#243347]'
+                          }`}
+                        >
+                          <Calendar className="w-2.5 h-2.5" />
+                          <span className="truncate">
+                            {followUpStatus?.type === 'OVERDUE'
+                              ? `⚠️ ${followUpStatus.text}`
+                              : followUpStatus?.type === 'TODAY'
+                              ? '⚡ Follow-up Today'
+                              : `Next: ${new Date(appr.nextFollowUpDate!).toLocaleDateString(undefined, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}`}
+                          </span>
+                        </span>
+                      ) : appr.lastContactDate ? (
+                        <span className="text-[11px] text-slate-500 dark:text-neutral-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
+                          Last: {new Date(appr.lastContactDate).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 dark:text-neutral-500 italic">Not contacted yet</span>
+                      )}
+                    </div>
+
+                    {/* Touch Action Buttons */}
+                    <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      {appr.phone && (
+                        <>
+                          <a
+                            href={`tel:${cleanPhone}`}
+                            className="p-2 rounded-xl bg-slate-100 dark:bg-[#202020] hover:bg-slate-200 dark:hover:bg-[#282828] active:bg-slate-300 dark:active:bg-[#303030] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#2d2d2d] transition"
+                            title="Call"
+                            aria-label="Call business"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                          </a>
+                          {cleanPhone && (
+                            <a
+                              href={`https://wa.me/${cleanPhone.replace('+', '')}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1 transition"
+                              title="WhatsApp"
+                              aria-label="WhatsApp"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" />
+                              <span>WA</span>
+                            </a>
+                          )}
+                        </>
+                      )}
+                      {appr.email && (
+                        <a
+                          href={`mailto:${appr.email}`}
+                          className="p-2 rounded-xl bg-slate-100 dark:bg-[#202020] hover:bg-slate-200 dark:hover:bg-[#282828] active:bg-slate-300 dark:active:bg-[#303030] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#2d2d2d] transition"
+                          title="Email"
+                          aria-label="Email business"
+                        >
+                          <Mail className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setApproachToDelete(appr)}
+                        className="p-2 rounded-xl bg-slate-100 dark:bg-[#202020] hover:bg-rose-500/10 text-slate-500 dark:text-neutral-400 hover:text-rose-400 border border-slate-200 dark:border-[#2d2d2d] transition cursor-pointer"
+                        title="Delete target"
+                        aria-label="Delete target"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {filteredApproaches.length === 0 && (
+              <div className="py-10 text-center text-slate-400 dark:text-neutral-500 bg-white dark:bg-[#121212] rounded-2xl border border-slate-200 dark:border-[#222222] shadow-xs">
+                <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                <p className="text-xs">No outreach targets found matching your filter.</p>
+                <button
+                  type="button"
+                  onClick={openCreateModal}
+                  className="mt-2 text-xs text-teal-600 dark:text-teal-400 font-semibold hover:underline"
+                >
+                  + Add First Target
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1160,11 +1487,15 @@ export default function ApproachesPage() {
               Notes & What to Remember
             </label>
             <textarea
-              rows={3}
+              rows={2}
               placeholder="e.g. Wants POS and multi-store inventory. Budget around 150k ETB. Prefers WhatsApp communication."
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              onChange={(e) => {
+                setNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1393,11 +1724,15 @@ export default function ApproachesPage() {
             </label>
             <textarea
               required
-              rows={3}
+              rows={2}
               placeholder="e.g. Called owner, they want a demo next Tuesday. Follow up on Monday."
               value={quickNotes}
-              onChange={(e) => setQuickNotes(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              onChange={(e) => {
+                setQuickNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 

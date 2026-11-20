@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { PriorityBadge } from '@/components/Badge';
 import { Modal } from '@/components/Modal';
@@ -23,8 +23,18 @@ import {
   User as UserIcon,
   ChevronDown,
   Sparkles,
+  GripVertical,
+  Gauge,
+  X,
+  LayoutGrid,
+  List as ListIcon,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Pencil,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useAlert } from '@/context/AlertContext';
 
 const COLUMNS: { id: TaskStatus; label: string; accent: string }[] = [
   { id: 'TODO', label: 'To Do', accent: 'border-[#262626]' },
@@ -35,10 +45,15 @@ const COLUMNS: { id: TaskStatus; label: string; accent: string }[] = [
 
 export default function TasksPage() {
   const { user } = useAuth();
+  const { showAlert, showConfirm } = useAlert();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Drag and Drop state
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dragOverColumnId, setDragOverColumnId] = useState<TaskStatus | null>(null);
 
   // Filters
   const [dateFilter, setDateFilter] = useState<'ALL' | 'TODAY' | 'TOMORROW' | 'THIS_WEEK' | 'OVERDUE' | 'CUSTOM'>('ALL');
@@ -46,12 +61,33 @@ export default function TasksPage() {
   const [projectFilter, setProjectFilter] = useState<string>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [personalOnly, setPersonalOnly] = useState<boolean>(true); // Focused on individual/personal use by default
+  const [assigneeFilter, setAssigneeFilter] = useState<string>('MY_TASKS'); // Default: Personal My Tasks
+
+  // WIP (Work In Progress) Limit state (default: 3 tasks in IN_PROGRESS per person)
+  const [wipLimit, setWipLimit] = useState<number>(3);
+  const [wipWarning, setWipWarning] = useState<{
+    message: string;
+    assigneeName: string;
+    count: number;
+  } | null>(null);
 
   // Modals state
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
+  const [newTaskStatus, setNewTaskStatus] = useState<TaskStatus>('TODO');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [mobileColumn, setMobileColumn] = useState<'ALL' | TaskStatus>('ALL');
+  const [isFiltersOpen, setIsFiltersOpen] = useState(true);
+
+  // View mode & Pagination states
+  const [viewMode, setViewMode] = useState<'KANBAN' | 'LIST'>('KANBAN');
+  const [tasksPerPage, setTasksPerPage] = useState<number>(15);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [columnLimits, setColumnLimits] = useState<{ [key: string]: number }>({
+    TODO: 15,
+    IN_PROGRESS: 15,
+    REVIEW: 15,
+    DONE: 15,
+  });
 
   // New task form state
   const [title, setTitle] = useState('');
@@ -68,16 +104,47 @@ export default function TasksPage() {
   const [detailSubtaskText, setDetailSubtaskText] = useState('');
   const [commentText, setCommentText] = useState('');
 
+  // Edit Task modal state
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editProjectId, setEditProjectId] = useState('');
+  const [editAssignedToId, setEditAssignedToId] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
+  const [editPriority, setEditPriority] = useState<TaskPriority>('MEDIUM');
+  const [editEstimatedHours, setEditEstimatedHours] = useState('2');
+  const [savingEditTask, setSavingEditTask] = useState(false);
+  const editDescriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (editDescriptionRef.current) {
+      editDescriptionRef.current.style.height = 'auto';
+      editDescriptionRef.current.style.height = `${Math.max(68, editDescriptionRef.current.scrollHeight)}px`;
+    }
+  }, [editDescription, editingTask]);
+
+  const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (descriptionTextareaRef.current) {
+      descriptionTextareaRef.current.style.height = 'auto';
+      descriptionTextareaRef.current.style.height = `${Math.max(68, descriptionTextareaRef.current.scrollHeight)}px`;
+    }
+  }, [description, isNewTaskOpen]);
+
   const loadData = async () => {
     try {
       setLoading(true);
       const [tasksData, projectsData, teamData] = await Promise.all([
-        apiFetch<Task[]>('/tasks'),
+        apiFetch<any>('/tasks'),
         apiFetch<Project[]>('/projects'),
         apiFetch<any[]>('/team'),
       ]);
 
-      if (tasksData) setTasks(tasksData);
+      if (tasksData) {
+        const loadedTasks = Array.isArray(tasksData) ? tasksData : (tasksData.tasks || []);
+        setTasks(loadedTasks);
+      }
       if (projectsData) {
         setProjects(projectsData);
         if (projectsData.length > 0 && !selectedProjectId) {
@@ -106,9 +173,68 @@ export default function TasksPage() {
     }
   }, [user, teamMembers]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('create') === 'true') {
+        setIsNewTaskOpen(true);
+      }
+    }
+  }, []);
+
+  // Count how many tasks an individual user currently has in IN_PROGRESS
+  const getInProgressCountForUser = (userIdOrEmail?: string, userName?: string) => {
+    if (!userIdOrEmail && !userName) return 0;
+    return tasks.filter((t) => {
+      if (t.status !== 'IN_PROGRESS') return false;
+      const aId = t.assignedTo?._id || (t.assignedTo as any)?.id || (typeof t.assignedTo === 'string' ? t.assignedTo : undefined);
+      const aEmail = t.assignedTo?.email?.toLowerCase();
+      const aName = t.assignedTo?.name?.toLowerCase();
+
+      return (
+        (userIdOrEmail && (aId === userIdOrEmail || aEmail === userIdOrEmail.toLowerCase())) ||
+        (userName && aName === userName.toLowerCase())
+      );
+    }).length;
+  };
+
+  // Check if moving/creating a task in IN_PROGRESS causes a WIP limit breach
+  const checkWipLimitWarning = (task: Task, targetStatus: TaskStatus) => {
+    if (targetStatus !== 'IN_PROGRESS' || wipLimit <= 0) return;
+    if (task.status === 'IN_PROGRESS') return;
+
+    const targetAssigneeId =
+      task.assignedTo?._id ||
+      (task.assignedTo as any)?.id ||
+      (typeof task.assignedTo === 'string' ? task.assignedTo : undefined);
+    const targetAssigneeName =
+      task.assignedTo?.name ||
+      (targetAssigneeId ? teamMembers.find((m) => ((m as any).id || (m as any)._id) === targetAssigneeId)?.name : '') ||
+      (user?.name || 'Assignee');
+
+    const currentCount = getInProgressCountForUser(
+      targetAssigneeId || task.assignedTo?.email || (user as any)?.id,
+      targetAssigneeName
+    );
+
+    const newCount = currentCount + 1;
+    if (newCount > wipLimit) {
+      setWipWarning({
+        message: `${targetAssigneeName} currently has ${currentCount} active tasks in progress. Adding "${task.title}" pushes them to ${newCount}, exceeding the recommended WIP limit of ${wipLimit}!`,
+        assigneeName: targetAssigneeName,
+        count: newCount,
+      });
+    }
+  };
+
   // Status Change with Dropdown
   const handleQuickStatusChange = async (taskId: string, newStatus: TaskStatus, e?: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent) => {
     if (e) e.stopPropagation();
+
+    const task = tasks.find((t) => t._id === taskId);
+    if (task) {
+      checkWipLimitWarning(task, newStatus);
+    }
 
     setTasks((prev) =>
       prev.map((t) => (t._id === taskId ? { ...t, status: newStatus } : t))
@@ -125,6 +251,49 @@ export default function TasksPage() {
       });
     } catch (err) {
       console.error('Failed to update status', err);
+    }
+  };
+
+  // Open New Task Modal pre-assigned to a specific column/status
+  const openNewTaskForColumn = (status: TaskStatus) => {
+    setNewTaskStatus(status);
+    setIsNewTaskOpen(true);
+  };
+
+  // Handle Drag & Drop Task between Kanban columns
+  const handleDropToColumn = async (targetStatus: TaskStatus) => {
+    if (!draggedTaskId) return;
+    const task = tasks.find((t) => t._id === draggedTaskId);
+    if (!task || task.status === targetStatus) {
+      setDraggedTaskId(null);
+      setDragOverColumnId(null);
+      return;
+    }
+
+    checkWipLimitWarning(task, targetStatus);
+
+    const currentId = draggedTaskId;
+
+    // Optimistic UI state update
+    setTasks((prev) =>
+      prev.map((t) => (t._id === currentId ? { ...t, status: targetStatus } : t))
+    );
+
+    if (selectedTask?._id === currentId) {
+      setSelectedTask({ ...selectedTask, status: targetStatus });
+    }
+
+    setDraggedTaskId(null);
+    setDragOverColumnId(null);
+
+    try {
+      await apiFetch(`/tasks/${currentId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: targetStatus }),
+      });
+    } catch (err) {
+      console.error('Failed to move task via drag-and-drop:', err);
+      loadData();
     }
   };
 
@@ -197,7 +366,7 @@ export default function TasksPage() {
         body: JSON.stringify({ subtasks: updatedSubtasks }),
       });
     } catch (err: any) {
-      alert(err.message || 'Failed to add subtask');
+      showAlert(err.message || 'Failed to add subtask', { type: 'error' });
     }
   };
 
@@ -216,23 +385,77 @@ export default function TasksPage() {
         body: JSON.stringify({ subtasks: updatedSubtasks }),
       });
     } catch (err: any) {
-      alert(err.message || 'Failed to remove subtask');
+      showAlert(err.message || 'Failed to remove subtask', { type: 'error' });
     }
   };
 
   // Delete entire task
-  const handleDeleteTask = async (taskId: string) => {
-    if (!confirm('Are you sure you want to delete this task?')) return;
+  const handleDeleteTask = (taskId: string) => {
+    showConfirm(
+      'Are you sure you want to delete this task? This action cannot be undone.',
+      async () => {
+        setTasks((prev) => prev.filter((t) => t._id !== taskId));
+        if (selectedTask?._id === taskId) {
+          setSelectedTask(null);
+        }
 
-    setTasks((prev) => prev.filter((t) => t._id !== taskId));
-    if (selectedTask?._id === taskId) {
-      setSelectedTask(null);
-    }
+        try {
+          await apiFetch(`/tasks/${taskId}`, { method: 'DELETE' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to delete task', { type: 'error' });
+        }
+      },
+      {
+        title: 'Delete Task',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
+  };
+
+  // Edit Task handlers
+  const openEditTask = (task: Task) => {
+    setEditingTask(task);
+    setEditTitle(task.title || '');
+    setEditDescription(task.description || '');
+    setEditProjectId(task.project?._id || (task.project as any) || '');
+    setEditAssignedToId(task.assignedTo?._id || (task.assignedTo as any) || '');
+    setEditDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '');
+    setEditPriority(task.priority || 'MEDIUM');
+    setEditEstimatedHours(task.estimatedHours !== undefined ? String(task.estimatedHours) : '2');
+  };
+
+  const handleUpdateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask || !editTitle.trim()) return;
 
     try {
-      await apiFetch(`/tasks/${taskId}`, { method: 'DELETE' });
+      setSavingEditTask(true);
+      const payload: any = {
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        project: editProjectId || null,
+        assignedTo: editAssignedToId || null,
+        dueDate: editDueDate ? new Date(editDueDate).toISOString() : null,
+        priority: editPriority,
+        estimatedHours: parseFloat(editEstimatedHours) || 0,
+      };
+
+      const updated = await apiFetch<Task>(`/tasks/${editingTask._id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+
+      setTasks((prev) => prev.map((t) => (t._id === updated._id ? updated : t)));
+      if (selectedTask?._id === updated._id) {
+        setSelectedTask(updated);
+      }
+      setEditingTask(null);
+      showAlert('Task updated successfully', { type: 'success' });
     } catch (err: any) {
-      alert(err.message || 'Failed to delete task');
+      showAlert(err.message || 'Failed to update task', { type: 'error' });
+    } finally {
+      setSavingEditTask(false);
     }
   };
 
@@ -246,6 +469,65 @@ export default function TasksPage() {
 
   const handleRemoveDraftSubtask = (idx: number) => {
     setNewSubtasks(newSubtasks.filter((_, i) => i !== idx));
+  };
+
+  const handleDeleteComment = (commentIdx: number) => {
+    if (!selectedTask) return;
+    showConfirm(
+      'Are you sure you want to delete this note?',
+      async () => {
+        const updatedComments = (selectedTask.comments || []).filter((_, idx) => idx !== commentIdx);
+        const updatedTask = { ...selectedTask, comments: updatedComments };
+        setSelectedTask(updatedTask);
+        setTasks((prev) => prev.map((t) => (t._id === selectedTask._id ? updatedTask : t)));
+
+        try {
+          await apiFetch(`/tasks/${selectedTask._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ comments: updatedComments }),
+          });
+          showAlert('Note deleted', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to delete note', { type: 'error' });
+        }
+      },
+      {
+        title: 'Delete Note',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
+  };
+
+  const [editingCommentIdx, setEditingCommentIdx] = useState<number | null>(null);
+  const [editCommentText, setEditCommentText] = useState('');
+
+  const handleStartEditComment = (idx: number, currentText: string) => {
+    setEditingCommentIdx(idx);
+    setEditCommentText(currentText);
+  };
+
+  const handleSaveEditComment = async (commentIdx: number) => {
+    if (!selectedTask || !editCommentText.trim()) return;
+    const updatedComments = [...(selectedTask.comments || [])];
+    updatedComments[commentIdx] = {
+      ...updatedComments[commentIdx],
+      text: editCommentText.trim(),
+    };
+    const updatedTask = { ...selectedTask, comments: updatedComments };
+    setSelectedTask(updatedTask);
+    setTasks((prev) => prev.map((t) => (t._id === selectedTask._id ? updatedTask : t)));
+    setEditingCommentIdx(null);
+
+    try {
+      await apiFetch(`/tasks/${selectedTask._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ comments: updatedComments }),
+      });
+      showAlert('Note updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update note', { type: 'error' });
+    }
   };
 
   // Create Task Form Submit
@@ -265,7 +547,7 @@ export default function TasksPage() {
           title: title.trim(),
           description: description.trim(),
           priority,
-          status: 'TODO',
+          status: newTaskStatus || 'TODO',
           project: selectedProjectId || undefined,
           assignedTo: selectedAssignedToId || undefined,
           dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
@@ -275,13 +557,16 @@ export default function TasksPage() {
       });
 
       setTasks([created, ...tasks]);
+      if (created.status === 'IN_PROGRESS' && wipLimit > 0) {
+        checkWipLimitWarning(created, 'IN_PROGRESS');
+      }
       setTitle('');
       setDescription('');
       setNewSubtasks([]);
       setSubtaskInput('');
       setIsNewTaskOpen(false);
     } catch (err: any) {
-      alert(err.message || 'Failed to create task');
+      showAlert(err.message || 'Failed to create task', { type: 'error' });
     }
   };
 
@@ -347,23 +632,38 @@ export default function TasksPage() {
     return { text: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), isToday: false, isOverdue: false, isTomorrow: false };
   };
 
-  // Metric counts for date badges
-  const todayCount = tasks.filter((t) => getDaysDiff(t.dueDate) === 0).length;
-  const tomorrowCount = tasks.filter((t) => getDaysDiff(t.dueDate) === 1).length;
-  const overdueCount = tasks.filter((t) => {
-    const diff = getDaysDiff(t.dueDate);
-    return diff !== null && diff < 0 && t.status !== 'DONE';
-  }).length;
-
-  // Filter Tasks Engine
-  const filteredTasks = tasks.filter((task) => {
-    // 1. Personal Only filter (Individual View)
-    if (personalOnly && user) {
-      const isMyTask =
-        task.assignedTo?._id === (user as any).id ||
-        task.assignedTo?.email?.toLowerCase() === user.email?.toLowerCase() ||
-        task.assignedTo?.name?.toLowerCase() === user.name?.toLowerCase();
-      if (!isMyTask) return false;
+  // Check if a task matches the active Assignee, Project, Priority, and Search Keyword filters (active scope)
+  const matchesActiveScope = (task: Task) => {
+    // 1. Assignee / Person Filter (Dropdown)
+    if (assigneeFilter === 'MY_TASKS') {
+      if (user) {
+        const userId = (user as any).id || (user as any)._id;
+        const assignedId = task.assignedTo?._id || (task.assignedTo as any)?.id;
+        const isMyTask =
+          (userId && (assignedId === userId || task.assignedTo?._id === userId)) ||
+          task.assignedTo?._id === (user as any).id ||
+          task.assignedTo?._id === (user as any)._id ||
+          (task.assignedTo as any)?.id === (user as any).id ||
+          (task.assignedTo as any)?.id === (user as any)._id ||
+          task.assignedTo?.email?.toLowerCase() === user.email?.toLowerCase() ||
+          task.assignedTo?.name?.toLowerCase() === user.name?.toLowerCase();
+        if (!isMyTask) return false;
+      }
+    } else if (assigneeFilter === 'UNASSIGNED') {
+      if (task.assignedTo) return false;
+    } else if (assigneeFilter !== 'ALL') {
+      const assignedId = task.assignedTo?._id || (task.assignedTo as any)?.id;
+      const assignedEmail = task.assignedTo?.email?.toLowerCase();
+      const assignedName = task.assignedTo?.name?.toLowerCase();
+      const targetMember = teamMembers.find(
+        (m) => (m as any).id === assigneeFilter || (m as any)._id === assigneeFilter
+      );
+      const isTarget =
+        assignedId === assigneeFilter ||
+        (targetMember &&
+          (assignedEmail === targetMember.email?.toLowerCase() ||
+            assignedName === targetMember.name?.toLowerCase()));
+      if (!isTarget) return false;
     }
 
     // 2. Project Filter
@@ -388,6 +688,22 @@ export default function TasksPage() {
       if (!matchTitle && !matchDesc && !matchSub) return false;
     }
 
+    return true;
+  };
+
+  // Base tasks matching the user's active context (e.g. My Tasks, Project, Priority, Search)
+  const scopedTasks = tasks.filter(matchesActiveScope);
+
+  // Metric counts for date badges (accurately scoped to active assignee & filters!)
+  const todayCount = scopedTasks.filter((t) => getDaysDiff(t.dueDate) === 0).length;
+  const tomorrowCount = scopedTasks.filter((t) => getDaysDiff(t.dueDate) === 1).length;
+  const overdueCount = scopedTasks.filter((t) => {
+    const diff = getDaysDiff(t.dueDate);
+    return diff !== null && diff < 0 && t.status !== 'DONE';
+  }).length;
+
+  // Filter Tasks Engine (Further filters the scoped tasks by Date)
+  const filteredTasks = scopedTasks.filter((task) => {
     // 5. Date Filter
     if (dateFilter === 'ALL') return true;
 
@@ -419,10 +735,62 @@ export default function TasksPage() {
     return true;
   });
 
+  // Pagination calculations for List view
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [dateFilter, customDate, projectFilter, priorityFilter, searchQuery, assigneeFilter, mobileColumn, viewMode]);
+
+  const totalListTasks = filteredTasks.length;
+  const totalListPages = tasksPerPage === -1 ? 1 : Math.max(1, Math.ceil(totalListTasks / tasksPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalListPages) {
+      setCurrentPage(totalListPages);
+    }
+  }, [currentPage, totalListPages]);
+
+  const paginatedTasks = React.useMemo(() => {
+    if (tasksPerPage === -1) return filteredTasks;
+    const start = (currentPage - 1) * tasksPerPage;
+    return filteredTasks.slice(start, start + tasksPerPage);
+  }, [filteredTasks, currentPage, tasksPerPage]);
+
+  // WIP (Work In Progress) Calculations
+  const overloadedMembers = teamMembers.filter((m) => {
+    const mId = (m as any).id || (m as any)._id;
+    return getInProgressCountForUser(mId, m.name) > wipLimit;
+  });
+
+  let currentViewInProgressCount = 0;
+  let isCurrentViewWipExceeded = false;
+  let isCurrentViewWipAtLimit = false;
+
+  if (assigneeFilter === 'MY_TASKS') {
+    currentViewInProgressCount = user ? getInProgressCountForUser((user as any).id, user.name) : 0;
+    isCurrentViewWipExceeded = wipLimit > 0 && currentViewInProgressCount > wipLimit;
+    isCurrentViewWipAtLimit = wipLimit > 0 && currentViewInProgressCount === wipLimit;
+  } else if (assigneeFilter !== 'ALL') {
+    const selectedMember = teamMembers.find(
+      (m) => (m as any).id === assigneeFilter || (m as any)._id === assigneeFilter
+    );
+    currentViewInProgressCount = selectedMember
+      ? getInProgressCountForUser(assigneeFilter, selectedMember.name)
+      : 0;
+    isCurrentViewWipExceeded = wipLimit > 0 && currentViewInProgressCount > wipLimit;
+    isCurrentViewWipAtLimit = wipLimit > 0 && currentViewInProgressCount === wipLimit;
+  } else {
+    isCurrentViewWipExceeded = wipLimit > 0 && overloadedMembers.length > 0;
+  }
+
   return (
     <div className="flex-1 flex flex-col min-h-screen">
       <Header
-        title="Personal Tasks & Daily Board"
+        title={
+          <>
+            <span className="sm:hidden">Personal Tasks</span>
+            <span className="hidden sm:inline">Personal Tasks & Daily Board</span>
+          </>
+        }
         subtitle="Individual work queue with subtask tracking, due dates, and project filtering"
         actionButton={{
           label: 'New Task',
@@ -432,43 +800,113 @@ export default function TasksPage() {
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-4">
         {/* Productivity Control & Filtering Ribbon */}
-        <div className="p-4 bg-[#121212] border border-[#222222] rounded-3xl space-y-3 shadow-md">
-          {/* Top Row: Personal Scope Switcher + Search + Projects */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            {/* Personal Mode Toggle */}
-            <div className="flex items-center gap-2">
-              <div className="p-1 rounded-xl bg-[#181818] border border-[#282828] flex items-center">
-                <button
-                  type="button"
-                  onClick={() => setPersonalOnly(true)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
-                    personalOnly
-                      ? 'bg-teal-600 text-white shadow-sm'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  <UserIcon className="w-3.5 h-3.5" />
-                  <span>My Tasks (Personal)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPersonalOnly(false)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
-                    !personalOnly
-                      ? 'bg-teal-600 text-white shadow-sm'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  <span>All Team Tasks</span>
-                </button>
-              </div>
+        <div className="p-3.5 sm:p-4 bg-[#121212] border border-[#222222] rounded-3xl space-y-3.5 shadow-md">
+          {/* Top Row: Search Bar + Filter Toggle Button */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search tasks, deliverables, or subtasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+              />
+            </div>
 
-              {/* Project Filter Dropdown */}
+            {/* View Switcher: Kanban vs Table List */}
+            <div className="flex items-center bg-[#181818] border border-[#282828] rounded-xl p-1 gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode('KANBAN')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  viewMode === 'KANBAN'
+                    ? 'bg-teal-600 text-white shadow-xs'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+                title="Kanban Board View"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Board</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('LIST')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  viewMode === 'LIST'
+                    ? 'bg-teal-600 text-white shadow-xs'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+                title="Table List View"
+              >
+                <ListIcon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">List</span>
+              </button>
+            </div>
+
+            {/* Filter Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+              className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition shrink-0 ${
+                isFiltersOpen
+                  ? 'bg-teal-500/15 text-teal-300 border-teal-500/40 shadow-xs'
+                  : 'bg-[#181818] text-neutral-400 hover:text-white border-[#282828]'
+              }`}
+              title={isFiltersOpen ? 'Hide Filters' : 'Show Filters'}
+              aria-label="Toggle task filters"
+            >
+              <Filter className="w-4 h-4 text-teal-400" />
+              <span className="hidden sm:inline">{isFiltersOpen ? 'Hide Filters' : 'Filters'}</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isFiltersOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+
+          {/* Collapsible Filter Body */}
+          {isFiltersOpen && (
+            <div className="space-y-3.5 pt-1 animate-in fade-in duration-200">
+              {/* Filters Grid: 1 col on mobile, 2 cols on tablet, 4 cols on desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* 1. Assignee / Member Scope */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1">
+                <UserIcon className="w-3 h-3 text-teal-400" />
+                Assignee
+              </label>
+              <div className="relative">
+                <select
+                  value={assigneeFilter}
+                  onChange={(e) => setAssigneeFilter(e.target.value)}
+                  className="w-full bg-[#181818] border border-[#282828] text-white text-xs font-medium rounded-xl px-3 py-2.5 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none"
+                >
+                  <option value="MY_TASKS">👤 My Tasks (Personal)</option>
+                  <option value="ALL">👥 All Team Tasks</option>
+                  <optgroup label="Select Specific Person">
+                    {teamMembers.map((m) => {
+                      const mId = (m as any).id || (m as any)._id;
+                      return (
+                        <option key={mId} value={mId}>
+                          👤 {m.name} ({m.title || m.role})
+                        </option>
+                      );
+                    })}
+                  </optgroup>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* 2. Project Filter */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1">
+                <FolderKanban className="w-3 h-3 text-teal-400" />
+                Project
+              </label>
               <div className="relative">
                 <select
                   value={projectFilter}
                   onChange={(e) => setProjectFilter(e.target.value)}
-                  className="bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none min-w-[170px]"
+                  className="w-full bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2.5 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none"
                 >
                   <option value="ALL">📁 All Projects</option>
                   {projects.map((p) => (
@@ -479,147 +917,200 @@ export default function TasksPage() {
                 </select>
                 <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
+            </div>
 
-              {/* Priority Filter Dropdown */}
+            {/* 3. Priority Filter */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                Priority
+              </label>
               <div className="relative">
                 <select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none"
+                  className="w-full bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2.5 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none"
                 >
                   <option value="ALL">⚡ All Priorities</option>
-                  <option value="URGENT">🔴 Urgent</option>
-                  <option value="HIGH">🟠 High</option>
-                  <option value="MEDIUM">🟡 Medium</option>
-                  <option value="LOW">🟢 Low</option>
+                  <option value="URGENT">🔴 Urgent Priority</option>
+                  <option value="HIGH">🟠 High Priority</option>
+                  <option value="MEDIUM">🟡 Medium Priority</option>
+                  <option value="LOW">🟢 Low Priority</option>
                 </select>
                 <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
-            {/* Keyword Search Input */}
-            <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search tasks or subtasks..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
-              />
+            {/* 4. WIP Limit */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1">
+                <Gauge className="w-3 h-3 text-rose-400" />
+                WIP Bottleneck Limit
+              </label>
+              <div className="relative">
+                <select
+                  value={wipLimit}
+                  onChange={(e) => setWipLimit(Number(e.target.value))}
+                  className={`w-full bg-[#181818] border text-xs rounded-xl px-3 py-2.5 pr-8 outline-none cursor-pointer appearance-none transition ${
+                    isCurrentViewWipExceeded
+                      ? 'border-rose-500/60 text-rose-300 font-semibold'
+                      : 'border-[#282828] text-white focus:border-teal-500'
+                  }`}
+                  title="Work-In-Progress (WIP) limit flags bottlenecks when too many tasks are in progress simultaneously."
+                >
+                  <option value={2}>🎯 Max 2 Tasks / Person</option>
+                  <option value={3}>🎯 Max 3 Tasks / Person (Recommended)</option>
+                  <option value={4}>🎯 Max 4 Tasks / Person</option>
+                  <option value={5}>🎯 Max 5 Tasks / Person</option>
+                  <option value={0}>🚫 No WIP Limit</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
           </div>
 
-          {/* Bottom Row: Date Filter Pills */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-[#1e1e1e]">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
-              <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1 mr-1">
+          {/* Bottom Row: Date Filter Row with clear label */}
+          <div className="pt-3 border-t border-[#1e1e1e] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1 mr-2 shrink-0">
                 <CalendarDays className="w-3.5 h-3.5 text-teal-400" />
-                Filter Date:
+                Filter by Due Date:
               </span>
 
-              <button
-                type="button"
-                onClick={() => setDateFilter('ALL')}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold transition ${
-                  dateFilter === 'ALL'
-                    ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
-                    : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#282828]'
-                }`}
-              >
-                All Dates
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setDateFilter('TODAY')}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
-                  dateFilter === 'TODAY'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                    : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#282828]'
-                }`}
-              >
-                <span>Today</span>
-                {todayCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/30 text-amber-200 font-bold">
-                    {todayCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setDateFilter('TOMORROW')}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
-                  dateFilter === 'TOMORROW'
-                    ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
-                    : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#282828]'
-                }`}
-              >
-                <span>Tomorrow</span>
-                {tomorrowCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-teal-500/30 text-teal-200 font-bold">
-                    {tomorrowCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setDateFilter('THIS_WEEK')}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold transition ${
-                  dateFilter === 'THIS_WEEK'
-                    ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
-                    : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#282828]'
-                }`}
-              >
-                This Week
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setDateFilter('OVERDUE')}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
-                  dateFilter === 'OVERDUE'
-                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                    : 'bg-[#181818] text-neutral-400 hover:text-rose-400 border border-[#282828]'
-                }`}
-              >
-                <AlertTriangle className="w-3 h-3 text-rose-400" />
-                <span>Overdue</span>
-                {overdueCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500/30 text-rose-200 font-bold">
-                    {overdueCount}
-                  </span>
-                )}
-              </button>
-
-              {/* Specific Date Picker */}
-              <div className="flex items-center gap-1 pl-1">
-                <input
-                  type="date"
-                  value={customDate}
-                  onChange={(e) => {
-                    setCustomDate(e.target.value);
-                    if (e.target.value) setDateFilter('CUSTOM');
-                  }}
-                  className={`px-2 py-0.5 rounded-xl text-xs outline-none border transition ${
-                    dateFilter === 'CUSTOM'
-                      ? 'bg-teal-500/10 border-teal-500/40 text-teal-300'
-                      : 'bg-[#181818] border-[#282828] text-neutral-400'
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setDateFilter('ALL')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                    dateFilter === 'ALL'
+                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-xs'
+                      : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#282828]'
                   }`}
-                />
+                >
+                  All Dates
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDateFilter('TODAY')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
+                    dateFilter === 'TODAY'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs'
+                      : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#282828]'
+                  }`}
+                >
+                  <span>Today</span>
+                  {todayCount > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/30 text-amber-200 font-bold">
+                      {todayCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDateFilter('TOMORROW')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
+                    dateFilter === 'TOMORROW'
+                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-xs'
+                      : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#282828]'
+                  }`}
+                >
+                  <span>Tomorrow</span>
+                  {tomorrowCount > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-teal-500/30 text-teal-200 font-bold">
+                      {tomorrowCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDateFilter('THIS_WEEK')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                    dateFilter === 'THIS_WEEK'
+                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-xs'
+                      : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#282828]'
+                  }`}
+                >
+                  This Week
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDateFilter('OVERDUE')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
+                    dateFilter === 'OVERDUE'
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-xs'
+                      : 'bg-[#181818] text-neutral-400 hover:text-rose-400 border border-[#282828]'
+                  }`}
+                >
+                  <AlertTriangle className="w-3 h-3 text-rose-400" />
+                  <span>Overdue</span>
+                  {overdueCount > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500/30 text-rose-200 font-bold">
+                      {overdueCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Specific Date Picker with visible label */}
+                <div className="flex items-center gap-1.5 bg-[#181818] border border-[#282828] rounded-xl px-2 py-1 text-xs">
+                  <span className="text-[10px] text-neutral-500">Pick:</span>
+                  <input
+                    type="date"
+                    value={customDate}
+                    onChange={(e) => {
+                      setCustomDate(e.target.value);
+                      if (e.target.value) setDateFilter('CUSTOM');
+                    }}
+                    className={`bg-transparent outline-none text-xs ${
+                      dateFilter === 'CUSTOM' ? 'text-teal-300 font-bold' : 'text-neutral-400'
+                    }`}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="text-xs text-neutral-400">
+            <div className="text-xs text-neutral-400 shrink-0">
               Showing <strong className="text-white font-mono">{filteredTasks.length}</strong> tasks
-              {personalOnly ? ' for you' : ' in workspace'}
+              {assigneeFilter === 'MY_TASKS'
+                ? ' for you'
+                : assigneeFilter === 'ALL'
+                ? ' across team'
+                : ` for ${teamMembers.find((m) => (m as any).id === assigneeFilter || (m as any)._id === assigneeFilter)?.name || 'selected member'}`}
             </div>
           </div>
+          </div>
+        )}
         </div>
 
-        {/* Mobile Column Tab Switcher */}
+        {/* WIP Warning Alert Banner */}
+        {wipWarning && (
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-xs shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="font-bold text-rose-300">WIP Limit Warning: </span>
+                <span>{wipWarning.message}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setWipWarning(null)}
+              className="p-1 rounded-lg hover:bg-rose-500/20 text-rose-400 hover:text-rose-200 transition shrink-0 ml-2"
+              title="Dismiss warning"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {viewMode === 'KANBAN' ? (
+          <>
+            {/* Mobile Column Tab Switcher */}
         <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
           <button
             type="button"
@@ -660,58 +1151,191 @@ export default function TasksPage() {
           {COLUMNS.map((col) => {
             const isHiddenOnMobile = mobileColumn !== 'ALL' && mobileColumn !== col.id;
             const colTasks = filteredTasks.filter((t) => t.status === col.id);
+            const colEstimatedHours = colTasks.reduce((sum, t) => sum + (t.estimatedHours || 0), 0);
+            const isColumnTarget = dragOverColumnId === col.id;
+            const limit = columnLimits[col.id] || 15;
+            const visibleTasks = colTasks.slice(0, limit);
+
             return (
               <div
                 key={col.id}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  if (dragOverColumnId !== col.id) {
+                    setDragOverColumnId(col.id);
+                  }
+                }}
+                onDragLeave={(e) => {
+                  if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                  if (dragOverColumnId === col.id) {
+                    setDragOverColumnId(null);
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  handleDropToColumn(col.id);
+                }}
                 className={`${
                   isHiddenOnMobile ? 'hidden md:flex' : 'flex'
-                } bg-[#111111] border border-[#222222] rounded-3xl p-3.5 flex-col min-h-[460px] md:min-h-[580px] shadow-sm`}
+                } bg-slate-100/70 dark:bg-[#121926] border ${
+                  isColumnTarget
+                    ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/20 shadow-lg ring-2 ring-teal-500/30'
+                    : 'border-slate-200/90 dark:border-[#222e42]'
+                } rounded-3xl p-3.5 flex-col min-h-[460px] md:min-h-[580px] shadow-xs transition-all duration-200`}
               >
                 {/* Column Header */}
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#222222]">
-                  <div className="flex items-center gap-2">
-                    <span className="font-heading text-xs font-bold uppercase tracking-wider text-neutral-200">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200/80 dark:border-[#1e2a3c]">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-heading text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-neutral-200">
                       {col.label}
                     </span>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#1c1c1c] text-neutral-400 font-semibold border border-[#2a2a2a]">
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-white dark:bg-[#1a2332] text-slate-700 dark:text-neutral-400 font-semibold border border-slate-200 dark:border-[#253346] shadow-xs">
                       {colTasks.length}
                     </span>
+                    {colEstimatedHours > 0 && (
+                      <span className="text-[10px] font-mono text-slate-500 dark:text-neutral-500">
+                        • {colEstimatedHours}h est
+                      </span>
+                    )}
+
+                    {/* WIP Limit Tag for IN_PROGRESS */}
+                    {col.id === 'IN_PROGRESS' && wipLimit > 0 && (
+                      <div
+                        title={
+                          assigneeFilter === 'ALL'
+                            ? overloadedMembers.length > 0
+                              ? `${overloadedMembers.length} member(s) over limit (${wipLimit}): ${overloadedMembers.map((m) => m.name).join(', ')}`
+                              : `All members are within the ${wipLimit}-task WIP limit`
+                            : isCurrentViewWipExceeded
+                            ? `WIP limit exceeded! ${currentViewInProgressCount} tasks in progress (limit is ${wipLimit}). Focus on finishing before starting new tasks.`
+                            : isCurrentViewWipAtLimit
+                            ? `At WIP limit capacity (${currentViewInProgressCount}/${wipLimit}).`
+                            : `Within WIP limit (${currentViewInProgressCount}/${wipLimit})`
+                        }
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${
+                          isCurrentViewWipExceeded
+                            ? 'bg-rose-500/20 border-rose-500/40 text-rose-300 animate-pulse'
+                            : isCurrentViewWipAtLimit
+                            ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                            : 'bg-teal-500/15 border-teal-500/30 text-teal-300'
+                        }`}
+                      >
+                        <Gauge className="w-2.5 h-2.5" />
+                        <span>
+                          {assigneeFilter === 'ALL'
+                            ? overloadedMembers.length > 0
+                              ? `${overloadedMembers.length} Over WIP`
+                              : `WIP: ${wipLimit}/user`
+                            : `WIP: ${currentViewInProgressCount}/${wipLimit}`}
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Quick Add Button to Column */}
+                  <button
+                    type="button"
+                    title={`Add task to ${col.label}`}
+                    onClick={() => openNewTaskForColumn(col.id)}
+                    className="w-6 h-6 rounded-lg bg-[#181818] hover:bg-teal-600 text-neutral-400 hover:text-white flex items-center justify-center transition text-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
                 </div>
+
+                {/* Drop Indicator placeholder when dragging over column */}
+                {isColumnTarget && draggedTaskId && (
+                  <div className="p-3 mb-3 rounded-2xl border-2 border-dashed border-teal-500/70 bg-teal-500/10 text-center text-xs text-teal-300 font-medium animate-pulse">
+                    Drop task here to move to {col.label}
+                  </div>
+                )}
 
                 {/* Task Cards List */}
                 <div className="space-y-3 flex-1 overflow-y-auto">
-                  {colTasks.map((task) => {
+                  {visibleTasks.map((task) => {
                     const dateInfo = formatTaskDueDate(task.dueDate);
                     const subtasks = task.subtasks || [];
                     const completedSubtasks = subtasks.filter((s) => s.completed).length;
+                    const isDraggingThis = draggedTaskId === task._id;
+                    const isTaskAssigneeOverWip =
+                      col.id === 'IN_PROGRESS' &&
+                      wipLimit > 0 &&
+                      Boolean(task.assignedTo) &&
+                      getInProgressCountForUser(
+                        task.assignedTo?._id || (task.assignedTo as any)?.id || task.assignedTo?.email,
+                        task.assignedTo?.name
+                      ) > wipLimit;
 
                     return (
                       <div
                         key={task._id}
+                        draggable={true}
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/plain', task._id);
+                          e.dataTransfer.effectAllowed = 'move';
+                          setDraggedTaskId(task._id);
+                        }}
+                        onDragEnd={() => {
+                          setDraggedTaskId(null);
+                          setDragOverColumnId(null);
+                        }}
                         onClick={() => setSelectedTask(task)}
-                        className="p-3.5 rounded-2xl bg-[#161616] border border-[#242424] hover:border-teal-500/40 transition cursor-pointer shadow-sm group select-none space-y-2.5"
+                        className={`p-3.5 rounded-2xl bg-white dark:bg-[#182130] border ${
+                          isDraggingThis
+                            ? 'opacity-40 border-dashed border-teal-500 scale-[0.98]'
+                            : isTaskAssigneeOverWip
+                            ? 'border-rose-500/50 hover:border-rose-500/80 shadow-rose-950/10 shadow-xs'
+                            : dateInfo?.isOverdue
+                            ? 'border-rose-500/30 hover:border-rose-500/60'
+                            : 'border-slate-200/90 dark:border-[#243347] hover:border-teal-500/50'
+                        } transition-all cursor-grab active:cursor-grabbing shadow-xs hover:shadow-md group select-none space-y-2.5`}
                       >
-                        {/* Top Badges: Priority + Due Date */}
+                        {/* Top Badges: Priority + Due Date + Drag Grip */}
                         <div className="flex items-center justify-between gap-1.5">
-                          <PriorityBadge priority={task.priority} />
+                          <div className="flex items-center gap-1.5">
+                            <GripVertical className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400 opacity-60 group-hover:opacity-100 transition shrink-0" />
+                            <PriorityBadge priority={task.priority} />
+                            {isTaskAssigneeOverWip && (
+                              <span
+                                title={`Assignee has exceeded the ${wipLimit}-task WIP limit`}
+                                className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1"
+                              >
+                                <AlertTriangle className="w-2.5 h-2.5 text-rose-400" />
+                                <span>Over WIP</span>
+                              </span>
+                            )}
+                          </div>
 
-                          {dateInfo && (
-                            <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 border ${
-                                dateInfo.isOverdue
-                                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                                  : dateInfo.isToday
-                                  ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-                                  : dateInfo.isTomorrow
-                                  ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
-                                  : 'bg-[#202020] text-neutral-400 border-[#2d2d2d]'
-                              }`}
+                          <div className="flex items-center gap-1.5">
+                            {dateInfo && (
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 border ${
+                                  dateInfo.isOverdue
+                                    ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                                    : dateInfo.isToday
+                                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                                    : dateInfo.isTomorrow
+                                    ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
+                                    : 'bg-[#202020] text-neutral-400 border-[#2d2d2d]'
+                                }`}
+                              >
+                                <Calendar className="w-2.5 h-2.5" />
+                                {dateInfo.text}
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteTask(task._id);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 transition cursor-pointer rounded"
+                              title="Delete task"
                             >
-                              <Calendar className="w-2.5 h-2.5" />
-                              {dateInfo.text}
-                            </span>
-                          )}
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
                         </div>
 
                         {/* Title */}
@@ -787,8 +1411,8 @@ export default function TasksPage() {
                           </div>
                         )}
 
-                        {/* Interactive Status Dropdown & Estimated Hours */}
-                        <div className="flex items-center justify-between pt-2.5 border-t border-[#222222]">
+                        {/* Interactive Status Dropdown, Assignee Avatar & Estimated Hours */}
+                        <div className="flex items-center justify-between pt-2.5 border-t border-[#222222] gap-2">
                           {/* Status Dropdown Selector */}
                           <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                             <select
@@ -812,6 +1436,27 @@ export default function TasksPage() {
                           </div>
 
                           <div className="flex items-center gap-2 text-neutral-400 text-[11px]">
+                            {/* Assignee Avatar */}
+                            {task.assignedTo ? (
+                              <div
+                                title={`Assigned to ${task.assignedTo.name || 'Member'}${isTaskAssigneeOverWip ? ` (Over WIP Limit: >${wipLimit} tasks in progress)` : ''}`}
+                                className={`flex items-center gap-1 bg-[#1a1a1a] border px-1.5 py-0.5 rounded-md ${
+                                  isTaskAssigneeOverWip ? 'border-rose-500/40 text-rose-300' : 'border-[#2a2a2a]'
+                                }`}
+                              >
+                                <div
+                                  className={`w-3.5 h-3.5 rounded-full text-white font-bold text-[8px] flex items-center justify-center ${
+                                    isTaskAssigneeOverWip ? 'bg-rose-600' : 'bg-teal-600'
+                                  }`}
+                                >
+                                  {task.assignedTo.name?.charAt(0) || 'U'}
+                                </div>
+                                <span className="text-[10px] text-neutral-300 truncate max-w-[65px]">
+                                  {task.assignedTo.name}
+                                </span>
+                              </div>
+                            ) : null}
+
                             {task.estimatedHours ? (
                               <span className="text-[10px] font-mono text-neutral-400 flex items-center gap-0.5">
                                 <Clock className="w-2.5 h-2.5 text-teal-400" />
@@ -831,9 +1476,29 @@ export default function TasksPage() {
                     );
                   })}
 
+                  {/* Column Pagination / Show More controls */}
+                  {colTasks.length > limit ? (
+                    <button
+                      type="button"
+                      onClick={() => setColumnLimits((prev) => ({ ...prev, [col.id]: (prev[col.id] || 15) + 15 }))}
+                      className="w-full py-2 rounded-xl bg-white dark:bg-[#16202e] hover:bg-slate-200 dark:hover:bg-[#1e2a3c] border border-slate-200 dark:border-[#28384e] text-teal-600 dark:text-teal-400 text-xs font-semibold transition"
+                    >
+                      Show {Math.min(15, colTasks.length - limit)} more ({colTasks.length - limit} left)
+                    </button>
+                  ) : colTasks.length > 15 ? (
+                    <button
+                      type="button"
+                      onClick={() => setColumnLimits((prev) => ({ ...prev, [col.id]: 15 }))}
+                      className="w-full py-1 text-slate-400 dark:text-neutral-500 hover:text-slate-600 dark:hover:text-neutral-300 text-[10px] font-medium transition text-center"
+                    >
+                      Collapse to 15
+                    </button>
+                  ) : null}
+
                   {colTasks.length === 0 && (
-                    <div className="h-32 border border-dashed border-[#262626] rounded-2xl flex items-center justify-center text-xs text-neutral-600">
-                      No tasks in {col.label}
+                    <div className="h-36 border border-dashed border-slate-200/90 dark:border-[#243347] rounded-2xl flex flex-col items-center justify-center p-3 text-center transition-colors">
+                      <CheckSquare className="w-5 h-5 mb-1.5 text-slate-300 dark:text-neutral-600" />
+                      <span className="text-[11px] text-slate-400 dark:text-neutral-500 font-medium">No tasks in {col.label}</span>
                     </div>
                   )}
                 </div>
@@ -841,6 +1506,195 @@ export default function TasksPage() {
             );
           })}
         </div>
+      </>
+    ) : (
+      /* Table List View with Full Pagination */
+      <div className="space-y-4">
+        <div className="rounded-3xl bg-[#121212] border border-[#222222] overflow-hidden shadow-md">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-[#222222] bg-[#161616] text-neutral-400 font-semibold uppercase text-[10px] tracking-wider">
+                  <th className="py-3 px-4">Priority</th>
+                  <th className="py-3 px-4">Task</th>
+                  <th className="py-3 px-4">Project</th>
+                  <th className="py-3 px-4">Assignee</th>
+                  <th className="py-3 px-4">Due Date</th>
+                  <th className="py-3 px-4">Est.</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1c1c1c]">
+                {paginatedTasks.length > 0 ? (
+                  paginatedTasks.map((t) => {
+                    const projectName = t.project?.name || 'Internal';
+                    const assignee = t.assignedTo;
+                    const completedSubtasks = (t.subtasks || []).filter((st) => st.completed).length;
+                    const totalSubtasks = (t.subtasks || []).length;
+                    const isOverdue = t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'DONE';
+
+                    return (
+                      <tr
+                        key={t._id}
+                        onClick={() => setSelectedTask(t)}
+                        className="hover:bg-[#181818] transition cursor-pointer group"
+                      >
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <PriorityBadge priority={t.priority} />
+                        </td>
+                        <td className="py-3 px-4 max-w-xs">
+                          <div className="font-semibold text-white group-hover:text-teal-400 transition truncate">
+                            {t.title}
+                          </div>
+                          {totalSubtasks > 0 && (
+                            <div className="text-[11px] text-neutral-400 flex items-center gap-1.5 mt-0.5 font-mono">
+                              <ListChecks className="w-3 h-3 text-teal-400" />
+                              <span>{completedSubtasks}/{totalSubtasks} subtasks</span>
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-neutral-300 whitespace-nowrap">
+                          {projectName}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          {assignee ? (
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-5 h-5 rounded-full bg-teal-500/20 text-teal-300 font-bold text-[10px] flex items-center justify-center">
+                                {assignee.name ? assignee.name.charAt(0) : 'U'}
+                              </div>
+                              <span className="text-white text-xs">{assignee.name}</span>
+                            </div>
+                          ) : (
+                            <span className="text-neutral-500 italic">Unassigned</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px]">
+                          {t.dueDate ? (
+                            <span className={isOverdue ? 'text-rose-400 font-bold' : 'text-neutral-400'}>
+                              {new Date(t.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            </span>
+                          ) : (
+                            <span className="text-neutral-600">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-neutral-400">
+                          {t.estimatedHours ? `${t.estimatedHours}h` : '—'}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <select
+                            value={t.status}
+                            onChange={(e) => handleQuickStatusChange(t._id, e.target.value as TaskStatus, e)}
+                            className={`text-[11px] font-bold rounded-lg px-2.5 py-1 border outline-none cursor-pointer ${
+                              t.status === 'DONE'
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                : t.status === 'IN_PROGRESS'
+                                ? 'bg-teal-500/10 text-teal-400 border-teal-500/30'
+                                : t.status === 'REVIEW'
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+                            }`}
+                          >
+                            <option value="TODO">To Do</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="REVIEW">Review</option>
+                            <option value="DONE">Done</option>
+                          </select>
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedTask(t)}
+                              className="p-1.5 rounded-lg hover:bg-[#252525] text-neutral-400 hover:text-white transition"
+                              title="View details"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTask(t._id)}
+                              className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                              title="Delete task"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-neutral-500">
+                      No tasks match the active filters or search query.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* List Pagination Toolbar */}
+        {filteredTasks.length > 0 && (
+          <div className="p-4 rounded-2xl bg-[#111111] border border-[#222222] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+            <div className="text-xs text-neutral-400 text-center sm:text-left">
+              Showing tasks <span className="font-semibold text-white font-mono">{tasksPerPage === -1 ? 1 : Math.min((currentPage - 1) * tasksPerPage + 1, totalListTasks)}</span> to{' '}
+              <span className="font-semibold text-white font-mono">{tasksPerPage === -1 ? totalListTasks : Math.min(currentPage * tasksPerPage, totalListTasks)}</span> of{' '}
+              <span className="font-semibold text-teal-400 font-mono">{totalListTasks}</span> tasks
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              <div className="flex items-center gap-1.5 text-xs text-neutral-400">
+                <span>Tasks per page:</span>
+                <select
+                  value={tasksPerPage}
+                  onChange={(e) => {
+                    setTasksPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="bg-[#181818] border border-[#282828] text-white text-xs rounded-lg px-2 py-1 outline-none focus:border-teal-500"
+                >
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                  <option value="-1">All</option>
+                </select>
+              </div>
+
+              {tasksPerPage !== -1 && totalListPages > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Prev</span>
+                  </button>
+
+                  <div className="px-2.5 py-1 text-xs font-mono text-neutral-300">
+                    Page <strong className="text-teal-400 font-bold">{currentPage}</strong> of <strong>{totalListPages}</strong>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(totalListPages, p + 1))}
+                    disabled={currentPage === totalListPages}
+                    className="px-2.5 py-1 rounded-lg border border-[#262626] bg-[#161616] hover:bg-[#202020] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-white transition flex items-center gap-1"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    )}
       </div>
 
       {/* New Task Modal with Subtasks Builder */}
@@ -861,15 +1715,20 @@ export default function TasksPage() {
           <div>
             <label className="block text-xs font-medium text-neutral-300 mb-1">Description</label>
             <textarea
+              ref={descriptionTextareaRef}
               rows={2}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
               placeholder="Provide details or acceptance criteria..."
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none"
+              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
               <select
@@ -903,14 +1762,14 @@ export default function TasksPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 min-w-0"
               />
             </div>
 
@@ -966,9 +1825,10 @@ export default function TasksPage() {
               <button
                 type="button"
                 onClick={handleAddDraftSubtask}
-                className="px-3 py-1.5 bg-[#222222] hover:bg-teal-600 text-white rounded-xl text-xs font-medium transition"
+                className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-sm shrink-0"
               >
-                Add
+                <Plus className="w-3 h-3" />
+                <span>Add</span>
               </button>
             </div>
 
@@ -999,7 +1859,7 @@ export default function TasksPage() {
             )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+          <div className="sticky bottom-0 bg-[#121212] pt-3 pb-1 border-t border-[#222222] flex justify-end gap-2.5 z-10">
             <button
               type="button"
               onClick={() => setIsNewTaskOpen(false)}
@@ -1009,7 +1869,7 @@ export default function TasksPage() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white rounded-xl shadow-md transition"
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition shrink-0"
             >
               Create Task
             </button>
@@ -1080,7 +1940,7 @@ export default function TasksPage() {
 
             {/* Description */}
             {selectedTask.description && (
-              <p className="text-xs text-neutral-300 leading-relaxed bg-[#161616] p-3.5 rounded-2xl border border-[#242424]">
+              <p className="text-xs text-neutral-300 leading-relaxed bg-[#161616] p-3.5 rounded-2xl border border-[#242424] whitespace-pre-wrap break-words">
                 {selectedTask.description}
               </p>
             )}
@@ -1183,12 +2043,60 @@ export default function TasksPage() {
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {selectedTask.comments && selectedTask.comments.length > 0 ? (
                   selectedTask.comments.map((c, i) => (
-                    <div key={i} className="p-2.5 rounded-xl bg-[#161616] border border-[#262626] text-xs">
+                    <div key={i} className="group/c p-2.5 rounded-xl bg-[#161616] border border-[#262626] text-xs">
                       <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
                         <span className="font-semibold text-neutral-200">{c.author.name}</span>
-                        <span>{c.createdAt}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span>{c.createdAt}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleStartEditComment(i, c.text)}
+                            className="opacity-0 group-hover/c:opacity-100 text-neutral-500 hover:text-teal-400 p-0.5 rounded transition cursor-pointer"
+                            title="Edit note"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteComment(i)}
+                            className="opacity-0 group-hover/c:opacity-100 text-neutral-500 hover:text-rose-400 p-0.5 rounded transition cursor-pointer"
+                            title="Delete note"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-neutral-300">{c.text}</p>
+                      {editingCommentIdx === i ? (
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <input
+                            type="text"
+                            value={editCommentText}
+                            onChange={(e) => setEditCommentText(e.target.value)}
+                            className="flex-1 px-2.5 py-1 bg-[#121212] border border-teal-500/50 rounded-lg text-xs text-white outline-none"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveEditComment(i);
+                              if (e.key === 'Escape') setEditingCommentIdx(null);
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSaveEditComment(i)}
+                            className="px-2 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-[11px] font-semibold cursor-pointer"
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingCommentIdx(null)}
+                            className="px-2 py-1 text-neutral-400 hover:text-white text-[11px] cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-neutral-300 whitespace-pre-wrap">{c.text}</p>
+                      )}
                     </div>
                   ))
                 ) : (
@@ -1218,26 +2126,160 @@ export default function TasksPage() {
               </div>
             </div>
 
-            {/* Action Bar (Delete Task) */}
+            {/* Action Bar (Delete Task, Edit Task, Close) */}
             <div className="flex justify-between items-center pt-3 border-t border-[#222222]">
               <button
                 type="button"
                 onClick={() => handleDeleteTask(selectedTask._id)}
-                className="px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl flex items-center gap-1.5 transition"
+                className="px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete Task</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setSelectedTask(null)}
-                className="px-4 py-1.5 bg-[#181818] hover:bg-[#222222] text-xs text-white rounded-xl font-medium"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => openEditTask(selectedTask)}
+                  className="px-3.5 py-1.5 bg-teal-600/15 hover:bg-teal-600/25 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-sm"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Edit Task</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTask(null)}
+                  className="px-4 py-1.5 bg-[#181818] hover:bg-[#222222] text-xs text-white rounded-xl font-medium cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
+        </Modal>
+      )}
+
+      {/* Edit Task Modal */}
+      {editingTask && (
+        <Modal isOpen={!!editingTask} onClose={() => setEditingTask(null)} title="Edit Task">
+          <form onSubmit={handleUpdateTask} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Task Title *</label>
+              <input
+                type="text"
+                required
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="e.g. Implement JWT authentication & ERP backend APIs"
+                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">Description</label>
+              <textarea
+                ref={editDescriptionRef}
+                rows={2}
+                value={editDescription}
+                onChange={(e) => {
+                  setEditDescription(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+                }}
+                placeholder="Provide details or acceptance criteria..."
+                className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
+                <select
+                  value={editProjectId}
+                  onChange={(e) => setEditProjectId(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                >
+                  <option value="">-- No Project (General) --</option>
+                  {projects.map((p) => (
+                    <option key={p._id} value={p._id}>
+                      {p.name} ({p.clientName || 'Internal'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
+                <select
+                  value={editAssignedToId}
+                  onChange={(e) => setEditAssignedToId(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                >
+                  <option value="">-- Myself (Personal Task) --</option>
+                  {teamMembers.map((m) => (
+                    <option key={(m as any).id || (m as any)._id} value={(m as any).id || (m as any)._id}>
+                      {m.name} ({m.title || 'Developer'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
+                <input
+                  type="date"
+                  value={editDueDate}
+                  onChange={(e) => setEditDueDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 min-w-0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
+                <select
+                  value={editPriority}
+                  onChange={(e) => setEditPriority(e.target.value as TaskPriority)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                >
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HIGH">High</option>
+                  <option value="URGENT">Urgent</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Est. Hours</label>
+                <input
+                  type="number"
+                  min="0.5"
+                  step="0.5"
+                  value={editEstimatedHours}
+                  onChange={(e) => setEditEstimatedHours(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+              <button
+                type="button"
+                onClick={() => setEditingTask(null)}
+                className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingEditTask}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:opacity-50 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition cursor-pointer"
+              >
+                {savingEditTask ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
         </Modal>
       )}
     </div>

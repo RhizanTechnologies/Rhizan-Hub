@@ -1,0 +1,19 @@
+name: Evaluate Background Alerts & Push Notifications
+
+on:
+  schedule:
+    # Runs every 30 minutes for background alerts evaluation
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  evaluate-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Notification Evaluator
+        run: |
+          ENDPOINT="${{ secrets.BACKEND_URL || 'https://rhizan-hub-nz4k.vercel.app' }}/api/notifications/evaluate"
+          echo "Triggering $ENDPOINT..."
+          curl -s -X POST "$ENDPOINT" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" || true

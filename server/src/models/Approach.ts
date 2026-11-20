@@ -76,5 +76,9 @@ const ApproachSchema = new Schema<IApproach>(
   { timestamps: true }
 );
 
+ApproachSchema.index({ assignedTo: 1, status: 1 });
+ApproachSchema.index({ nextFollowUpDate: 1 });
+ApproachSchema.index({ niche: 1 });
+
 export const Approach = mongoose.model<IApproach>('Approach', ApproachSchema);
 

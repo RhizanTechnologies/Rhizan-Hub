@@ -1,12 +1,16 @@
 import { Router } from 'express';
-import { getTeam } from '../controllers/teamController';
-import { inviteMember } from '../controllers/authController';
+import { getTeam, getTeamMemberDetails, updateTeamMember, deleteTeamMember } from '../controllers/teamController';
+import { inviteMember, resendInvite } from '../controllers/authController';
 import { authenticateToken, requireAdmin } from '../middlewares/auth';
 
 const router = Router();
 
 router.use(authenticateToken);
 router.get('/', getTeam);
+router.get('/:id', getTeamMemberDetails);
+router.patch('/:id', updateTeamMember);
+router.delete('/:id', requireAdmin, deleteTeamMember);
 router.post('/invite', requireAdmin, inviteMember);
+router.post('/:id/resend-invite', requireAdmin, resendInvite);
 
 export default router;

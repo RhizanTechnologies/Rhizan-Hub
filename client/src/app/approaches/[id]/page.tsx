@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
-import { Approach, ApproachStatus, ContactChannel, Niche, User } from '@/types';
+import { Approach, ApproachStatus, ContactChannel, ContactInteraction, Niche, User } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
   ArrowLeft,
@@ -29,6 +29,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useAlert } from '@/context/AlertContext';
 
 const STATUS_CONFIG: Record<ApproachStatus, { label: string; color: string; badge: string }> = {
   PROSPECT: {
@@ -87,6 +88,7 @@ function formatCleanPhone(raw?: string): string {
 export default function ApproachDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { showAlert, showConfirm } = useAlert();
   const approachId = params?.id as string;
 
   const [approach, setApproach] = useState<Approach | null>(null);
@@ -199,7 +201,7 @@ export default function ApproachDetailPage() {
       setApproach((prev) => (prev ? { ...prev, ...updated } : updated));
       setIsEditModalOpen(false);
     } catch (err: any) {
-      alert(err.message || 'Failed to update approach details');
+      showAlert(err.message || 'Failed to update approach details', { type: 'error' });
     }
   };
 
@@ -213,7 +215,7 @@ export default function ApproachDetailPage() {
       setApproach(updated);
       setFormAssignedTo(newOwnerId);
     } catch (err: any) {
-      alert(err.message || 'Failed to update assigned lead owner');
+      showAlert(err.message || 'Failed to update assigned lead owner', { type: 'error' });
     }
   };
 
@@ -227,7 +229,7 @@ export default function ApproachDetailPage() {
       setApproach((prev) => (prev ? { ...prev, status: updated.status } : updated));
       setFormStatus(newStatus);
     } catch (err: any) {
-      alert(err.message || 'Failed to update status');
+      showAlert(err.message || 'Failed to update status', { type: 'error' });
     }
   };
 
@@ -259,7 +261,7 @@ export default function ApproachDetailPage() {
       setLogUpdateStatus('');
       setIsLogModalOpen(false);
     } catch (err: any) {
-      alert(err.message || 'Failed to log contact interaction');
+      showAlert(err.message || 'Failed to log contact interaction', { type: 'error' });
     } finally {
       setSubmittingLog(false);
     }
@@ -317,7 +319,7 @@ export default function ApproachDetailPage() {
       setIsConvertModalOpen(false);
       router.push(`/clients/${res.client._id}`);
     } catch (err: any) {
-      alert(err.message || 'Failed to convert to client');
+      showAlert(err.message || 'Failed to convert to client', { type: 'error' });
     } finally {
       setConverting(false);
     }
@@ -329,7 +331,81 @@ export default function ApproachDetailPage() {
       await apiFetch(`/approaches/${approach._id}`, { method: 'DELETE' });
       router.push('/approaches');
     } catch (err: any) {
-      alert(err.message || 'Failed to delete target');
+      showAlert(err.message || 'Failed to delete target', { type: 'error' });
+    }
+  };
+
+  const handleDeleteContactLog = (targetEntry: ContactInteraction) => {
+    if (!approach || !approach.contactHistory) return;
+    showConfirm(
+      'Are you sure you want to delete this interaction log?',
+      async () => {
+        const updatedHistory = approach.contactHistory?.filter((item) =>
+          item._id && targetEntry._id ? item._id !== targetEntry._id : item !== targetEntry
+        ) || [];
+        try {
+          const updated = await apiFetch<Approach>(`/approaches/${approach._id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ contactHistory: updatedHistory }),
+          });
+          setApproach(updated);
+          showAlert('Interaction log deleted', { type: 'success' });
+        } catch (err: any) {
+          showAlert(err.message || 'Failed to delete log', { type: 'error' });
+        }
+      },
+      {
+        title: 'Delete Interaction Log',
+        confirmText: 'Delete',
+        isDestructive: true,
+      }
+    );
+  };
+
+  // EDIT INTERACTION LOG STATE & HANDLERS
+  const [editingLog, setEditingLog] = useState<ContactInteraction | null>(null);
+  const [editLogChannel, setEditLogChannel] = useState<ContactChannel>('CALL');
+  const [editLogDate, setEditLogDate] = useState('');
+  const [editLogNotes, setEditLogNotes] = useState('');
+  const [editLogFollowUp, setEditLogFollowUp] = useState('');
+
+  const openEditContactLog = (entry: ContactInteraction) => {
+    setEditingLog(entry);
+    setEditLogChannel(entry.channel || 'CALL');
+    setEditLogDate(entry.date ? new Date(entry.date).toISOString().split('T')[0] : '');
+    setEditLogNotes(entry.notes || '');
+    setEditLogFollowUp(entry.nextFollowUpDate ? new Date(entry.nextFollowUpDate).toISOString().split('T')[0] : '');
+  };
+
+  const handleUpdateContactLog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!approach || !approach.contactHistory || !editingLog) return;
+
+    const updatedHistory = approach.contactHistory.map((item) => {
+      const isMatch = item._id && editingLog._id ? item._id === editingLog._id : item === editingLog;
+      if (!isMatch) return item;
+      return {
+        ...item,
+        channel: editLogChannel,
+        date: editLogDate ? new Date(editLogDate).toISOString() : item.date,
+        notes: editLogNotes.trim(),
+        nextFollowUpDate: editLogFollowUp ? new Date(editLogFollowUp).toISOString() : undefined,
+      };
+    });
+
+    try {
+      const updated = await apiFetch<Approach>(`/approaches/${approach._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          contactHistory: updatedHistory,
+          nextFollowUpDate: editLogFollowUp ? new Date(editLogFollowUp).toISOString() : approach.nextFollowUpDate,
+        }),
+      });
+      setApproach(updated);
+      setEditingLog(null);
+      showAlert('Interaction log updated', { type: 'success' });
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update log', { type: 'error' });
     }
   };
 
@@ -586,11 +662,31 @@ export default function ApproachDetailPage() {
                                 {dateFormatted}
                               </span>
                             </div>
-                            {entry.loggedBy && (
-                              <span className="text-[11px] text-neutral-400 flex items-center gap-1">
-                                Logged by <strong className="text-neutral-300 font-medium">{entry.loggedBy.name}</strong>
-                              </span>
-                            )}
+                            <div className="flex items-center gap-3">
+                              {entry.loggedBy && (
+                                <span className="text-[11px] text-neutral-400 flex items-center gap-1">
+                                  Logged by <strong className="text-neutral-300 font-medium">{entry.loggedBy.name}</strong>
+                                </span>
+                              )}
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditContactLog(entry)}
+                                  className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-teal-400 hover:bg-teal-500/10 rounded transition cursor-pointer"
+                                  title="Edit interaction log"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteContactLog(entry)}
+                                  className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition cursor-pointer"
+                                  title="Delete interaction log"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
                           </div>
 
                           {/* Notes / Details to remember */}
@@ -869,11 +965,15 @@ export default function ApproachDetailPage() {
             </label>
             <textarea
               required
-              rows={4}
+              rows={3}
               value={logNotes}
-              onChange={(e) => setLogNotes(e.target.value)}
+              onChange={(e) => {
+                setLogNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(80, e.target.scrollHeight)}px`;
+              }}
               placeholder="e.g. Owner expressed interest in POS & inventory module. Wants us to prepare a quote for 2 branches. Call back on Friday afternoon."
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1071,10 +1171,15 @@ export default function ApproachDetailPage() {
               General Background Notes
             </label>
             <textarea
-              rows={3}
+              rows={2}
               value={formNotes}
-              onChange={(e) => setFormNotes(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              onChange={(e) => {
+                setFormNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              placeholder="Background context, key contacts, or initial impressions..."
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1296,10 +1401,15 @@ export default function ApproachDetailPage() {
               Contract & Onboarding Notes
             </label>
             <textarea
-              rows={3}
+              rows={2}
               value={convertNotes}
-              onChange={(e) => setConvertNotes(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none"
+              onChange={(e) => {
+                setConvertNotes(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+              }}
+              placeholder="Final agreed scope, payment milestones, or kickoff instructions..."
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1318,6 +1428,88 @@ export default function ApproachDetailPage() {
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>{converting ? 'Creating Client...' : 'Confirm & Onboard Client'}</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* EDIT INTERACTION LOG MODAL */}
+      <Modal
+        isOpen={Boolean(editingLog)}
+        onClose={() => setEditingLog(null)}
+        title="Edit Interaction Log"
+      >
+        <form onSubmit={handleUpdateContactLog} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Channel *
+              </label>
+              <select
+                value={editLogChannel}
+                onChange={(e) => setEditLogChannel(e.target.value as ContactChannel)}
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              >
+                <option value="CALL">Phone Call</option>
+                <option value="WHATSAPP">WhatsApp Message / Call</option>
+                <option value="MEETING">In-Person / Office Meeting</option>
+                <option value="EMAIL">Email Outreach</option>
+                <option value="OTHER">Other Touchpoint</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-300 mb-1">
+                Interaction Date *
+              </label>
+              <input
+                type="date"
+                value={editLogDate}
+                onChange={(e) => setEditLogDate(e.target.value)}
+                required
+                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Discussion Notes / Requirements *
+            </label>
+            <textarea
+              rows={3}
+              value={editLogNotes}
+              onChange={(e) => setEditLogNotes(e.target.value)}
+              required
+              placeholder="What did the prospect say? What pricing or features were discussed?"
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1">
+              Next Follow-Up Date (Optional)
+            </label>
+            <input
+              type="date"
+              value={editLogFollowUp}
+              onChange={(e) => setEditLogFollowUp(e.target.value)}
+              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+            <button
+              type="button"
+              onClick={() => setEditingLog(null)}
+              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold transition shadow-md shadow-teal-900/30"
+            >
+              Save Changes
             </button>
           </div>
         </form>
