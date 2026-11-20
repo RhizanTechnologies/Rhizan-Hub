@@ -8,10 +8,11 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   maxWidth?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer, maxWidth = 'max-w-lg' }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -39,7 +40,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
           <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate pr-2">{title}</h3>
           <button
             onClick={onClose}
-            className="min-w-[36px] min-h-[36px] p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-[#1e2a3c] transition shrink-0 flex items-center justify-center"
+            className="min-w-[36px] min-h-[36px] p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-[#1e2a3c] transition shrink-0 flex items-center justify-center cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
@@ -47,7 +48,14 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         </div>
 
         {/* Scrollable Content Container */}
-        <div className="mt-3 flex-1 overflow-y-auto px-0.5 sm:px-1 pt-1 pb-6 sm:pb-4 custom-scrollbar">{children}</div>
+        <div className="mt-3 flex-1 overflow-y-auto px-0.5 sm:px-1 pt-1 pb-3 custom-scrollbar">{children}</div>
+
+        {/* Optional Fixed Bottom Footer Bar */}
+        {footer && (
+          <div className="pt-3 mt-1 border-t border-slate-200 dark:border-[#1e2a3c] shrink-0 flex items-center justify-end gap-2.5 bg-white dark:bg-[#151d2a]">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

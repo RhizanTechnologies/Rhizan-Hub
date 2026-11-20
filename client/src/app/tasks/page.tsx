@@ -616,8 +616,12 @@ export default function TasksPage() {
     return Math.round((tDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   };
 
-  const formatTaskDueDate = (dateStr?: string) => {
+  const formatTaskDueDate = (dateStr?: string, status?: string) => {
     if (!dateStr) return null;
+    if (status === 'DONE') {
+      const d = new Date(dateStr);
+      return { text: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), isToday: false, isOverdue: false, isTomorrow: false };
+    }
     const diff = getDaysDiff(dateStr);
     if (diff === null) return { text: dateStr, isToday: false, isOverdue: false, isTomorrow: false };
 
@@ -811,38 +815,8 @@ export default function TasksPage() {
                 placeholder="Search tasks, deliverables, or subtasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+                className="w-full pl-10 pr-4 py-3 sm:py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition"
               />
-            </div>
-
-            {/* View Switcher: Kanban vs Table List */}
-            <div className="flex items-center bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl p-1 gap-1 shrink-0">
-              <button
-                type="button"
-                onClick={() => setViewMode('KANBAN')}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  viewMode === 'KANBAN'
-                    ? 'bg-teal-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-                title="Kanban Board View"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Board</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('LIST')}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  viewMode === 'LIST'
-                    ? 'bg-teal-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-                title="Table List View"
-              >
-                <ListIcon className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">List</span>
-              </button>
             </div>
 
             {/* Filter Toggle Button */}
@@ -1099,14 +1073,15 @@ export default function TasksPage() {
           </div>
         )}
 
-        {viewMode === 'KANBAN' ? (
-          <>
-            {/* Mobile Column Tab Switcher */}
-        <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
+        {/* Mobile Column Tab Switcher */}
+        <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar scroll-smooth">
           <button
             type="button"
-            onClick={() => setMobileColumn('ALL')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+            onClick={(e) => {
+              setMobileColumn('ALL');
+              e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               mobileColumn === 'ALL'
                 ? 'bg-teal-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c]'
@@ -1121,8 +1096,11 @@ export default function TasksPage() {
               <button
                 key={col.id}
                 type="button"
-                onClick={() => setMobileColumn(col.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition ${
+                onClick={(e) => {
+                  setMobileColumn(col.id);
+                  e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition shrink-0 ${
                   isSelected
                     ? 'bg-teal-600 text-white shadow-sm'
                     : 'bg-slate-100 dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c]'
@@ -1245,7 +1223,7 @@ export default function TasksPage() {
                 {/* Task Cards List */}
                 <div className="space-y-3 flex-1 overflow-y-auto">
                   {visibleTasks.map((task) => {
-                    const dateInfo = formatTaskDueDate(task.dueDate);
+                    const dateInfo = formatTaskDueDate(task.dueDate, task.status);
                     const subtasks = task.subtasks || [];
                     const completedSubtasks = subtasks.filter((s) => s.completed).length;
                     const isDraggingThis = draggedTaskId === task._id;
@@ -1491,196 +1469,33 @@ export default function TasksPage() {
             );
           })}
         </div>
-      </>
-    ) : (
-      /* Table List View with Full Pagination */
-      <div className="space-y-4">
-        <div className="rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] overflow-hidden shadow-md">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-[#1e2a3c] bg-slate-50 dark:bg-[#101724] text-slate-500 dark:text-neutral-400 font-semibold uppercase text-[10px] tracking-wider">
-                  <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Task</th>
-                  <th className="py-3 px-4">Project</th>
-                  <th className="py-3 px-4">Assignee</th>
-                  <th className="py-3 px-4">Due Date</th>
-                  <th className="py-3 px-4">Est.</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-[#1e2a3c]">
-                {paginatedTasks.length > 0 ? (
-                  paginatedTasks.map((t) => {
-                    const projectName = t.project?.name || 'Internal';
-                    const assignee = t.assignedTo;
-                    const completedSubtasks = (t.subtasks || []).filter((st) => st.completed).length;
-                    const totalSubtasks = (t.subtasks || []).length;
-                    const isOverdue = t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'DONE';
-
-                    return (
-                      <tr
-                        key={t._id}
-                        onClick={() => setSelectedTask(t)}
-                        className="hover:bg-slate-50 dark:hover:bg-[#1a2436] transition cursor-pointer group"
-                      >
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          <PriorityBadge priority={t.priority} />
-                        </td>
-                        <td className="py-3 px-4 max-w-xs">
-                          <div className="font-semibold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition truncate">
-                            {t.title}
-                          </div>
-                          {totalSubtasks > 0 && (
-                            <div className="text-[11px] text-slate-500 dark:text-neutral-400 flex items-center gap-1.5 mt-0.5 font-mono">
-                              <ListChecks className="w-3 h-3 text-teal-600 dark:text-teal-400" />
-                              <span>{completedSubtasks}/{totalSubtasks} subtasks</span>
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-slate-700 dark:text-neutral-300 whitespace-nowrap">
-                          {projectName}
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          {assignee ? (
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-5 h-5 rounded-full bg-teal-500/20 text-teal-300 font-bold text-[10px] flex items-center justify-center">
-                                {assignee.name ? assignee.name.charAt(0) : 'U'}
-                              </div>
-                              <span className="text-white text-xs">{assignee.name}</span>
-                            </div>
-                          ) : (
-                            <span className="text-neutral-500 italic">Unassigned</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px]">
-                          {t.dueDate ? (
-                            <span className={isOverdue ? 'text-rose-400 font-bold' : 'text-neutral-400'}>
-                              {new Date(t.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                            </span>
-                          ) : (
-                            <span className="text-neutral-600">—</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-neutral-400">
-                          {t.estimatedHours ? `${t.estimatedHours}h` : '—'}
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                          <CustomSelect
-                            value={t.status}
-                            onChange={(val) => handleQuickStatusChange(t._id, val as TaskStatus)}
-                            options={[
-                              { value: 'TODO', label: 'To Do' },
-                              { value: 'IN_PROGRESS', label: 'In Progress' },
-                              { value: 'REVIEW', label: 'Review' },
-                              { value: 'DONE', label: 'Done' },
-                            ]}
-                            size="sm"
-                            className="min-w-[110px]"
-                          />
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedTask(t)}
-                              className="p-1.5 rounded-lg hover:bg-[#252525] text-neutral-400 hover:text-white transition"
-                              title="View details"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteTask(t._id)}
-                              className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
-                              title="Delete task"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={8} className="p-8 text-center text-neutral-500">
-                      No tasks match the active filters or search query.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* List Pagination Toolbar */}
-        {filteredTasks.length > 0 && (
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
-            <div className="text-xs text-slate-500 dark:text-neutral-400 text-center sm:text-left">
-              Showing tasks <span className="font-semibold text-slate-900 dark:text-white font-mono">{tasksPerPage === -1 ? 1 : Math.min((currentPage - 1) * tasksPerPage + 1, totalListTasks)}</span> to{' '}
-              <span className="font-semibold text-slate-900 dark:text-white font-mono">{tasksPerPage === -1 ? totalListTasks : Math.min(currentPage * tasksPerPage, totalListTasks)}</span> of{' '}
-              <span className="font-semibold text-teal-600 dark:text-teal-400 font-mono">{totalListTasks}</span> tasks
-            </div>
-
-            <div className="flex items-center gap-3 flex-wrap justify-center">
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400">
-                <span>Tasks per page:</span>
-                <CustomSelect
-                  value={tasksPerPage}
-                  onChange={(val) => {
-                    setTasksPerPage(Number(val));
-                    setCurrentPage(1);
-                  }}
-                  options={[
-                    { value: 10, label: '10' },
-                    { value: 20, label: '20' },
-                    { value: 50, label: '50' },
-                    { value: -1, label: 'All' },
-                  ]}
-                  size="sm"
-                  className="min-w-[70px]"
-                />
-              </div>
-
-              {tasksPerPage !== -1 && totalListPages > 1 && (
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-[#1e2a3c] bg-slate-50 hover:bg-slate-100 dark:bg-[#101724] dark:hover:bg-[#1a2436] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-slate-700 dark:text-white transition flex items-center gap-1"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Prev</span>
-                  </button>
-
-                  <div className="px-2.5 py-1 text-xs font-mono text-slate-700 dark:text-neutral-300">
-                    Page <strong className="text-teal-600 dark:text-teal-400 font-bold">{currentPage}</strong> of <strong>{totalListPages}</strong>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((p) => Math.min(totalListPages, p + 1))}
-                    disabled={currentPage === totalListPages}
-                    className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-[#1e2a3c] bg-slate-50 hover:bg-slate-100 dark:bg-[#101724] dark:hover:bg-[#1a2436] disabled:opacity-30 disabled:cursor-not-allowed text-xs text-slate-700 dark:text-white transition flex items-center gap-1"
-                  >
-                    <span className="hidden sm:inline">Next</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    )}
       </div>
 
       {/* New Task Modal with Subtasks Builder */}
-      <Modal isOpen={isNewTaskOpen} onClose={() => setIsNewTaskOpen(false)} title="Create New Task">
-        <form onSubmit={handleCreateTask} className="space-y-4">
+      <Modal
+        isOpen={isNewTaskOpen}
+        onClose={() => setIsNewTaskOpen(false)}
+        title="Create New Task"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setIsNewTaskOpen(false)}
+              className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="create-new-task-form"
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition shrink-0 cursor-pointer"
+            >
+              Create Task
+            </button>
+          </>
+        }
+      >
+        <form id="create-new-task-form" onSubmit={handleCreateTask} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Task Title *</label>
             <input
@@ -1689,7 +1504,7 @@ export default function TasksPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Implement JWT authentication & ERP backend APIs"
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500 transition"
             />
           </div>
 
@@ -1697,15 +1512,15 @@ export default function TasksPage() {
             <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Description</label>
             <textarea
               ref={descriptionTextareaRef}
-              rows={2}
+              rows={3}
               value={description}
               onChange={(e) => {
                 setDescription(e.target.value);
                 e.target.style.height = 'auto';
-                e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+                e.target.style.height = `${Math.max(76, e.target.scrollHeight)}px`;
               }}
               placeholder="Provide details or acceptance criteria..."
-              className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75 min-h-[76px]"
             />
           </div>
 
@@ -1755,7 +1570,7 @@ export default function TasksPage() {
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500 min-w-0"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500 min-w-0"
               />
             </div>
 
@@ -1783,7 +1598,7 @@ export default function TasksPage() {
                 step="0.5"
                 value={estimatedHours}
                 onChange={(e) => setEstimatedHours(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500"
               />
             </div>
           </div>
@@ -1808,12 +1623,12 @@ export default function TasksPage() {
                     handleAddDraftSubtask(e);
                   }
                 }}
-                className="flex-1 px-3 py-1.5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+                className="flex-1 px-3.5 py-2 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
               />
               <button
                 type="button"
                 onClick={handleAddDraftSubtask}
-                className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-sm shrink-0"
+                className="px-3.5 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-sm shrink-0 cursor-pointer"
               >
                 <Plus className="w-3 h-3" />
                 <span>Add</span>
@@ -1837,7 +1652,7 @@ export default function TasksPage() {
                     <button
                       type="button"
                       onClick={() => handleRemoveDraftSubtask(idx)}
-                      className="text-slate-400 hover:text-rose-500 dark:text-neutral-500 dark:hover:text-rose-400"
+                      className="text-slate-400 hover:text-rose-500 dark:text-neutral-500 dark:hover:text-rose-400 cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -1845,22 +1660,6 @@ export default function TasksPage() {
                 ))}
               </div>
             )}
-          </div>
-
-          <div className="sticky bottom-0 bg-white dark:bg-[#151d2a] pt-3 pb-1 border-t border-slate-100 dark:border-[#1e2a3c] flex justify-end gap-2.5 z-10">
-            <button
-              type="button"
-              onClick={() => setIsNewTaskOpen(false)}
-              className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition shrink-0"
-            >
-              Create Task
-            </button>
           </div>
         </form>
       </Modal>
@@ -2143,8 +1942,31 @@ export default function TasksPage() {
 
       {/* Edit Task Modal */}
       {editingTask && (
-        <Modal isOpen={!!editingTask} onClose={() => setEditingTask(null)} title="Edit Task">
-          <form onSubmit={handleUpdateTask} className="space-y-4">
+        <Modal
+          isOpen={!!editingTask}
+          onClose={() => setEditingTask(null)}
+          title="Edit Task"
+          footer={
+            <>
+              <button
+                type="button"
+                onClick={() => setEditingTask(null)}
+                className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="edit-task-form"
+                disabled={savingEditTask}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:opacity-50 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition cursor-pointer"
+              >
+                {savingEditTask ? 'Saving...' : 'Save Changes'}
+              </button>
+            </>
+          }
+        >
+          <form id="edit-task-form" onSubmit={handleUpdateTask} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Task Title *</label>
               <input
@@ -2153,7 +1975,7 @@ export default function TasksPage() {
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 placeholder="e.g. Implement JWT authentication & ERP backend APIs"
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500 transition"
               />
             </div>
 
@@ -2161,15 +1983,15 @@ export default function TasksPage() {
               <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Description</label>
               <textarea
                 ref={editDescriptionRef}
-                rows={2}
+                rows={3}
                 value={editDescription}
                 onChange={(e) => {
                   setEditDescription(e.target.value);
                   e.target.style.height = 'auto';
-                  e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
+                  e.target.style.height = `${Math.max(76, e.target.scrollHeight)}px`;
                 }}
                 placeholder="Provide details or acceptance criteria..."
-                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75 min-h-[76px]"
               />
             </div>
 
@@ -2219,7 +2041,7 @@ export default function TasksPage() {
                   type="date"
                   value={editDueDate}
                   onChange={(e) => setEditDueDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500 min-w-0"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500 min-w-0"
                 />
               </div>
 
@@ -2247,26 +2069,9 @@ export default function TasksPage() {
                   step="0.5"
                   value={editEstimatedHours}
                   onChange={(e) => setEditEstimatedHours(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-sm sm:text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500"
                 />
               </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
-              <button
-                type="button"
-                onClick={() => setEditingTask(null)}
-                className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={savingEditTask}
-                className="px-4 py-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:opacity-50 text-xs font-semibold text-white rounded-xl shadow-md shadow-teal-900/30 transition cursor-pointer"
-              >
-                {savingEditTask ? 'Saving...' : 'Save Changes'}
-              </button>
             </div>
           </form>
         </Modal>

@@ -64,6 +64,7 @@ export default function DashboardPage() {
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [isActivityFeedOpen, setIsActivityFeedOpen] = useState(false);
   const [selectedActivityLog, setSelectedActivityLog] = useState<any | null>(null);
+  const [selectedLoggedWork, setSelectedLoggedWork] = useState<any | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Quick Log Time Form State
@@ -816,32 +817,6 @@ export default function DashboardPage() {
                     <span>{timerBillable ? 'Client' : 'Internal'}</span>
                   </button>
                 </div>
-
-                {/* Instant Quick Log Chips (+15m, +30m, +1h) */}
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-slate-500 dark:text-neutral-500 mr-1 font-medium">Quick Log:</span>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickPresetLog(15)}
-                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#222e42] text-[10px] font-mono transition"
-                  >
-                    +15m
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickPresetLog(30)}
-                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#222e42] text-[10px] font-mono transition"
-                  >
-                    +30m
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickPresetLog(60)}
-                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#222e42] text-[10px] font-mono transition"
-                  >
-                    +1h
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -890,14 +865,6 @@ export default function DashboardPage() {
                     <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                     <span>Today's Logged Work ({todayEntries.length})</span>
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setIsLogTimeOpen(true)}
-                    className="text-[11px] text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-semibold flex items-center gap-1 transition"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Add Manual</span>
-                  </button>
                 </div>
 
                 <div className="max-h-[175px] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
@@ -905,7 +872,9 @@ export default function DashboardPage() {
                     todayEntries.map((entry) => (
                       <div
                         key={entry._id}
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/40 transition text-xs group shadow-xs"
+                        onClick={() => setSelectedLoggedWork(entry)}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/50 hover:bg-slate-50/60 dark:hover:bg-[#182232] cursor-pointer transition text-xs group shadow-xs"
+                        title="Click to view full log details"
                       >
                         <div className="min-w-0 flex-1 pr-2">
                           <div className="flex items-center gap-1.5">
@@ -931,8 +900,11 @@ export default function DashboardPage() {
                           </span>
                           <button
                             type="button"
-                            onClick={() => handleDeleteTimeEntry(entry._id)}
-                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTimeEntry(entry._id);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 transition cursor-pointer"
                             title="Delete entry"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -942,8 +914,7 @@ export default function DashboardPage() {
                     ))
                   ) : (
                     <div className="text-center py-6 text-slate-400 dark:text-neutral-500 text-xs">
-                      No hours logged yet today. Click <strong className="text-teal-600 dark:text-teal-400">Start Timer</strong> or{' '}
-                      <strong className="text-teal-600 dark:text-teal-400">+ Manual</strong> to get started!
+                      No hours logged yet today. Click <strong className="text-teal-600 dark:text-teal-400">Start Timer</strong> to get started!
                     </div>
                   )}
                 </div>
@@ -1008,7 +979,11 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between mt-2.5 text-[11px] text-slate-500 dark:text-neutral-400">
                       <span>{project.totalTasks} tasks connected</span>
                       <span className="text-slate-400 dark:text-neutral-500">
-                        Deadline: <strong className="text-slate-700 dark:text-neutral-300">{project.deadline || 'Upcoming'}</strong>
+                        Deadline: <strong className="text-slate-700 dark:text-neutral-300">
+                          {project.deadline
+                            ? new Date(project.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                            : 'Upcoming'}
+                        </strong>
                       </span>
                     </div>
                   </Link>
@@ -1630,6 +1605,94 @@ export default function DashboardPage() {
           </div>
         )}
       </Modal>
+
+      {/* ========================================================================= */}
+      {/* MODAL: TODAY'S LOGGED WORK DETAIL POPUP (CLICKABLE FOR FULL DETAILS)      */}
+      {/* ========================================================================= */}
+      {selectedLoggedWork && (
+        <Modal
+          isOpen={!!selectedLoggedWork}
+          onClose={() => setSelectedLoggedWork(null)}
+          title="Logged Work Details"
+          footer={
+            <div className="flex items-center justify-between w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  handleDeleteTimeEntry(selectedLoggedWork._id);
+                  setSelectedLoggedWork(null);
+                }}
+                className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Entry</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedLoggedWork(null)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1e2a3c] text-slate-700 dark:text-white rounded-xl text-xs font-semibold transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-4 text-xs">
+            {/* Project & Client */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-1">
+              <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-neutral-500">Project & Scope</div>
+              <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center justify-between gap-2">
+                <span>{selectedLoggedWork.project?.name || 'General Project'}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                  selectedLoggedWork.isBillable
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                    : 'bg-slate-200 dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400'
+                }`}>
+                  {selectedLoggedWork.isBillable ? 'Client Billable' : 'Internal'}
+                </span>
+              </div>
+            </div>
+
+            {/* Task (if linked) */}
+            {selectedLoggedWork.task && (
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-1">
+                <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-neutral-500">Connected Task</div>
+                <div className="font-semibold text-xs text-teal-600 dark:text-teal-400">
+                  {selectedLoggedWork.task.title}
+                </div>
+              </div>
+            )}
+
+            {/* Duration and Date */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-1">
+                <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-neutral-500">Duration</div>
+                <div className="font-mono text-base font-bold text-slate-900 dark:text-white">
+                  {formatDurationText(selectedLoggedWork.hours, selectedLoggedWork.minutes)}
+                </div>
+              </div>
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-1">
+                <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-neutral-500">Logged Date</div>
+                <div className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+                  {new Date(selectedLoggedWork.date || selectedLoggedWork.createdAt).toLocaleDateString(undefined, {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Work Description / Notes */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-1.5">
+              <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-neutral-500">Work Description / Details</div>
+              <p className="text-xs text-slate-700 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap break-words">
+                {selectedLoggedWork.description || 'No detailed description was entered for this session.'}
+              </p>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
