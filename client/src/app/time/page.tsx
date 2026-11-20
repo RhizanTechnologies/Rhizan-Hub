@@ -614,7 +614,7 @@ export default function TimeTrackingPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-5 sm:space-y-6">
+      <div className="p-3 sm:p-6 max-w-7xl mx-auto w-full space-y-4 sm:space-y-6 overflow-x-hidden">
         {/* Navigation Switcher: Personal Tracker vs Team Timesheet */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222] pb-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -841,19 +841,21 @@ export default function TimeTrackingPage() {
 
               {/* Extra Row for Manual Mode: Date & Time range / hours */}
               {entryMode === 'MANUAL' && (
-                <div className="pt-2.5 border-t border-[#1e1e1e] flex flex-wrap items-center justify-between gap-3 text-xs animate-fade-in">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
+                <div className="pt-3 border-t border-[#1e1e1e] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs animate-fade-in">
+                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                    {/* Date */}
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-neutral-400">Date:</span>
                       <input
                         type="date"
                         value={manualDate}
                         onChange={(e) => setManualDate(e.target.value)}
-                        className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2.5 py-1 text-white text-xs outline-none"
+                        className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2.5 py-1 text-white text-xs outline-none focus:border-teal-500"
                       />
                     </div>
 
-                    <div className="flex items-center gap-2 border-l border-[#262626] pl-3">
+                    {/* Toggle Range */}
+                    <div className="flex items-center gap-1.5 pl-0 sm:pl-2 border-l-0 sm:border-l sm:border-[#262626] shrink-0">
                       <label className="flex items-center gap-1.5 cursor-pointer text-neutral-300">
                         <input
                           type="checkbox"
@@ -861,28 +863,29 @@ export default function TimeTrackingPage() {
                           onChange={(e) => setManualUseTimeRange(e.target.checked)}
                           className="rounded bg-[#181818] border-[#333333] text-teal-500"
                         />
-                        <span>Enter Start/End Time</span>
+                        <span>Enter Range</span>
                       </label>
                     </div>
 
+                    {/* Range or Hours/Minutes */}
                     {manualUseTimeRange ? (
-                      <div className="flex items-center gap-1.5 pl-2">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <input
                           type="time"
                           value={manualStartTime}
                           onChange={(e) => setManualStartTime(e.target.value)}
-                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none"
+                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none focus:border-teal-500"
                         />
                         <span className="text-neutral-500">-</span>
                         <input
                           type="time"
                           value={manualEndTime}
                           onChange={(e) => setManualEndTime(e.target.value)}
-                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none"
+                          className="bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none focus:border-teal-500"
                         />
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 pl-2">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <div className="flex items-center gap-1">
                           <input
                             type="number"
@@ -890,7 +893,7 @@ export default function TimeTrackingPage() {
                             max="24"
                             value={manualHours}
                             onChange={(e) => setManualHours(e.target.value)}
-                            className="w-14 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center"
+                            className="w-12 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center focus:border-teal-500"
                           />
                           <span className="text-neutral-400">h</span>
                         </div>
@@ -902,7 +905,7 @@ export default function TimeTrackingPage() {
                             step="5"
                             value={manualMinutes}
                             onChange={(e) => setManualMinutes(e.target.value)}
-                            className="w-14 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center"
+                            className="w-12 bg-[#181818] border border-[#2a2a2a] rounded-xl px-2 py-1 text-white text-xs outline-none text-center focus:border-teal-500"
                           />
                           <span className="text-neutral-400">m</span>
                         </div>
@@ -910,7 +913,7 @@ export default function TimeTrackingPage() {
                     )}
                   </div>
 
-                  <span className="text-[11px] text-neutral-500">
+                  <span className="text-[11px] text-neutral-500 pt-1 md:pt-0 shrink-0">
                     Logged under: <strong className="text-neutral-300">{user?.name || 'Me'}</strong>
                   </span>
                 </div>
@@ -918,9 +921,9 @@ export default function TimeTrackingPage() {
             </div>
 
             {/* Filter and Search Ribbon */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-[#121212] border border-[#222222] rounded-2xl">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#121212] border border-[#222222] rounded-2xl">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1.5 pl-1 shrink-0">
                   <Filter className="w-3.5 h-3.5 text-teal-400" />
                   Filter:
                 </span>
@@ -929,7 +932,7 @@ export default function TimeTrackingPage() {
                 <select
                   value={projectFilter}
                   onChange={(e) => setProjectFilter(e.target.value)}
-                  className="bg-[#181818] border border-[#2a2a2a] text-white text-xs rounded-xl px-2.5 py-1.5 outline-none cursor-pointer"
+                  className="bg-[#181818] border border-[#2a2a2a] text-white text-xs rounded-xl px-2.5 py-1.5 outline-none cursor-pointer max-w-[150px] truncate"
                 >
                   <option value="ALL">All Projects</option>
                   {projects.map((p) => (
