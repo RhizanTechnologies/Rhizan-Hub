@@ -63,6 +63,7 @@ export default function TimeTrackingPage() {
   const [isEditingStartTime, setIsEditingStartTime] = useState(false);
   const [customStartTime, setCustomStartTime] = useState('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeEditRef = useRef<HTMLDivElement>(null);
 
   // Top Bar Form fields
   const [description, setDescription] = useState('');
@@ -552,6 +553,18 @@ export default function TimeTrackingPage() {
     setTimeout(() => setSuccessToast(null), 3000);
   };
 
+  // Close start time editing popover when clicking outside
+  useEffect(() => {
+    if (!isEditingStartTime) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (startTimeEditRef.current && !startTimeEditRef.current.contains(e.target as Node)) {
+        setIsEditingStartTime(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isEditingStartTime]);
+
   // LOG TIME IN MANUAL MODE
   const handleManualAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -987,9 +1000,9 @@ export default function TimeTrackingPage() {
               </div>
 
               {/* The Main Clockify Bar Form */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5 sm:gap-3">
                 {/* Description Input (What are you working on?) */}
-                <div className="lg:col-span-5">
+                <div className="flex-1 min-w-0">
                   <input
                     type="text"
                     placeholder="What are you working on right now?"
@@ -1000,7 +1013,7 @@ export default function TimeTrackingPage() {
                 </div>
 
                 {/* Project Selector */}
-                <div className="lg:col-span-3">
+                <div className="w-full lg:w-60 xl:w-72 shrink-0">
                   <CustomSelect
                     value={selectedProjectId}
                     onChange={(val) => {
@@ -1018,7 +1031,7 @@ export default function TimeTrackingPage() {
                 </div>
 
                 {/* Optional Task Selector */}
-                <div className="lg:col-span-2">
+                <div className="w-full lg:w-48 xl:w-56 shrink-0">
                   <CustomSelect
                     value={selectedTaskId}
                     onChange={(val) => setSelectedTaskId(val)}
@@ -1035,27 +1048,33 @@ export default function TimeTrackingPage() {
                 </div>
 
                 {/* Action Column: Digital Timer & Start/Stop OR Manual Input */}
-                <div className="lg:col-span-2 flex items-center justify-between sm:justify-end gap-3 pt-1 lg:pt-0">
+                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-1 lg:pt-0">
                   {entryMode === 'TIMER' ? (
                     <>
                       {/* Big Digital Stopwatch - Click to edit start time (Clockify Style) */}
                       {isEditingStartTime ? (
-                        <div className="flex items-center gap-1.5 bg-[#181818] border border-teal-500 rounded-xl px-2 py-1 shadow-xl animate-fade-in">
-                          <input
-                            type="time"
-                            value={customStartTime}
-                            onChange={(e) => setCustomStartTime(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleApplyStartTime();
-                              if (e.key === 'Escape') setIsEditingStartTime(false);
-                            }}
-                            autoFocus
-                            className="bg-[#222222] border border-[#333333] text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-400"
-                          />
+                        <div
+                          ref={startTimeEditRef}
+                          className="flex items-center gap-1.5 bg-[#181818] border border-teal-500 rounded-xl px-2.5 py-1.5 shadow-xl animate-fade-in shrink-0"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                            <input
+                              type="time"
+                              value={customStartTime}
+                              onChange={(e) => setCustomStartTime(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleApplyStartTime();
+                                if (e.key === 'Escape') setIsEditingStartTime(false);
+                              }}
+                              autoFocus
+                              className="w-[90px] bg-[#222222] border border-[#333333] text-white text-xs font-mono rounded-lg px-2 py-0.5 outline-none focus:border-teal-400"
+                            />
+                          </div>
                           <button
                             type="button"
                             onClick={handleApplyStartTime}
-                            className="p-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white transition cursor-pointer"
+                            className="p-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white transition cursor-pointer shrink-0"
                             title="Apply new start time"
                           >
                             <Check className="w-3.5 h-3.5" />
@@ -1063,7 +1082,7 @@ export default function TimeTrackingPage() {
                           <button
                             type="button"
                             onClick={() => setIsEditingStartTime(false)}
-                            className="p-1 rounded-lg bg-[#242424] hover:bg-[#2e2e2e] text-neutral-400 hover:text-white transition cursor-pointer"
+                            className="p-1.5 rounded-lg bg-[#242424] hover:bg-[#2e2e2e] text-neutral-400 hover:text-white transition cursor-pointer shrink-0"
                             title="Cancel"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -1078,7 +1097,7 @@ export default function TimeTrackingPage() {
                             setCustomStartTime(formatClockTime(s));
                             setIsEditingStartTime(true);
                           }}
-                          className="group/timer flex items-center gap-1.5 px-2 py-1 rounded-xl hover:bg-[#181818] border border-transparent hover:border-[#2a2a2a] transition cursor-pointer"
+                          className="group/timer flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl hover:bg-[#181818] border border-transparent hover:border-[#2a2a2a] transition cursor-pointer shrink-0"
                           title="Click on count time to edit start time (Clockify style)"
                         >
                           <span
@@ -1099,7 +1118,7 @@ export default function TimeTrackingPage() {
                         <button
                           type="button"
                           onClick={stopTimer}
-                          className="px-4 sm:px-5 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-lg shadow-rose-950/40"
+                          className="px-4 sm:px-5 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-lg shadow-rose-950/40 shrink-0"
                         >
                           <Square className="w-3.5 h-3.5 fill-white" />
                           <span>STOP</span>
@@ -1108,7 +1127,7 @@ export default function TimeTrackingPage() {
                         <button
                           type="button"
                           onClick={startTimer}
-                          className="px-4 sm:px-5 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-lg shadow-teal-950/40"
+                          className="px-4 sm:px-5 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-lg shadow-teal-950/40 shrink-0"
                         >
                           <Play className="w-3.5 h-3.5 fill-white" />
                           <span>START</span>
@@ -1119,7 +1138,7 @@ export default function TimeTrackingPage() {
                     <button
                       type="button"
                       onClick={handleManualAdd}
-                      className="w-full py-2.5 px-4 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-md"
+                      className="w-full sm:w-auto py-2.5 px-5 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-md shrink-0"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>ADD TIME</span>
