@@ -1055,10 +1055,10 @@ export default function TimeTrackingPage() {
                       {isEditingStartTime ? (
                         <div
                           ref={startTimeEditRef}
-                          className="flex items-center gap-1.5 bg-[#181818] border border-teal-500 rounded-xl px-2.5 py-1.5 shadow-xl animate-fade-in shrink-0"
+                          className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#181818] border border-teal-500 rounded-xl px-2.5 py-1.5 shadow-xl animate-fade-in shrink-0"
                         >
                           <div className="flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                            <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
                             <input
                               type="time"
                               value={customStartTime}
@@ -1068,7 +1068,7 @@ export default function TimeTrackingPage() {
                                 if (e.key === 'Escape') setIsEditingStartTime(false);
                               }}
                               autoFocus
-                              className="w-[90px] bg-[#222222] border border-[#333333] text-white text-xs font-mono rounded-lg px-2 py-0.5 outline-none focus:border-teal-400"
+                              className="w-[90px] bg-white dark:bg-[#222222] border border-slate-200 dark:border-[#333333] text-slate-900 dark:text-white text-xs font-mono rounded-lg px-2 py-0.5 outline-none focus:border-teal-500"
                             />
                           </div>
                           <button
@@ -1082,7 +1082,7 @@ export default function TimeTrackingPage() {
                           <button
                             type="button"
                             onClick={() => setIsEditingStartTime(false)}
-                            className="p-1.5 rounded-lg bg-[#242424] hover:bg-[#2e2e2e] text-neutral-400 hover:text-white transition cursor-pointer shrink-0"
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 dark:bg-[#242424] dark:hover:bg-[#2e2e2e] dark:text-neutral-400 dark:hover:text-white transition cursor-pointer shrink-0"
                             title="Cancel"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -1097,19 +1097,19 @@ export default function TimeTrackingPage() {
                             setCustomStartTime(formatClockTime(s));
                             setIsEditingStartTime(true);
                           }}
-                          className="group/timer flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl hover:bg-[#181818] border border-transparent hover:border-[#2a2a2a] transition cursor-pointer shrink-0"
+                          className="group/timer flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-[#181818] border border-transparent hover:border-slate-200 dark:hover:border-[#2a2a2a] transition cursor-pointer shrink-0"
                           title="Click on count time to edit start time (Clockify style)"
                         >
                           <span
                             className={`font-mono font-extrabold text-base tracking-wider transition ${
                               isRunning
-                                ? 'text-amber-300 animate-pulse group-hover/timer:text-amber-200'
-                                : 'text-neutral-300 group-hover/timer:text-white'
+                                ? 'text-amber-600 dark:text-amber-300 animate-pulse group-hover/timer:text-amber-700 dark:group-hover/timer:text-amber-200'
+                                : 'text-slate-700 dark:text-neutral-300 group-hover/timer:text-slate-900 dark:group-hover/timer:text-white'
                             }`}
                           >
                             {formatStopwatch(elapsedSeconds)}
                           </span>
-                          <Pencil className="w-3 h-3 text-neutral-500 group-hover/timer:text-teal-400 opacity-0 group-hover/timer:opacity-100 transition-opacity shrink-0" />
+                          <Pencil className="w-3 h-3 text-slate-400 group-hover/timer:text-teal-600 dark:text-neutral-500 dark:group-hover/timer:text-teal-400 opacity-0 group-hover/timer:opacity-100 transition-opacity shrink-0" />
                         </button>
                       )}
 
@@ -1420,7 +1420,7 @@ export default function TimeTrackingPage() {
                             <div className="flex items-center justify-between md:justify-end gap-2.5 sm:gap-4 shrink-0">
                               {/* Time Interval e.g. 18:17 - 19:29 (Clockify Style Inline Editable) */}
                               {editingTimeEntryId === entry._id ? (
-                                <div className="flex items-center gap-1.5 bg-[#181818] border border-teal-500/50 rounded-xl px-2 py-1 shadow-md">
+                                <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#181818] border border-teal-500/50 rounded-xl px-2 py-1 shadow-md">
                                   <input
                                     type="time"
                                     value={inlineStartTime}
@@ -1429,10 +1429,10 @@ export default function TimeTrackingPage() {
                                       if (e.key === 'Enter') saveInlineTimeRange(entry._id);
                                       if (e.key === 'Escape') setEditingTimeEntryId(null);
                                     }}
-                                    className="bg-[#202020] border border-[#333333] text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-400"
+                                    className="bg-white dark:bg-[#202020] border border-slate-200 dark:border-[#333333] text-slate-900 dark:text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-500"
                                     autoFocus
                                   />
-                                  <span className="text-neutral-400 font-mono text-xs">-</span>
+                                  <span className="text-slate-400 dark:text-neutral-400 font-mono text-xs">-</span>
                                   <input
                                     type="time"
                                     value={inlineEndTime}
@@ -1441,7 +1441,7 @@ export default function TimeTrackingPage() {
                                       if (e.key === 'Enter') saveInlineTimeRange(entry._id);
                                       if (e.key === 'Escape') setEditingTimeEntryId(null);
                                     }}
-                                    className="bg-[#202020] border border-[#333333] text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-400"
+                                    className="bg-white dark:bg-[#202020] border border-slate-200 dark:border-[#333333] text-slate-900 dark:text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-500"
                                   />
                                   <button
                                     type="button"
@@ -1454,7 +1454,7 @@ export default function TimeTrackingPage() {
                                   <button
                                     type="button"
                                     onClick={() => setEditingTimeEntryId(null)}
-                                    className="p-1 rounded-lg bg-[#242424] hover:bg-[#2e2e2e] text-neutral-400 hover:text-white transition cursor-pointer"
+                                    className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 dark:bg-[#242424] dark:hover:bg-[#2e2e2e] dark:text-neutral-400 dark:hover:text-white transition cursor-pointer"
                                     title="Cancel"
                                   >
                                     <X className="w-3.5 h-3.5" />
@@ -1464,13 +1464,13 @@ export default function TimeTrackingPage() {
                                 <button
                                   type="button"
                                   onClick={() => startEditingTimeRange(entry)}
-                                  className="group/time flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-[#242424] hover:border-teal-500/40 border-l border-l-dotted border-l-neutral-700/60 transition text-left cursor-pointer"
+                                  className="group/time flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#141414] hover:bg-slate-100 dark:hover:bg-[#1a1a1a] border border-slate-200 dark:border-[#242424] hover:border-teal-500/40 border-l border-l-dotted border-l-slate-300 dark:border-l-neutral-700/60 transition text-left cursor-pointer"
                                   title="Click to edit start & end time"
                                 >
-                                  <span className="font-mono text-xs text-neutral-300 group-hover/time:text-teal-300 font-medium tracking-wider">
+                                  <span className="font-mono text-xs text-slate-700 dark:text-neutral-300 group-hover/time:text-teal-600 dark:group-hover/time:text-teal-300 font-medium tracking-wider">
                                     {to24Hour(entry.startTime) || '--:--'}&nbsp;&nbsp;-&nbsp;&nbsp;{to24Hour(entry.endTime) || '--:--'}
                                   </span>
-                                  <Pencil className="w-2.5 h-2.5 text-neutral-500 group-hover/time:text-teal-400 opacity-0 group-hover/time:opacity-100 transition-opacity ml-0.5" />
+                                  <Pencil className="w-2.5 h-2.5 text-slate-400 group-hover/time:text-teal-600 dark:text-neutral-500 dark:group-hover/time:text-teal-400 opacity-0 group-hover/time:opacity-100 transition-opacity ml-0.5" />
                                 </button>
                               )}
 

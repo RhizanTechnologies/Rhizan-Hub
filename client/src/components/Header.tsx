@@ -169,21 +169,21 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {/* User Status Avatar & Dropdown */}
-        <div className="relative pl-1 sm:pl-2 border-l border-[#222222]" ref={menuRef}>
+        <div className="relative pl-1 sm:pl-2 border-l border-slate-200 dark:border-[#222222]" ref={menuRef}>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="flex items-center gap-2 sm:gap-2.5 p-1 rounded-xl hover:bg-[#181818] transition text-left"
+            className="flex items-center gap-2 sm:gap-2.5 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-[#181818] transition text-left"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
               {user?.name?.charAt(0) || 'A'}
             </div>
             <div className="hidden md:block">
-              <div className="text-xs font-medium text-white leading-none flex items-center gap-1">
+              <div className="text-xs font-medium text-slate-800 dark:text-white leading-none flex items-center gap-1">
                 <span className="truncate max-w-[100px]">{user?.name || 'Member'}</span>
-                <ChevronDown className="w-3 h-3 text-neutral-400" />
+                <ChevronDown className="w-3 h-3 text-slate-400 dark:text-neutral-400" />
               </div>
-              <div className="text-[10px] text-teal-400 font-medium flex items-center gap-1 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></span>
+              <div className="text-[10px] text-teal-600 dark:text-teal-400 font-medium flex items-center gap-1 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
                 Active
               </div>
             </div>
@@ -191,25 +191,25 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Profile Dropdown Menu */}
           {menuOpen && (
-            <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-[#141414] border border-[#262626] shadow-2xl py-2 z-50 text-xs animate-fade-in">
-              <div className="px-3.5 py-2.5 border-b border-[#222222]">
-                <div className="font-semibold text-white truncate text-sm">{user?.name}</div>
-                <div className="text-[11px] text-neutral-400 truncate">{user?.email}</div>
+            <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#262626] shadow-2xl py-2 z-50 text-xs animate-fade-in">
+              <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-[#222222]">
+                <div className="font-semibold text-slate-900 dark:text-white truncate text-sm">{user?.name}</div>
+                <div className="text-[11px] text-slate-500 dark:text-neutral-400 truncate">{user?.email}</div>
                 <div className="mt-2 flex items-center gap-1.5 flex-wrap">
                   <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                     user?.role === 'CEO'
-                      ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30'
                       : user?.role === 'CTO'
-                      ? 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+                      ? 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30'
                       : user?.role === 'COO'
-                      ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                       : user?.role === 'ADMIN'
-                      ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
-                      : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+                      ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30'
+                      : 'bg-slate-100 dark:bg-neutral-800 text-slate-700 dark:text-neutral-300 border-slate-200 dark:border-neutral-700'
                   }`}>
                     {user?.role === 'CEO' ? '👑 CEO' : user?.role === 'CTO' ? '⚡ CTO' : user?.role === 'COO' ? '📊 COO' : user?.role === 'ADMIN' ? '🛡️ Admin' : '👤 Member'}
                   </span>
-                  <span className="text-[10px] text-neutral-400 truncate max-w-[130px]">• {user?.title || 'Team Member'}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-neutral-400 truncate max-w-[130px]">• {user?.title || 'Team Member'}</span>
                 </div>
               </div>
 
@@ -220,9 +220,9 @@ export const Header: React.FC<HeaderProps> = ({
                     setMenuOpen(false);
                     setIsEditProfileOpen(true);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-teal-300 hover:text-teal-200 hover:bg-teal-500/10 font-semibold transition text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-teal-700 dark:text-teal-300 hover:text-teal-800 dark:hover:text-teal-200 hover:bg-teal-500/10 font-semibold transition text-left"
                 >
-                  <UserCog className="w-4 h-4 text-teal-400" />
+                  <UserCog className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   <span>Edit Profile</span>
                 </button>
 
@@ -232,17 +232,17 @@ export const Header: React.FC<HeaderProps> = ({
                     toggleColorMode();
                     setMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
                 >
                   <div className="flex items-center gap-2">
                     {isLight ? (
-                      <Moon className="w-4 h-4 text-indigo-400" />
+                      <Moon className="w-4 h-4 text-indigo-500" />
                     ) : (
                       <Sun className="w-4 h-4 text-amber-400" />
                     )}
                     <span>{isLight ? 'Dark Mode' : 'Light Mode'}</span>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-mono">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 font-mono">
                     {isLight ? 'Light Active' : 'Dark Active'}
                   </span>
                 </button>
@@ -251,9 +251,9 @@ export const Header: React.FC<HeaderProps> = ({
                   <Link
                     href={`/team/${user.id}`}
                     onClick={() => setMenuOpen(false)}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
                   >
-                    <UserIcon className="w-4 h-4 text-neutral-400" />
+                    <UserIcon className="w-4 h-4 text-slate-400 dark:text-neutral-400" />
                     <span>My Profile & Stats</span>
                   </Link>
                 )}
@@ -261,27 +261,27 @@ export const Header: React.FC<HeaderProps> = ({
                 <Link
                   href="/settings"
                   onClick={() => setMenuOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
                 >
-                  <SlidersHorizontal className="w-4 h-4 text-neutral-400" />
+                  <SlidersHorizontal className="w-4 h-4 text-slate-400 dark:text-neutral-400" />
                   <span>Settings & Appearance</span>
                 </Link>
 
                 <Link
                   href="/docs"
                   onClick={() => setMenuOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
                 >
-                  <BookOpen className="w-4 h-4 text-teal-400" />
+                  <BookOpen className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   <span>Hub Documentation</span>
                 </Link>
 
                 <Link
                   href="/change-password"
                   onClick={() => setMenuOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-[#1c1c1c] transition text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
                 >
-                  <KeyRound className="w-4 h-4 text-neutral-400" />
+                  <KeyRound className="w-4 h-4 text-slate-400 dark:text-neutral-400" />
                   <span>Change Password</span>
                 </Link>
 
@@ -292,31 +292,31 @@ export const Header: React.FC<HeaderProps> = ({
                       setMenuOpen(false);
                       installPwa();
                     }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-teal-400 hover:text-teal-300 hover:bg-teal-500/10 border border-teal-500/20 transition text-left cursor-pointer"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 hover:bg-teal-500/10 border border-teal-500/20 transition text-left cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
-                      <Download className="w-4 h-4 text-teal-400" />
+                      <Download className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                       <span>Install App</span>
                     </div>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 font-semibold font-mono">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-700 dark:text-teal-300 font-semibold font-mono">
                       PWA
                     </span>
                   </button>
                 )}
 
                 {isInstalled && (
-                  <div className="px-3 py-2 flex items-center justify-between text-[11px] text-neutral-400">
+                  <div className="px-3 py-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-neutral-400">
                     <div className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-teal-400" />
+                      <Check className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                       <span>App Installed</span>
                     </div>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-teal-400 font-mono">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-neutral-800 text-teal-600 dark:text-teal-400 font-mono">
                       Standalone
                     </span>
                   </div>
                 )}
 
-                <div className="h-px bg-[#222222] my-1" />
+                <div className="h-px bg-slate-100 dark:bg-[#222222] my-1" />
 
                 <button
                   onClick={() => {

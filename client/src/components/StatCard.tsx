@@ -18,38 +18,38 @@ export const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const variantStyles = {
     default: {
-      border: 'border-[#222222]',
-      iconBg: 'bg-[#181818] text-neutral-300',
-      valueColor: 'text-white',
+      border: 'border-slate-200 dark:border-[#222222]',
+      iconBg: 'bg-slate-100 dark:bg-[#181818] text-slate-700 dark:text-neutral-300',
+      valueColor: 'text-slate-900 dark:text-white',
     },
     warning: {
-      border: 'border-amber-500/20 bg-amber-500/[0.02]',
-      iconBg: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
-      valueColor: 'text-amber-400',
+      border: 'border-amber-200 dark:border-amber-500/20 bg-amber-500/[0.04] dark:bg-amber-500/[0.02]',
+      iconBg: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20',
+      valueColor: 'text-amber-700 dark:text-amber-400',
     },
     danger: {
-      border: 'border-rose-500/20 bg-rose-500/[0.02]',
-      iconBg: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
-      valueColor: 'text-rose-400',
+      border: 'border-rose-200 dark:border-rose-500/20 bg-rose-500/[0.04] dark:bg-rose-500/[0.02]',
+      iconBg: 'bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20',
+      valueColor: 'text-rose-700 dark:text-rose-400',
     },
     success: {
-      border: 'border-emerald-500/20 bg-emerald-500/[0.02]',
-      iconBg: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-      valueColor: 'text-emerald-400',
+      border: 'border-emerald-200 dark:border-emerald-500/20 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.02]',
+      iconBg: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20',
+      valueColor: 'text-emerald-700 dark:text-emerald-400',
     },
     teal: {
-      border: 'border-teal-500/20 bg-teal-500/[0.02]',
-      iconBg: 'bg-teal-500/10 text-teal-400 border border-teal-500/20',
-      valueColor: 'text-teal-400',
+      border: 'border-teal-200 dark:border-teal-500/20 bg-teal-500/[0.04] dark:bg-teal-500/[0.02]',
+      iconBg: 'bg-teal-100 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-500/20',
+      valueColor: 'text-teal-700 dark:text-teal-400',
     },
   }[variant];
 
   return (
     <div
-      className={`p-4 rounded-2xl bg-[#121212] border ${variantStyles.border} backdrop-blur-sm transition-all hover:border-[#333333] shadow-sm`}
+      className={`p-4 rounded-2xl bg-white dark:bg-[#121212] border ${variantStyles.border} backdrop-blur-sm transition-all hover:border-slate-300 dark:hover:border-[#333333] shadow-xs`}
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-neutral-400">{label}</span>
+        <span className="text-xs font-medium text-slate-500 dark:text-neutral-400">{label}</span>
         <div className={`p-2 rounded-xl ${variantStyles.iconBg}`}>
           <Icon className="w-4 h-4" />
         </div>
