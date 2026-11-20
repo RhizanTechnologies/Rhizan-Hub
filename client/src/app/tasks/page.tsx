@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { PriorityBadge } from '@/components/Badge';
 import { Modal } from '@/components/Modal';
+import { CustomSelect } from '@/components/CustomSelect';
 import { Task, TaskPriority, TaskStatus, TaskSubtask, Project, User } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
@@ -873,27 +874,24 @@ export default function TasksPage() {
                 <UserIcon className="w-3 h-3 text-teal-400" />
                 Assignee
               </label>
-              <div className="relative">
-                <select
-                  value={assigneeFilter}
-                  onChange={(e) => setAssigneeFilter(e.target.value)}
-                  className="w-full bg-[#181818] border border-[#282828] text-white text-xs font-medium rounded-xl px-3 py-2.5 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none"
-                >
-                  <option value="MY_TASKS">👤 My Tasks (Personal)</option>
-                  <option value="ALL">👥 All Team Tasks</option>
-                  <optgroup label="Select Specific Person">
-                    {teamMembers.map((m) => {
-                      const mId = (m as any).id || (m as any)._id;
-                      return (
-                        <option key={mId} value={mId}>
-                          👤 {m.name} ({m.title || m.role})
-                        </option>
-                      );
-                    })}
-                  </optgroup>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <CustomSelect
+                value={assigneeFilter}
+                onChange={(val) => setAssigneeFilter(val)}
+                options={[
+                  { value: 'MY_TASKS', label: '👤 My Tasks (Personal)' },
+                  { value: 'ALL', label: '👥 All Team Tasks' },
+                  ...teamMembers.map((m) => {
+                    const mId = (m as any).id || (m as any)._id;
+                    return {
+                      value: mId,
+                      label: `👤 ${m.name} (${m.title || m.role})`,
+                      group: 'Specific Team Members',
+                    };
+                  }),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             {/* 2. Project Filter */}
@@ -902,21 +900,20 @@ export default function TasksPage() {
                 <FolderKanban className="w-3 h-3 text-teal-400" />
                 Project
               </label>
-              <div className="relative">
-                <select
-                  value={projectFilter}
-                  onChange={(e) => setProjectFilter(e.target.value)}
-                  className="w-full bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2.5 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none"
-                >
-                  <option value="ALL">📁 All Projects</option>
-                  {projects.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.name} ({p.clientName || 'Internal'})
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <CustomSelect
+                value={projectFilter}
+                onChange={(val) => setProjectFilter(val)}
+                options={[
+                  { value: 'ALL', label: '📁 All Projects' },
+                  ...projects.map((p) => ({
+                    value: p._id,
+                    label: p.name,
+                    sublabel: p.clientName || 'Internal',
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             {/* 3. Priority Filter */}
@@ -925,20 +922,19 @@ export default function TasksPage() {
                 <Sparkles className="w-3 h-3 text-amber-400" />
                 Priority
               </label>
-              <div className="relative">
-                <select
-                  value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="w-full bg-[#181818] border border-[#282828] text-white text-xs rounded-xl px-3 py-2.5 pr-8 outline-none focus:border-teal-500 cursor-pointer appearance-none"
-                >
-                  <option value="ALL">⚡ All Priorities</option>
-                  <option value="URGENT">🔴 Urgent Priority</option>
-                  <option value="HIGH">🟠 High Priority</option>
-                  <option value="MEDIUM">🟡 Medium Priority</option>
-                  <option value="LOW">🟢 Low Priority</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <CustomSelect
+                value={priorityFilter}
+                onChange={(val) => setPriorityFilter(val)}
+                options={[
+                  { value: 'ALL', label: '⚡ All Priorities' },
+                  { value: 'URGENT', label: '🔴 Urgent Priority' },
+                  { value: 'HIGH', label: '🟠 High Priority' },
+                  { value: 'MEDIUM', label: '🟡 Medium Priority' },
+                  { value: 'LOW', label: '🟢 Low Priority' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             {/* 4. WIP Limit */}
@@ -947,25 +943,20 @@ export default function TasksPage() {
                 <Gauge className="w-3 h-3 text-rose-400" />
                 WIP Bottleneck Limit
               </label>
-              <div className="relative">
-                <select
-                  value={wipLimit}
-                  onChange={(e) => setWipLimit(Number(e.target.value))}
-                  className={`w-full bg-[#181818] border text-xs rounded-xl px-3 py-2.5 pr-8 outline-none cursor-pointer appearance-none transition ${
-                    isCurrentViewWipExceeded
-                      ? 'border-rose-500/60 text-rose-300 font-semibold'
-                      : 'border-[#282828] text-white focus:border-teal-500'
-                  }`}
-                  title="Work-In-Progress (WIP) limit flags bottlenecks when too many tasks are in progress simultaneously."
-                >
-                  <option value={2}>🎯 Max 2 Tasks / Person</option>
-                  <option value={3}>🎯 Max 3 Tasks / Person (Recommended)</option>
-                  <option value={4}>🎯 Max 4 Tasks / Person</option>
-                  <option value={5}>🎯 Max 5 Tasks / Person</option>
-                  <option value={0}>🚫 No WIP Limit</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <CustomSelect
+                value={wipLimit}
+                onChange={(val) => setWipLimit(Number(val))}
+                options={[
+                  { value: 2, label: '🎯 Max 2 Tasks / Person' },
+                  { value: 3, label: '🎯 Max 3 Tasks / Person (Recommended)' },
+                  { value: 4, label: '🎯 Max 4 Tasks / Person' },
+                  { value: 5, label: '🎯 Max 5 Tasks / Person' },
+                  { value: 0, label: '🚫 No WIP Limit' },
+                ]}
+                size="md"
+                className={`w-full ${isCurrentViewWipExceeded ? 'border-rose-500/60 text-rose-300 font-semibold' : ''}`}
+                title="Work-In-Progress (WIP) limit flags bottlenecks when too many tasks are in progress simultaneously."
+              />
             </div>
           </div>
 
@@ -1415,24 +1406,18 @@ export default function TasksPage() {
                         <div className="flex items-center justify-between pt-2.5 border-t border-[#222222] gap-2">
                           {/* Status Dropdown Selector */}
                           <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            <select
+                            <CustomSelect
                               value={task.status}
-                              onChange={(e) => handleQuickStatusChange(task._id, e.target.value as TaskStatus, e)}
-                              className={`text-[10px] font-bold uppercase px-2 py-1 rounded-lg border outline-none cursor-pointer ${
-                                task.status === 'DONE'
-                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                  : task.status === 'IN_PROGRESS'
-                                  ? 'bg-teal-500/10 text-teal-400 border-teal-500/30'
-                                  : task.status === 'REVIEW'
-                                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                  : 'bg-[#121212] text-neutral-300 border-[#2a2a2a]'
-                              }`}
-                            >
-                              <option value="TODO">To Do</option>
-                              <option value="IN_PROGRESS">In Progress</option>
-                              <option value="REVIEW">Review</option>
-                              <option value="DONE">Done</option>
-                            </select>
+                              onChange={(val) => handleQuickStatusChange(task._id, val as TaskStatus)}
+                              options={[
+                                { value: 'TODO', label: 'To Do' },
+                                { value: 'IN_PROGRESS', label: 'In Progress' },
+                                { value: 'REVIEW', label: 'Review' },
+                                { value: 'DONE', label: 'Done' },
+                              ]}
+                              size="sm"
+                              className="min-w-[110px]"
+                            />
                           </div>
 
                           <div className="flex items-center gap-2 text-neutral-400 text-[11px]">
@@ -1582,24 +1567,18 @@ export default function TasksPage() {
                           {t.estimatedHours ? `${t.estimatedHours}h` : '—'}
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                          <select
+                          <CustomSelect
                             value={t.status}
-                            onChange={(e) => handleQuickStatusChange(t._id, e.target.value as TaskStatus, e)}
-                            className={`text-[11px] font-bold rounded-lg px-2.5 py-1 border outline-none cursor-pointer ${
-                              t.status === 'DONE'
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                : t.status === 'IN_PROGRESS'
-                                ? 'bg-teal-500/10 text-teal-400 border-teal-500/30'
-                                : t.status === 'REVIEW'
-                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                : 'bg-neutral-800 text-neutral-300 border-neutral-700'
-                            }`}
-                          >
-                            <option value="TODO">To Do</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="REVIEW">Review</option>
-                            <option value="DONE">Done</option>
-                          </select>
+                            onChange={(val) => handleQuickStatusChange(t._id, val as TaskStatus)}
+                            options={[
+                              { value: 'TODO', label: 'To Do' },
+                              { value: 'IN_PROGRESS', label: 'In Progress' },
+                              { value: 'REVIEW', label: 'Review' },
+                              { value: 'DONE', label: 'Done' },
+                            ]}
+                            size="sm"
+                            className="min-w-[110px]"
+                          />
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1.5">
@@ -1648,19 +1627,21 @@ export default function TasksPage() {
             <div className="flex items-center gap-3 flex-wrap justify-center">
               <div className="flex items-center gap-1.5 text-xs text-neutral-400">
                 <span>Tasks per page:</span>
-                <select
+                <CustomSelect
                   value={tasksPerPage}
-                  onChange={(e) => {
-                    setTasksPerPage(Number(e.target.value));
+                  onChange={(val) => {
+                    setTasksPerPage(Number(val));
                     setCurrentPage(1);
                   }}
-                  className="bg-[#181818] border border-[#282828] text-white text-xs rounded-lg px-2 py-1 outline-none focus:border-teal-500"
-                >
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="50">50</option>
-                  <option value="-1">All</option>
-                </select>
+                  options={[
+                    { value: 10, label: '10' },
+                    { value: 20, label: '20' },
+                    { value: 50, label: '50' },
+                    { value: -1, label: 'All' },
+                  ]}
+                  size="sm"
+                  className="min-w-[70px]"
+                />
               </div>
 
               {tasksPerPage !== -1 && totalListPages > 1 && (
@@ -1731,34 +1712,39 @@ export default function TasksPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
-              <select
+              <CustomSelect
                 value={selectedProjectId}
-                onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-              >
-                <option value="">-- No Project (General) --</option>
-                {projects.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    {p.name} ({p.clientName || 'Internal'})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setSelectedProjectId(val)}
+                placeholder="-- No Project (General) --"
+                options={[
+                  { value: '', label: '-- No Project (General) --' },
+                  ...projects.map((p) => ({
+                    value: p._id,
+                    label: p.name,
+                    sublabel: p.clientName || 'Internal',
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
-              <select
+              <CustomSelect
                 value={selectedAssignedToId}
-                onChange={(e) => setSelectedAssignedToId(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-              >
-                <option value="">-- Myself (Personal Task) --</option>
-                {teamMembers.map((m) => (
-                  <option key={(m as any).id || (m as any)._id} value={(m as any).id || (m as any)._id}>
-                    {m.name} ({m.title || 'Developer'})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setSelectedAssignedToId(val)}
+                placeholder="-- Myself (Personal Task) --"
+                options={[
+                  { value: '', label: '-- Myself (Personal Task) --' },
+                  ...teamMembers.map((m) => ({
+                    value: (m as any).id || (m as any)._id,
+                    label: `${m.name} (${m.title || 'Developer'})`,
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1775,16 +1761,18 @@ export default function TasksPage() {
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
-              <select
+              <CustomSelect
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-              >
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-                <option value="URGENT">Urgent</option>
-              </select>
+                onChange={(val) => setPriority(val as TaskPriority)}
+                options={[
+                  { value: 'LOW', label: '🟢 Low' },
+                  { value: 'MEDIUM', label: '🟡 Medium' },
+                  { value: 'HIGH', label: '🟠 High' },
+                  { value: 'URGENT', label: '🔴 Urgent' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div>
@@ -1900,24 +1888,18 @@ export default function TasksPage() {
               {/* Status Dropdown */}
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-neutral-400 uppercase">Status:</span>
-                <select
+                <CustomSelect
                   value={selectedTask.status}
-                  onChange={(e) => handleQuickStatusChange(selectedTask._id, e.target.value as TaskStatus)}
-                  className={`text-xs font-bold uppercase px-3 py-1.5 rounded-xl border outline-none cursor-pointer ${
-                    selectedTask.status === 'DONE'
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                      : selectedTask.status === 'IN_PROGRESS'
-                      ? 'bg-teal-500/10 text-teal-400 border-teal-500/30'
-                      : selectedTask.status === 'REVIEW'
-                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                      : 'bg-[#181818] text-neutral-300 border-[#333333]'
-                  }`}
-                >
-                  <option value="TODO">To Do</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="REVIEW">Review</option>
-                  <option value="DONE">Done</option>
-                </select>
+                  onChange={(val) => handleQuickStatusChange(selectedTask._id, val as TaskStatus)}
+                  options={[
+                    { value: 'TODO', label: 'To Do' },
+                    { value: 'IN_PROGRESS', label: 'In Progress' },
+                    { value: 'REVIEW', label: 'Review' },
+                    { value: 'DONE', label: 'Done' },
+                  ]}
+                  size="sm"
+                  className="min-w-[120px]"
+                />
               </div>
             </div>
 
@@ -2194,34 +2176,39 @@ export default function TasksPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
-                <select
+                <CustomSelect
                   value={editProjectId}
-                  onChange={(e) => setEditProjectId(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-                >
-                  <option value="">-- No Project (General) --</option>
-                  {projects.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.name} ({p.clientName || 'Internal'})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setEditProjectId(val)}
+                  placeholder="-- No Project (General) --"
+                  options={[
+                    { value: '', label: '-- No Project (General) --' },
+                    ...projects.map((p) => ({
+                      value: p._id,
+                      label: p.name,
+                      sublabel: p.clientName || 'Internal',
+                    })),
+                  ]}
+                  size="md"
+                  className="w-full"
+                />
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
-                <select
+                <CustomSelect
                   value={editAssignedToId}
-                  onChange={(e) => setEditAssignedToId(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-                >
-                  <option value="">-- Myself (Personal Task) --</option>
-                  {teamMembers.map((m) => (
-                    <option key={(m as any).id || (m as any)._id} value={(m as any).id || (m as any)._id}>
-                      {m.name} ({m.title || 'Developer'})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setEditAssignedToId(val)}
+                  placeholder="-- Myself (Personal Task) --"
+                  options={[
+                    { value: '', label: '-- Myself (Personal Task) --' },
+                    ...teamMembers.map((m) => ({
+                      value: (m as any).id || (m as any)._id,
+                      label: `${m.name} (${m.title || 'Developer'})`,
+                    })),
+                  ]}
+                  size="md"
+                  className="w-full"
+                />
               </div>
             </div>
 
@@ -2238,16 +2225,18 @@ export default function TasksPage() {
 
               <div>
                 <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
-                <select
+                <CustomSelect
                   value={editPriority}
-                  onChange={(e) => setEditPriority(e.target.value as TaskPriority)}
-                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-                >
-                  <option value="LOW">Low</option>
-                  <option value="MEDIUM">Medium</option>
-                  <option value="HIGH">High</option>
-                  <option value="URGENT">Urgent</option>
-                </select>
+                  onChange={(val) => setEditPriority(val as TaskPriority)}
+                  options={[
+                    { value: 'LOW', label: '🟢 Low' },
+                    { value: 'MEDIUM', label: '🟡 Medium' },
+                    { value: 'HIGH', label: '🟠 High' },
+                    { value: 'URGENT', label: '🔴 Urgent' },
+                  ]}
+                  size="md"
+                  className="w-full"
+                />
               </div>
 
               <div>

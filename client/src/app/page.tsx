@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { StatCard } from '@/components/StatCard';
 import { PriorityBadge } from '@/components/Badge';
 import { Modal } from '@/components/Modal';
+import { CustomSelect } from '@/components/CustomSelect';
 import {
   CheckSquare,
   AlertCircle,
@@ -832,39 +833,35 @@ export default function DashboardPage() {
 
               {/* Project & Task Selectors */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div className="relative">
-                  <select
-                    value={timerProjectId}
-                    onChange={(e) => setTimerProjectId(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#111111] border border-[#2a2a2a] rounded-xl text-xs text-white outline-none focus:border-teal-500 cursor-pointer appearance-none truncate pr-8"
-                  >
-                    <option value="" disabled>Select Project *</option>
-                    {projects.map((p) => (
-                      <option key={p._id} value={p._id}>
-                        📁 {p.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
+                <CustomSelect
+                  value={timerProjectId}
+                  onChange={(val) => setTimerProjectId(val)}
+                  placeholder="Select Project *"
+                  options={projects.map((p) => ({
+                    value: p._id,
+                    label: p.name,
+                    sublabel: p.clientName || 'Internal',
+                  }))}
+                  size="sm"
+                  className="w-full"
+                />
 
-                <div className="relative">
-                  <select
-                    value={timerTaskId}
-                    onChange={(e) => setTimerTaskId(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#111111] border border-[#2a2a2a] rounded-xl text-xs text-white outline-none focus:border-teal-500 cursor-pointer appearance-none truncate pr-8"
-                  >
-                    <option value="">(Optional) Link Task</option>
-                    {tasks
+                <CustomSelect
+                  value={timerTaskId}
+                  onChange={(val) => setTimerTaskId(val)}
+                  placeholder="(Optional) Link Task"
+                  options={[
+                    { value: '', label: '(Optional) Link Task' },
+                    ...tasks
                       .filter((t) => !timerProjectId || (typeof t.project === 'object' ? t.project?._id === timerProjectId : t.project === timerProjectId))
-                      .map((t) => (
-                        <option key={t._id} value={t._id}>
-                          ✓ {t.title}
-                        </option>
-                      ))}
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
+                      .map((t) => ({
+                        value: t._id,
+                        label: t.title,
+                      })),
+                  ]}
+                  size="sm"
+                  className="w-full"
+                />
               </div>
 
               {/* Timer Controls & Quick Presets */}
@@ -1318,37 +1315,38 @@ export default function DashboardPage() {
         <form onSubmit={handleManualLogSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-neutral-300 mb-1">Project *</label>
-            <select
+            <CustomSelect
               value={manualProjectId}
-              onChange={(e) => setManualProjectId(e.target.value)}
-              required
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:border-teal-500 outline-none"
-            >
-              <option value="" disabled>Select Project</option>
-              {projects.map((p) => (
-                <option key={p._id} value={p._id}>
-                  📁 {p.name} ({p.clientName || 'Internal'})
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setManualProjectId(val)}
+              placeholder="Select Project"
+              options={projects.map((p) => ({
+                value: p._id,
+                label: p.name,
+                sublabel: p.clientName || 'Internal',
+              }))}
+              size="md"
+              className="w-full"
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-neutral-300 mb-1">Task (Optional)</label>
-            <select
+            <CustomSelect
               value={manualTaskId}
-              onChange={(e) => setManualTaskId(e.target.value)}
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:border-teal-500 outline-none"
-            >
-              <option value="">No linked task</option>
-              {tasks
-                .filter((t) => !manualProjectId || (typeof t.project === 'object' ? t.project?._id === manualProjectId : t.project === manualProjectId))
-                .map((t) => (
-                  <option key={t._id} value={t._id}>
-                    ✓ {t.title}
-                  </option>
-                ))}
-            </select>
+              onChange={(val) => setManualTaskId(val)}
+              placeholder="No linked task"
+              options={[
+                { value: '', label: 'No linked task' },
+                ...tasks
+                  .filter((t) => !manualProjectId || (typeof t.project === 'object' ? t.project?._id === manualProjectId : t.project === manualProjectId))
+                  .map((t) => ({
+                    value: t._id,
+                    label: t.title,
+                  })),
+              ]}
+              size="md"
+              className="w-full"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -1443,32 +1441,36 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-neutral-300 mb-1">Project</label>
-              <select
+              <CustomSelect
                 value={taskProjectId}
-                onChange={(e) => setTaskProjectId(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:border-teal-500 outline-none"
-              >
-                <option value="">No Project</option>
-                {projects.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    📁 {p.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setTaskProjectId(val)}
+                placeholder="No Project"
+                options={[
+                  { value: '', label: 'No Project' },
+                  ...projects.map((p) => ({
+                    value: p._id,
+                    label: p.name,
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-neutral-300 mb-1">Priority</label>
-              <select
+              <CustomSelect
                 value={taskPriority}
-                onChange={(e) => setTaskPriority(e.target.value as any)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:border-teal-500 outline-none"
-              >
-                <option value="URGENT">🔴 Urgent</option>
-                <option value="HIGH">🟠 High</option>
-                <option value="MEDIUM">🟡 Medium</option>
-                <option value="LOW">🟢 Low</option>
-              </select>
+                onChange={(val) => setTaskPriority(val as any)}
+                options={[
+                  { value: 'URGENT', label: '🔴 Urgent' },
+                  { value: 'HIGH', label: '🟠 High' },
+                  { value: 'MEDIUM', label: '🟡 Medium' },
+                  { value: 'LOW', label: '🟢 Low' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 

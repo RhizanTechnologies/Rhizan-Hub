@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Modal } from './Modal';
+import { CustomSelect } from './CustomSelect';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
 import {
@@ -147,18 +148,18 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <span>Executive / Company Role</span>
             <span className="text-[10px] text-teal-400 font-semibold">Options: 👑 CEO, ⚡ CTO, 📊 COO, 👤 Member</span>
           </label>
-          <div className="relative">
-            <select
-              value={role}
-              onChange={(e) => handleRoleChange(e.target.value as UserRole)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white outline-none transition font-medium appearance-none"
-            >
-              <option value="CEO">👑 CEO — Chief Executive Officer</option>
-              <option value="CTO">⚡ CTO — Chief Technology Officer</option>
-              <option value="COO">📊 COO — Chief Operating Officer</option>
-              <option value="MEMBER">👤 Member — Team Member</option>
-            </select>
-          </div>
+          <CustomSelect
+            value={role}
+            onChange={(val) => handleRoleChange(val as UserRole)}
+            options={[
+              { value: 'CEO', label: '👑 CEO — Chief Executive Officer' },
+              { value: 'CTO', label: '⚡ CTO — Chief Technology Officer' },
+              { value: 'COO', label: '📊 COO — Chief Operating Officer' },
+              { value: 'MEMBER', label: '👤 Member — Team Member' },
+            ]}
+            size="md"
+            className="w-full"
+          />
           <p className="text-[10px] text-neutral-400 mt-1">
             CEO, CTO, and COO roles automatically possess full workspace executive privileges.
           </p>
@@ -211,15 +212,17 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <label className="block text-xs font-medium text-neutral-300 mb-1">
               Active Status
             </label>
-            <select
+            <CustomSelect
               value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
-            >
-              <option value="ACTIVE">🟢 Active (Available)</option>
-              <option value="AWAY">🟡 Away (In Meeting / Break)</option>
-              <option value="OFFLINE">⚪ Offline (Off Hours)</option>
-            </select>
+              onChange={(val) => setStatus(val as any)}
+              options={[
+                { value: 'ACTIVE', label: '🟢 Active (Available)' },
+                { value: 'AWAY', label: '🟡 Away (In Meeting / Break)' },
+                { value: 'OFFLINE', label: '⚪ Offline (Off Hours)' },
+              ]}
+              size="md"
+              className="w-full"
+            />
           </div>
 
           <div>

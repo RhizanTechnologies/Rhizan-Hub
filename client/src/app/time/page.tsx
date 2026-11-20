@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
+import { CustomSelect } from '@/components/CustomSelect';
 import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
 import { TimeEntry, Project, Task, WeeklyTeamMemberSummary } from '@/types';
@@ -999,40 +1000,38 @@ export default function TimeTrackingPage() {
                 </div>
 
                 {/* Project Selector */}
-                <div className="lg:col-span-3 relative">
-                  <select
+                <div className="lg:col-span-3">
+                  <CustomSelect
                     value={selectedProjectId}
-                    onChange={(e) => {
-                      setSelectedProjectId(e.target.value);
+                    onChange={(val) => {
+                      setSelectedProjectId(val);
                       setSelectedTaskId('');
                     }}
-                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-2xl px-3.5 py-2.5 pr-9 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer font-medium truncate"
-                  >
-                    <option value="">-- Choose Project --</option>
-                    {projects.map((p) => (
-                      <option key={p._id} value={p._id}>
-                        {p.name} ({p.clientName || 'Internal'})
-                      </option>
-                    ))}
-                  </select>
-                  <FolderKanban className="w-3.5 h-3.5 text-teal-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    placeholder="-- Choose Project --"
+                    options={projects.map((p) => ({
+                      value: p._id,
+                      label: p.name,
+                      sublabel: p.clientName || 'Internal',
+                    }))}
+                    className="rounded-2xl py-2.5 bg-[#181818] border-[#2a2a2a]"
+                  />
                 </div>
 
                 {/* Optional Task Selector */}
-                <div className="lg:col-span-2 relative">
-                  <select
+                <div className="lg:col-span-2">
+                  <CustomSelect
                     value={selectedTaskId}
-                    onChange={(e) => setSelectedTaskId(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-2xl px-3 py-2.5 pr-7 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer truncate"
-                  >
-                    <option value="">-- Task (Optional) --</option>
-                    {projectTasks.map((t) => (
-                      <option key={t._id} value={t._id}>
-                        {t.title}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3 h-3 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    onChange={(val) => setSelectedTaskId(val)}
+                    placeholder="-- Task (Optional) --"
+                    options={[
+                      { value: '', label: '-- Task (Optional) --' },
+                      ...projectTasks.map((t) => ({
+                        value: t._id,
+                        label: t.title,
+                      })),
+                    ]}
+                    className="rounded-2xl py-2.5 bg-[#181818] border-[#2a2a2a]"
+                  />
                 </div>
 
                 {/* Action Column: Digital Timer & Start/Stop OR Manual Input */}
@@ -1258,18 +1257,20 @@ export default function TimeTrackingPage() {
                       <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider shrink-0">
                         Project:
                       </span>
-                      <select
-                        value={projectFilter}
-                        onChange={(e) => setProjectFilter(e.target.value)}
-                        className="bg-[#181818] border border-[#2a2a2a] text-white text-xs rounded-xl px-3 py-1.5 outline-none cursor-pointer flex-1 sm:flex-none sm:w-48"
-                      >
-                        <option value="ALL">All Projects</option>
-                        {projects.map((p) => (
-                          <option key={p._id} value={p._id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="flex-1 sm:flex-none sm:w-48">
+                        <CustomSelect
+                          value={projectFilter}
+                          onChange={(val) => setProjectFilter(val)}
+                          options={[
+                            { value: 'ALL', label: 'All Projects' },
+                            ...projects.map((p) => ({
+                              value: p._id,
+                              label: p.name,
+                            })),
+                          ]}
+                          size="sm"
+                        />
+                      </div>
                     </div>
 
                     {/* Date Range Filter */}
@@ -1529,20 +1530,23 @@ export default function TimeTrackingPage() {
                 <div className="flex items-center gap-3 flex-wrap justify-center">
                   <div className="flex items-center gap-1.5 text-xs text-neutral-400">
                     <span>Days per page:</span>
-                    <select
-                      value={daysPerPage}
-                      onChange={(e) => {
-                        setDaysPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                      className="bg-[#181818] border border-[#282828] text-white text-xs rounded-lg px-2 py-1 outline-none focus:border-teal-500"
-                    >
-                      <option value="3">3</option>
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="20">20</option>
-                      <option value="-1">All</option>
-                    </select>
+                    <div className="w-24">
+                      <CustomSelect
+                        value={daysPerPage}
+                        onChange={(val) => {
+                          setDaysPerPage(Number(val));
+                          setCurrentPage(1);
+                        }}
+                        options={[
+                          { value: 3, label: '3 days' },
+                          { value: 5, label: '5 days' },
+                          { value: 10, label: '10 days' },
+                          { value: 20, label: '20 days' },
+                          { value: -1, label: 'All' },
+                        ]}
+                        size="sm"
+                      />
+                    </div>
                   </div>
 
                   {daysPerPage !== -1 && totalPages > 1 && (
@@ -2003,21 +2007,19 @@ export default function TimeTrackingPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Project *
               </label>
-              <select
+              <CustomSelect
                 value={editProject}
-                onChange={(e) => {
-                  setEditProject(e.target.value);
+                onChange={(val) => {
+                  setEditProject(val);
                   setEditTask('');
                 }}
-                required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                {projects.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    {p.name} {p.clientName ? `(${p.clientName})` : ''}
-                  </option>
-                ))}
-              </select>
+                placeholder="Select Project"
+                options={projects.map((p) => ({
+                  value: p._id,
+                  label: p.name,
+                  sublabel: p.clientName,
+                }))}
+              />
             </div>
 
             {tasks.filter((t) => (t.project as any)?._id === editProject || (t.project as any) === editProject).length > 0 && (
@@ -2025,20 +2027,20 @@ export default function TimeTrackingPage() {
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
                   Associated Task (Optional)
                 </label>
-                <select
+                <CustomSelect
                   value={editTask}
-                  onChange={(e) => setEditTask(e.target.value)}
-                  className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-                >
-                  <option value="">No task linked</option>
-                  {tasks
-                    .filter((t) => (t.project as any)?._id === editProject || (t.project as any) === editProject)
-                    .map((t) => (
-                      <option key={t._id} value={t._id}>
-                        {t.title}
-                      </option>
-                    ))}
-                </select>
+                  onChange={(val) => setEditTask(val)}
+                  placeholder="No task linked"
+                  options={[
+                    { value: '', label: 'No task linked' },
+                    ...tasks
+                      .filter((t) => (t.project as any)?._id === editProject || (t.project as any) === editProject)
+                      .map((t) => ({
+                        value: t._id,
+                        label: t.title,
+                      })),
+                  ]}
+                />
               </div>
             )}
 

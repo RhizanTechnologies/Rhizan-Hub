@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
+import { CustomSelect } from '@/components/CustomSelect';
 import { Project, Client, User, ResourceLink, Task, TaskStatus, ProjectMilestone, ProjectDeliverable } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
@@ -1417,20 +1418,22 @@ export default function ProjectDetailPage() {
                     required
                     className="w-full bg-[#101010] border border-[#282828] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
                   />
-                  <select
+                  <CustomSelect
                     value={linkCategory}
-                    onChange={(e) => setLinkCategory(e.target.value as any)}
-                    className="w-full bg-[#101010] border border-[#282828] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
-                  >
-                    <option value="SRS">Software Requirements Specification (SRS)</option>
-                    <option value="REQUIREMENTS">Requirements & Scope</option>
-                    <option value="FIGMA">Figma Design System</option>
-                    <option value="GITHUB">GitHub Source Code</option>
-                    <option value="LIVE">Live Production URL</option>
-                    <option value="STAGING">Staging / Test Server</option>
-                    <option value="DRIVE">Google Drive Folder</option>
-                    <option value="OTHER">Other Link</option>
-                  </select>
+                    onChange={(val) => setLinkCategory(val as any)}
+                    options={[
+                      { value: 'SRS', label: 'Software Requirements Specification (SRS)' },
+                      { value: 'REQUIREMENTS', label: 'Requirements & Scope' },
+                      { value: 'FIGMA', label: 'Figma Design System' },
+                      { value: 'GITHUB', label: 'GitHub Source Code' },
+                      { value: 'LIVE', label: 'Live Production URL' },
+                      { value: 'STAGING', label: 'Staging / Test Server' },
+                      { value: 'DRIVE', label: 'Google Drive Folder' },
+                      { value: 'OTHER', label: 'Other Link' },
+                    ]}
+                    size="sm"
+                    className="w-full"
+                  />
                   <div className="flex justify-end gap-2 pt-1">
                     <button
                       type="button"
@@ -1787,22 +1790,18 @@ export default function ProjectDetailPage() {
                               )}
 
                               {/* Status Dropdown */}
-                              <select
+                              <CustomSelect
                                 value={m.status}
-                                onChange={(e) => handleUpdateMilestoneStatus(mIdx, e.target.value)}
-                                className={`text-[11px] font-bold uppercase px-2.5 py-1 rounded-lg border outline-none cursor-pointer transition ${
-                                  m.status === 'COMPLETED'
-                                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
-                                    : m.status === 'IN_PROGRESS'
-                                    ? 'bg-teal-950/60 text-teal-300 border-teal-500/40 ring-1 ring-teal-500/30'
-                                    : 'bg-[#0b1320] text-slate-300 border-[#223147]'
-                                }`}
-                              >
-                                <option value="PENDING" className="bg-[#0f172a] text-slate-300">Pending</option>
-                                <option value="IN_PROGRESS" className="bg-[#0f172a] text-teal-300">In Progress</option>
-                                <option value="COMPLETED" className="bg-[#0f172a] text-emerald-300">Completed</option>
-                                <option value="CANCELLED" className="bg-[#0f172a] text-rose-300">Cancelled</option>
-                              </select>
+                                onChange={(val) => handleUpdateMilestoneStatus(mIdx, val)}
+                                options={[
+                                  { value: 'PENDING', label: 'Pending' },
+                                  { value: 'IN_PROGRESS', label: 'In Progress' },
+                                  { value: 'COMPLETED', label: 'Completed' },
+                                  { value: 'CANCELLED', label: 'Cancelled' },
+                                ]}
+                                size="sm"
+                                className="min-w-[120px]"
+                              />
 
                               <button
                                 type="button"
@@ -2067,24 +2066,18 @@ export default function ProjectDetailPage() {
                             </span>
                           )}
                           <PriorityBadge priority={t.priority} />
-                          <select
+                          <CustomSelect
                             value={t.status}
-                            onChange={(e) => handleTaskStatusChange(t._id, e.target.value as TaskStatus)}
-                            className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-lg border outline-none cursor-pointer transition ${
-                              t.status === 'DONE'
-                                ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
-                                : t.status === 'IN_PROGRESS'
-                                ? 'bg-teal-950/60 text-teal-300 border-teal-500/40 ring-1 ring-teal-500/30'
-                                : t.status === 'REVIEW'
-                                ? 'bg-amber-950/60 text-amber-300 border-amber-500/40'
-                                : 'bg-[#0b1320] text-slate-300 border-[#223147]'
-                            }`}
-                          >
-                            <option value="TODO" className="bg-[#0f172a] text-slate-300">To Do</option>
-                            <option value="IN_PROGRESS" className="bg-[#0f172a] text-teal-300">In Progress</option>
-                            <option value="REVIEW" className="bg-[#0f172a] text-amber-300">Review</option>
-                            <option value="DONE" className="bg-[#0f172a] text-emerald-300">Done</option>
-                          </select>
+                            onChange={(val) => handleTaskStatusChange(t._id, val as TaskStatus)}
+                            options={[
+                              { value: 'TODO', label: 'To Do' },
+                              { value: 'IN_PROGRESS', label: 'In Progress' },
+                              { value: 'REVIEW', label: 'Review' },
+                              { value: 'DONE', label: 'Done' },
+                            ]}
+                            size="sm"
+                            className="min-w-[110px]"
+                          />
                           <button
                             type="button"
                             onClick={() => handleDeleteTask(t._id)}
@@ -2137,35 +2130,39 @@ export default function ProjectDetailPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Connected Client</label>
-              <select
+              <CustomSelect
                 value={formClientId}
-                onChange={(e) => {
-                  setFormClientId(e.target.value);
-                  const found = clients.find((c) => c._id === e.target.value);
+                onChange={(val) => {
+                  setFormClientId(val);
+                  const found = clients.find((c) => c._id === val);
                   if (found) setFormClientName(found.name);
                 }}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="">-- Choose Existing Client --</option>
-                {clients.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name} ({c.status})
-                  </option>
-                ))}
-              </select>
+                placeholder="-- Choose Existing Client --"
+                options={[
+                  { value: '', label: '-- Choose Existing Client --' },
+                  ...clients.map((c) => ({
+                    value: c._id,
+                    label: `${c.name} (${c.status})`,
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
-              <select
+              <CustomSelect
                 value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="PLANNING">Planning</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="REVIEW">Review / QA</option>
-                <option value="COMPLETED">Completed</option>
-              </select>
+                onChange={(val) => setFormStatus(val)}
+                options={[
+                  { value: 'PLANNING', label: 'Planning' },
+                  { value: 'IN_PROGRESS', label: 'In Progress' },
+                  { value: 'REVIEW', label: 'Review / QA' },
+                  { value: 'COMPLETED', label: 'Completed' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -2174,31 +2171,35 @@ export default function ProjectDetailPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Project Lead (Lead Developer / Tech Lead)
               </label>
-              <select
+              <CustomSelect
                 value={formLeadId}
-                onChange={(e) => setFormLeadId(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="">-- Choose Project Lead (Optional) --</option>
-                {teamMembers.map((m) => (
-                  <option key={m.id || m._id} value={m.id || m._id}>
-                    {m.name} ({m.title || 'Developer'})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setFormLeadId(val)}
+                placeholder="-- Choose Project Lead (Optional) --"
+                options={[
+                  { value: '', label: '-- Choose Project Lead (Optional) --' },
+                  ...teamMembers.map((m) => ({
+                    value: m.id || m._id,
+                    label: `${m.name} (${m.title || 'Developer'})`,
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
-              <select
+              <CustomSelect
                 value={formPriority}
-                onChange={(e) => setFormPriority(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="LOW">Low Priority</option>
-                <option value="MEDIUM">Medium Priority</option>
-                <option value="HIGH">High Priority</option>
-                <option value="URGENT">Urgent Priority</option>
-              </select>
+                onChange={(val) => setFormPriority(val as any)}
+                options={[
+                  { value: 'LOW', label: '🟢 Low Priority' },
+                  { value: 'MEDIUM', label: '🟡 Medium Priority' },
+                  { value: 'HIGH', label: '🟠 High Priority' },
+                  { value: 'URGENT', label: '🔴 Urgent Priority' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -2369,18 +2370,20 @@ export default function ProjectDetailPage() {
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
-              <select
+              <CustomSelect
                 value={taskAssignedToId}
-                onChange={(e) => setTaskAssignedToId(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-              >
-                <option value="">-- Unassigned (Team Backlog) --</option>
-                {teamMembers.map((m) => (
-                  <option key={m._id || m.id} value={m._id || m.id}>
-                    {m.name} ({m.title || 'Developer'})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setTaskAssignedToId(val)}
+                placeholder="-- Unassigned (Team Backlog) --"
+                options={[
+                  { value: '', label: '-- Unassigned (Team Backlog) --' },
+                  ...teamMembers.map((m) => ({
+                    value: m._id || m.id,
+                    label: `${m.name} (${m.title || 'Developer'})`,
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -2397,16 +2400,18 @@ export default function ProjectDetailPage() {
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
-              <select
+              <CustomSelect
                 value={taskPriority}
-                onChange={(e) => setTaskPriority(e.target.value as any)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-              >
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-                <option value="URGENT">Urgent</option>
-              </select>
+                onChange={(val) => setTaskPriority(val as any)}
+                options={[
+                  { value: 'LOW', label: '🟢 Low' },
+                  { value: 'MEDIUM', label: '🟡 Medium' },
+                  { value: 'HIGH', label: '🟠 High' },
+                  { value: 'URGENT', label: '🔴 Urgent' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div>
@@ -2518,24 +2523,18 @@ export default function ProjectDetailPage() {
               {/* Status Dropdown */}
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-neutral-400 uppercase">Status:</span>
-                <select
+                <CustomSelect
                   value={selectedTask.status}
-                  onChange={(e) => handleTaskStatusChange(selectedTask._id, e.target.value as TaskStatus)}
-                  className={`text-xs font-bold uppercase px-3 py-1.5 rounded-xl border outline-none cursor-pointer ${
-                    selectedTask.status === 'DONE'
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                      : selectedTask.status === 'IN_PROGRESS'
-                      ? 'bg-teal-500/10 text-teal-400 border-teal-500/30'
-                      : selectedTask.status === 'REVIEW'
-                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                      : 'bg-[#181818] text-neutral-300 border-[#333333]'
-                  }`}
-                >
-                  <option value="TODO">To Do</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="REVIEW">Review</option>
-                  <option value="DONE">Done</option>
-                </select>
+                  onChange={(val) => handleTaskStatusChange(selectedTask._id, val as TaskStatus)}
+                  options={[
+                    { value: 'TODO', label: 'To Do' },
+                    { value: 'IN_PROGRESS', label: 'In Progress' },
+                    { value: 'REVIEW', label: 'Review' },
+                    { value: 'DONE', label: 'Done' },
+                  ]}
+                  size="sm"
+                  className="min-w-[120px]"
+                />
               </div>
             </div>
 
@@ -2819,18 +2818,20 @@ export default function ProjectDetailPage() {
 
               <div>
                 <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
-                <select
+                <CustomSelect
                   value={editTaskAssignedToId}
-                  onChange={(e) => setEditTaskAssignedToId(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-                >
-                  <option value="">-- Unassigned (Team Backlog) --</option>
-                  {teamMembers.map((m) => (
-                    <option key={m._id || m.id} value={m._id || m.id}>
-                      {m.name} ({m.title || 'Developer'})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setEditTaskAssignedToId(val)}
+                  placeholder="-- Unassigned (Team Backlog) --"
+                  options={[
+                    { value: '', label: '-- Unassigned (Team Backlog) --' },
+                    ...teamMembers.map((m) => ({
+                      value: m._id || m.id,
+                      label: `${m.name} (${m.title || 'Developer'})`,
+                    })),
+                  ]}
+                  size="md"
+                  className="w-full"
+                />
               </div>
             </div>
 
@@ -2847,16 +2848,18 @@ export default function ProjectDetailPage() {
 
               <div>
                 <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
-                <select
+                <CustomSelect
                   value={editTaskPriority}
-                  onChange={(e) => setEditTaskPriority(e.target.value as any)}
-                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-                >
-                  <option value="LOW">Low</option>
-                  <option value="MEDIUM">Medium</option>
-                  <option value="HIGH">High</option>
-                  <option value="URGENT">Urgent</option>
-                </select>
+                  onChange={(val) => setEditTaskPriority(val as any)}
+                  options={[
+                    { value: 'LOW', label: '🟢 Low' },
+                    { value: 'MEDIUM', label: '🟡 Medium' },
+                    { value: 'HIGH', label: '🟠 High' },
+                    { value: 'URGENT', label: '🔴 Urgent' },
+                  ]}
+                  size="md"
+                  className="w-full"
+                />
               </div>
 
               <div>
@@ -2992,19 +2995,21 @@ export default function ProjectDetailPage() {
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Category</label>
-              <select
+              <CustomSelect
                 value={editLinkCategory}
-                onChange={(e) => setEditLinkCategory(e.target.value as any)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
-              >
-                <option value="SRS">SRS & Requirements</option>
-                <option value="GITHUB">GitHub Repository</option>
-                <option value="FIGMA">Figma Design System</option>
-                <option value="LIVE">Live Production App</option>
-                <option value="STAGING">Staging Environment</option>
-                <option value="DRIVE">Google Drive / Docs</option>
-                <option value="OTHER">Other Link</option>
-              </select>
+                onChange={(val) => setEditLinkCategory(val as any)}
+                options={[
+                  { value: 'SRS', label: 'SRS & Requirements' },
+                  { value: 'GITHUB', label: 'GitHub Repository' },
+                  { value: 'FIGMA', label: 'Figma Design System' },
+                  { value: 'LIVE', label: 'Live Production App' },
+                  { value: 'STAGING', label: 'Staging Environment' },
+                  { value: 'DRIVE', label: 'Google Drive / Docs' },
+                  { value: 'OTHER', label: 'Other Link' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">

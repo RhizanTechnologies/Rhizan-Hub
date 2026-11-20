@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
+import { CustomSelect } from '@/components/CustomSelect';
 import { Client, Project, ClientMeeting, ClientPayment, ResourceLink, User } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
@@ -977,18 +978,20 @@ export default function ClientDetailPage() {
                     <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                       Select Project
                     </label>
-                    <select
+                    <CustomSelect
                       value={paymentProjectId}
-                      onChange={(e) => setPaymentProjectId(e.target.value)}
-                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                    >
-                      <option value="">General Client Milestone (All Projects)</option>
-                      {connectedProjects.map((p) => (
-                        <option key={p._id} value={p._id}>
-                          {p.name} ({currencySymbol}{(p.budget || 0).toLocaleString()})
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setPaymentProjectId(val)}
+                      placeholder="General Client Milestone (All Projects)"
+                      options={[
+                        { value: '', label: 'General Client Milestone (All Projects)' },
+                        ...connectedProjects.map((p) => ({
+                          value: p._id,
+                          label: `${p.name} (${currencySymbol}${(p.budget || 0).toLocaleString()})`,
+                        })),
+                      ]}
+                      size="sm"
+                      className="w-full"
+                    />
                   </div>
                   <div>
                     <label className="block text-[11px] font-medium text-neutral-400 mb-1">
@@ -1019,15 +1022,17 @@ export default function ClientDetailPage() {
                     <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                       Payment Status
                     </label>
-                    <select
+                    <CustomSelect
                       value={paymentStatus}
-                      onChange={(e) => setPaymentStatus(e.target.value as any)}
-                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                    >
-                      <option value="PENDING">Pending</option>
-                      <option value="PAID">Paid / Received</option>
-                      <option value="OVERDUE">Overdue</option>
-                    </select>
+                      onChange={(val) => setPaymentStatus(val as any)}
+                      options={[
+                        { value: 'PENDING', label: 'Pending' },
+                        { value: 'PAID', label: 'Paid / Received' },
+                        { value: 'OVERDUE', label: 'Overdue' },
+                      ]}
+                      size="sm"
+                      className="w-full"
+                    />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-[11px] font-medium text-neutral-400 mb-1">
@@ -1167,17 +1172,19 @@ export default function ClientDetailPage() {
                     required
                     className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
                   />
-                  <select
+                  <CustomSelect
                     value={linkCategory}
-                    onChange={(e) => setLinkCategory(e.target.value)}
-                    className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                  >
-                    <option value="CONTRACT">Legal Agreement / Contract</option>
-                    <option value="DOCS">Google Doc / SOW</option>
-                    <option value="DESIGN">Design Mockup / Figma</option>
-                    <option value="DRIVE">Google Drive Assets</option>
-                    <option value="OTHER">Other Resource</option>
-                  </select>
+                    onChange={(val) => setLinkCategory(val)}
+                    options={[
+                      { value: 'CONTRACT', label: 'Legal Agreement / Contract' },
+                      { value: 'DOCS', label: 'Google Doc / SOW' },
+                      { value: 'DESIGN', label: 'Design Mockup / Figma' },
+                      { value: 'DRIVE', label: 'Google Drive Assets' },
+                      { value: 'OTHER', label: 'Other Resource' },
+                    ]}
+                    size="sm"
+                    className="w-full"
+                  />
                 </div>
                 <div className="flex justify-end gap-2 pt-1">
                   <button
@@ -1295,16 +1302,18 @@ export default function ClientDetailPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
-              <select
+              <CustomSelect
                 value={newProjectStatus}
-                onChange={(e) => setNewProjectStatus(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="PLANNING">Planning</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="REVIEW">Under Review</option>
-                <option value="COMPLETED">Completed</option>
-              </select>
+                onChange={(val) => setNewProjectStatus(val as any)}
+                options={[
+                  { value: 'PLANNING', label: 'Planning' },
+                  { value: 'IN_PROGRESS', label: 'In Progress' },
+                  { value: 'REVIEW', label: 'Under Review' },
+                  { value: 'COMPLETED', label: 'Completed' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1312,18 +1321,20 @@ export default function ClientDetailPage() {
             <label className="block text-xs font-medium text-neutral-300 mb-1">
               Project Lead (Lead Developer / Tech Lead)
             </label>
-            <select
+            <CustomSelect
               value={newProjectLeadId}
-              onChange={(e) => setNewProjectLeadId(e.target.value)}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-            >
-              <option value="">-- Select Project Lead (Optional) --</option>
-              {teamMembers.map((m) => (
-                <option key={m.id || m._id} value={m.id || m._id}>
-                  {m.name} ({m.title || 'Developer'})
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setNewProjectLeadId(val)}
+              placeholder="-- Select Project Lead (Optional) --"
+              options={[
+                { value: '', label: '-- Select Project Lead (Optional) --' },
+                ...teamMembers.map((m) => ({
+                  value: m.id || m._id,
+                  label: `${m.name} (${m.title || 'Developer'})`,
+                })),
+              ]}
+              size="md"
+              className="w-full"
+            />
           </div>
 
           <div>
@@ -1400,16 +1411,18 @@ export default function ClientDetailPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
-              <select
+              <CustomSelect
                 value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="ACTIVE">Active Deal Client</option>
-                <option value="PROPOSAL">Proposal Stage</option>
-                <option value="MEETING">Meeting Stage</option>
-                <option value="COMPLETED">Completed</option>
-              </select>
+                onChange={(val) => setFormStatus(val)}
+                options={[
+                  { value: 'ACTIVE', label: 'Active Deal Client' },
+                  { value: 'PROPOSAL', label: 'Proposal Stage' },
+                  { value: 'MEETING', label: 'Meeting Stage' },
+                  { value: 'COMPLETED', label: 'Completed' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1437,16 +1450,18 @@ export default function ClientDetailPage() {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Currency</label>
-              <select
+              <CustomSelect
                 value={formCurrency}
-                onChange={(e) => setFormCurrency(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="USD">USD ($)</option>
-                <option value="ETB">ETB (ETB)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
-              </select>
+                onChange={(val) => setFormCurrency(val)}
+                options={[
+                  { value: 'USD', label: 'USD ($)' },
+                  { value: 'ETB', label: 'ETB (ETB)' },
+                  { value: 'EUR', label: 'EUR (€)' },
+                  { value: 'GBP', label: 'GBP (£)' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
@@ -1624,16 +1639,18 @@ export default function ClientDetailPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
-              <select
+              <CustomSelect
                 value={editMeetingStatus}
-                onChange={(e) => setEditMeetingStatus(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="SCHEDULED">Scheduled</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="RESCHEDULED">Rescheduled</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
+                onChange={(val) => setEditMeetingStatus(val)}
+                options={[
+                  { value: 'SCHEDULED', label: 'Scheduled' },
+                  { value: 'COMPLETED', label: 'Completed' },
+                  { value: 'RESCHEDULED', label: 'Rescheduled' },
+                  { value: 'CANCELLED', label: 'Cancelled' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Location or Link</label>
@@ -1695,18 +1712,20 @@ export default function ClientDetailPage() {
 
           <div>
             <label className="block text-xs font-medium text-neutral-300 mb-1">Select Project</label>
-            <select
+            <CustomSelect
               value={editPaymentProjectId}
-              onChange={(e) => setEditPaymentProjectId(e.target.value)}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-            >
-              <option value="">General Client Milestone (All Projects)</option>
-              {connectedProjects.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setEditPaymentProjectId(val)}
+              placeholder="General Client Milestone (All Projects)"
+              options={[
+                { value: '', label: 'General Client Milestone (All Projects)' },
+                ...connectedProjects.map((p) => ({
+                  value: p._id,
+                  label: p.name,
+                })),
+              ]}
+              size="md"
+              className="w-full"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -1735,15 +1754,17 @@ export default function ClientDetailPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Payment Status</label>
-              <select
+              <CustomSelect
                 value={editPaymentStatus}
-                onChange={(e) => setEditPaymentStatus(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="PENDING">Pending</option>
-                <option value="PAID">Paid / Received</option>
-                <option value="OVERDUE">Overdue</option>
-              </select>
+                onChange={(val) => setEditPaymentStatus(val as any)}
+                options={[
+                  { value: 'PENDING', label: 'Pending' },
+                  { value: 'PAID', label: 'Paid / Received' },
+                  { value: 'OVERDUE', label: 'Overdue' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
+import { CustomSelect } from '@/components/CustomSelect';
 import { Project, Client, User, ResourceLink, Task } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
@@ -492,17 +493,19 @@ export default function ProjectsPage() {
               />
             </div>
 
-            <select
+            <CustomSelect
               value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-xl px-2.5 py-1.5 text-xs text-slate-700 dark:text-neutral-300 outline-none focus:border-teal-500 transition shadow-xs"
-            >
-              <option value="ALL">All Priorities</option>
-              <option value="URGENT">Urgent</option>
-              <option value="HIGH">High</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="LOW">Low</option>
-            </select>
+              onChange={(val) => setPriorityFilter(val)}
+              options={[
+                { value: 'ALL', label: 'All Priorities' },
+                { value: 'URGENT', label: '🔴 Urgent' },
+                { value: 'HIGH', label: '🟠 High' },
+                { value: 'MEDIUM', label: '🟡 Medium' },
+                { value: 'LOW', label: '🟢 Low' },
+              ]}
+              size="sm"
+              className="min-w-[130px]"
+            />
           </div>
         </div>
 
@@ -1003,19 +1006,21 @@ export default function ProjectsPage() {
                       required
                       className="col-span-2 w-full bg-[#121212] border border-[#2a2a2a] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
                     />
-                    <select
+                    <CustomSelect
                       value={newLinkCategory}
-                      onChange={(e) => setNewLinkCategory(e.target.value as any)}
-                      className="col-span-2 w-full bg-[#121212] border border-[#2a2a2a] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
-                    >
-                      <option value="LIVE">Live Production Site</option>
-                      <option value="STAGING">Staging / Demo URL</option>
-                      <option value="GITHUB">GitHub Repository</option>
-                      <option value="FIGMA">Figma Design System</option>
-                      <option value="DRIVE">Google Drive / Assets</option>
-                      <option value="DOCS">Documentation / Wiki</option>
-                      <option value="OTHER">Other Link</option>
-                    </select>
+                      onChange={(val) => setNewLinkCategory(val as any)}
+                      options={[
+                        { value: 'LIVE', label: 'Live Production Site' },
+                        { value: 'STAGING', label: 'Staging / Demo URL' },
+                        { value: 'GITHUB', label: 'GitHub Repository' },
+                        { value: 'FIGMA', label: 'Figma Design System' },
+                        { value: 'DRIVE', label: 'Google Drive / Assets' },
+                        { value: 'DOCS', label: 'Documentation / Wiki' },
+                        { value: 'OTHER', label: 'Other Link' },
+                      ]}
+                      size="sm"
+                      className="col-span-2 w-full"
+                    />
                   </div>
                   <div className="flex justify-end gap-2">
                     <button
@@ -1151,22 +1156,24 @@ export default function ProjectsPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Select Client Account
               </label>
-              <select
+              <CustomSelect
                 value={formClientId}
-                onChange={(e) => {
-                  setFormClientId(e.target.value);
-                  const found = clients.find((c) => c._id === e.target.value);
+                onChange={(val) => {
+                  setFormClientId(val);
+                  const found = clients.find((c) => c._id === val);
                   if (found) setFormClientName(found.name);
                 }}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
-              >
-                <option value="">-- Choose Existing Client --</option>
-                {clients.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name} ({c.status})
-                  </option>
-                ))}
-              </select>
+                placeholder="-- Choose Existing Client --"
+                options={[
+                  { value: '', label: '-- Choose Existing Client --' },
+                  ...clients.map((c) => ({
+                    value: c._id,
+                    label: `${c.name} (${c.status})`,
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div>
@@ -1188,34 +1195,38 @@ export default function ProjectsPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Project Lead (Lead Developer / Tech Lead)
               </label>
-              <select
+              <CustomSelect
                 value={formLeadId}
-                onChange={(e) => setFormLeadId(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
-              >
-                <option value="">-- Choose Project Lead (Optional) --</option>
-                {teamMembers.map((m) => (
-                  <option key={m.id || m._id} value={m.id || m._id}>
-                    {m.name} ({m.title || 'Developer'})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setFormLeadId(val)}
+                placeholder="-- Choose Project Lead (Optional) --"
+                options={[
+                  { value: '', label: '-- Choose Project Lead (Optional) --' },
+                  ...teamMembers.map((m) => ({
+                    value: m.id || m._id,
+                    label: `${m.name} (${m.title || 'Developer'})`,
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Project Priority
               </label>
-              <select
+              <CustomSelect
                 value={formPriority}
-                onChange={(e) => setFormPriority(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
-              >
-                <option value="LOW">Low Priority</option>
-                <option value="MEDIUM">Medium Priority</option>
-                <option value="HIGH">High Priority</option>
-                <option value="URGENT">Urgent Priority</option>
-              </select>
+                onChange={(val) => setFormPriority(val as any)}
+                options={[
+                  { value: 'LOW', label: '🟢 Low Priority' },
+                  { value: 'MEDIUM', label: '🟡 Medium Priority' },
+                  { value: 'HIGH', label: '🟠 High Priority' },
+                  { value: 'URGENT', label: '🔴 Urgent Priority' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1279,16 +1290,18 @@ export default function ProjectsPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Status
               </label>
-              <select
+              <CustomSelect
                 value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
-              >
-                <option value="PLANNING">Planning</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="REVIEW">Review / QA</option>
-                <option value="COMPLETED">Completed</option>
-              </select>
+                onChange={(val) => setFormStatus(val as any)}
+                options={[
+                  { value: 'PLANNING', label: 'Planning' },
+                  { value: 'IN_PROGRESS', label: 'In Progress' },
+                  { value: 'REVIEW', label: 'Review / QA' },
+                  { value: 'COMPLETED', label: 'Completed' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 

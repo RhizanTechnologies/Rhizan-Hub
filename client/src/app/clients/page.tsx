@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
+import { CustomSelect } from '@/components/CustomSelect';
 import { Client, ClientStatus, Project, ClientMeeting, ClientPayment, ResourceLink } from '@/types';
 import { apiFetch } from '@/lib/api';
 import { useRouter } from 'next/navigation';
@@ -946,15 +947,17 @@ export default function ClientsPage() {
                         onChange={(e) => setNewPaymentInvoice(e.target.value)}
                         className="w-full bg-[#121212] border border-[#2a2a2a] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
                       />
-                      <select
+                      <CustomSelect
                         value={newPaymentStatus}
-                        onChange={(e) => setNewPaymentStatus(e.target.value as any)}
-                        className="w-full bg-[#121212] border border-[#2a2a2a] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
-                      >
-                        <option value="PENDING">Pending</option>
-                        <option value="PAID">Paid / Received</option>
-                        <option value="OVERDUE">Overdue</option>
-                      </select>
+                        onChange={(val) => setNewPaymentStatus(val as any)}
+                        options={[
+                          { value: 'PENDING', label: 'Pending' },
+                          { value: 'PAID', label: 'Paid / Received' },
+                          { value: 'OVERDUE', label: 'Overdue' },
+                        ]}
+                        size="sm"
+                        className="w-full"
+                      />
                       <input
                         type="date"
                         placeholder="Due Date"
@@ -1075,18 +1078,20 @@ export default function ClientsPage() {
                         required
                         className="col-span-2 w-full bg-[#121212] border border-[#2a2a2a] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
                       />
-                      <select
+                      <CustomSelect
                         value={newLinkCategory}
-                        onChange={(e) => setNewLinkCategory(e.target.value)}
-                        className="col-span-2 w-full bg-[#121212] border border-[#2a2a2a] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
-                      >
-                        <option value="CONTRACT">Contract / Legal Agreement</option>
-                        <option value="DESIGN">Design Mockup / Figma</option>
-                        <option value="DRIVE">Google Drive Folder</option>
-                        <option value="DOCS">Scope of Work / Documentation</option>
-                        <option value="INVOICE">Invoice Document</option>
-                        <option value="OTHER">Other Resource</option>
-                      </select>
+                        onChange={(val) => setNewLinkCategory(val)}
+                        options={[
+                          { value: 'CONTRACT', label: 'Contract / Legal Agreement' },
+                          { value: 'DESIGN', label: 'Design Mockup / Figma' },
+                          { value: 'DRIVE', label: 'Google Drive Folder' },
+                          { value: 'DOCS', label: 'Scope of Work / Documentation' },
+                          { value: 'INVOICE', label: 'Invoice Document' },
+                          { value: 'OTHER', label: 'Other Resource' },
+                        ]}
+                        size="sm"
+                        className="col-span-2 w-full"
+                      />
                     </div>
                     <div className="flex justify-end gap-2">
                       <button
@@ -1209,18 +1214,20 @@ export default function ClientsPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Account Status
               </label>
-              <select
+              <CustomSelect
                 value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
-              >
-                <option value="ACTIVE">Active Deal Client</option>
-                <option value="PROPOSAL">Proposal Stage</option>
-                <option value="MEETING">Meeting Stage</option>
-                <option value="CONTACTED">Contacted</option>
-                <option value="LEAD">Lead</option>
-                <option value="COMPLETED">Completed Partnership</option>
-              </select>
+                onChange={(val) => setFormStatus(val as any)}
+                options={[
+                  { value: 'ACTIVE', label: 'Active Deal Client' },
+                  { value: 'PROPOSAL', label: 'Proposal Stage' },
+                  { value: 'MEETING', label: 'Meeting Stage' },
+                  { value: 'CONTACTED', label: 'Contacted' },
+                  { value: 'LEAD', label: 'Lead' },
+                  { value: 'COMPLETED', label: 'Completed Partnership' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1441,16 +1448,18 @@ export default function ClientsPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
-              <select
+              <CustomSelect
                 value={editMeetingStatus}
-                onChange={(e) => setEditMeetingStatus(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="SCHEDULED">Scheduled</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="RESCHEDULED">Rescheduled</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
+                onChange={(val) => setEditMeetingStatus(val)}
+                options={[
+                  { value: 'SCHEDULED', label: 'Scheduled' },
+                  { value: 'COMPLETED', label: 'Completed' },
+                  { value: 'RESCHEDULED', label: 'Rescheduled' },
+                  { value: 'CANCELLED', label: 'Cancelled' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Location or Link</label>
@@ -1536,15 +1545,17 @@ export default function ClientsPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Payment Status</label>
-              <select
+              <CustomSelect
                 value={editPaymentStatus}
-                onChange={(e) => setEditPaymentStatus(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
-              >
-                <option value="PENDING">Pending</option>
-                <option value="PAID">Paid / Received</option>
-                <option value="OVERDUE">Overdue</option>
-              </select>
+                onChange={(val) => setEditPaymentStatus(val as any)}
+                options={[
+                  { value: 'PENDING', label: 'Pending' },
+                  { value: 'PAID', label: 'Paid / Received' },
+                  { value: 'OVERDUE', label: 'Overdue' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>

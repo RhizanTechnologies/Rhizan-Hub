@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { StatCard } from '@/components/StatCard';
 import { Modal } from '@/components/Modal';
 import { PriorityBadge } from '@/components/Badge';
+import { CustomSelect } from '@/components/CustomSelect';
 import { apiFetch } from '@/lib/api';
 import {
   ArrowLeft,
@@ -1332,23 +1333,25 @@ export default function TeamMemberDetailPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Company Role
               </label>
-              <select
+              <CustomSelect
                 value={editRole}
-                onChange={(e) => {
-                  const r = e.target.value as any;
+                onChange={(val) => {
+                  const r = val as any;
                   setEditRole(r);
                   if (r === 'CEO') setEditTitle('Founder & CEO');
                   else if (r === 'CTO') setEditTitle('Founder & CTO');
                   else if (r === 'COO') setEditTitle('Founder & COO');
                   else setEditTitle('Founder');
                 }}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-medium"
-              >
-                <option value="CEO">👑 CEO — Chief Executive Officer</option>
-                <option value="CTO">⚡ CTO — Chief Technology Officer</option>
-                <option value="COO">📊 COO — Chief Operating Officer</option>
-                <option value="MEMBER">👤 Member — Team Member</option>
-              </select>
+                options={[
+                  { value: 'CEO', label: '👑 CEO — Chief Executive Officer' },
+                  { value: 'CTO', label: '⚡ CTO — Chief Technology Officer' },
+                  { value: 'COO', label: '📊 COO — Chief Operating Officer' },
+                  { value: 'MEMBER', label: '👤 Member — Team Member' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1399,14 +1402,16 @@ export default function TeamMemberDetailPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Status
               </label>
-              <select
+              <CustomSelect
                 value={editStatus}
-                onChange={(e) => setEditStatus(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
-              >
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-              </select>
+                onChange={(val) => setEditStatus(val)}
+                options={[
+                  { value: 'ACTIVE', label: '🟢 Active' },
+                  { value: 'INACTIVE', label: '⚪ Inactive' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 

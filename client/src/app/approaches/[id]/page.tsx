@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Modal } from '@/components/Modal';
+import { CustomSelect } from '@/components/CustomSelect';
 import { Approach, ApproachStatus, ContactChannel, ContactInteraction, Niche, User } from '@/types';
 import { apiFetch } from '@/lib/api';
 import {
@@ -829,27 +830,26 @@ export default function ApproachDetailPage() {
                     Responsible Team Member
                   </span>
                 </div>
-                <div className="relative">
-                  <select
-                    value={
-                      approach.assignedTo
-                        ? typeof approach.assignedTo === 'object'
-                          ? (approach.assignedTo as any)._id || (approach.assignedTo as any).id
-                          : approach.assignedTo
-                        : ''
-                    }
-                    onChange={(e) => handleQuickReassign(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 pr-8 text-xs text-teal-300 font-medium outline-none focus:border-teal-500 appearance-none cursor-pointer"
-                  >
-                    <option value="">🌐 Open for Everyone (Unassigned)</option>
-                    {teamMembers.map((m) => (
-                      <option key={m.id || m._id} value={m.id || m._id}>
-                        👤 {m.name} {m.title ? `(${m.title})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
+                <CustomSelect
+                  value={
+                    approach.assignedTo
+                      ? typeof approach.assignedTo === 'object'
+                        ? (approach.assignedTo as any)._id || (approach.assignedTo as any).id
+                        : approach.assignedTo
+                      : ''
+                  }
+                  onChange={(val) => handleQuickReassign(val)}
+                  placeholder="🌐 Open for Everyone (Unassigned)"
+                  options={[
+                    { value: '', label: '🌐 Open for Everyone (Unassigned)' },
+                    ...teamMembers.map((m) => ({
+                      value: m.id || m._id,
+                      label: `👤 ${m.name} ${m.title ? `(${m.title})` : ''}`,
+                    })),
+                  ]}
+                  size="md"
+                  className="w-full"
+                />
                 <p className="text-[10px] text-neutral-500 mt-1">
                   Change anytime. The assigned member owns communication and follow-up calls.
                 </p>
@@ -932,17 +932,19 @@ export default function ApproachDetailPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Channel / Method
               </label>
-              <select
+              <CustomSelect
                 value={logChannel}
-                onChange={(e) => setLogChannel(e.target.value as ContactChannel)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                <option value="CALL">Phone Call</option>
-                <option value="WHATSAPP">WhatsApp</option>
-                <option value="EMAIL">Email</option>
-                <option value="MEETING">In-Person Meeting</option>
-                <option value="OTHER">Other / Social Media</option>
-              </select>
+                onChange={(val) => setLogChannel(val as ContactChannel)}
+                options={[
+                  { value: 'CALL', label: '📞 Phone Call' },
+                  { value: 'WHATSAPP', label: '💬 WhatsApp' },
+                  { value: 'EMAIL', label: '✉️ Email' },
+                  { value: 'MEETING', label: '🤝 In-Person Meeting' },
+                  { value: 'OTHER', label: '🌐 Other / Social Media' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div>
@@ -994,18 +996,21 @@ export default function ApproachDetailPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Update Status To
               </label>
-              <select
+              <CustomSelect
                 value={logUpdateStatus}
-                onChange={(e) => setLogUpdateStatus(e.target.value as any)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                <option value="">Keep current ({statusConf.label})</option>
-                <option value="CONTACTED">Contacted</option>
-                <option value="PITCHED">Pitched / Demo Sent</option>
-                <option value="IN_DISCUSSION">In Discussion</option>
-                <option value="DEAL_WON">Deal Won</option>
-                <option value="NOT_INTERESTED">Not Interested</option>
-              </select>
+                onChange={(val) => setLogUpdateStatus(val as any)}
+                placeholder={`Keep current (${statusConf.label})`}
+                options={[
+                  { value: '', label: `Keep current (${statusConf.label})` },
+                  { value: 'CONTACTED', label: 'Contacted' },
+                  { value: 'PITCHED', label: 'Pitched / Demo Sent' },
+                  { value: 'IN_DISCUSSION', label: 'In Discussion' },
+                  { value: 'DEAL_WON', label: 'Deal Won' },
+                  { value: 'NOT_INTERESTED', label: 'Not Interested' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1053,38 +1058,38 @@ export default function ApproachDetailPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Niche / Category *
               </label>
-              <select
+              <CustomSelect
                 value={formNiche}
-                onChange={(e) => setFormNiche(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                {niches.map((n) => (
-                  <option key={n._id} value={n.name}>
-                    {n.name}
-                  </option>
-                ))}
-                {niches.every((n) => n.name !== formNiche) && formNiche && (
-                  <option value={formNiche}>{formNiche}</option>
-                )}
-              </select>
+                onChange={(val) => setFormNiche(val)}
+                options={[
+                  ...niches.map((n) => ({ value: n.name, label: n.name })),
+                  ...(niches.every((n) => n.name !== formNiche) && formNiche
+                    ? [{ value: formNiche, label: formNiche }]
+                    : []),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Outreach Status
               </label>
-              <select
+              <CustomSelect
                 value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value as ApproachStatus)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                <option value="PROSPECT">Prospect</option>
-                <option value="CONTACTED">Contacted</option>
-                <option value="PITCHED">Pitched / Demo Sent</option>
-                <option value="IN_DISCUSSION">In Discussion</option>
-                <option value="DEAL_WON">Deal Won (Client)</option>
-                <option value="NOT_INTERESTED">Not Interested</option>
-              </select>
+                onChange={(val) => setFormStatus(val as ApproachStatus)}
+                options={[
+                  { value: 'PROSPECT', label: 'Prospect' },
+                  { value: 'CONTACTED', label: 'Contacted' },
+                  { value: 'PITCHED', label: 'Pitched / Demo Sent' },
+                  { value: 'IN_DISCUSSION', label: 'In Discussion' },
+                  { value: 'DEAL_WON', label: 'Deal Won (Client)' },
+                  { value: 'NOT_INTERESTED', label: 'Not Interested' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1146,21 +1151,20 @@ export default function ApproachDetailPage() {
               <span>Responsible Person (Lead Follow-up)</span>
               <span className="text-[10px] text-neutral-500 font-normal lowercase">(optional)</span>
             </label>
-            <div className="relative">
-              <select
-                value={formAssignedTo}
-                onChange={(e) => setFormAssignedTo(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-teal-500 appearance-none cursor-pointer"
-              >
-                <option value="">-- Open for Everyone (Unassigned) --</option>
-                {teamMembers.map((member) => (
-                  <option key={member.id || member._id} value={member.id || member._id}>
-                    👤 {member.name} {member.title ? `(${member.title})` : ''}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
+            <CustomSelect
+              value={formAssignedTo}
+              onChange={(val) => setFormAssignedTo(val)}
+              placeholder="-- Open for Everyone (Unassigned) --"
+              options={[
+                { value: '', label: '-- Open for Everyone (Unassigned) --' },
+                ...teamMembers.map((member) => ({
+                  value: member.id || member._id,
+                  label: `👤 ${member.name} ${member.title ? `(${member.title})` : ''}`,
+                })),
+              ]}
+              size="md"
+              className="w-full"
+            />
             <p className="text-[10px] text-neutral-500 mt-1">
               Select who from the team is responsible for managing communications and follow-ups with this lead.
             </p>
@@ -1312,18 +1316,20 @@ export default function ApproachDetailPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Assign Account Lead / Manager
               </label>
-              <select
+              <CustomSelect
                 value={convertAssignedTo}
-                onChange={(e) => setConvertAssignedTo(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                <option value="">Unassigned</option>
-                {teamMembers.map((m) => (
-                  <option key={m._id} value={m._id}>
-                    {m.name} ({m.role})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setConvertAssignedTo(val)}
+                placeholder="Unassigned"
+                options={[
+                  { value: '', label: 'Unassigned' },
+                  ...teamMembers.map((m) => ({
+                    value: m._id,
+                    label: `${m.name} (${m.role})`,
+                  })),
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -1369,14 +1375,16 @@ export default function ApproachDetailPage() {
                 <label className="block text-[11px] font-medium text-neutral-300 mb-1">
                   Currency
                 </label>
-                <select
+                <CustomSelect
                   value={convertCurrency}
-                  onChange={(e) => setConvertCurrency(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-[#333333] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-                >
-                  <option value="ETB">ETB (Birr)</option>
-                  <option value="USD">USD ($)</option>
-                </select>
+                  onChange={(val) => setConvertCurrency(val)}
+                  options={[
+                    { value: 'ETB', label: 'ETB (Birr)' },
+                    { value: 'USD', label: 'USD ($)' },
+                  ]}
+                  size="md"
+                  className="w-full"
+                />
               </div>
             </div>
           </div>
@@ -1385,15 +1393,17 @@ export default function ApproachDetailPage() {
             <label className="block text-xs font-medium text-neutral-300 mb-1">
               Client Pipeline Status
             </label>
-            <select
+            <CustomSelect
               value={convertStatus}
-              onChange={(e) => setConvertStatus(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-            >
-              <option value="ACTIVE">Active Client (Contract signed)</option>
-              <option value="PROPOSAL">Proposal (Awaiting final signoff)</option>
-              <option value="MEETING">Meeting Stage</option>
-            </select>
+              onChange={(val) => setConvertStatus(val)}
+              options={[
+                { value: 'ACTIVE', label: 'Active Client (Contract signed)' },
+                { value: 'PROPOSAL', label: 'Proposal (Awaiting final signoff)' },
+                { value: 'MEETING', label: 'Meeting Stage' },
+              ]}
+              size="md"
+              className="w-full"
+            />
           </div>
 
           <div>
@@ -1445,17 +1455,19 @@ export default function ApproachDetailPage() {
               <label className="block text-xs font-medium text-neutral-300 mb-1">
                 Channel *
               </label>
-              <select
+              <CustomSelect
                 value={editLogChannel}
-                onChange={(e) => setEditLogChannel(e.target.value as ContactChannel)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
-              >
-                <option value="CALL">Phone Call</option>
-                <option value="WHATSAPP">WhatsApp Message / Call</option>
-                <option value="MEETING">In-Person / Office Meeting</option>
-                <option value="EMAIL">Email Outreach</option>
-                <option value="OTHER">Other Touchpoint</option>
-              </select>
+                onChange={(val) => setEditLogChannel(val as ContactChannel)}
+                options={[
+                  { value: 'CALL', label: '📞 Phone Call' },
+                  { value: 'WHATSAPP', label: '💬 WhatsApp Message / Call' },
+                  { value: 'MEETING', label: '🤝 In-Person / Office Meeting' },
+                  { value: 'EMAIL', label: '✉️ Email Outreach' },
+                  { value: 'OTHER', label: '🌐 Other Touchpoint' },
+                ]}
+                size="md"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1">
