@@ -460,7 +460,7 @@ export default function ProjectsPage() {
               className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
                 viewMode === 'GRID'
                   ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                  : 'bg-white dark:bg-[#141414] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#262626]'
+                  : 'bg-white dark:bg-[#101724] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c]'
               }`}
             >
               <FolderKanban className="w-3.5 h-3.5" />
@@ -472,7 +472,7 @@ export default function ProjectsPage() {
               className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
                 viewMode === 'PIPELINE'
                   ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                  : 'bg-white dark:bg-[#141414] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#262626]'
+                  : 'bg-white dark:bg-[#101724] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c]'
               }`}
             >
               <TrendingUp className="w-3.5 h-3.5" />
@@ -489,7 +489,7 @@ export default function ProjectsPage() {
                 placeholder="Search projects or clients..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition shadow-xs"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition shadow-xs"
               />
             </div>
 
@@ -556,7 +556,7 @@ export default function ProjectsPage() {
 
                     {/* Project Lead */}
                     {project.lead && (
-                      <div className="flex items-center gap-2 mb-3 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] w-fit">
+                      <div className="flex items-center gap-2 mb-3 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] w-fit">
                         <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-teal-500 text-black font-extrabold text-[9px] flex items-center justify-center">
                           {project.lead.name?.charAt(0) || 'L'}
                         </div>
@@ -575,7 +575,7 @@ export default function ProjectsPage() {
                     {project.techStack && project.techStack.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         {project.techStack.map((tech, idx) => (
-                          <span key={idx} className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#181818] text-slate-700 dark:text-neutral-300 border border-slate-200 dark:border-[#262626]">
+                          <span key={idx} className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#101724] text-slate-700 dark:text-neutral-300 border border-slate-200 dark:border-[#1e2a3c]">
                             {tech}
                           </span>
                         ))}
@@ -592,7 +592,7 @@ export default function ProjectsPage() {
                             target="_blank"
                             rel="noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#181818] hover:bg-slate-200 dark:hover:bg-[#222222] border border-slate-200 dark:border-[#282828] text-[10px] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 transition"
+                            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#101724] hover:bg-slate-200 dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] text-[10px] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 transition"
                           >
                             {getLinkIcon(l.category)}
                             <span className="truncate max-w-[90px]">{l.title}</span>
@@ -600,7 +600,7 @@ export default function ProjectsPage() {
                           </a>
                         ))}
                         {links.length > 3 && (
-                          <span className="px-1.5 py-1 rounded-lg bg-slate-100 dark:bg-[#181818] border border-slate-200 dark:border-[#282828] text-[10px] text-slate-500 dark:text-neutral-500">
+                          <span className="px-1.5 py-1 rounded-lg bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-[10px] text-slate-500 dark:text-neutral-400">
                             +{links.length - 3} more
                           </span>
                         )}
@@ -613,7 +613,7 @@ export default function ProjectsPage() {
                         <span className="text-slate-500 dark:text-neutral-400">Delivery Progress</span>
                         <span className="font-semibold text-slate-900 dark:text-white font-mono">{project.progress || 0}%</span>
                       </div>
-                      <div className="w-full bg-slate-100 dark:bg-[#202020] h-2 rounded-full overflow-hidden">
+                      <div className="w-full bg-slate-100 dark:bg-[#101724] h-2 rounded-full overflow-hidden">
                         <div
                           className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                           style={{ width: `${project.progress || 0}%` }}
@@ -622,7 +622,7 @@ export default function ProjectsPage() {
                     </div>
 
                     {/* Metadata Stats */}
-                    <div className="grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#242424] text-slate-600 dark:text-neutral-400 mb-4">
+                    <div className="grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-slate-600 dark:text-neutral-400 mb-4">
                       <span className="flex items-center gap-1.5">
                         <Calendar className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
                         {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'No deadline'}
@@ -635,13 +635,13 @@ export default function ProjectsPage() {
                   </div>
 
                   {/* Card Footer: Members & Manage */}
-                  <div className="pt-3 border-t border-slate-100 dark:border-[#1f1f1f] flex items-center justify-between">
+                  <div className="pt-3 border-t border-slate-100 dark:border-[#1e2a3c] flex items-center justify-between">
                     <div className="flex items-center -space-x-1.5 overflow-hidden">
                       {(project.members || []).map((m: any, idx: number) => (
                         <div
                           key={idx}
                           title={m.name}
-                          className="w-6 h-6 rounded-full bg-teal-700 border border-[#121212] flex items-center justify-center text-[10px] font-bold text-white uppercase shadow-sm"
+                          className="w-6 h-6 rounded-full bg-teal-700 border border-white dark:border-[#151d2a] flex items-center justify-center text-[10px] font-bold text-white uppercase shadow-sm"
                         >
                           {m.name?.charAt(0) || 'U'}
                         </div>
@@ -685,7 +685,7 @@ export default function ProjectsPage() {
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
                   mobileStageFilter === 'ALL'
                     ? 'bg-teal-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-[#181818] text-neutral-600 dark:text-neutral-400 border border-slate-200 dark:border-[#262626]'
+                    : 'bg-white dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c]'
                 }`}
               >
                 All Stages ({filteredProjects.length})
@@ -705,7 +705,7 @@ export default function ProjectsPage() {
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition ${
                       isSelected
                         ? 'bg-teal-600 text-white shadow-sm'
-                        : 'bg-white dark:bg-[#181818] text-neutral-600 dark:text-neutral-400 border border-slate-200 dark:border-[#262626]'
+                        : 'bg-white dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c]'
                     }`}
                   >
                     <span>{stg.label}</span>
@@ -730,14 +730,14 @@ export default function ProjectsPage() {
                 return (
                   <div
                     key={stage.id}
-                    className={`bg-slate-100/70 dark:bg-[#121926] border ${stage.borderAccent} rounded-2xl p-3 flex flex-col min-h-[450px] md:min-h-[550px] shadow-xs transition-colors`}
+                    className={`bg-slate-100/70 dark:bg-[#101724] border ${stage.borderAccent} rounded-2xl p-3 flex flex-col min-h-[450px] md:min-h-[550px] shadow-xs transition-colors`}
                   >
                   {/* Column Header */}
                   <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-[#1e2a3c] mb-3">
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-semibold text-slate-900 dark:text-white">{stage.label}</span>
-                        <span className="w-5 h-5 rounded-full bg-white dark:bg-[#1a2332] text-[10px] text-slate-700 dark:text-neutral-400 font-semibold border border-slate-200 dark:border-[#253346] flex items-center justify-center shadow-xs">
+                        <span className="w-5 h-5 rounded-full bg-white dark:bg-[#151d2a] text-[10px] text-slate-700 dark:text-neutral-400 font-semibold border border-slate-200 dark:border-[#222e42] flex items-center justify-center shadow-xs">
                           {stageProjects.length}
                         </span>
                       </div>
@@ -759,7 +759,7 @@ export default function ProjectsPage() {
                         <div
                           key={project._id}
                           onClick={() => router.push(`/projects/${project._id}`)}
-                          className="p-3.5 rounded-xl bg-white dark:bg-[#182130] hover:bg-slate-50 dark:hover:bg-[#1e2a3c] border border-slate-200/90 dark:border-[#243347] hover:border-teal-500/50 cursor-pointer transition shadow-xs hover:shadow-md space-y-2.5 group"
+                          className="p-3.5 rounded-xl bg-white dark:bg-[#151d2a] hover:bg-slate-50 dark:hover:bg-[#1a2436] border border-slate-200/90 dark:border-[#222e42] hover:border-teal-500/50 cursor-pointer transition shadow-xs hover:shadow-md space-y-2.5 group"
                         >
                           {/* Title & Priority */}
                           <div>
@@ -780,7 +780,7 @@ export default function ProjectsPage() {
                           </div>
 
                           {/* Interactive Delivery Progress */}
-                          <div className="space-y-1 p-2 rounded-lg bg-slate-50 dark:bg-[#131b27] border border-slate-200/80 dark:border-[#202c3e]">
+                          <div className="space-y-1 p-2 rounded-lg bg-slate-50 dark:bg-[#101724] border border-slate-200/80 dark:border-[#1e2a3c]">
                             <div className="flex items-center justify-between text-[11px]">
                               <span className="text-slate-500 dark:text-neutral-400">Progress</span>
                               <div className="flex items-center gap-1.5">
@@ -789,7 +789,7 @@ export default function ProjectsPage() {
                                   type="button"
                                   title="Reduce progress by 10%"
                                   onClick={(e) => handleQuickProgressUpdate(e, project._id, -10)}
-                                  className="w-4 h-4 rounded bg-slate-200/80 dark:bg-[#202c3e] hover:bg-slate-300 dark:hover:bg-neutral-700 text-slate-700 dark:text-neutral-300 text-[10px] font-bold flex items-center justify-center transition"
+                                  className="w-4 h-4 rounded bg-slate-200/80 dark:bg-[#1a2436] hover:bg-slate-300 dark:hover:bg-[#222e42] text-slate-700 dark:text-neutral-300 text-[10px] font-bold flex items-center justify-center transition"
                                 >
                                   -
                                 </button>
@@ -798,13 +798,13 @@ export default function ProjectsPage() {
                                   type="button"
                                   title="Advance progress by 10%"
                                   onClick={(e) => handleQuickProgressUpdate(e, project._id, 10)}
-                                  className="w-4 h-4 rounded bg-slate-200/80 dark:bg-[#202c3e] hover:bg-teal-600 hover:text-white text-slate-700 dark:text-neutral-300 text-[10px] font-bold flex items-center justify-center transition"
+                                  className="w-4 h-4 rounded bg-slate-200/80 dark:bg-[#1a2436] hover:bg-teal-600 hover:text-white text-slate-700 dark:text-neutral-300 text-[10px] font-bold flex items-center justify-center transition"
                                 >
                                   +
                                 </button>
                               </div>
                             </div>
-                            <div className="w-full bg-slate-200 dark:bg-[#1a2434] h-1.5 rounded-full overflow-hidden">
+                            <div className="w-full bg-slate-200 dark:bg-[#1a2436] h-1.5 rounded-full overflow-hidden">
                               <div
                                 className={`bg-gradient-to-r ${stage.barColor} h-full rounded-full transition-all duration-300`}
                                 style={{ width: `${prog}%` }}
@@ -842,7 +842,7 @@ export default function ProjectsPage() {
                                   <div
                                     key={idx}
                                     title={m.name}
-                                    className="w-4 h-4 rounded-full bg-teal-700 text-[8px] text-white font-bold flex items-center justify-center border border-white dark:border-[#141414]"
+                                    className="w-4 h-4 rounded-full bg-teal-700 text-[8px] text-white font-bold flex items-center justify-center border border-white dark:border-[#151d2a]"
                                   >
                                     {m.name?.charAt(0) || 'U'}
                                   </div>
@@ -857,7 +857,7 @@ export default function ProjectsPage() {
                           </div>
 
                           {/* Footer with Budget & Deadline */}
-                          <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-[#202c3e] text-[10px] text-slate-500 dark:text-neutral-400">
+                          <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-[#1e2a3c] text-[10px] text-slate-500 dark:text-neutral-400">
                             <span className="text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
                               ${(project.budget || 0).toLocaleString()}
                             </span>
@@ -876,7 +876,7 @@ export default function ProjectsPage() {
                     })}
 
                     {stageProjects.length === 0 && (
-                      <div className="h-36 border border-dashed border-slate-200/90 dark:border-[#243347] rounded-xl flex flex-col items-center justify-center p-3 text-center transition-colors">
+                      <div className="h-36 border border-dashed border-slate-200/90 dark:border-[#1e2a3c] rounded-xl flex flex-col items-center justify-center p-3 text-center transition-colors">
                         <FolderKanban className="w-5 h-5 mb-1.5 text-slate-300 dark:text-neutral-600" />
                         <span className="text-[11px] text-slate-400 dark:text-neutral-500 font-medium">No projects in this stage</span>
                       </div>
@@ -899,16 +899,16 @@ export default function ProjectsPage() {
         {selectedProject && (
           <div className="space-y-5">
             {/* Header Banner */}
-            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-heading text-lg font-bold text-white">{selectedProject.name}</h3>
-                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                  <h3 className="font-heading text-lg font-bold text-slate-900 dark:text-white">{selectedProject.name}</h3>
+                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
                     {selectedProject.status.replace('_', ' ')}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-neutral-400 mt-1">
-                  <span>Client: <strong className="text-teal-400">{selectedProject.clientName}</strong></span>
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-neutral-400 mt-1">
+                  <span>Client: <strong className="text-teal-600 dark:text-teal-400">{selectedProject.clientName}</strong></span>
                   {selectedProject.deadline && (
                     <span>• Deadline: {new Date(selectedProject.deadline).toLocaleDateString()}</span>
                   )}
@@ -919,7 +919,7 @@ export default function ProjectsPage() {
                 <button
                   type="button"
                   onClick={() => openEditModal(selectedProject)}
-                  className="px-3 py-1.5 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#222222] text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#222e42] bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   <span>Edit</span>
@@ -927,7 +927,7 @@ export default function ProjectsPage() {
                 <button
                   type="button"
                   onClick={() => setProjectToDelete(selectedProject)}
-                  className="px-3 py-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete</span>
@@ -937,42 +937,42 @@ export default function ProjectsPage() {
 
             {/* Description */}
             {selectedProject.description && (
-              <div className="p-3.5 rounded-xl bg-[#161616] border border-[#242424] text-xs text-neutral-300 leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-xs text-slate-700 dark:text-neutral-300 leading-relaxed">
                 {selectedProject.description}
               </div>
             )}
 
             {/* Stats Row */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
-                <span className="text-[10px] text-neutral-400 uppercase font-semibold block">Progress</span>
-                <span className="text-base font-bold text-teal-400 font-mono mt-0.5 block">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c]">
+                <span className="text-[10px] text-slate-500 dark:text-neutral-400 uppercase font-semibold block">Progress</span>
+                <span className="text-base font-bold text-teal-600 dark:text-teal-400 font-mono mt-0.5 block">
                   {selectedProject.progress || 0}%
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
-                <span className="text-[10px] text-neutral-400 uppercase font-semibold block">Budget</span>
-                <span className="text-base font-bold text-white font-mono mt-0.5 block">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c]">
+                <span className="text-[10px] text-slate-500 dark:text-neutral-400 uppercase font-semibold block">Budget</span>
+                <span className="text-base font-bold text-slate-900 dark:text-white font-mono mt-0.5 block">
                   {selectedProject.budget ? `$${selectedProject.budget.toLocaleString()}` : 'Flexible'}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-[#161616] border border-[#262626]">
-                <span className="text-[10px] text-neutral-400 uppercase font-semibold block">Linked Tasks</span>
-                <span className="text-base font-bold text-emerald-400 font-mono mt-0.5 block">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c]">
+                <span className="text-[10px] text-slate-500 dark:text-neutral-400 uppercase font-semibold block">Linked Tasks</span>
+                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block">
                   {projectTasks.length} tasks
                 </span>
               </div>
             </div>
 
             {/* SECTION: RESOURCE LINKS (Add many links, view, delete) */}
-            <div className="space-y-3 p-4 rounded-2xl bg-[#141414] border border-[#242424]">
+            <div className="space-y-3 p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c]">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <LinkIcon className="w-3.5 h-3.5 text-teal-400" />
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <LinkIcon className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                     Resource & Project Links ({ (selectedProject.links || []).length })
                   </h4>
-                  <p className="text-[11px] text-neutral-400">
+                  <p className="text-[11px] text-slate-500 dark:text-neutral-400">
                     Add GitHub, Figma, Live demo, Staging, Documentation, or Drive links.
                   </p>
                 </div>
@@ -987,8 +987,8 @@ export default function ProjectsPage() {
 
               {/* Add Link Form */}
               {isAddingLink && (
-                <form onSubmit={handleAddLink} className="p-3 rounded-xl bg-[#181818] border border-teal-500/30 space-y-2.5 animate-fade-in">
-                  <div className="text-xs font-semibold text-teal-300">Add New Resource Link</div>
+                <form onSubmit={handleAddLink} className="p-3 rounded-xl bg-white dark:bg-[#151d2a] border border-teal-500/30 space-y-2.5 animate-fade-in shadow-xs">
+                  <div className="text-xs font-semibold text-teal-600 dark:text-teal-300">Add New Resource Link</div>
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
@@ -996,7 +996,7 @@ export default function ProjectsPage() {
                       value={newLinkTitle}
                       onChange={(e) => setNewLinkTitle(e.target.value)}
                       required
-                      className="col-span-2 w-full bg-[#121212] border border-[#2a2a2a] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
+                      className="col-span-2 w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
                     />
                     <input
                       type="text"
@@ -1004,7 +1004,7 @@ export default function ProjectsPage() {
                       value={newLinkUrl}
                       onChange={(e) => setNewLinkUrl(e.target.value)}
                       required
-                      className="col-span-2 w-full bg-[#121212] border border-[#2a2a2a] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
+                      className="col-span-2 w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
                     />
                     <CustomSelect
                       value={newLinkCategory}
@@ -1026,7 +1026,7 @@ export default function ProjectsPage() {
                     <button
                       type="button"
                       onClick={() => setIsAddingLink(false)}
-                      className="px-3 py-1 rounded-lg text-xs text-neutral-400 hover:text-white"
+                      className="px-3 py-1 rounded-lg text-xs text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
                     >
                       Cancel
                     </button>
@@ -1046,20 +1046,20 @@ export default function ProjectsPage() {
                   selectedProject.links!.map((link, idx) => (
                     <div
                       key={idx}
-                      className="p-2.5 rounded-xl bg-[#181818] border border-[#262626] flex items-center justify-between"
+                      className="p-2.5 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between shadow-xs"
                     >
                       <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-lg bg-[#202020]">
+                        <div className="p-2 rounded-lg bg-slate-100 dark:bg-[#101724]">
                           {getLinkIcon(link.category)}
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-xs text-white">{link.title}</span>
-                            <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400">
+                            <span className="font-semibold text-xs text-slate-900 dark:text-white">{link.title}</span>
+                            <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1a2436] text-slate-600 dark:text-neutral-400 font-semibold">
                               {link.category || 'LINK'}
                             </span>
                           </div>
-                          <span className="text-[11px] text-neutral-500 truncate block max-w-xs">
+                          <span className="text-[11px] text-slate-400 dark:text-neutral-500 truncate block max-w-xs">
                             {link.url}
                           </span>
                         </div>
@@ -1070,14 +1070,14 @@ export default function ProjectsPage() {
                           href={link.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-1.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] text-teal-400 transition"
+                          className="p-1.5 rounded-lg bg-slate-100 dark:bg-[#101724] hover:bg-slate-200 dark:hover:bg-[#1a2436] text-teal-600 dark:text-teal-400 transition"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
                         <button
                           type="button"
                           onClick={() => handleDeleteLink(idx)}
-                          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 dark:text-neutral-500 hover:text-rose-500 dark:hover:text-rose-400 transition"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1085,7 +1085,7 @@ export default function ProjectsPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-neutral-500 italic p-2 text-center">
+                  <p className="text-xs text-slate-500 dark:text-neutral-500 italic p-2 text-center">
                     No resource links added yet. Click &apos;Add Link&apos; above to attach GitHub, Figma, or Live demo URLs.
                   </p>
                 )}
@@ -1094,8 +1094,8 @@ export default function ProjectsPage() {
 
             {/* Assigned Tasks */}
             <div className="space-y-2.5">
-              <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                <CheckSquare className="w-3.5 h-3.5 text-teal-400" />
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <CheckSquare className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                 Tasks in this Project ({projectTasks.length})
               </h4>
 
@@ -1104,13 +1104,13 @@ export default function ProjectsPage() {
                   {projectTasks.map((t) => (
                     <div
                       key={t._id}
-                      className="p-2 rounded-xl bg-[#161616] border border-[#242424] flex items-center justify-between text-xs"
+                      className="p-2 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between text-xs"
                     >
-                      <span className="text-neutral-200 truncate pr-2">{t.title}</span>
+                      <span className="text-slate-800 dark:text-neutral-200 truncate pr-2">{t.title}</span>
                       <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${
                         t.status === 'DONE'
-                          ? 'bg-emerald-500/10 text-emerald-400'
-                          : 'bg-teal-500/10 text-teal-400'
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-teal-500/10 text-teal-600 dark:text-teal-400'
                       }`}>
                         {t.status}
                       </span>
@@ -1118,7 +1118,7 @@ export default function ProjectsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-neutral-500 italic p-3 bg-[#161616] rounded-xl text-center">
+                <p className="text-xs text-slate-500 dark:text-neutral-500 italic p-3 bg-slate-50 dark:bg-[#101724] rounded-xl text-center">
                   No tasks assigned to this project yet.
                 </p>
               )}
@@ -1138,7 +1138,7 @@ export default function ProjectsPage() {
       >
         <form onSubmit={handleSaveProject} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Project Name *
             </label>
             <input
@@ -1147,13 +1147,13 @@ export default function ProjectsPage() {
               onChange={(e) => setFormName(e.target.value)}
               placeholder="e.g. Bakery ERP or RHIZAN Mobile App"
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Select Client Account
               </label>
               <CustomSelect
@@ -1177,7 +1177,7 @@ export default function ProjectsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Or Custom Client Name
               </label>
               <input
@@ -1185,14 +1185,14 @@ export default function ProjectsPage() {
                 value={formClientName}
                 onChange={(e) => setFormClientName(e.target.value)}
                 placeholder="e.g. ABC Bakery / Internal"
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Project Lead (Lead Developer / Tech Lead)
               </label>
               <CustomSelect
@@ -1212,7 +1212,7 @@ export default function ProjectsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Project Priority
               </label>
               <CustomSelect
@@ -1231,7 +1231,7 @@ export default function ProjectsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Tech Stack (Comma-separated)
             </label>
             <input
@@ -1239,12 +1239,12 @@ export default function ProjectsPage() {
               value={formTechStack}
               onChange={(e) => setFormTechStack(e.target.value)}
               placeholder="e.g. Next.js, Node.js, PostgreSQL, Tailwind CSS"
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Project Description
             </label>
             <textarea
@@ -1256,13 +1256,13 @@ export default function ProjectsPage() {
               }}
               placeholder="Describe deliverables, core features, or technical goals..."
               rows={2}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none transition resize-none leading-relaxed overflow-hidden"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition resize-none leading-relaxed overflow-hidden"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Budget ($)
               </label>
               <input
@@ -1270,24 +1270,24 @@ export default function ProjectsPage() {
                 value={formBudget}
                 onChange={(e) => setFormBudget(e.target.value)}
                 placeholder="e.g. 5000"
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Target Deadline
               </label>
               <input
                 type="date"
                 value={formDeadline}
                 onChange={(e) => setFormDeadline(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition min-w-0"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none transition min-w-0"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Status
               </label>
               <CustomSelect
@@ -1307,10 +1307,10 @@ export default function ProjectsPage() {
 
           {/* Team Members Assignment */}
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Assign Team Members
             </label>
-            <div className="flex flex-wrap gap-2 p-2.5 rounded-xl bg-[#181818] border border-[#262626]">
+            <div className="flex flex-wrap gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c]">
               {teamMembers.map((member) => {
                 const isSelected = formMemberIds.includes(member._id || member.id || '');
                 return (
@@ -1328,7 +1328,7 @@ export default function ProjectsPage() {
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition ${
                       isSelected
                         ? 'bg-teal-600 text-white border-teal-500 shadow-sm'
-                        : 'bg-[#141414] text-neutral-400 border-[#262626] hover:text-white'
+                        : 'bg-white dark:bg-[#151d2a] text-slate-700 dark:text-neutral-400 border-slate-200 dark:border-[#1e2a3c] hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     {member.name}
@@ -1338,14 +1338,14 @@ export default function ProjectsPage() {
             </div>
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-2">
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => {
                 setIsCreateModalOpen(false);
                 setIsEditModalOpen(false);
               }}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -1367,15 +1367,15 @@ export default function ProjectsPage() {
       >
         {projectToDelete && (
           <div className="space-y-4">
-            <p className="text-xs text-neutral-300 leading-relaxed">
-              Are you sure you want to delete <span className="font-semibold text-white">{projectToDelete.name}</span>? 
+            <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed">
+              Are you sure you want to delete <span className="font-semibold text-slate-900 dark:text-white">{projectToDelete.name}</span>? 
               This will remove all associated project links and unbind it from its client.
             </p>
-            <div className="flex items-center justify-end gap-2 pt-2">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
               <button
                 type="button"
                 onClick={() => setProjectToDelete(null)}
-                className="px-4 py-2 rounded-xl text-xs text-neutral-400 hover:text-white"
+                className="px-4 py-2 rounded-xl text-xs text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
               >
                 Cancel
               </button>

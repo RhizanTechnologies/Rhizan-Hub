@@ -1082,14 +1082,14 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Project Header Banner */}
-        <div className="p-4 sm:p-6 rounded-3xl bg-[#111111] border border-[#222222] shadow-xl space-y-5">
+        <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-xl space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-white tracking-tight">
+                <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-white tracking-tight">
                   {project.name}
                 </h1>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/30">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/30">
                   {project.status.replace('_', ' ')}
                 </span>
                 {project.priority && (
@@ -1099,40 +1099,40 @@ export default function ProjectDetailPage() {
 
               {/* Project Lead Card */}
               {project.lead && (
-                <div className="flex items-center gap-2.5 mt-2 px-3 py-1.5 rounded-2xl bg-[#161616] border border-amber-500/25 w-fit">
+                <div className="flex items-center gap-2.5 mt-2 px-3 py-1.5 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-amber-500/25 w-fit">
                   <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-500 to-teal-500 text-black font-extrabold text-[10px] flex items-center justify-center shadow-sm">
                     {project.lead.name?.charAt(0) || 'L'}
                   </div>
                   <div className="text-xs">
-                    <span className="text-[9px] uppercase font-bold text-amber-400 mr-1.5">Project Lead:</span>
-                    <strong className="text-white">{project.lead.name}</strong>
-                    <span className="text-neutral-400 text-[11px] ml-1">({project.lead.title || 'Developer'})</span>
+                    <span className="text-[9px] uppercase font-bold text-amber-600 dark:text-amber-400 mr-1.5">Project Lead:</span>
+                    <strong className="text-slate-800 dark:text-white">{project.lead.name}</strong>
+                    <span className="text-slate-500 dark:text-neutral-400 text-[11px] ml-1">({project.lead.title || 'Developer'})</span>
                   </div>
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
-                <div className="flex items-center gap-1 text-neutral-300">
-                  <Building2 className="w-3.5 h-3.5 text-teal-400" />
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-neutral-400 mt-2">
+                <div className="flex items-center gap-1 text-slate-700 dark:text-neutral-300">
+                  <Building2 className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                   <span>Client:</span>
                   {typeof project.clientId === 'object' && (project.clientId as any)?._id ? (
                     <Link
                       href={`/clients/${(project.clientId as any)._id}`}
-                      className="text-teal-400 font-semibold hover:underline flex items-center gap-1"
+                      className="text-teal-600 dark:text-teal-400 font-semibold hover:underline flex items-center gap-1"
                     >
                       {(project.clientId as any).name}
                       <ExternalLink className="w-3 h-3" />
                     </Link>
                   ) : (
-                    <strong className="text-white">{project.clientName || 'Internal'}</strong>
+                    <strong className="text-slate-900 dark:text-white">{project.clientName || 'Internal'}</strong>
                   )}
                 </div>
 
                 {project.deadline && (
-                  <span>• Target Deadline: <strong className="text-white">{new Date(project.deadline).toLocaleDateString()}</strong></span>
+                  <span>• Target Deadline: <strong className="text-slate-900 dark:text-white">{new Date(project.deadline).toLocaleDateString()}</strong></span>
                 )}
                 {project.budget && (
-                  <span>• Budget: <strong className="text-emerald-400">${project.budget.toLocaleString()}</strong></span>
+                  <span>• Budget: <strong className="text-emerald-600 dark:text-emerald-400">${project.budget.toLocaleString()}</strong></span>
                 )}
               </div>
 
@@ -1140,7 +1140,7 @@ export default function ProjectDetailPage() {
               {project.techStack && project.techStack.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-2">
                   {project.techStack.map((tech, idx) => (
-                    <span key={idx} className="text-[11px] px-2.5 py-0.5 rounded-lg bg-[#181818] text-teal-300 border border-[#2a2a2a] font-mono">
+                    <span key={idx} className="text-[11px] px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-[#101724] text-teal-700 dark:text-teal-300 border border-slate-200 dark:border-[#1e2a3c] font-mono">
                       {tech}
                     </span>
                   ))}
@@ -1153,7 +1153,7 @@ export default function ProjectDetailPage() {
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
-                className="px-3.5 py-2 rounded-xl border border-[#262626] bg-[#181818] hover:bg-[#222222] text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
+                className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#222e42] bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
               >
                 <Edit2 className="w-3.5 h-3.5" />
                 <span>Edit Project</span>
@@ -1161,7 +1161,7 @@ export default function ProjectDetailPage() {
               <button
                 type="button"
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="px-3.5 py-2 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
+                className="px-3.5 py-2 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 text-xs font-medium flex items-center gap-1.5 transition"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete</span>
@@ -1171,7 +1171,7 @@ export default function ProjectDetailPage() {
 
           {/* Description */}
           {project.description && (
-            <p className="text-xs text-neutral-300 leading-relaxed border-t border-[#1e1e1e] pt-4">
+            <p className="text-xs text-slate-700 dark:text-neutral-300 leading-relaxed border-t border-slate-100 dark:border-[#1e2a3c] pt-4">
               {project.description}
             </p>
           )}
@@ -1180,22 +1180,22 @@ export default function ProjectDetailPage() {
           <div className="space-y-1.5 pt-2">
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2">
-                <span className="text-neutral-400 font-medium">
+                <span className="text-slate-500 dark:text-neutral-400 font-medium">
                   Delivery Progress ({completedCount}/{tasks.length} tasks, {completedDeliverables}/{totalDeliverables} deliverables)
                 </span>
                 <button
                   type="button"
                   onClick={syncCalculatedProgress}
                   title="Auto-calculate and sync progress to database"
-                  className="px-2 py-0.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 text-[10px] font-semibold flex items-center gap-1 transition"
+                  className="px-2 py-0.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-600 dark:text-teal-400 border border-teal-500/30 text-[10px] font-semibold flex items-center gap-1 transition"
                 >
                   <RefreshCw className="w-2.5 h-2.5" />
                   <span>Auto-Sync</span>
                 </button>
               </div>
-              <span className="font-mono text-teal-400 font-bold">{project.progress ?? progressPercent}%</span>
+              <span className="font-mono text-teal-600 dark:text-teal-400 font-bold">{project.progress ?? progressPercent}%</span>
             </div>
-            <div className="w-full bg-[#1c1c1c] h-2.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-[#101724] h-2.5 rounded-full overflow-hidden">
               <div
                 className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                 style={{ width: `${project.progress ?? progressPercent}%` }}
@@ -1204,10 +1204,10 @@ export default function ProjectDetailPage() {
           </div>
 
           {/* Developer Quick-Launch Command Bar */}
-          <div className="pt-4 border-t border-[#1e1e1e] flex flex-wrap items-center justify-between gap-3">
+          <div className="pt-4 border-t border-slate-100 dark:border-[#1e2a3c] flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+              <span className="text-[11px] font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                 Dev Quick Launch:
               </span>
             </div>
@@ -1219,17 +1219,17 @@ export default function ProjectDetailPage() {
                   href={githubLink.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] border border-[#2d2d2d] hover:border-teal-500/50 text-white text-xs font-medium flex items-center gap-2 transition group shadow-sm"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#101724] hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/50 text-slate-800 dark:text-white text-xs font-medium flex items-center gap-2 transition group shadow-xs"
                 >
-                  <FileCode className="w-3.5 h-3.5 text-neutral-300 group-hover:text-teal-400 transition" />
+                  <FileCode className="w-3.5 h-3.5 text-slate-500 dark:text-neutral-300 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition" />
                   <span>GitHub Repo</span>
-                  <ExternalLink className="w-3 h-3 text-neutral-500 group-hover:text-teal-400" />
+                  <ExternalLink className="w-3 h-3 text-slate-400 dark:text-neutral-500 group-hover:text-teal-600 dark:group-hover:text-teal-400" />
                 </a>
               ) : (
                 <button
                   type="button"
                   onClick={() => openQuickAddLink('GITHUB', 'GitHub Repository')}
-                  className="px-3 py-1.5 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-dashed border-[#282828] hover:border-neutral-500 text-neutral-400 hover:text-white text-xs flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50/50 dark:bg-[#101724]/50 hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-dashed border-slate-300 dark:border-[#1e2a3c] hover:border-teal-500 text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white text-xs flex items-center gap-1.5 transition"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Connect GitHub</span>
@@ -1242,17 +1242,17 @@ export default function ProjectDetailPage() {
                   href={figmaLink.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] border border-[#2d2d2d] hover:border-purple-500/50 text-white text-xs font-medium flex items-center gap-2 transition group shadow-sm"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#101724] hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] hover:border-purple-500/50 text-slate-800 dark:text-white text-xs font-medium flex items-center gap-2 transition group shadow-xs"
                 >
-                  <Layers className="w-3.5 h-3.5 text-purple-400 group-hover:scale-110 transition" />
+                  <Layers className="w-3.5 h-3.5 text-purple-500 group-hover:scale-110 transition" />
                   <span>Figma Design</span>
-                  <ExternalLink className="w-3 h-3 text-neutral-500 group-hover:text-purple-400" />
+                  <ExternalLink className="w-3 h-3 text-slate-400 dark:text-neutral-500 group-hover:text-purple-400" />
                 </a>
               ) : (
                 <button
                   type="button"
                   onClick={() => openQuickAddLink('FIGMA', 'Figma Design System')}
-                  className="px-3 py-1.5 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-dashed border-[#282828] hover:border-purple-500/40 text-neutral-400 hover:text-white text-xs flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50/50 dark:bg-[#101724]/50 hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-dashed border-slate-300 dark:border-[#1e2a3c] hover:border-purple-500/40 text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white text-xs flex items-center gap-1.5 transition"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Connect Figma</span>
@@ -1265,17 +1265,17 @@ export default function ProjectDetailPage() {
                   href={stagingLink.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] border border-[#2d2d2d] hover:border-amber-500/50 text-white text-xs font-medium flex items-center gap-2 transition group shadow-sm"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#101724] hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] hover:border-amber-500/50 text-slate-800 dark:text-white text-xs font-medium flex items-center gap-2 transition group shadow-xs"
                 >
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                   <span>Staging App</span>
-                  <ExternalLink className="w-3 h-3 text-neutral-500 group-hover:text-amber-400" />
+                  <ExternalLink className="w-3 h-3 text-slate-400 dark:text-neutral-500 group-hover:text-amber-500" />
                 </a>
               ) : (
                 <button
                   type="button"
                   onClick={() => openQuickAddLink('STAGING', 'Staging / Test Environment')}
-                  className="px-3 py-1.5 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-dashed border-[#282828] hover:border-amber-500/40 text-neutral-400 hover:text-white text-xs flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50/50 dark:bg-[#101724]/50 hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-dashed border-slate-300 dark:border-[#1e2a3c] hover:border-amber-500/40 text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white text-xs flex items-center gap-1.5 transition"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Set Staging</span>
@@ -1288,17 +1288,17 @@ export default function ProjectDetailPage() {
                   href={liveLink.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] border border-[#2d2d2d] hover:border-emerald-500/50 text-white text-xs font-medium flex items-center gap-2 transition group shadow-sm"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#101724] hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] hover:border-emerald-500/50 text-slate-800 dark:text-white text-xs font-medium flex items-center gap-2 transition group shadow-xs"
                 >
-                  <Globe className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition" />
+                  <Globe className="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition" />
                   <span>Live App</span>
-                  <ExternalLink className="w-3 h-3 text-neutral-500 group-hover:text-emerald-400" />
+                  <ExternalLink className="w-3 h-3 text-slate-400 dark:text-neutral-500 group-hover:text-emerald-500" />
                 </a>
               ) : (
                 <button
                   type="button"
                   onClick={() => openQuickAddLink('LIVE', 'Live Production Application')}
-                  className="px-3 py-1.5 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-dashed border-[#282828] hover:border-emerald-500/40 text-neutral-400 hover:text-white text-xs flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50/50 dark:bg-[#101724]/50 hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-dashed border-slate-300 dark:border-[#1e2a3c] hover:border-emerald-500/40 text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white text-xs flex items-center gap-1.5 transition"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Set Live URL</span>
@@ -1311,17 +1311,17 @@ export default function ProjectDetailPage() {
                   href={srsLink.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] border border-[#2d2d2d] hover:border-teal-500/50 text-white text-xs font-medium flex items-center gap-2 transition group shadow-sm"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#101724] hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/50 text-slate-800 dark:text-white text-xs font-medium flex items-center gap-2 transition group shadow-xs"
                 >
-                  <FileText className="w-3.5 h-3.5 text-teal-400 group-hover:scale-110 transition" />
+                  <FileText className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 group-hover:scale-110 transition" />
                   <span>SRS / Scope</span>
-                  <ExternalLink className="w-3 h-3 text-neutral-500 group-hover:text-teal-400" />
+                  <ExternalLink className="w-3 h-3 text-slate-400 dark:text-neutral-500 group-hover:text-teal-400" />
                 </a>
               ) : (
                 <button
                   type="button"
                   onClick={() => openQuickAddLink('SRS', 'Software Requirements Specification (SRS)')}
-                  className="px-3 py-1.5 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-dashed border-[#282828] hover:border-teal-500/40 text-neutral-400 hover:text-white text-xs flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50/50 dark:bg-[#101724]/50 hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-dashed border-slate-300 dark:border-[#1e2a3c] hover:border-teal-500/40 text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white text-xs flex items-center gap-1.5 transition"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Attach SRS</span>
@@ -1332,21 +1332,21 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center justify-between border-b border-[#222222] pb-3 overflow-x-auto max-w-full no-scrollbar whitespace-nowrap">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#222e42] pb-3 overflow-x-auto max-w-full no-scrollbar whitespace-nowrap">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveTab('MILESTONES')}
               className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
                 activeTab === 'MILESTONES'
-                  ? 'bg-teal-500/10 text-teal-300 border border-teal-500/30 shadow-sm'
-                  : 'text-neutral-400 hover:text-white hover:bg-[#181818] border border-transparent'
+                  ? 'bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/30 shadow-sm'
+                  : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724] border border-transparent'
               }`}
             >
-              <Milestone className="w-4 h-4 text-teal-400" />
+              <Milestone className="w-4 h-4 text-teal-600 dark:text-teal-400" />
               <span>Milestones & Deliverables Roadmap</span>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                activeTab === 'MILESTONES' ? 'bg-teal-500/20 text-teal-200' : 'bg-[#222222] text-neutral-400'
+                activeTab === 'MILESTONES' ? 'bg-teal-500/20 text-teal-700 dark:text-teal-200' : 'bg-slate-100 dark:bg-[#1a2436] text-slate-600 dark:text-neutral-400'
               }`}>
                 {milestones.length}
               </span>
@@ -1357,14 +1357,14 @@ export default function ProjectDetailPage() {
               onClick={() => setActiveTab('TASKS')}
               className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
                 activeTab === 'TASKS'
-                  ? 'bg-teal-500/10 text-teal-300 border border-teal-500/30 shadow-sm'
-                  : 'text-neutral-400 hover:text-white hover:bg-[#181818] border border-transparent'
+                  ? 'bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/30 shadow-sm'
+                  : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724] border border-transparent'
               }`}
             >
-              <CheckSquare className="w-4 h-4 text-teal-400" />
+              <CheckSquare className="w-4 h-4 text-teal-600 dark:text-teal-400" />
               <span>Developer Tasks</span>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                activeTab === 'TASKS' ? 'bg-teal-500/20 text-teal-200' : 'bg-[#222222] text-neutral-400'
+                activeTab === 'TASKS' ? 'bg-teal-500/20 text-teal-700 dark:text-teal-200' : 'bg-slate-100 dark:bg-[#1a2436] text-slate-600 dark:text-neutral-400'
               }`}>
                 {tasks.length}
               </span>
@@ -1377,14 +1377,14 @@ export default function ProjectDetailPage() {
           {/* LEFT COLUMN: Resource Links & Assigned Developers */}
           <div className="space-y-6">
             {/* Resource & Requirement Links (SRS, Figma, GitHub, Live) */}
-            <div className="p-5 rounded-2xl bg-[#121212] border border-[#222222] space-y-4">
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-heading text-sm font-bold text-white flex items-center gap-1.5">
-                    <LinkIcon className="w-4 h-4 text-teal-400" />
+                  <h3 className="font-heading text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <LinkIcon className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                     Resource & Requirement Links
                   </h3>
-                  <p className="text-[11px] text-neutral-400 mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-0.5">
                     SRS document, Figma mockups, GitHub, and staging links.
                   </p>
                 </div>
@@ -1400,15 +1400,15 @@ export default function ProjectDetailPage() {
 
               {/* Add Link Form */}
               {isAddingLink && (
-                <form onSubmit={handleAddLink} className="p-3.5 rounded-xl bg-[#161616] border border-teal-500/30 space-y-2.5">
-                  <span className="text-xs font-bold text-teal-300">Attach New Resource</span>
+                <form onSubmit={handleAddLink} className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#101724] border border-teal-500/30 space-y-2.5 shadow-xs animate-fade-in">
+                  <span className="text-xs font-bold text-teal-600 dark:text-teal-300">Attach New Resource</span>
                   <input
                     type="text"
                     placeholder="Link Title (e.g. Software Requirements Specification - SRS)"
                     value={linkTitle}
                     onChange={(e) => setLinkTitle(e.target.value)}
                     required
-                    className="w-full bg-[#101010] border border-[#282828] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
+                    className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
                   />
                   <input
                     type="text"
@@ -1416,7 +1416,7 @@ export default function ProjectDetailPage() {
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
                     required
-                    className="w-full bg-[#101010] border border-[#282828] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-teal-500"
+                    className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
                   />
                   <CustomSelect
                     value={linkCategory}
@@ -1434,11 +1434,11 @@ export default function ProjectDetailPage() {
                     size="sm"
                     className="w-full"
                   />
-                  <div className="flex justify-end gap-2 pt-1">
+                  <div className="flex justify-end gap-2 pt-1 border-t border-slate-200 dark:border-[#1e2a3c]">
                     <button
                       type="button"
                       onClick={() => setIsAddingLink(false)}
-                      className="px-3 py-1 rounded-lg text-xs text-neutral-400 hover:text-white"
+                      className="px-3 py-1 rounded-lg text-xs text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
                     >
                       Cancel
                     </button>
@@ -1458,20 +1458,20 @@ export default function ProjectDetailPage() {
                   links.map((l, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-xl bg-[#161616] border border-[#262626] flex items-center justify-between group"
+                      className="p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between group shadow-xs"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                        <div className="p-2 rounded-lg bg-[#202020] shrink-0">
+                        <div className="p-2 rounded-lg bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] shrink-0">
                           {getLinkIcon(l.category)}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-xs text-white truncate">{l.title}</span>
-                            <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-400 font-semibold shrink-0">
+                            <span className="font-semibold text-xs text-slate-900 dark:text-white truncate">{l.title}</span>
+                            <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-slate-100 dark:bg-[#1a2436] text-slate-600 dark:text-neutral-400 font-semibold shrink-0">
                               {l.category || 'LINK'}
                             </span>
                           </div>
-                          <span className="text-[11px] text-neutral-500 truncate block mt-0.5">
+                          <span className="text-[11px] text-slate-400 dark:text-neutral-500 truncate block mt-0.5">
                             {l.url}
                           </span>
                         </div>
@@ -1482,7 +1482,7 @@ export default function ProjectDetailPage() {
                           href={l.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-1.5 rounded-lg bg-[#202020] hover:bg-[#282828] text-teal-400 transition"
+                          className="p-1.5 rounded-lg bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] text-teal-600 dark:text-teal-400 transition"
                           title="Open link in new tab"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
@@ -1490,7 +1490,7 @@ export default function ProjectDetailPage() {
                         <button
                           type="button"
                           onClick={() => openEditLink(idx)}
-                          className="p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-300 transition cursor-pointer"
+                          className="p-1.5 rounded-lg hover:bg-teal-500/10 text-slate-400 dark:text-neutral-500 hover:text-teal-600 dark:hover:text-teal-300 transition cursor-pointer"
                           title="Edit link"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -1498,7 +1498,7 @@ export default function ProjectDetailPage() {
                         <button
                           type="button"
                           onClick={() => handleDeleteLink(idx)}
-                          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 dark:text-neutral-500 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer"
                           title="Delete link"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1507,7 +1507,7 @@ export default function ProjectDetailPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-neutral-500 italic p-4 text-center bg-[#161616] rounded-xl border border-dashed border-[#262626]">
+                  <p className="text-xs text-slate-500 dark:text-neutral-500 italic p-4 text-center bg-slate-50 dark:bg-[#101724] rounded-xl border border-dashed border-slate-200 dark:border-[#1e2a3c]">
                     No links added yet. Add SRS documents, GitHub, or Figma links above.
                   </p>
                 )}
@@ -1515,21 +1515,21 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Assigned Developers / Team Members */}
-            <div className="p-5 rounded-2xl bg-[#121212] border border-[#222222] space-y-4">
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-heading text-sm font-bold text-white flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-teal-400" />
+                  <h3 className="font-heading text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                     Assigned Developers ({assignedDevs.length})
                   </h3>
-                  <p className="text-[11px] text-neutral-400 mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-0.5">
                     Team members responsible for this project.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(true)}
-                  className="text-xs text-teal-400 hover:underline"
+                  className="text-xs text-teal-600 dark:text-teal-400 hover:underline font-semibold"
                 >
                   Manage
                 </button>
@@ -1543,8 +1543,8 @@ export default function ProjectDetailPage() {
                       key={dev._id || idx}
                       className={`p-3.5 rounded-2xl border flex items-start gap-3 transition ${
                         isLead
-                          ? 'bg-[#181818] border-amber-500/30 shadow-sm'
-                          : 'bg-[#161616] border-[#262626]'
+                          ? 'bg-amber-500/5 dark:bg-[#1a2436] border-amber-500/30 shadow-xs'
+                          : 'bg-slate-50 dark:bg-[#101724] border-slate-200 dark:border-[#1e2a3c]'
                       }`}
                     >
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
@@ -1556,18 +1556,18 @@ export default function ProjectDetailPage() {
                       </div>
                       <div className="min-w-0 flex-1 space-y-0.5">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-bold text-white truncate">{dev.name}</span>
+                          <span className="text-xs font-bold text-slate-900 dark:text-white truncate">{dev.name}</span>
                           {isLead && (
-                            <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
+                            <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0">
                               Project Lead
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-teal-400 font-medium truncate">
+                        <div className="text-[11px] text-teal-600 dark:text-teal-400 font-medium truncate">
                           {dev.title || 'Developer'}
                         </div>
                         {dev.email && (
-                          <div className="text-[11px] text-neutral-400 font-mono truncate pt-0.5" title={dev.email}>
+                          <div className="text-[11px] text-slate-500 dark:text-neutral-400 font-mono truncate pt-0.5" title={dev.email}>
                             {dev.email}
                           </div>
                         )}
@@ -1576,7 +1576,7 @@ export default function ProjectDetailPage() {
                   );
                 })}
                 {assignedDevs.length === 0 && (
-                  <p className="text-xs text-neutral-500 italic p-3 text-center">No developers assigned yet.</p>
+                  <p className="text-xs text-slate-500 dark:text-neutral-500 italic p-3 text-center">No developers assigned yet.</p>
                 )}
               </div>
             </div>
@@ -1585,15 +1585,15 @@ export default function ProjectDetailPage() {
           {/* RIGHT COLUMN: Milestones & Deliverables Roadmap OR Tasks */}
           <div className="lg:col-span-2 space-y-4">
             {activeTab === 'MILESTONES' ? (
-              <div className="p-5 sm:p-6 rounded-3xl bg-[#0f172a] border border-[#1e293b] space-y-6 shadow-xl">
+              <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] space-y-6 shadow-xl">
                 {/* Header & Stats */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h3 className="font-heading text-base font-bold text-white flex items-center gap-2">
-                      <Milestone className="w-4 h-4 text-teal-400" />
+                    <h3 className="font-heading text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <Milestone className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                       Milestones & Deliverables Roadmap ({milestones.length})
                     </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
                       Track delivery phases, client deliverables, and launch sign-offs.
                     </p>
                   </div>
@@ -1602,7 +1602,7 @@ export default function ProjectDetailPage() {
                       <button
                         type="button"
                         onClick={handleLoadStandardPhases}
-                        className="px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 text-xs font-medium flex items-center gap-1.5 transition cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-700 dark:text-teal-300 text-xs font-medium flex items-center gap-1.5 transition cursor-pointer"
                       >
                         <Sparkles className="w-3.5 h-3.5" />
                         <span>Use 3-Phase Template</span>
@@ -1621,17 +1621,17 @@ export default function ProjectDetailPage() {
 
                 {/* Milestone Summary Metric Cards */}
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="p-4 rounded-2xl bg-[#131d2e] border border-[#1e293b] shadow-xs">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Total Phases</span>
-                    <span className="text-xl font-extrabold text-white mt-0.5 block">{milestones.length}</span>
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] shadow-xs">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-neutral-400 tracking-wider block">Total Phases</span>
+                    <span className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5 block">{milestones.length}</span>
                   </div>
-                  <div className="p-4 rounded-2xl bg-[#131d2e] border border-[#1e293b] shadow-xs">
-                    <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block">Completed Phases</span>
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] shadow-xs">
+                    <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 tracking-wider block">Completed Phases</span>
                     <span className="text-xl font-extrabold text-emerald-400 mt-0.5 block">{completedMilestones}</span>
                   </div>
-                  <div className="p-4 rounded-2xl bg-[#131d2e] border border-[#1e293b] shadow-xs">
-                    <span className="text-[10px] uppercase font-bold text-teal-400 tracking-wider block">Deliverables Checked</span>
-                    <span className="text-xl font-extrabold text-teal-400 mt-0.5 block">{completedDeliverables} / {totalDeliverables}</span>
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] shadow-xs">
+                    <span className="text-[10px] uppercase font-bold text-teal-600 dark:text-teal-400 tracking-wider block">Deliverables Checked</span>
+                    <span className="text-xl font-extrabold text-teal-600 dark:text-teal-400 mt-0.5 block">{completedDeliverables} / {totalDeliverables}</span>
                   </div>
                 </div>
 
@@ -1639,10 +1639,10 @@ export default function ProjectDetailPage() {
                 {milestones.length > 0 && (
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-medium">Roadmap Progress</span>
-                      <span className="font-mono text-teal-400 font-bold">{milestoneProgress}%</span>
+                      <span className="text-slate-500 dark:text-neutral-400 font-medium">Roadmap Progress</span>
+                      <span className="font-mono text-teal-600 dark:text-teal-400 font-bold">{milestoneProgress}%</span>
                     </div>
-                    <div className="w-full bg-[#0b1320] h-2.5 rounded-full overflow-hidden border border-[#1e293b]">
+                    <div className="w-full bg-slate-100 dark:bg-[#101724] h-2.5 rounded-full overflow-hidden border border-slate-200 dark:border-[#1e2a3c]">
                       <div
                         className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                         style={{ width: `${milestoneProgress}%` }}
@@ -1653,16 +1653,16 @@ export default function ProjectDetailPage() {
 
                 {/* Add Milestone Form */}
                 {isAddingMilestone && (
-                  <form onSubmit={handleAddMilestone} className="p-5 sm:p-6 rounded-2xl bg-[#131d2e] border border-teal-500/40 shadow-xl space-y-4 animate-fade-in">
+                  <form onSubmit={handleAddMilestone} className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-teal-500/40 shadow-xl space-y-4 animate-fade-in">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-bold text-teal-300 flex items-center gap-1.5">
-                        <Flag className="w-4 h-4 text-teal-400" />
+                      <h4 className="text-sm font-bold text-teal-600 dark:text-teal-300 flex items-center gap-1.5">
+                        <Flag className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                         Create New Milestone / Phase
                       </h4>
                       <button
                         type="button"
                         onClick={() => setIsAddingMilestone(false)}
-                        className="text-xs text-slate-400 hover:text-white transition cursor-pointer"
+                        className="text-xs text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -1670,29 +1670,29 @@ export default function ProjectDetailPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="md:col-span-2">
-                        <label className="block text-[11px] text-slate-300 font-medium mb-1">Phase Title *</label>
+                        <label className="block text-[11px] text-slate-700 dark:text-neutral-300 font-medium mb-1">Phase Title *</label>
                         <input
                           type="text"
                           placeholder="e.g. Phase 1: Architecture, UI/UX Design & SRS"
                           value={milestoneTitle}
                           onChange={(e) => setMilestoneTitle(e.target.value)}
                           required
-                          className="w-full bg-[#0b1320] border border-[#223147] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition"
+                          className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] text-slate-300 font-medium mb-1">Target Deadline</label>
+                        <label className="block text-[11px] text-slate-700 dark:text-neutral-300 font-medium mb-1">Target Deadline</label>
                         <input
                           type="date"
                           value={milestoneDueDate}
                           onChange={(e) => setMilestoneDueDate(e.target.value)}
-                          className="w-full bg-[#0b1320] border border-[#223147] rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition"
+                          className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] text-slate-300 font-medium mb-1">Phase Description (Optional)</label>
+                      <label className="block text-[11px] text-slate-700 dark:text-neutral-300 font-medium mb-1">Phase Description (Optional)</label>
                       <textarea
                         rows={2}
                         placeholder="Brief summary of goals and scope for this phase"
@@ -1702,15 +1702,15 @@ export default function ProjectDetailPage() {
                           e.target.style.height = 'auto';
                           e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
                         }}
-                        className="w-full bg-[#0b1320] border border-[#223147] rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition resize-none leading-relaxed overflow-hidden"
+                        className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl p-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition resize-none leading-relaxed overflow-hidden"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] text-slate-300 font-medium mb-1 flex items-center justify-between">
+                      <label className="block text-[11px] text-slate-700 dark:text-neutral-300 font-medium mb-1 flex items-center justify-between">
                         <span>Deliverables Checklist (One deliverable per line)</span>
                         {milestoneDeliverablesInput.trim() && (
-                          <span className="text-[10px] text-teal-400 font-mono">
+                          <span className="text-[10px] text-teal-600 dark:text-teal-400 font-mono">
                             {milestoneDeliverablesInput.split('\n').filter((l) => l.trim()).length} deliverables
                           </span>
                         )}
@@ -1724,15 +1724,15 @@ export default function ProjectDetailPage() {
                           e.target.style.height = 'auto';
                           e.target.style.height = `${Math.max(100, e.target.scrollHeight)}px`;
                         }}
-                        className="w-full bg-[#0b1320] border border-[#223147] rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition resize-none font-mono leading-relaxed overflow-hidden"
+                        className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl p-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/30 transition resize-none font-mono leading-relaxed overflow-hidden"
                       />
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-1">
+                    <div className="flex justify-end gap-2 pt-1 border-t border-slate-200 dark:border-[#1e2a3c]">
                       <button
                         type="button"
                         onClick={() => setIsAddingMilestone(false)}
-                        className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer"
+                        className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -1760,31 +1760,31 @@ export default function ProjectDetailPage() {
                           key={m._id || mIdx}
                           className={`p-5 rounded-2xl border transition-all shadow-md ${
                             m.status === 'COMPLETED'
-                              ? 'bg-[#0f1d24] border-emerald-500/40 shadow-emerald-950/20'
+                              ? 'bg-emerald-500/5 dark:bg-[#101e22] border-emerald-500/40 shadow-emerald-950/20'
                               : m.status === 'IN_PROGRESS'
-                              ? 'bg-[#0f1b2c] border-teal-500/40 shadow-teal-950/20 ring-1 ring-teal-500/20'
-                              : 'bg-[#0f172a] border-[#1e293b] hover:border-slate-700'
+                              ? 'bg-teal-500/5 dark:bg-[#101f28] border-teal-500/40 shadow-teal-950/20 ring-1 ring-teal-500/20'
+                              : 'bg-slate-50 dark:bg-[#101724] border-slate-200 dark:border-[#1e2a3c] hover:border-slate-300 dark:hover:border-slate-700'
                           }`}
                         >
                           {/* Milestone Header: Title on Left, Date/Status/Delete on Right (Above) */}
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#1e293b]">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-[#1e2a3c]">
                             <div className="flex items-center gap-3">
                               <span className={`w-7 h-7 rounded-xl text-xs font-bold flex items-center justify-center shrink-0 ${
                                 m.status === 'COMPLETED'
-                                  ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/30'
-                                  : 'bg-teal-500/20 text-teal-300 ring-1 ring-teal-500/30'
+                                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/30'
+                                  : 'bg-teal-500/20 text-teal-700 dark:text-teal-300 ring-1 ring-teal-500/30'
                               }`}>
                                 {mIdx + 1}
                               </span>
-                              <h4 className="text-sm sm:text-base font-bold text-white tracking-wide">
+                              <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-wide">
                                 {m.title}
                               </h4>
                             </div>
 
                             <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                               {m.dueDate && (
-                                <span className="text-xs text-slate-300 bg-[#0b1320] border border-[#223147] px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-xs">
-                                  <Calendar className="w-3.5 h-3.5 text-teal-400" />
+                                <span className="text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-xs">
+                                  <Calendar className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                                   {new Date(m.dueDate).toLocaleDateString()}
                                 </span>
                               )}
@@ -1806,7 +1806,7 @@ export default function ProjectDetailPage() {
                               <button
                                 type="button"
                                 onClick={() => openEditMilestone(mIdx)}
-                                className="p-1.5 rounded-lg hover:bg-teal-500/10 text-slate-400 hover:text-teal-300 transition cursor-pointer"
+                                className="p-1.5 rounded-lg hover:bg-teal-500/10 text-slate-400 dark:text-slate-500 hover:text-teal-600 dark:hover:text-teal-300 transition cursor-pointer"
                                 title="Edit milestone"
                               >
                                 <Edit2 className="w-4 h-4" />
@@ -1815,7 +1815,7 @@ export default function ProjectDetailPage() {
                               <button
                                 type="button"
                                 onClick={() => handleDeleteMilestone(mIdx)}
-                                className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition cursor-pointer"
+                                className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer"
                                 title="Delete milestone"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -1826,7 +1826,7 @@ export default function ProjectDetailPage() {
                           {/* Phase Description: Full Width with increased, readable font size */}
                           {m.description && (
                             <div className="pt-3 pb-1 w-full">
-                              <p className="text-sm text-slate-200 leading-relaxed font-normal">
+                              <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-normal">
                                 {m.description}
                               </p>
                             </div>
@@ -1836,12 +1836,12 @@ export default function ProjectDetailPage() {
                           {deliverables.length > 0 && (
                             <div className="py-2.5">
                               <div className="flex items-center justify-between text-xs mb-1.5">
-                                <span className="text-slate-400">
-                                  Deliverables: <strong className="text-white">{doneCount}</strong> of <strong className="text-white">{deliverables.length}</strong> complete
+                                <span className="text-slate-500 dark:text-slate-400">
+                                  Deliverables: <strong className="text-slate-900 dark:text-white">{doneCount}</strong> of <strong className="text-slate-900 dark:text-white">{deliverables.length}</strong> complete
                                 </span>
-                                <span className="font-mono text-teal-400 font-bold">{phaseProgress}%</span>
+                                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold">{phaseProgress}%</span>
                               </div>
-                              <div className="w-full bg-[#0b1320] h-2 rounded-full overflow-hidden border border-[#1e293b]/60">
+                              <div className="w-full bg-slate-200 dark:bg-[#1a2436] h-2 rounded-full overflow-hidden border border-slate-300 dark:border-[#1e293b]/60">
                                 <div
                                   className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-300"
                                   style={{ width: `${phaseProgress}%` }}
@@ -1852,7 +1852,7 @@ export default function ProjectDetailPage() {
 
                           {/* Deliverables Checklist */}
                           <div className="space-y-2 pt-2">
-                            <span className="text-[11px] uppercase font-bold text-slate-400 block tracking-wider">
+                            <span className="text-[11px] uppercase font-bold text-slate-500 dark:text-slate-400 block tracking-wider">
                               Phase Deliverables Checklist:
                             </span>
 
@@ -1860,7 +1860,7 @@ export default function ProjectDetailPage() {
                               {deliverables.map((d, dIdx) => (
                                 <div
                                   key={d._id || dIdx}
-                                  className="group flex items-center justify-between py-1.5 px-2.5 rounded-xl hover:bg-[#162238]/60 transition"
+                                  className="group flex items-center justify-between py-1.5 px-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-[#162238]/60 transition"
                                 >
                                   {editingDeliverable?.mIdx === mIdx && editingDeliverable?.dIdx === dIdx ? (
                                     <div className="flex items-center gap-2 flex-1 mr-2">
@@ -1875,7 +1875,7 @@ export default function ProjectDetailPage() {
                                           if (e.key === 'Escape') setEditingDeliverable(null);
                                         }}
                                         autoFocus
-                                        className="flex-1 px-2.5 py-1 bg-[#0b1320] border border-teal-500/50 rounded-lg text-xs text-white outline-none"
+                                        className="flex-1 px-2.5 py-1 bg-white dark:bg-[#151d2a] border border-teal-500/50 rounded-lg text-xs text-slate-900 dark:text-white outline-none"
                                       />
                                       <button
                                         type="button"
@@ -1887,7 +1887,7 @@ export default function ProjectDetailPage() {
                                       <button
                                         type="button"
                                         onClick={() => setEditingDeliverable(null)}
-                                        className="px-2 py-1 text-slate-400 hover:text-white text-xs cursor-pointer"
+                                        className="px-2 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs cursor-pointer"
                                       >
                                         Cancel
                                       </button>
@@ -1902,7 +1902,7 @@ export default function ProjectDetailPage() {
                                         className={`w-4 h-4 rounded flex items-center justify-center transition shrink-0 ${
                                           d.completed
                                             ? 'bg-emerald-500 text-black shadow-sm ring-1 ring-emerald-400'
-                                            : 'border border-slate-600 group-hover:border-teal-400'
+                                            : 'border border-slate-400 dark:border-slate-600 group-hover:border-teal-500'
                                         }`}
                                       >
                                         {d.completed && <Check className="w-3 h-3 stroke-[3]" />}
@@ -1910,8 +1910,8 @@ export default function ProjectDetailPage() {
                                       <span
                                         className={`text-xs sm:text-sm transition ${
                                           d.completed
-                                            ? 'line-through text-slate-500'
-                                            : 'text-slate-200 group-hover:text-white'
+                                            ? 'line-through text-slate-400 dark:text-slate-500'
+                                            : 'text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white'
                                         }`}
                                       >
                                         {d.title}
@@ -1923,7 +1923,7 @@ export default function ProjectDetailPage() {
                                     <button
                                       type="button"
                                       onClick={() => setEditingDeliverable({ mIdx, dIdx, text: d.title })}
-                                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-teal-400 transition cursor-pointer"
+                                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 dark:text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 transition cursor-pointer"
                                       title="Edit deliverable"
                                     >
                                       <Pencil className="w-3 h-3" />
@@ -1931,7 +1931,7 @@ export default function ProjectDetailPage() {
                                     <button
                                       type="button"
                                       onClick={() => handleDeleteDeliverableItem(mIdx, dIdx)}
-                                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 transition cursor-pointer"
+                                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer"
                                       title="Remove deliverable"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
@@ -1942,8 +1942,8 @@ export default function ProjectDetailPage() {
                             </div>
 
                             {/* Inline Add Deliverable Input */}
-                            <div className="mt-3 flex items-center rounded-xl bg-[#0b1320] border border-[#223147] focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500/30 p-1 pl-3 transition-all">
-                              <Plus className="w-3.5 h-3.5 text-slate-500 mr-2 shrink-0" />
+                            <div className="mt-3 flex items-center rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500/30 p-1 pl-3 transition-all">
+                              <Plus className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 mr-2 shrink-0" />
                               <input
                                 type="text"
                                 placeholder="Add deliverable to this phase (press Enter)..."
@@ -1957,7 +1957,7 @@ export default function ProjectDetailPage() {
                                     handleAddDeliverableItem(mIdx);
                                   }
                                 }}
-                                className="flex-1 bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 outline-none min-w-0"
+                                className="flex-1 bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none min-w-0"
                               />
                               <button
                                 type="button"
@@ -1973,11 +1973,11 @@ export default function ProjectDetailPage() {
                       );
                     })
                   ) : (
-                    <div className="p-8 text-center bg-[#131d2e] rounded-2xl border border-dashed border-[#1e293b] space-y-3">
-                      <Milestone className="w-9 h-9 text-slate-500 mx-auto" />
+                    <div className="p-8 text-center bg-slate-50 dark:bg-[#101724] rounded-2xl border border-dashed border-slate-200 dark:border-[#1e2a3c] space-y-3">
+                      <Milestone className="w-9 h-9 text-slate-400 dark:text-slate-500 mx-auto" />
                       <div className="space-y-1">
-                        <h4 className="text-sm font-bold text-white">No delivery milestones added yet</h4>
-                        <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">No delivery milestones added yet</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
                           Break your project into clear delivery phases (e.g. SRS & UI/UX, Backend MVP, Testing, and Launch) to keep clients and developers aligned.
                         </p>
                       </div>
@@ -1985,7 +1985,7 @@ export default function ProjectDetailPage() {
                         <button
                           type="button"
                           onClick={handleLoadStandardPhases}
-                          className="px-3.5 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                          className="px-3.5 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-700 dark:text-teal-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
                         >
                           <Sparkles className="w-3.5 h-3.5" />
                           <span>Load 3-Phase Software Template</span>
@@ -2004,14 +2004,14 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
             ) : (
-              <div className="p-5 sm:p-6 rounded-3xl bg-[#0f172a] border border-[#1e293b] space-y-5 shadow-xl">
+              <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] space-y-5 shadow-xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-heading text-base font-bold text-white flex items-center gap-2">
-                      <CheckSquare className="w-4 h-4 text-teal-400" />
+                    <h3 className="font-heading text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                       Project Tasks ({tasks.length})
                     </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       Break down features into tasks and assign developers.
                     </p>
                   </div>
@@ -2032,26 +2032,26 @@ export default function ProjectDetailPage() {
                       <div
                         key={t._id}
                         onClick={() => setSelectedTask(t)}
-                        className="p-4 rounded-2xl bg-[#131d2e] border border-[#1e293b] hover:border-teal-500/50 hover:bg-[#162238] transition flex items-center justify-between cursor-pointer group shadow-xs"
+                        className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/50 hover:bg-slate-100 dark:hover:bg-[#162238] transition flex items-center justify-between cursor-pointer group shadow-xs"
                       >
                         <div className="flex items-center gap-3 min-w-0 pr-3">
                           <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                             t.status === 'DONE' ? 'bg-emerald-400 ring-2 ring-emerald-500/20' : 'bg-teal-400 ring-2 ring-teal-500/20'
                           }`} />
                           <div className="min-w-0">
-                            <div className="text-xs sm:text-sm font-semibold text-white group-hover:text-teal-300 transition truncate">
+                            <div className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition truncate">
                               {t.title}
                             </div>
-                            <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-400 mt-1">
+                            <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                               {t.assignedTo && (
-                                <span className="text-slate-300 flex items-center gap-1">
-                                  <Users className="w-3 h-3 text-teal-400" />
-                                  <span>Assigned: <strong className="text-white">{t.assignedTo.name}</strong></span>
+                                <span className="text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                  <Users className="w-3 h-3 text-teal-600 dark:text-teal-400" />
+                                  <span>Assigned: <strong className="text-slate-900 dark:text-white">{t.assignedTo.name}</strong></span>
                                 </span>
                               )}
                               {t.dueDate && (
-                                <span className="flex items-center gap-1 font-mono text-slate-400">
-                                  <Calendar className="w-3 h-3 text-slate-500" />
+                                <span className="flex items-center gap-1 font-mono text-slate-500 dark:text-slate-400">
+                                  <Calendar className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                                   <span>Due: {new Date(t.dueDate).toLocaleDateString()}</span>
                                 </span>
                               )}
@@ -2061,7 +2061,7 @@ export default function ProjectDetailPage() {
 
                         <div className="flex items-center gap-2.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                           {t.subtasks && t.subtasks.length > 0 && (
-                            <span className="text-[10px] text-teal-400 font-mono font-medium px-2 py-0.5 rounded-lg bg-teal-500/10 border border-teal-500/20 hidden sm:inline-block">
+                            <span className="text-[10px] text-teal-600 dark:text-teal-400 font-mono font-medium px-2 py-0.5 rounded-lg bg-teal-500/10 border border-teal-500/20 hidden sm:inline-block">
                               ✓ {t.subtasks.filter((s) => s.completed).length}/{t.subtasks.length} subtasks
                             </span>
                           )}
@@ -2081,7 +2081,7 @@ export default function ProjectDetailPage() {
                           <button
                             type="button"
                             onClick={() => handleDeleteTask(t._id)}
-                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 transition cursor-pointer"
+                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer"
                             title="Delete task"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -2090,13 +2090,13 @@ export default function ProjectDetailPage() {
                       </div>
                     ))
                   ) : (
-                    <div className="p-8 text-center bg-[#131d2e] rounded-2xl border border-dashed border-[#1e293b]">
-                      <CheckSquare className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-                      <p className="text-xs text-slate-400">No tasks created for this project yet.</p>
+                    <div className="p-8 text-center bg-slate-50 dark:bg-[#101724] rounded-2xl border border-dashed border-slate-200 dark:border-[#1e2a3c]">
+                      <CheckSquare className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto mb-2" />
+                      <p className="text-xs text-slate-500 dark:text-slate-400">No tasks created for this project yet.</p>
                       <button
                         type="button"
                         onClick={() => setIsAddingTask(true)}
-                        className="mt-2 text-xs text-teal-400 hover:underline font-semibold cursor-pointer"
+                        className="mt-2 text-xs text-teal-600 dark:text-teal-400 hover:underline font-semibold cursor-pointer"
                       >
                         Create First Task →
                       </button>
@@ -2117,19 +2117,19 @@ export default function ProjectDetailPage() {
       >
         <form onSubmit={handleUpdateProject} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Project Name *</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Project Name *</label>
             <input
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Connected Client</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Connected Client</label>
               <CustomSelect
                 value={formClientId}
                 onChange={(val) => {
@@ -2150,7 +2150,7 @@ export default function ProjectDetailPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Status</label>
               <CustomSelect
                 value={formStatus}
                 onChange={(val) => setFormStatus(val)}
@@ -2168,7 +2168,7 @@ export default function ProjectDetailPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Project Lead (Lead Developer / Tech Lead)
               </label>
               <CustomSelect
@@ -2187,7 +2187,7 @@ export default function ProjectDetailPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Priority</label>
               <CustomSelect
                 value={formPriority}
                 onChange={(val) => setFormPriority(val as any)}
@@ -2204,7 +2204,7 @@ export default function ProjectDetailPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Tech Stack (Comma-separated)
             </label>
             <input
@@ -2212,34 +2212,34 @@ export default function ProjectDetailPage() {
               value={formTechStack}
               onChange={(e) => setFormTechStack(e.target.value)}
               placeholder="e.g. Next.js, Node.js, PostgreSQL, Tailwind CSS"
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Budget ($)</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Budget ($)</label>
               <input
                 type="number"
                 value={formBudget}
                 onChange={(e) => setFormBudget(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Deadline</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Deadline</label>
               <input
                 type="date"
                 value={formDeadline}
                 onChange={(e) => setFormDeadline(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Assign Developers</label>
-            <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-[#181818] border border-[#262626]">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Assign Developers</label>
+            <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c]">
               {teamMembers.map((m) => {
                 const isSelected = formMemberIds.includes(m._id || m.id || '');
                 return (
@@ -2257,7 +2257,7 @@ export default function ProjectDetailPage() {
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition ${
                       isSelected
                         ? 'bg-teal-600 text-white border-teal-500'
-                        : 'bg-[#121212] text-neutral-400 border-[#262626] hover:text-white'
+                        : 'bg-white dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 border-slate-200 dark:border-[#1e2a3c] hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     {m.name}
@@ -2268,7 +2268,7 @@ export default function ProjectDetailPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Description & Scope</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Description & Scope</label>
             <textarea
               value={formDescription}
               onChange={(e) => {
@@ -2277,15 +2277,15 @@ export default function ProjectDetailPage() {
                 e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
               }}
               rows={2}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setIsEditModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -2306,15 +2306,15 @@ export default function ProjectDetailPage() {
         title="Delete Project"
       >
         <div className="space-y-4">
-          <p className="text-xs text-neutral-300 leading-relaxed">
-            Are you sure you want to permanently delete <strong className="text-white">{project.name}</strong>?
+          <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed">
+            Are you sure you want to permanently delete <strong className="text-slate-900 dark:text-white">{project.name}</strong>?
             This will remove all associated links and unbind it from its client.
           </p>
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -2333,19 +2333,19 @@ export default function ProjectDetailPage() {
       <Modal isOpen={isAddingTask} onClose={() => setIsAddingTask(false)} title="Create New Task">
         <form onSubmit={handleCreateTask} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Task Title *</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Task Title *</label>
             <input
               type="text"
               required
               value={taskTitle}
               onChange={(e) => setTaskTitle(e.target.value)}
               placeholder="e.g. Implement JWT authentication & ERP backend APIs"
-              className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Description</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Description</label>
             <textarea
               ref={taskDescriptionRef}
               rows={2}
@@ -2356,20 +2356,20 @@ export default function ProjectDetailPage() {
                 e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
               }}
               placeholder="Provide details, deliverables, or acceptance criteria..."
-              className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+              className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
-              <div className="px-3 py-2 bg-[#141414] border border-[#282828] rounded-xl text-xs text-teal-400 font-semibold truncate">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Project</label>
+              <div className="px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-teal-600 dark:text-teal-400 font-semibold truncate">
                 📁 {project.name}
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Assignee</label>
               <CustomSelect
                 value={taskAssignedToId}
                 onChange={(val) => setTaskAssignedToId(val)}
@@ -2389,17 +2389,17 @@ export default function ProjectDetailPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Due Date</label>
               <input
                 type="date"
                 value={taskDueDate}
                 onChange={(e) => setTaskDueDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 min-w-0"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 min-w-0"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Priority</label>
               <CustomSelect
                 value={taskPriority}
                 onChange={(val) => setTaskPriority(val as any)}
@@ -2415,22 +2415,22 @@ export default function ProjectDetailPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Est. Hours</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Est. Hours</label>
               <input
                 type="number"
                 min="0.5"
                 step="0.5"
                 value={taskEstHours}
                 onChange={(e) => setTaskEstHours(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500"
               />
             </div>
           </div>
 
           {/* Subtasks Checklist Builder */}
-          <div className="p-3.5 rounded-2xl bg-[#141414] border border-[#262626] space-y-2.5">
-            <span className="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
-              <CheckSquare className="w-3.5 h-3.5 text-teal-400" />
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-2.5">
+            <span className="text-xs font-bold text-slate-900 dark:text-neutral-200 flex items-center gap-1.5">
+              <CheckSquare className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
               Subtasks Checklist ({taskSubtasks.length})
             </span>
 
@@ -2441,7 +2441,7 @@ export default function ProjectDetailPage() {
                 value={taskSubtaskInput}
                 onChange={(e) => setTaskSubtaskInput(e.target.value)}
                 placeholder="Add subtask and press enter (e.g. Design schema)..."
-                className="flex-1 px-3 py-1.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+                className="flex-1 px-3 py-1.5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -2465,13 +2465,13 @@ export default function ProjectDetailPage() {
                 {taskSubtasks.map((st, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2 rounded-xl bg-[#181818] border border-[#262626] text-xs text-neutral-300"
+                    className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] text-xs text-slate-800 dark:text-neutral-300"
                   >
                     <span className="truncate pr-2">{st}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveDraftTaskSubtask(idx)}
-                      className="text-neutral-500 hover:text-rose-400 p-0.5 rounded cursor-pointer"
+                      className="text-slate-400 dark:text-neutral-500 hover:text-rose-500 dark:hover:text-rose-400 p-0.5 rounded cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -2481,11 +2481,11 @@ export default function ProjectDetailPage() {
             )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setIsAddingTask(false)}
-              className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+              className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
             >
               Cancel
             </button>
@@ -2509,12 +2509,12 @@ export default function ProjectDetailPage() {
         >
           <div className="space-y-5">
             {/* Header info bar */}
-            <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-[#161616] border border-[#262626]">
+            <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c]">
               <div className="flex items-center gap-2">
                 <PriorityBadge priority={selectedTask.priority} />
                 {selectedTask.dueDate && (
-                  <span className="text-xs text-neutral-400 flex items-center gap-1 font-mono">
-                    <Calendar className="w-3.5 h-3.5 text-teal-400" />
+                  <span className="text-xs text-slate-500 dark:text-neutral-400 flex items-center gap-1 font-mono">
+                    <Calendar className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400" />
                     {new Date(selectedTask.dueDate).toLocaleDateString()}
                   </span>
                 )}
@@ -2522,7 +2522,7 @@ export default function ProjectDetailPage() {
 
               {/* Status Dropdown */}
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-neutral-400 uppercase">Status:</span>
+                <span className="text-[11px] font-bold text-slate-500 dark:text-neutral-400 uppercase">Status:</span>
                 <CustomSelect
                   value={selectedTask.status}
                   onChange={(val) => handleTaskStatusChange(selectedTask._id, val as TaskStatus)}
@@ -2539,39 +2539,39 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Project & Assignee */}
-            <div className="flex flex-wrap items-center justify-between text-xs text-neutral-400 gap-2">
+            <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 dark:text-neutral-400 gap-2">
               <div className="flex items-center gap-1.5">
-                <FolderKanban className="w-3.5 h-3.5 text-teal-400" />
+                <FolderKanban className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400" />
                 <span>Project:</span>
-                <strong className="text-white">
+                <strong className="text-slate-900 dark:text-white">
                   {selectedTask.project?.name || project.name}
                 </strong>
               </div>
 
               <div className="flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-teal-400" />
+                <Users className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400" />
                 <span>Assignee:</span>
-                <strong className="text-white">{selectedTask.assignedTo?.name || 'Unassigned'}</strong>
+                <strong className="text-slate-900 dark:text-white">{selectedTask.assignedTo?.name || 'Unassigned'}</strong>
               </div>
             </div>
 
             {/* Description */}
             {selectedTask.description && (
-              <p className="text-xs text-neutral-300 leading-relaxed bg-[#161616] p-3.5 rounded-2xl border border-[#242424] whitespace-pre-wrap break-words">
+              <p className="text-xs text-slate-700 dark:text-neutral-300 leading-relaxed bg-slate-50 dark:bg-[#101724] p-3.5 rounded-2xl border border-slate-200 dark:border-[#1e2a3c] whitespace-pre-wrap break-words">
                 {selectedTask.description}
               </p>
             )}
 
             {/* SUBTASKS CHECKLIST SECTION */}
-            <div className="p-4 rounded-2xl bg-[#141414] border border-[#262626] space-y-3">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="font-heading text-xs font-bold text-white flex items-center gap-1.5">
-                  <CheckSquare className="w-4 h-4 text-teal-400" />
+                <h4 className="font-heading text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <CheckSquare className="w-4 h-4 text-teal-500 dark:text-teal-400" />
                   Subtasks Checklist ({(selectedTask.subtasks || []).filter((s) => s.completed).length}/
                   {(selectedTask.subtasks || []).length})
                 </h4>
                 {(selectedTask.subtasks || []).length > 0 && (
-                  <span className="text-xs font-mono font-bold text-teal-400">
+                  <span className="text-xs font-mono font-bold text-teal-600 dark:text-teal-400">
                     {Math.round(
                       (((selectedTask.subtasks || []).filter((s) => s.completed).length) /
                         (selectedTask.subtasks || []).length) *
@@ -2587,7 +2587,7 @@ export default function ProjectDetailPage() {
                 {(selectedTask.subtasks || []).map((st, idx) => (
                   <div
                     key={idx}
-                    className="group flex items-center justify-between p-2.5 rounded-xl bg-[#181818] border border-[#262626] hover:border-[#383838] transition"
+                    className="group flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] hover:border-slate-300 dark:hover:border-[#2a3a52] transition"
                   >
                     <button
                       type="button"
@@ -2597,15 +2597,15 @@ export default function ProjectDetailPage() {
                       <div
                         className={`w-4 h-4 rounded flex items-center justify-center transition shrink-0 ${
                           st.completed
-                            ? 'bg-emerald-500 text-black shadow-sm'
-                            : 'border border-neutral-600 group-hover:border-teal-400'
+                            ? 'bg-emerald-500 text-white shadow-sm'
+                            : 'border border-slate-300 dark:border-neutral-600 group-hover:border-teal-500'
                         }`}
                       >
                         {st.completed && <Check className="w-3 h-3 stroke-[3]" />}
                       </div>
                       <span
                         className={`text-xs transition truncate ${
-                          st.completed ? 'line-through text-neutral-500' : 'text-neutral-200'
+                          st.completed ? 'line-through text-slate-400 dark:text-neutral-500' : 'text-slate-800 dark:text-neutral-200'
                         }`}
                       >
                         {st.title}
@@ -2615,7 +2615,7 @@ export default function ProjectDetailPage() {
                     <button
                       type="button"
                       onClick={() => handleDeleteSubtaskFromSelected(idx)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 dark:text-neutral-500 dark:hover:text-rose-400 transition cursor-pointer"
                       title="Delete subtask"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -2624,7 +2624,7 @@ export default function ProjectDetailPage() {
                 ))}
 
                 {(selectedTask.subtasks || []).length === 0 && (
-                  <p className="text-xs text-neutral-600 italic">No subtasks added yet.</p>
+                  <p className="text-xs text-slate-400 dark:text-neutral-500 italic">No subtasks added yet.</p>
                 )}
               </div>
 
@@ -2635,7 +2635,7 @@ export default function ProjectDetailPage() {
                   value={detailSubtaskText}
                   onChange={(e) => setDetailSubtaskText(e.target.value)}
                   placeholder="Add a new subtask..."
-                  className="flex-1 px-3 py-1.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+                  className="flex-1 px-3 py-1.5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleAddSubtaskToSelectedTask(e);
                   }}
@@ -2651,24 +2651,24 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* ACTIVITY & COMMENTS SECTION */}
-            <div className="p-4 rounded-2xl bg-[#141414] border border-[#262626] space-y-3">
-              <h4 className="font-heading text-xs font-bold text-white flex items-center gap-1.5">
-                <MessageSquare className="w-4 h-4 text-teal-400" />
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-3">
+              <h4 className="font-heading text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <MessageSquare className="w-4 h-4 text-teal-500 dark:text-teal-400" />
                 Notes & Activity ({selectedTask.comments?.length || 0})
               </h4>
 
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {selectedTask.comments && selectedTask.comments.length > 0 ? (
                   selectedTask.comments.map((c, i) => (
-                    <div key={i} className="group/c p-2.5 rounded-xl bg-[#161616] border border-[#262626] text-xs">
-                      <div className="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
-                        <span className="font-semibold text-neutral-200">{c.author.name}</span>
+                    <div key={i} className="group/c p-2.5 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] text-xs">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-neutral-400 mb-1">
+                        <span className="font-semibold text-slate-900 dark:text-neutral-200">{c.author.name}</span>
                         <div className="flex items-center gap-1.5">
                           <span>{c.createdAt}</span>
                           <button
                             type="button"
                             onClick={() => handleStartEditComment(i, c.text)}
-                            className="opacity-0 group-hover/c:opacity-100 text-neutral-500 hover:text-teal-400 p-0.5 rounded transition cursor-pointer"
+                            className="opacity-0 group-hover/c:opacity-100 text-slate-400 hover:text-teal-500 dark:text-neutral-500 dark:hover:text-teal-400 p-0.5 rounded transition cursor-pointer"
                             title="Edit note"
                           >
                             <Pencil className="w-3 h-3" />
@@ -2676,7 +2676,7 @@ export default function ProjectDetailPage() {
                           <button
                             type="button"
                             onClick={() => handleDeleteComment(i)}
-                            className="opacity-0 group-hover/c:opacity-100 text-neutral-500 hover:text-rose-400 p-0.5 rounded transition cursor-pointer"
+                            className="opacity-0 group-hover/c:opacity-100 text-slate-400 hover:text-rose-500 dark:text-neutral-500 dark:hover:text-rose-400 p-0.5 rounded transition cursor-pointer"
                             title="Delete note"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -2689,7 +2689,7 @@ export default function ProjectDetailPage() {
                             type="text"
                             value={editCommentText}
                             onChange={(e) => setEditCommentText(e.target.value)}
-                            className="flex-1 px-2.5 py-1 bg-[#121212] border border-teal-500/50 rounded-lg text-xs text-white outline-none"
+                            className="flex-1 px-2.5 py-1 bg-slate-50 dark:bg-[#101724] border border-teal-500 rounded-lg text-xs text-slate-900 dark:text-white outline-none"
                             autoFocus
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') handleSaveEditComment(i);
@@ -2706,18 +2706,18 @@ export default function ProjectDetailPage() {
                           <button
                             type="button"
                             onClick={() => setEditingCommentIdx(null)}
-                            className="px-2 py-1 text-neutral-400 hover:text-white text-[11px] cursor-pointer"
+                            className="px-2 py-1 text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white text-[11px] cursor-pointer"
                           >
                             Cancel
                           </button>
                         </div>
                       ) : (
-                        <p className="text-neutral-300 whitespace-pre-wrap">{c.text}</p>
+                        <p className="text-slate-700 dark:text-neutral-300 whitespace-pre-wrap">{c.text}</p>
                       )}
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-neutral-600 italic">No notes or comments yet.</p>
+                  <p className="text-xs text-slate-400 dark:text-neutral-500 italic">No notes or comments yet.</p>
                 )}
               </div>
 
@@ -2728,7 +2728,7 @@ export default function ProjectDetailPage() {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Write a note..."
-                  className="flex-1 px-3 py-1.5 bg-[#181818] border border-[#262626] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                  className="flex-1 px-3 py-1.5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleAddComment();
                   }}
@@ -2736,7 +2736,7 @@ export default function ProjectDetailPage() {
                 <button
                   type="button"
                   onClick={handleAddComment}
-                  className="px-3.5 py-1.5 bg-[#202020] hover:bg-teal-600 text-xs font-semibold text-white rounded-xl transition cursor-pointer"
+                  className="px-3.5 py-1.5 bg-slate-200 hover:bg-teal-600 dark:bg-[#1a2436] dark:hover:bg-teal-600 text-xs font-semibold text-slate-700 hover:text-white dark:text-neutral-200 dark:hover:text-white rounded-xl transition cursor-pointer"
                 >
                   Reply
                 </button>
@@ -2744,11 +2744,11 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Action Bar (Delete Task, Edit Task, Close) */}
-            <div className="flex justify-between items-center pt-3 border-t border-[#222222]">
+            <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-[#1e2a3c]">
               <button
                 type="button"
                 onClick={() => handleDeleteTask(selectedTask._id)}
-                className="px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3 py-1.5 text-xs text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 rounded-xl flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete Task</span>
@@ -2758,7 +2758,7 @@ export default function ProjectDetailPage() {
                 <button
                   type="button"
                   onClick={() => openEditTask(selectedTask)}
-                  className="px-3.5 py-1.5 bg-teal-600/15 hover:bg-teal-600/25 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-sm"
+                  className="px-3.5 py-1.5 bg-teal-600/15 hover:bg-teal-600/25 text-teal-700 dark:text-teal-300 border border-teal-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-sm"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   <span>Edit Task</span>
@@ -2766,7 +2766,7 @@ export default function ProjectDetailPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedTask(null)}
-                  className="px-4 py-1.5 bg-[#181818] hover:bg-[#222222] text-xs text-white rounded-xl font-medium cursor-pointer"
+                  className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-xs text-slate-700 dark:text-white border border-slate-200 dark:border-[#1e2a3c] rounded-xl font-medium cursor-pointer"
                 >
                   Close
                 </button>
@@ -2781,19 +2781,19 @@ export default function ProjectDetailPage() {
         <Modal isOpen={!!editingTask} onClose={() => setEditingTask(null)} title="Edit Task">
           <form onSubmit={handleUpdateTask} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Task Title *</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Task Title *</label>
               <input
                 type="text"
                 required
                 value={editTaskTitle}
                 onChange={(e) => setEditTaskTitle(e.target.value)}
                 placeholder="e.g. Implement JWT authentication & ERP backend APIs"
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Description</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Description</label>
               <textarea
                 ref={editTaskDescRef}
                 rows={2}
@@ -2804,20 +2804,20 @@ export default function ProjectDetailPage() {
                   e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
                 }}
                 placeholder="Provide details or acceptance criteria..."
-                className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">Project</label>
-                <div className="px-3 py-2 bg-[#141414] border border-[#282828] rounded-xl text-xs text-teal-400 font-semibold truncate">
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Project</label>
+                <div className="px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-teal-600 dark:text-teal-400 font-semibold truncate">
                   📁 {project.name}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">Assignee</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Assignee</label>
                 <CustomSelect
                   value={editTaskAssignedToId}
                   onChange={(val) => setEditTaskAssignedToId(val)}
@@ -2837,17 +2837,17 @@ export default function ProjectDetailPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Due Date</label>
                 <input
                   type="date"
                   value={editTaskDueDate}
                   onChange={(e) => setEditTaskDueDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 min-w-0"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500 min-w-0"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">Priority</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Priority</label>
                 <CustomSelect
                   value={editTaskPriority}
                   onChange={(val) => setEditTaskPriority(val as any)}
@@ -2863,23 +2863,23 @@ export default function ProjectDetailPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">Est. Hours</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Est. Hours</label>
                 <input
                   type="number"
                   min="0.5"
                   step="0.5"
                   value={editTaskEstHours}
                   onChange={(e) => setEditTaskEstHours(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
               <button
                 type="button"
                 onClick={() => setEditingTask(null)}
-                className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+                className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -2904,29 +2904,29 @@ export default function ProjectDetailPage() {
         >
           <form onSubmit={handleUpdateMilestone} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Phase Title *</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Phase Title *</label>
               <input
                 type="text"
                 required
                 value={editMilestoneTitle}
                 onChange={(e) => setEditMilestoneTitle(e.target.value)}
                 placeholder="e.g. Phase 2: Core MVP Development & APIs"
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Target Deadline</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Target Deadline</label>
               <input
                 type="date"
                 value={editMilestoneDueDate}
                 onChange={(e) => setEditMilestoneDueDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Phase Description</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Phase Description</label>
               <textarea
                 ref={editMilestoneDescRef}
                 rows={2}
@@ -2937,15 +2937,15 @@ export default function ProjectDetailPage() {
                   e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
                 }}
                 placeholder="Scope and key objectives for this delivery milestone..."
-                className="w-full px-3 py-2.5 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height] duration-75"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
               <button
                 type="button"
                 onClick={() => setEditingMilestoneIndex(null)}
-                className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+                className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -2970,31 +2970,31 @@ export default function ProjectDetailPage() {
         >
           <form onSubmit={handleUpdateLink} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Link Title *</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Link Title *</label>
               <input
                 type="text"
                 required
                 value={editLinkTitle}
                 onChange={(e) => setEditLinkTitle(e.target.value)}
                 placeholder="e.g. Figma Design System"
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">URL *</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">URL *</label>
               <input
                 type="text"
                 required
                 value={editLinkUrl}
                 onChange={(e) => setEditLinkUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full px-3 py-2 bg-[#181818] border border-[#282828] rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Category</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Category</label>
               <CustomSelect
                 value={editLinkCategory}
                 onChange={(val) => setEditLinkCategory(val as any)}
@@ -3012,11 +3012,11 @@ export default function ProjectDetailPage() {
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#1e2a3c]">
               <button
                 type="button"
                 onClick={() => setEditingLinkIndex(null)}
-                className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white transition cursor-pointer"
+                className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
               >
                 Cancel
               </button>
