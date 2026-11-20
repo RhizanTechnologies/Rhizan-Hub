@@ -56,6 +56,9 @@ export default function TimeTrackingPage() {
   // Live Timer states
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [activeStartTimestamp, setActiveStartTimestamp] = useState<number | null>(null);
+  const [isEditingStartTime, setIsEditingStartTime] = useState(false);
+  const [customStartTime, setCustomStartTime] = useState('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Top Bar Form fields
@@ -323,6 +326,7 @@ export default function TimeTrackingPage() {
           const elapsed = Math.max(0, Math.floor((now - parsed.startTimestamp) / 1000));
           setElapsedSeconds(elapsed);
           setIsRunning(true);
+          setActiveStartTimestamp(parsed.startTimestamp);
           if (parsed.description) setDescription(parsed.description);
           if (parsed.projectId) setSelectedProjectId(parsed.projectId);
           if (parsed.taskId) setSelectedTaskId(parsed.taskId);
@@ -348,6 +352,10 @@ export default function TimeTrackingPage() {
     const now = Date.now();
     setIsRunning(true);
     setElapsedSeconds(0);
+    setActiveStartTimestamp(now);
+    setIsEditingStartTime(false);
+    setActiveStartTimestamp(now);
+    setIsEditingStartTime(false);
 
     const timerData = {
       isRunning: true,
@@ -385,6 +393,8 @@ export default function TimeTrackingPage() {
     }
     localStorage.removeItem(TIMER_STORAGE_KEY);
     setIsRunning(false);
+    setActiveStartTimestamp(null);
+    setIsEditingStartTime(false);
 
     const now = new Date();
     const startDateObj = new Date(startTimestamp);
@@ -451,6 +461,8 @@ export default function TimeTrackingPage() {
     const now = Date.now();
     setIsRunning(true);
     setElapsedSeconds(0);
+    setActiveStartTimestamp(now);
+    setIsEditingStartTime(false);
 
     const timerData = {
       isRunning: true,
@@ -468,6 +480,61 @@ export default function TimeTrackingPage() {
     }, 1000);
 
     setSuccessToast(`Timer restarted for "${entry.description || 'Task'}"`);
+    setTimeout(() => setSuccessToast(null), 3000);
+  };
+
+  // Adjust live timer start time on-the-fly by clicking the counting timer (Clockify feature)
+  const handleApplyStartTime = () => {
+    if (!customStartTime) {
+      setIsEditingStartTime(false);
+      return;
+    }
+
+    const [hrs, mins] = customStartTime.split(':').map(Number);
+    const targetDate = new Date();
+    targetDate.setHours(hrs, mins, 0, 0);
+
+    let newStartTimestamp = targetDate.getTime();
+    if (newStartTimestamp > Date.now()) {
+      if (newStartTimestamp - Date.now() > 5 * 60 * 1000) {
+        targetDate.setDate(targetDate.getDate() - 1);
+        newStartTimestamp = targetDate.getTime();
+      } else {
+        newStartTimestamp = Date.now();
+      }
+    }
+
+    const newElapsed = Math.max(0, Math.floor((Date.now() - newStartTimestamp) / 1000));
+    setActiveStartTimestamp(newStartTimestamp);
+    setElapsedSeconds(newElapsed);
+
+    const saved = localStorage.getItem(TIMER_STORAGE_KEY);
+    let parsed: any = {};
+    if (saved) {
+      try { parsed = JSON.parse(saved); } catch (e) {}
+    }
+
+    const updatedTimerData = {
+      ...parsed,
+      isRunning: true,
+      startTimestamp: newStartTimestamp,
+      description: description || parsed.description || '',
+      projectId: selectedProjectId || parsed.projectId || '',
+      taskId: selectedTaskId || parsed.taskId || '',
+      billable: isBillable,
+    };
+    localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(updatedTimerData));
+
+    if (!isRunning) setIsRunning(true);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      const currentElapsed = Math.max(0, Math.floor((Date.now() - newStartTimestamp) / 1000));
+      setElapsedSeconds(currentElapsed);
+    }, 1000);
+
+    setIsEditingStartTime(false);
+    setSuccessToast(`Start time adjusted to ${customStartTime} (${formatDurationText(Math.floor(newElapsed / 60), newElapsed % 60)} elapsed)`);
     setTimeout(() => setSuccessToast(null), 3000);
   };
 
@@ -878,12 +945,61 @@ export default function TimeTrackingPage() {
                 <div className="lg:col-span-2 flex items-center justify-between sm:justify-end gap-3 pt-1 lg:pt-0">
                   {entryMode === 'TIMER' ? (
                     <>
-                      {/* Big Digital Stopwatch */}
-                      <span className={`font-mono font-extrabold text-base tracking-wider ${
-                        isRunning ? 'text-amber-300 animate-pulse' : 'text-neutral-300'
-                      }`}>
-                        {formatStopwatch(elapsedSeconds)}
-                      </span>
+                      {/* Big Digital Stopwatch - Click to edit start time (Clockify Style) */}
+                      {isEditingStartTime ? (
+                        <div className="flex items-center gap-1.5 bg-[#181818] border border-teal-500 rounded-xl px-2 py-1 shadow-xl animate-fade-in">
+                          <input
+                            type="time"
+                            value={customStartTime}
+                            onChange={(e) => setCustomStartTime(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleApplyStartTime();
+                              if (e.key === 'Escape') setIsEditingStartTime(false);
+                            }}
+                            autoFocus
+                            className="bg-[#222222] border border-[#333333] text-white text-xs font-mono rounded px-1.5 py-0.5 outline-none focus:border-teal-400"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleApplyStartTime}
+                            className="p-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white transition cursor-pointer"
+                            title="Apply new start time"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingStartTime(false)}
+                            className="p-1 rounded-lg bg-[#242424] hover:bg-[#2e2e2e] text-neutral-400 hover:text-white transition cursor-pointer"
+                            title="Cancel"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const now = new Date();
+                            const s = activeStartTimestamp ? new Date(activeStartTimestamp) : now;
+                            setCustomStartTime(formatClockTime(s));
+                            setIsEditingStartTime(true);
+                          }}
+                          className="group/timer flex items-center gap-1.5 px-2 py-1 rounded-xl hover:bg-[#181818] border border-transparent hover:border-[#2a2a2a] transition cursor-pointer"
+                          title="Click on count time to edit start time (Clockify style)"
+                        >
+                          <span
+                            className={`font-mono font-extrabold text-base tracking-wider transition ${
+                              isRunning
+                                ? 'text-amber-300 animate-pulse group-hover/timer:text-amber-200'
+                                : 'text-neutral-300 group-hover/timer:text-white'
+                            }`}
+                          >
+                            {formatStopwatch(elapsedSeconds)}
+                          </span>
+                          <Pencil className="w-3 h-3 text-neutral-500 group-hover/timer:text-teal-400 opacity-0 group-hover/timer:opacity-100 transition-opacity shrink-0" />
+                        </button>
+                      )}
 
                       {/* Start / Stop Button */}
                       {isRunning ? (
