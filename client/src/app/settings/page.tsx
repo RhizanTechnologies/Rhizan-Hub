@@ -175,27 +175,33 @@ export default function SettingsPage() {
                   key={t.id}
                   type="button"
                   onClick={() => handleSelectTheme(t.id)}
-                  className={`text-left p-4 rounded-2xl border transition-all duration-200 relative group flex flex-col justify-between h-44 ${
-                    isSelected
-                      ? 'border-teal-400 ring-2 ring-teal-500/30 shadow-xl'
-                      : 'border-[#262626] hover:border-[#383838]'
-                  }`}
+                  className="text-left p-4 rounded-2xl border transition-all duration-200 relative group flex flex-col justify-between h-48 select-none"
                   style={{
                     backgroundColor: t.bgHex,
+                    borderColor: isSelected ? t.accentColor : t.borderHex,
+                    boxShadow: isSelected
+                      ? `0 0 0 2px ${t.accentColor}40, 0 8px 24px -4px ${t.accentColor}30`
+                      : '0 1px 3px 0 rgba(0,0,0,0.1)',
                   }}
                 >
                   {/* Selected Badge */}
                   {isSelected && (
-                    <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-md">
+                    <div
+                      className="absolute top-3 right-3 w-6 h-6 rounded-full text-white flex items-center justify-center shadow-md animate-in zoom-in-75 duration-150"
+                      style={{
+                        backgroundColor: t.accentColor,
+                        color: t.id === 'monochrome' ? '#09090b' : '#ffffff',
+                      }}
+                    >
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                   )}
 
                   {/* Header */}
                   <div>
-                    <div className="flex items-center gap-2 mb-1.5">
+                    <div className="flex items-center gap-2 mb-1.5 pr-7">
                       <span
-                        className="w-3 h-3 rounded-full shrink-0 shadow-sm"
+                        className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs ring-2 ring-white/10"
                         style={{ backgroundColor: t.accentColor }}
                       />
                       <span
@@ -218,23 +224,33 @@ export default function SettingsPage() {
 
                   {/* Mock Card Preview */}
                   <div
-                    className="p-2.5 rounded-xl border space-y-1.5"
+                    className="p-3 rounded-xl border space-y-2 shadow-xs transition-transform group-hover:scale-[1.01]"
                     style={{
                       backgroundColor: t.cardHex,
-                      borderColor: t.isDark ? '#2e2e2e' : '#e2e8f0',
+                      borderColor: t.borderHex,
                     }}
                   >
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className={t.isDark ? 'text-neutral-400' : 'text-slate-600'}>Preview Card</span>
+                      <span className={`font-semibold ${t.isDark ? 'text-neutral-300' : 'text-slate-700'}`}>
+                        Active Projects
+                      </span>
                       <span
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ backgroundColor: t.accentColor }}
-                      />
+                        className="font-mono font-bold px-1.5 py-0.5 rounded text-[9px]"
+                        style={{
+                          backgroundColor: `${t.accentColor}20`,
+                          color: t.accentColor,
+                        }}
+                      >
+                        2 Active
+                      </span>
                     </div>
-                    <div className="w-full h-1.5 rounded-full bg-black/20 overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full bg-black/20 dark:bg-white/10 overflow-hidden">
                       <div
-                        className="h-full rounded-full"
-                        style={{ backgroundColor: t.accentColor, width: '65%' }}
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          backgroundColor: t.accentColor,
+                          width: '78%',
+                        }}
                       />
                     </div>
                   </div>
