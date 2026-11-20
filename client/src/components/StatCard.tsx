@@ -18,8 +18,8 @@ export const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const variantStyles = {
     default: {
-      border: 'border-slate-200 dark:border-[#222222]',
-      iconBg: 'bg-slate-100 dark:bg-[#181818] text-slate-700 dark:text-neutral-300',
+      border: 'border-slate-200 dark:border-[#222e42]',
+      iconBg: 'bg-slate-100 dark:bg-[#1e2a3c] text-slate-700 dark:text-neutral-300',
       valueColor: 'text-slate-900 dark:text-white',
     },
     warning: {
@@ -46,7 +46,7 @@ export const StatCard: React.FC<StatCardProps> = ({
 
   return (
     <div
-      className={`p-4 rounded-2xl bg-white dark:bg-[#121212] border ${variantStyles.border} backdrop-blur-sm transition-all hover:border-slate-300 dark:hover:border-[#333333] shadow-xs`}
+      className={`p-4 rounded-2xl bg-white dark:bg-[#151d2a] border ${variantStyles.border} backdrop-blur-sm transition-all hover:border-slate-300 dark:hover:border-teal-500/40 shadow-xs`}
     >
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-medium text-slate-500 dark:text-neutral-400">{label}</span>

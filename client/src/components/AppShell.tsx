@@ -112,9 +112,9 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   // Authenticated workspace
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full max-w-full bg-[var(--background)] text-[var(--foreground)] overflow-x-hidden">
+      <div className="flex min-h-screen w-full max-w-full bg-[var(--background)] text-[var(--foreground)]">
         <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0 w-full max-w-full min-h-screen bg-[var(--background)] text-[var(--foreground)] overflow-x-hidden">
+        <div className="flex-1 flex flex-col min-w-0 w-full max-w-full min-h-screen lg:pl-64 bg-[var(--background)] text-[var(--foreground)]">
           {children}
         </div>
       </div>

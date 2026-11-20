@@ -212,8 +212,8 @@ export const Sidebar: React.FC = () => {
         {sidebarContent}
       </aside>
 
-      {/* Desktop Persistent Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-white dark:bg-[#0d0d0d] text-slate-800 dark:text-neutral-200 border-r border-slate-200 dark:border-[#222222] flex-col h-screen sticky top-0 select-none shrink-0">
+      {/* Desktop Persistent Sidebar (Fixed) */}
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-[#0d0d0d] text-slate-800 dark:text-neutral-200 border-r border-slate-200 dark:border-[#222222] flex-col h-screen select-none">
         {sidebarContent}
       </aside>
     </>

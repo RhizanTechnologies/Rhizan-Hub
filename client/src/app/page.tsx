@@ -562,7 +562,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Daily EOD Standup Banner / Feed Toggle (After Cards) */}
-        <div className="p-3.5 bg-white dark:bg-[#121212] border border-slate-200 dark:border-[#242424] rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-sm">
+        <div className="p-3.5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-sm">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
               <Moon className="w-3.5 h-3.5" />
@@ -680,7 +680,7 @@ export default function DashboardPage() {
         {/* ========================================================================= */}
         <div
           id="dashboard-timer-section"
-          className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm relative overflow-hidden"
+          className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl p-5 sm:p-6 shadow-sm relative overflow-hidden"
         >
           {/* Subtle Ambient Background Glow */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -957,7 +957,7 @@ export default function DashboardPage() {
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Active Projects (7 columns) */}
-          <div className="lg:col-span-7 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+          <div className="lg:col-span-7 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222]">
               <div>
                 <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1020,7 +1020,7 @@ export default function DashboardPage() {
           </div>
 
           {/* My Tasks with 1-Click Timer Integration (5 columns) */}
-          <div className="lg:col-span-5 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222] mb-3">
                 <div>
@@ -1120,7 +1120,7 @@ export default function DashboardPage() {
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Team Weekly Status (5 cols) - 48h Weekly Target */}
-          <div className="lg:col-span-5 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+          <div className="lg:col-span-5 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222]">
               <div>
                 <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1180,7 +1180,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Activity Feed (7 cols) */}
-          <div className="lg:col-span-7 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+          <div className="lg:col-span-7 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222]">
               <div>
                 <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
