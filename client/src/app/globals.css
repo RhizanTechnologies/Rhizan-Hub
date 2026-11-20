@@ -496,14 +496,12 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 [data-theme="clean-light"] .bg-amber-600.text-white,
 [data-theme="clean-light"] .bg-indigo-600.text-white,
 [data-theme="clean-light"] .bg-blue-600.text-white,
-[data-theme="clean-light"] [class*="bg-teal-600"] .text-white,
-[data-theme="clean-light"] [class*="bg-teal-500"] .text-white,
-[data-theme="clean-light"] [class*="bg-emerald-600"] .text-white,
-[data-theme="clean-light"] [class*="bg-rose-600"] .text-white,
 [data-theme="clean-light"] button.bg-teal-600,
 [data-theme="clean-light"] button.bg-teal-500,
 [data-theme="clean-light"] button.bg-rose-600,
 [data-theme="clean-light"] button.bg-emerald-600,
+[data-theme="clean-light"] button.bg-indigo-600,
+[data-theme="clean-light"] a.bg-teal-600,
 .light .bg-teal-600.text-white,
 .light .bg-teal-500.text-white,
 .light .bg-emerald-600.text-white,
@@ -511,14 +509,12 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .light .bg-amber-600.text-white,
 .light .bg-indigo-600.text-white,
 .light .bg-blue-600.text-white,
-.light [class*="bg-teal-600"] .text-white,
-.light [class*="bg-teal-500"] .text-white,
-.light [class*="bg-emerald-600"] .text-white,
-.light [class*="bg-rose-600"] .text-white,
 .light button.bg-teal-600,
 .light button.bg-teal-500,
 .light button.bg-rose-600,
-.light button.bg-emerald-600 {
+.light button.bg-emerald-600,
+.light button.bg-indigo-600,
+.light a.bg-teal-600 {
   color: #ffffff !important;
 }
 

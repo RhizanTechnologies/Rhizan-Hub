@@ -63,6 +63,7 @@ export default function DashboardPage() {
   const [isLogTimeOpen, setIsLogTimeOpen] = useState(false);
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [isActivityFeedOpen, setIsActivityFeedOpen] = useState(false);
+  const [selectedActivityLog, setSelectedActivityLog] = useState<any | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Quick Log Time Form State
@@ -515,207 +516,7 @@ export default function DashboardPage() {
       />
 
       <main className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
-        {/* Quick Action Navigation Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#111111] border border-[#222222] rounded-2xl">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
-            <span className="text-xs font-semibold text-neutral-300">Quick Navigation:</span>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link
-              href="/time"
-              className="px-3 py-1.5 rounded-xl bg-teal-600/10 hover:bg-teal-600/20 text-teal-400 border border-teal-500/30 text-xs font-semibold flex items-center gap-1.5 transition"
-              title="Go to Time Tracking"
-            >
-              <Clock className="w-3.5 h-3.5" />
-              <span>Log Time</span>
-            </Link>
-
-            <Link
-              href="/tasks"
-              className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
-              title="Go to Tasks Kanban"
-            >
-              <CheckSquare className="w-3.5 h-3.5 text-teal-400" />
-              <span>Tasks</span>
-            </Link>
-
-            <Link
-              href="/projects"
-              className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
-              title="Go to Projects"
-            >
-              <FolderKanban className="w-3.5 h-3.5 text-teal-400" />
-              <span>Projects</span>
-            </Link>
-
-            <Link
-              href="/clients"
-              className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
-              title="Go to Clients"
-            >
-              <Building2 className="w-3.5 h-3.5 text-teal-400" />
-              <span>Clients</span>
-            </Link>
-
-            <Link
-              href="/approaches"
-              className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
-              title="Go to Client Outreach"
-            >
-              <Target className="w-3.5 h-3.5 text-teal-400" />
-              <span>Client Outreach</span>
-            </Link>
-
-            {/* Mobile / Quick Operations Feed Popup Trigger */}
-            <button
-              type="button"
-              onClick={() => setIsActivityFeedOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-              title="Open Recent Operations Feed Popup"
-            >
-              <TrendingUp className="w-3.5 h-3.5 text-teal-400" />
-              <span>Operations Feed</span>
-              {(data?.recentActivities || []).length > 0 && (
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-teal-500/20 text-teal-300 font-mono font-bold">
-                  {data?.recentActivities?.length}
-                </span>
-              )}
-            </button>
-
-            {/* Optional Daily EOD Standup Button */}
-            <button
-              type="button"
-              onClick={openStandupModal}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
-                myStandup
-                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                  : 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
-              }`}
-              title="Optional: Share a quick 2-minute daily check-in"
-            >
-              <Moon className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{myStandup ? 'Edit EOD Standup' : 'EOD Check-in (Optional)'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Optional Daily EOD Standup Banner / Feed Toggle */}
-        <div className="p-3.5 bg-[#121212] border border-[#242424] rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
-              <Moon className="w-3.5 h-3.5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-white">Daily EOD Wrap-Up</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700">
-                  Optional
-                </span>
-                {todayStandups.length > 0 && (
-                  <span className="text-[10px] font-semibold text-emerald-400">
-                    • {todayStandups.length} checked in today
-                  </span>
-                )}
-              </div>
-              <p className="text-[11px] text-neutral-400">
-                {myStandup
-                  ? 'You submitted your EOD wrap-up today. Great work!'
-                  : 'Keep your team asynchronously aligned — share what you completed, tomorrow\'s plan, and any blockers.'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {todayStandups.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setIsStandupFeedOpen(!isStandupFeedOpen)}
-                className="px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#202020] text-neutral-300 hover:text-white border border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
-              >
-                <Users className="w-3.5 h-3.5 text-indigo-400" />
-                <span>{isStandupFeedOpen ? 'Hide Standups' : `View Standups (${todayStandups.length})`}</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={openStandupModal}
-              className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md shadow-indigo-950 flex items-center gap-1.5"
-            >
-              <span>{myStandup ? 'Update My Standup' : '+ Share EOD Check-in'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Standup Feed Drawer (when opened) */}
-        {isStandupFeedOpen && todayStandups.length > 0 && (
-          <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center justify-between pb-2 border-b border-[#242424]">
-              <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Today's Team Standup Check-ins ({todayStandups.length})</span>
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {todayStandups.map((s) => (
-                <div key={s._id} className="p-3.5 rounded-xl bg-[#181818] border border-[#2a2a2a] space-y-2.5 text-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-[9px] flex items-center justify-center">
-                        {s.userName?.charAt(0) || 'U'}
-                      </div>
-                      <div>
-                        <span className="font-bold text-white block">{s.userName}</span>
-                        <span className="text-[10px] text-neutral-400">{s.userRole || 'Team Member'}</span>
-                      </div>
-                    </div>
-                    {s.hoursWorked ? (
-                      <span className="text-[10px] font-mono font-bold text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">
-                        {s.hoursWorked}h logged
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <div className="space-y-1.5 pt-1 border-t border-[#242424]">
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block">
-                        Completed Today:
-                      </span>
-                      <p className="text-[11px] text-neutral-200 whitespace-pre-line leading-relaxed">
-                        {s.completedToday}
-                      </p>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-teal-400 tracking-wider block">
-                        Planning Tomorrow:
-                      </span>
-                      <p className="text-[11px] text-neutral-300 whitespace-pre-line leading-relaxed">
-                        {s.prioritiesTomorrow}
-                      </p>
-                    </div>
-
-                    {s.blockers && (
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider block">
-                          Blockers / Impediments:
-                        </span>
-                        <p className="text-[11px] text-rose-300/90 whitespace-pre-line leading-relaxed">
-                          {s.blockers}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Top 6 KPIs Grid */}
+        {/* Top 6 KPIs Grid (Uniform Cards) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-3.5">
           <StatCard
             label="Today's Hours"
@@ -760,30 +561,144 @@ export default function DashboardPage() {
           />
         </div>
 
+        {/* Daily EOD Standup Banner / Feed Toggle (After Cards) */}
+        <div className="p-3.5 bg-white dark:bg-[#121212] border border-slate-200 dark:border-[#242424] rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
+              <Moon className="w-3.5 h-3.5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-900 dark:text-white">Daily EOD Wrap-Up</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-neutral-700">
+                  Optional
+                </span>
+                {todayStandups.length > 0 && (
+                  <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                    • {todayStandups.length} checked in today
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400">
+                {myStandup
+                  ? 'You submitted your EOD wrap-up today. Great work!'
+                  : 'Keep your team asynchronously aligned — share what you completed, tomorrow\'s plan, and any blockers.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {todayStandups.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsStandupFeedOpen(!isStandupFeedOpen)}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#181818] dark:hover:bg-[#202020] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
+              >
+                <Users className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+                <span>{isStandupFeedOpen ? 'Hide Standups' : `View Standups (${todayStandups.length})`}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={openStandupModal}
+              className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md shadow-indigo-950/20 flex items-center gap-1.5"
+            >
+              <span>{myStandup ? 'Update My Standup' : '+ Share EOD Check-in'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Standup Feed Drawer (when opened) */}
+        {isStandupFeedOpen && todayStandups.length > 0 && (
+          <div className="p-4 bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#242424]">
+              <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+                <span>Today's Team Standup Check-ins ({todayStandups.length})</span>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {todayStandups.map((s) => (
+                <div key={s._id} className="p-3.5 rounded-xl bg-white dark:bg-[#181818] border border-slate-200 dark:border-[#2a2a2a] space-y-2.5 text-xs shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-[9px] flex items-center justify-center">
+                        {s.userName?.charAt(0) || 'U'}
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-900 dark:text-white block">{s.userName}</span>
+                        <span className="text-[10px] text-slate-500 dark:text-neutral-400">{s.userRole || 'Team Member'}</span>
+                      </div>
+                    </div>
+                    {s.hoursWorked ? (
+                      <span className="text-[10px] font-mono font-bold text-teal-700 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">
+                        {s.hoursWorked}h logged
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-[#242424]">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-neutral-400 tracking-wider block">
+                        Completed Today:
+                      </span>
+                      <p className="text-[11px] text-slate-700 dark:text-neutral-200 whitespace-pre-line leading-relaxed">
+                        {s.completedToday}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-teal-700 dark:text-teal-400 tracking-wider block">
+                        Planning Tomorrow:
+                      </span>
+                      <p className="text-[11px] text-slate-700 dark:text-neutral-300 whitespace-pre-line leading-relaxed">
+                        {s.prioritiesTomorrow}
+                      </p>
+                    </div>
+
+                    {s.blockers && (
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-rose-600 dark:text-rose-400 tracking-wider block">
+                          Blockers / Impediments:
+                        </span>
+                        <p className="text-[11px] text-rose-700 dark:text-rose-300/90 whitespace-pre-line leading-relaxed">
+                          {s.blockers}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ========================================================================= */}
         {/* TODAY'S TIME TRACKING & LIVE TIMER HUB (High-Priority User Feature)       */}
         {/* ========================================================================= */}
         <div
           id="dashboard-timer-section"
-          className="bg-[#111111] border border-[#222222] rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-hidden"
+          className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm relative overflow-hidden"
         >
           {/* Subtle Ambient Background Glow */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
 
           {/* Section Header */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-[#222222]">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100 dark:border-[#222222]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center">
                 <Clock className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="font-heading text-base font-bold text-white">Today's Time Tracking Hub</h2>
-                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-300 font-bold border border-teal-500/20">
+                  <h2 className="font-heading text-base font-bold text-slate-900 dark:text-white">Today's Time Tracking Hub</h2>
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-300 font-bold border border-teal-500/20">
                     Live
                   </span>
                 </div>
-                <p className="text-xs text-neutral-400">
+                <p className="text-xs text-slate-500 dark:text-neutral-400">
                   Track hours in real time, monitor your daily 8h capacity, and review today's logged work
                 </p>
               </div>
@@ -792,7 +707,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/time"
-                className="text-xs font-semibold text-teal-400 hover:text-teal-300 flex items-center gap-1 transition px-3 py-1.5 rounded-xl bg-[#181818] border border-[#262626] hover:border-[#383838]"
+                className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 flex items-center gap-1 transition px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#181818] dark:hover:bg-[#262626] border border-slate-200 dark:border-[#262626]"
               >
                 <span>View Full Timesheet</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -802,20 +717,20 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column: Live Stopwatch & Quick Logging (6 Cols) */}
-            <div className="lg:col-span-6 bg-[#161616] border border-[#262626] rounded-2xl p-5 space-y-4">
+            <div className="lg:col-span-6 bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] rounded-2xl p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span
                     className={`w-2.5 h-2.5 rounded-full ${
-                      isRunning ? 'bg-emerald-400 animate-ping' : 'bg-neutral-600'
+                      isRunning ? 'bg-emerald-500 dark:bg-emerald-400 animate-ping' : 'bg-slate-400 dark:bg-neutral-600'
                     }`}
                   />
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-300">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300">
                     {isRunning ? 'Timer Running' : 'Live Stopwatch'}
                   </span>
                 </div>
 
-                <span className="text-xs font-mono font-bold text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20">
+                <span className="text-xs font-mono font-bold text-teal-700 dark:text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20">
                   {formatStopwatch(elapsedSeconds)}
                 </span>
               </div>
@@ -827,7 +742,7 @@ export default function DashboardPage() {
                   placeholder="What are you working on right now?"
                   value={timerDescription}
                   onChange={(e) => setTimerDescription(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#111111] border border-[#2a2a2a] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+                  className="w-full px-3.5 py-2.5 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#2a2a2a] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition"
                 />
               </div>
 
@@ -865,13 +780,13 @@ export default function DashboardPage() {
               </div>
 
               {/* Timer Controls & Quick Presets */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#222222]">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-[#222222]">
                 <div className="flex items-center gap-2">
                   {!isRunning ? (
                     <button
                       type="button"
                       onClick={startTimer}
-                      className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-teal-900/40 transition active:scale-95"
+                      className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-teal-900/20 transition active:scale-95"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Start Timer</span>
@@ -880,7 +795,7 @@ export default function DashboardPage() {
                     <button
                       type="button"
                       onClick={stopTimer}
-                      className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-rose-900/40 transition active:scale-95 animate-pulse"
+                      className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-rose-900/20 transition active:scale-95 animate-pulse"
                     >
                       <Square className="w-3.5 h-3.5 fill-current" />
                       <span>Stop & Log</span>
@@ -892,8 +807,8 @@ export default function DashboardPage() {
                     onClick={() => setTimerBillable(!timerBillable)}
                     className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1 transition ${
                       timerBillable
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                        : 'bg-[#181818] border-[#2a2a2a] text-neutral-400'
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
+                        : 'bg-slate-100 dark:bg-[#181818] border-slate-200 dark:border-[#2a2a2a] text-slate-600 dark:text-neutral-400'
                     }`}
                     title={timerBillable ? 'Client Work (Billable)' : 'Internal Work'}
                   >
@@ -904,25 +819,25 @@ export default function DashboardPage() {
 
                 {/* Instant Quick Log Chips (+15m, +30m, +1h) */}
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-neutral-500 mr-1 font-medium">Quick Log:</span>
+                  <span className="text-[10px] text-slate-500 dark:text-neutral-500 mr-1 font-medium">Quick Log:</span>
                   <button
                     type="button"
                     onClick={() => handleQuickPresetLog(15)}
-                    className="px-2 py-1 rounded-lg bg-[#111111] hover:bg-[#202020] text-neutral-300 hover:text-teal-300 border border-[#2a2a2a] text-[10px] font-mono transition"
+                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#111111] hover:bg-slate-100 dark:hover:bg-[#202020] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#2a2a2a] text-[10px] font-mono transition"
                   >
                     +15m
                   </button>
                   <button
                     type="button"
                     onClick={() => handleQuickPresetLog(30)}
-                    className="px-2 py-1 rounded-lg bg-[#111111] hover:bg-[#202020] text-neutral-300 hover:text-teal-300 border border-[#2a2a2a] text-[10px] font-mono transition"
+                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#111111] hover:bg-slate-100 dark:hover:bg-[#202020] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#2a2a2a] text-[10px] font-mono transition"
                   >
                     +30m
                   </button>
                   <button
                     type="button"
                     onClick={() => handleQuickPresetLog(60)}
-                    className="px-2 py-1 rounded-lg bg-[#111111] hover:bg-[#202020] text-neutral-300 hover:text-teal-300 border border-[#2a2a2a] text-[10px] font-mono transition"
+                    className="px-2 py-1 rounded-lg bg-white dark:bg-[#111111] hover:bg-slate-100 dark:hover:bg-[#202020] text-slate-700 dark:text-neutral-300 hover:text-teal-600 dark:hover:text-teal-300 border border-slate-200 dark:border-[#2a2a2a] text-[10px] font-mono transition"
                   >
                     +1h
                   </button>
@@ -933,52 +848,52 @@ export default function DashboardPage() {
             {/* Right Column: Daily Capacity Dial & Today's Logged Entries (6 Cols) */}
             <div className="lg:col-span-6 space-y-4">
               {/* Daily Capacity Meter Card */}
-              <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-teal-400" />
-                    <span className="text-xs font-bold text-white">Daily Target Progress</span>
+                    <Target className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">Daily Target Progress</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs font-mono font-bold text-white">{myHoursToday}h</span>
-                    <span className="text-xs text-neutral-400"> / {dailyTarget}h target</span>
+                    <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">{myHoursToday}h</span>
+                    <span className="text-xs text-slate-500 dark:text-neutral-400"> / {dailyTarget}h target</span>
                   </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full bg-[#111111] h-2.5 rounded-full overflow-hidden p-0.5 border border-[#2a2a2a]">
+                <div className="w-full bg-slate-200 dark:bg-[#111111] h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-[#2a2a2a]">
                   <div
                     className={`h-full rounded-full transition-all duration-700 ${
                       todayProgressPercent >= 100
                         ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                        : 'bg-gradient-to-r from-teal-500 to-teal-300'
+                        : 'bg-gradient-to-r from-teal-500 to-teal-400'
                     }`}
                     style={{ width: `${todayProgressPercent}%` }}
                   />
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] text-neutral-400 pt-1">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-neutral-400 pt-1">
                   <span>
                     {todayProgressPercent >= 100
                       ? '🎉 Daily goal achieved!'
                       : `${Math.max(0, Math.round((dailyTarget - myHoursToday) * 10) / 10)}h remaining today`}
                   </span>
-                  <span className="font-semibold text-teal-400">{todayProgressPercent}% of 8h</span>
-                  <span className="text-neutral-500">Team today: {teamHoursToday}h</span>
+                  <span className="font-semibold text-teal-700 dark:text-teal-400">{todayProgressPercent}% of 8h</span>
+                  <span className="text-slate-400 dark:text-neutral-500">Team today: {teamHoursToday}h</span>
                 </div>
               </div>
 
               {/* Today's Logged Sessions List */}
-              <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-2.5">
-                <div className="flex items-center justify-between pb-2 border-b border-[#242424]">
-                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-teal-400" />
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] space-y-2.5">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#242424]">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                     <span>Today's Logged Work ({todayEntries.length})</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => setIsLogTimeOpen(true)}
-                    className="text-[11px] text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1 transition"
+                    className="text-[11px] text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-semibold flex items-center gap-1 transition"
                   >
                     <Plus className="w-3 h-3" />
                     <span>Add Manual</span>
@@ -990,34 +905,34 @@ export default function DashboardPage() {
                     todayEntries.map((entry) => (
                       <div
                         key={entry._id}
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-[#111111] border border-[#262626] hover:border-[#333333] transition text-xs group"
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#262626] hover:border-teal-500/40 transition text-xs group shadow-xs"
                       >
                         <div className="min-w-0 flex-1 pr-2">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-white truncate max-w-[140px]">
+                            <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[140px]">
                               {entry.project?.name || 'Project'}
                             </span>
                             {entry.task && (
-                              <span className="text-[10px] text-teal-400/90 truncate max-w-[130px]">
+                              <span className="text-[10px] text-teal-700 dark:text-teal-400/90 truncate max-w-[130px]">
                                 • {entry.task.title}
                               </span>
                             )}
                           </div>
                           {entry.description && (
-                            <p className="text-[11px] text-neutral-400 truncate mt-0.5">
+                            <p className="text-[11px] text-slate-500 dark:text-neutral-400 truncate mt-0.5">
                               {entry.description}
                             </p>
                           )}
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="font-mono text-xs font-bold text-white bg-[#1a1a1a] px-2 py-0.5 rounded-md border border-[#2e2e2e]">
+                          <span className="font-mono text-xs font-bold text-slate-800 dark:text-white bg-slate-100 dark:bg-[#1a1a1a] px-2 py-0.5 rounded-md border border-slate-200 dark:border-[#2e2e2e]">
                             {formatDurationText(entry.hours, entry.minutes)}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleDeleteTimeEntry(entry._id)}
-                            className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 transition"
+                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 transition"
                             title="Delete entry"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -1026,9 +941,9 @@ export default function DashboardPage() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-6 text-neutral-500 text-xs">
-                      No hours logged yet today. Click <strong className="text-teal-400">Start Timer</strong> or{' '}
-                      <strong className="text-teal-400">+ Manual</strong> to get started!
+                    <div className="text-center py-6 text-slate-400 dark:text-neutral-500 text-xs">
+                      No hours logged yet today. Click <strong className="text-teal-600 dark:text-teal-400">Start Timer</strong> or{' '}
+                      <strong className="text-teal-600 dark:text-teal-400">+ Manual</strong> to get started!
                     </div>
                   )}
                 </div>
@@ -1042,18 +957,18 @@ export default function DashboardPage() {
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Active Projects (7 columns) */}
-          <div className="lg:col-span-7 bg-[#111111] border border-[#222222] rounded-3xl p-5 sm:p-6 backdrop-blur-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#222222]">
+          <div className="lg:col-span-7 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222]">
               <div>
-                <h2 className="font-heading text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <FolderKanban className="w-4 h-4 text-teal-400" />
+                <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <FolderKanban className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   Active Project Deliverables
                 </h2>
-                <p className="text-xs text-neutral-400">Ongoing client contracts & internal roadmap</p>
+                <p className="text-xs text-slate-500 dark:text-neutral-400">Ongoing client contracts & internal roadmap</p>
               </div>
               <Link
                 href="/projects"
-                className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1 font-semibold transition"
+                className="text-xs text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 flex items-center gap-1 font-semibold transition"
               >
                 <span>All Projects</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -1066,58 +981,58 @@ export default function DashboardPage() {
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className="block p-4 rounded-2xl bg-[#161616] border border-[#262626] hover:border-teal-500/40 transition group"
+                    className="block p-4 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] hover:border-teal-500/40 transition group"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-heading text-sm font-bold text-white group-hover:text-teal-300 transition truncate">
+                        <span className="font-heading text-sm font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition truncate">
                           {project.name}
                         </span>
-                        <span className="text-[11px] text-neutral-400 shrink-0">
+                        <span className="text-[11px] text-slate-500 dark:text-neutral-400 shrink-0">
                           ({project.clientName})
                         </span>
                       </div>
-                      <span className="text-xs font-mono font-bold text-teal-400 shrink-0">
+                      <span className="text-xs font-mono font-bold text-teal-700 dark:text-teal-400 shrink-0">
                         {project.progress}%
                       </span>
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="w-full bg-[#111111] h-2 rounded-full overflow-hidden border border-[#282828]">
+                    <div className="w-full bg-slate-200 dark:bg-[#111111] h-2 rounded-full overflow-hidden border border-slate-200 dark:border-[#282828]">
                       <div
                         className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                         style={{ width: `${project.progress}%` }}
                       />
                     </div>
 
-                    <div className="flex items-center justify-between mt-2.5 text-[11px] text-neutral-400">
+                    <div className="flex items-center justify-between mt-2.5 text-[11px] text-slate-500 dark:text-neutral-400">
                       <span>{project.totalTasks} tasks connected</span>
-                      <span className="text-neutral-500">
-                        Deadline: <strong className="text-neutral-300">{project.deadline || 'Upcoming'}</strong>
+                      <span className="text-slate-400 dark:text-neutral-500">
+                        Deadline: <strong className="text-slate-700 dark:text-neutral-300">{project.deadline || 'Upcoming'}</strong>
                       </span>
                     </div>
                   </Link>
                 ))
               ) : (
-                <div className="text-center py-8 text-neutral-500 text-xs">No active projects found.</div>
+                <div className="text-center py-8 text-slate-400 dark:text-neutral-500 text-xs">No active projects found.</div>
               )}
             </div>
           </div>
 
           {/* My Tasks with 1-Click Timer Integration (5 columns) */}
-          <div className="lg:col-span-5 bg-[#111111] border border-[#222222] rounded-3xl p-5 sm:p-6 backdrop-blur-sm flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-5 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex items-center justify-between pb-3 border-b border-[#222222] mb-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222] mb-3">
                 <div>
-                  <h2 className="font-heading text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                    <CheckSquare className="w-4 h-4 text-emerald-400" />
+                  <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <CheckSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     My Active Tasks
                   </h2>
-                  <p className="text-xs text-neutral-400">Assigned directly to you</p>
+                  <p className="text-xs text-slate-500 dark:text-neutral-400">Assigned directly to you</p>
                 </div>
                 <Link
                   href="/tasks"
-                  className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1 font-semibold transition"
+                  className="text-xs text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 flex items-center gap-1 font-semibold transition"
                 >
                   <span>Board</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -1133,8 +1048,8 @@ export default function DashboardPage() {
                         key={task._id}
                         className={`p-3 rounded-2xl border transition flex items-start gap-3 select-none ${
                           isDone
-                            ? 'bg-[#141414] border-[#1e1e1e] opacity-60'
-                            : 'bg-[#161616] border-[#262626] hover:border-[#383838]'
+                            ? 'bg-slate-100/60 dark:bg-[#141414] border-slate-200 dark:border-[#1e1e1e] opacity-60'
+                            : 'bg-slate-50 dark:bg-[#161616] border-slate-200 dark:border-[#262626] hover:border-teal-500/40'
                         }`}
                       >
                         <button
@@ -1143,7 +1058,7 @@ export default function DashboardPage() {
                           className={`mt-0.5 w-4 h-4 rounded-md border flex items-center justify-center transition shrink-0 ${
                             isDone
                               ? 'bg-emerald-500 border-emerald-500 text-white'
-                              : 'border-neutral-600 hover:border-teal-400 text-transparent'
+                              : 'border-slate-300 dark:border-neutral-600 hover:border-teal-500 text-transparent'
                           }`}
                           title={isDone ? 'Mark Incomplete' : 'Mark Done'}
                         >
@@ -1153,7 +1068,7 @@ export default function DashboardPage() {
                         <div className="flex-1 min-w-0">
                           <div
                             className={`text-xs font-semibold leading-snug ${
-                              isDone ? 'line-through text-neutral-500' : 'text-neutral-200'
+                              isDone ? 'line-through text-slate-400 dark:text-neutral-500' : 'text-slate-800 dark:text-neutral-200'
                             }`}
                           >
                             {task.title}
@@ -1162,7 +1077,7 @@ export default function DashboardPage() {
                           <div className="flex items-center gap-2 mt-2 flex-wrap">
                             <PriorityBadge priority={task.priority} />
                             {task.project && (
-                              <span className="text-[10px] text-neutral-400 truncate max-w-[120px]">
+                              <span className="text-[10px] text-slate-500 dark:text-neutral-400 truncate max-w-[120px]">
                                 {task.project.name}
                               </span>
                             )}
@@ -1174,7 +1089,7 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => startTrackingForTask(task)}
-                            className="p-1.5 rounded-lg bg-[#1a1a1a] hover:bg-teal-600 text-neutral-400 hover:text-white border border-[#2a2a2a] transition shrink-0"
+                            className="p-1.5 rounded-lg bg-white dark:bg-[#1a1a1a] hover:bg-teal-600 hover:text-white text-slate-500 dark:text-neutral-400 border border-slate-200 dark:border-[#2a2a2a] transition shrink-0"
                             title="Start timer for this task"
                           >
                             <Play className="w-3 h-3 fill-current" />
@@ -1184,7 +1099,7 @@ export default function DashboardPage() {
                     );
                   })
                 ) : (
-                  <div className="text-center py-8 text-neutral-500 text-xs">
+                  <div className="text-center py-8 text-slate-400 dark:text-neutral-500 text-xs">
                     No active tasks assigned. Great job!
                   </div>
                 )}
@@ -1193,7 +1108,7 @@ export default function DashboardPage() {
 
             <Link
               href="/tasks"
-              className="w-full py-2.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-xs font-semibold text-neutral-200 text-center transition block border border-[#282828]"
+              className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#181818] dark:hover:bg-[#222222] text-xs font-semibold text-slate-700 dark:text-neutral-200 text-center transition block border border-slate-200 dark:border-[#282828]"
             >
               Open Full Task Board
             </Link>
@@ -1205,18 +1120,18 @@ export default function DashboardPage() {
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Team Weekly Status (5 cols) - 48h Weekly Target */}
-          <div className="lg:col-span-5 bg-[#111111] border border-[#222222] rounded-3xl p-5 sm:p-6 backdrop-blur-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#222222]">
+          <div className="lg:col-span-5 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222]">
               <div>
-                <h2 className="font-heading text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <Users className="w-4 h-4 text-teal-400" />
+                <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Users className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   Team Weekly Capacity
                 </h2>
-                <p className="text-xs text-neutral-400">Target: 48h / member (6 days × 8h)</p>
+                <p className="text-xs text-slate-500 dark:text-neutral-400">Target: 48h / member (6 days × 8h)</p>
               </div>
               <Link
                 href="/team"
-                className="text-xs text-teal-400 hover:text-teal-300 font-semibold transition"
+                className="text-xs text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-semibold transition"
               >
                 Team Page
               </Link>
@@ -1231,29 +1146,29 @@ export default function DashboardPage() {
                 <Link
                   key={member.id}
                   href={`/team/${member.id}`}
-                  className="block p-3.5 rounded-2xl bg-[#161616] border border-[#262626] hover:border-teal-500/40 transition group"
+                  className="block p-3.5 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] hover:border-teal-500/40 transition group"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-teal-600/20 text-teal-300 font-bold text-xs flex items-center justify-center border border-teal-500/30">
+                      <div className="w-7 h-7 rounded-full bg-teal-600/10 text-teal-700 dark:text-teal-300 font-bold text-xs flex items-center justify-center border border-teal-500/30">
                         {member.name?.charAt(0) || 'M'}
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white group-hover:text-teal-300 transition">
+                        <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition">
                           {member.name}
                         </div>
-                        <div className="text-[10px] text-neutral-400">{member.role}</div>
+                        <div className="text-[10px] text-slate-500 dark:text-neutral-400">{member.role}</div>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <span className="font-mono text-xs font-bold text-white">{member.hours}h</span>
-                      <span className="text-[10px] text-neutral-500"> / {member.capacity || 48}h</span>
+                      <span className="font-mono text-xs font-bold text-slate-900 dark:text-white">{member.hours}h</span>
+                      <span className="text-[10px] text-slate-500 dark:text-neutral-500"> / {member.capacity || 48}h</span>
                     </div>
                   </div>
 
                   {/* Capacity Progress Bar */}
-                  <div className="w-full bg-[#111111] h-1.5 rounded-full overflow-hidden border border-[#242424]">
+                  <div className="w-full bg-slate-200 dark:bg-[#111111] h-1.5 rounded-full overflow-hidden border border-slate-200 dark:border-[#242424]">
                     <div
                       className="bg-teal-500 h-full rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, member.percentage || 0)}%` }}
@@ -1265,14 +1180,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Activity Feed (7 cols) */}
-          <div className="lg:col-span-7 bg-[#111111] border border-[#222222] rounded-3xl p-5 sm:p-6 backdrop-blur-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#222222]">
+          <div className="lg:col-span-7 bg-white dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222]">
               <div>
-                <h2 className="font-heading text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-teal-400" />
+                <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   Recent Operations Feed
                 </h2>
-                <p className="text-xs text-neutral-400">Live updates across deliverables, clients, and time logs</p>
+                <p className="text-xs text-slate-500 dark:text-neutral-400">Live updates across deliverables, clients, and time logs (click any log to view details)</p>
               </div>
             </div>
 
@@ -1281,25 +1196,27 @@ export default function DashboardPage() {
                 data?.recentActivities.map((act) => (
                   <div
                     key={act._id}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-[#161616] border border-[#262626] text-xs gap-3"
+                    onClick={() => setSelectedActivityLog(act)}
+                    className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] hover:border-teal-500/50 cursor-pointer active:scale-[0.99] transition text-xs gap-3 group"
+                    title="Click to view details"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      <div className="w-7 h-7 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold text-xs shrink-0">
                         {act.userName?.charAt(0) || 'U'}
                       </div>
                       <div className="truncate">
-                        <span className="font-semibold text-white">{act.userName}</span>{' '}
-                        <span className="text-neutral-400">{act.action}</span>{' '}
-                        <span className="font-medium text-teal-300">"{act.entityTitle}"</span>
+                        <span className="font-semibold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition">{act.userName}</span>{' '}
+                        <span className="text-slate-600 dark:text-neutral-400">{act.action}</span>{' '}
+                        <span className="font-medium text-teal-700 dark:text-teal-300">"{act.entityTitle}"</span>
                       </div>
                     </div>
-                    <span className="text-[10px] text-neutral-500 shrink-0">
+                    <span className="text-[10px] text-slate-400 dark:text-neutral-500 shrink-0">
                       {act.createdAt}
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-neutral-500 text-xs">
+                <div className="text-center py-8 text-slate-400 dark:text-neutral-500 text-xs">
                   No activity recorded yet.
                 </div>
               )}
@@ -1613,8 +1530,8 @@ export default function DashboardPage() {
         title="Recent Operations Feed"
       >
         <div className="space-y-3">
-          <p className="text-xs text-neutral-400">
-            Live updates across deliverables, project milestones, clients, and time logs.
+          <p className="text-xs text-slate-500 dark:text-neutral-400">
+            Live updates across deliverables, project milestones, clients, and time logs. Tap any log to view complete details.
           </p>
 
           <div className="space-y-2.5 max-h-[60vh] overflow-y-auto pr-0.5 custom-scrollbar">
@@ -1622,30 +1539,96 @@ export default function DashboardPage() {
               data?.recentActivities.map((act) => (
                 <div
                   key={act._id}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-[#161616] border border-[#262626] text-xs gap-3"
+                  onClick={() => setSelectedActivityLog(act)}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] hover:border-teal-500/50 cursor-pointer active:scale-[0.99] transition text-xs gap-3 group"
+                  title="Click to view full details"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold text-xs shrink-0">
                       {act.userName?.charAt(0) || 'U'}
                     </div>
                     <div className="truncate">
-                      <span className="font-semibold text-white">{act.userName}</span>{' '}
-                      <span className="text-neutral-400">{act.action}</span>{' '}
-                      <span className="font-medium text-teal-300">"{act.entityTitle}"</span>
+                      <span className="font-semibold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition">{act.userName}</span>{' '}
+                      <span className="text-slate-600 dark:text-neutral-400">{act.action}</span>{' '}
+                      <span className="font-medium text-teal-700 dark:text-teal-300">"{act.entityTitle}"</span>
                     </div>
                   </div>
-                  <span className="text-[10px] text-neutral-500 shrink-0 font-mono">
+                  <span className="text-[10px] text-slate-400 dark:text-neutral-500 shrink-0 font-mono">
                     {act.createdAt}
                   </span>
                 </div>
               ))
             ) : (
-              <div className="text-center py-10 text-neutral-500 text-xs">
+              <div className="text-center py-10 text-slate-400 dark:text-neutral-500 text-xs">
                 No activity recorded yet.
               </div>
             )}
           </div>
         </div>
+      </Modal>
+
+      {/* ========================================================================= */}
+      {/* MODAL: SINGLE ACTIVITY LOG DETAIL POPUP (FOR MOBILE & FULL DETAILS)       */}
+      {/* ========================================================================= */}
+      <Modal
+        isOpen={!!selectedActivityLog}
+        onClose={() => setSelectedActivityLog(null)}
+        title="Operation Log Details"
+      >
+        {selectedActivityLog && (
+          <div className="space-y-4 text-xs">
+            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-[#161616] border border-slate-200 dark:border-[#262626]">
+              <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold text-sm shrink-0">
+                {selectedActivityLog.userName?.charAt(0) || 'U'}
+              </div>
+              <div>
+                <span className="font-bold text-sm text-slate-900 dark:text-white block">
+                  {selectedActivityLog.userName}
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-neutral-400">
+                  {selectedActivityLog.userRole || 'Team Member'}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-neutral-400">
+                Action
+              </label>
+              <div className="p-3 rounded-xl bg-slate-100 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] font-medium text-slate-800 dark:text-neutral-200">
+                {selectedActivityLog.action}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-neutral-400">
+                Target Deliverable / Entity
+              </label>
+              <div className="p-3.5 rounded-xl bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-500/30 text-teal-800 dark:text-teal-300 font-semibold break-words leading-relaxed text-sm">
+                "{selectedActivityLog.entityTitle}"
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-neutral-400">
+                Timestamp
+              </label>
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] text-slate-600 dark:text-neutral-400 font-mono text-[11px]">
+                {selectedActivityLog.createdAt}
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedActivityLog(null)}
+                className="w-full py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202020] dark:hover:bg-[#282828] text-slate-800 dark:text-white font-semibold transition"
+              >
+                Close Details
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
