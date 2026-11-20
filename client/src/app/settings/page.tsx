@@ -78,19 +78,19 @@ export default function SettingsPage() {
 
       <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
         {/* Top Control Bar with Quick Reset */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-3xl bg-[#111111] border border-[#222222]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>Personalized Workspace</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-bold">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 font-bold">
                   Active
                 </span>
               </h2>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-slate-500 dark:text-neutral-400">
                 Preferences are automatically saved to your browser and sync across all pages
               </p>
             </div>
@@ -100,7 +100,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={handleResetDefaults}
-              className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] text-neutral-300 hover:text-white border border-[#282828] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+              className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#101724] hover:bg-slate-100 dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset to Defaults</span>
@@ -111,31 +111,31 @@ export default function SettingsPage() {
         {/* ========================================================================= */}
         {/* SECTION 0: MY PROFILE & ROLE                                              */}
         {/* ========================================================================= */}
-        <div className="p-4 sm:p-6 rounded-3xl bg-[#121212] border border-[#262626] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 w-full md:w-auto">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-lg sm:text-xl flex items-center justify-center shadow-lg shadow-teal-900/20 shrink-0 font-heading">
               {user?.name?.charAt(0) || 'A'}
             </div>
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-bold text-white truncate">{user?.name}</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white truncate">{user?.name}</h3>
                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
                   user?.role === 'CEO'
-                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/30'
                     : user?.role === 'CTO'
-                    ? 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+                    ? 'bg-sky-500/10 text-sky-600 dark:text-sky-300 border-sky-500/30'
                     : user?.role === 'COO'
-                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/30'
                     : user?.role === 'ADMIN'
-                    ? 'bg-teal-500/10 text-teal-300 border-teal-500/30'
-                    : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+                    ? 'bg-teal-500/10 text-teal-600 dark:text-teal-300 border-teal-500/30'
+                    : 'bg-slate-100 dark:bg-neutral-800 text-slate-700 dark:text-neutral-300 border-slate-200 dark:border-neutral-700'
                 }`}>
                   {user?.role === 'CEO' ? '👑 CEO' : user?.role === 'CTO' ? '⚡ CTO' : user?.role === 'COO' ? '📊 COO' : user?.role === 'ADMIN' ? '🛡️ Admin' : '👤 Member'}
                 </span>
-                <span className="text-[10px] text-teal-400 font-mono shrink-0">• {user?.weeklyCapacityHours || 48}h Weekly Target</span>
+                <span className="text-[10px] text-teal-600 dark:text-teal-400 font-mono shrink-0">• {user?.weeklyCapacityHours || 48}h Weekly Target</span>
               </div>
-              <p className="text-xs text-neutral-400 truncate">
-                {user?.title || 'Executive Leadership'} • <span className="text-neutral-500">{user?.email}</span>
+              <p className="text-xs text-slate-500 dark:text-neutral-400 truncate">
+                {user?.title || 'Executive Leadership'} • <span className="text-slate-400 dark:text-neutral-500">{user?.email}</span>
               </p>
             </div>
           </div>
@@ -156,14 +156,14 @@ export default function SettingsPage() {
         {/* SECTION 1: THEME PICKER                                                   */}
         {/* ========================================================================= */}
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 pb-2 border-b border-[#222222]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 pb-2 border-b border-slate-200 dark:border-[#1e2a3c]">
             <div className="flex items-center gap-2 min-w-0">
-              <Palette className="w-4 h-4 text-teal-400 shrink-0" />
-              <h3 className="font-heading text-sm sm:text-base font-bold text-white truncate">Color Themes</h3>
-              <span className="text-xs text-neutral-400 font-normal shrink-0">({themesList.length} options)</span>
+              <Palette className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+              <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">Color Themes</h3>
+              <span className="text-xs text-slate-500 dark:text-neutral-400 font-normal shrink-0">({themesList.length} options)</span>
             </div>
-            <div className="text-xs text-neutral-400 shrink-0">
-              Active: <strong className="text-teal-300 font-semibold">{currentTheme.name}</strong>
+            <div className="text-xs text-slate-500 dark:text-neutral-400 shrink-0">
+              Active: <strong className="text-teal-600 dark:text-teal-300 font-semibold">{currentTheme.name}</strong>
             </div>
           </div>
 
@@ -264,14 +264,14 @@ export default function SettingsPage() {
         {/* SECTION 2: FONT SELECTOR                                                  */}
         {/* ========================================================================= */}
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 pb-2 border-b border-[#222222]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 pb-2 border-b border-slate-200 dark:border-[#1e2a3c]">
             <div className="flex items-center gap-2 min-w-0">
-              <Type className="w-4 h-4 text-teal-400 shrink-0" />
-              <h3 className="font-heading text-sm sm:text-base font-bold text-white truncate">Typography & Fonts</h3>
-              <span className="text-xs text-neutral-400 font-normal shrink-0">({fontsList.length} fonts)</span>
+              <Type className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+              <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">Typography & Fonts</h3>
+              <span className="text-xs text-slate-500 dark:text-neutral-400 font-normal shrink-0">({fontsList.length} fonts)</span>
             </div>
-            <div className="text-xs text-neutral-400 shrink-0">
-              Active: <strong className="text-teal-300 font-semibold">{currentFont.name}</strong>
+            <div className="text-xs text-slate-500 dark:text-neutral-400 shrink-0">
+              Active: <strong className="text-teal-600 dark:text-teal-300 font-semibold">{currentFont.name}</strong>
             </div>
           </div>
 
@@ -283,10 +283,10 @@ export default function SettingsPage() {
                   key={f.id}
                   type="button"
                   onClick={() => handleSelectFont(f.id)}
-                  className={`text-left p-4 rounded-2xl bg-[#141414] border transition-all duration-200 relative group flex flex-col justify-between ${
+                  className={`text-left p-4 rounded-2xl bg-white dark:bg-[#151d2a] border transition-all duration-200 relative group flex flex-col justify-between ${
                     isSelected
-                      ? 'border-teal-400 ring-2 ring-teal-500/30 shadow-xl'
-                      : 'border-[#262626] hover:border-[#383838]'
+                      ? 'border-teal-500 dark:border-teal-400 ring-2 ring-teal-500/30 shadow-xl'
+                      : 'border-slate-200 dark:border-[#1e2a3c] hover:border-slate-300 dark:hover:border-teal-500/40'
                   }`}
                 >
                   {/* Selected Badge */}
@@ -298,25 +298,25 @@ export default function SettingsPage() {
 
                   <div className="space-y-1 mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-white">{f.name}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1e1e1e] text-neutral-400 border border-[#2a2a2a]">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">{f.name}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c]">
                         {f.category}
                       </span>
                     </div>
-                    <p className="text-[11px] text-neutral-400 leading-relaxed">
+                    <p className="text-[11px] text-slate-500 dark:text-neutral-400 leading-relaxed">
                       {f.description}
                     </p>
                   </div>
 
                   {/* Font Specimen Box */}
-                  <div className="p-3 rounded-xl bg-[#0e0e0e] border border-[#242424] space-y-1">
-                    <span className="text-[10px] text-neutral-500 font-mono block uppercase">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-1">
+                    <span className="text-[10px] text-slate-400 dark:text-neutral-500 font-mono block uppercase">
                       Specimen Preview:
                     </span>
-                    <div className="text-xs font-semibold text-neutral-200 truncate">
+                    <div className="text-xs font-semibold text-slate-800 dark:text-neutral-200 truncate">
                       {sampleText}
                     </div>
-                    <div className="text-[11px] text-neutral-400">
+                    <div className="text-[11px] text-slate-500 dark:text-neutral-400">
                       0123456789 • ABCDEFGHIJKLMNOPQRSTUVWXYZ
                     </div>
                   </div>
@@ -329,58 +329,58 @@ export default function SettingsPage() {
         {/* ========================================================================= */}
         {/* SECTION 3: LIVE PLAYGROUND PREVIEW                                        */}
         {/* ========================================================================= */}
-        <div className="bg-[#111111] border border-[#222222] rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#222222]">
+        <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-[#1e2a3c]">
             <div className="flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-teal-400 shrink-0" />
-              <h3 className="font-heading text-sm sm:text-base font-bold text-white">
+              <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+              <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                 Live Component Preview
               </h3>
             </div>
-            <span className="text-xs font-mono font-bold text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20 self-start sm:self-auto truncate max-w-full">
+            <span className="text-xs font-mono font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-200 dark:border-teal-500/20 self-start sm:self-auto truncate max-w-full">
               {currentTheme.name} • {currentFont.name}
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Card 1: Live Interactive Typography Input */}
-            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] space-y-2">
-              <span className="text-xs font-bold text-white block">Test Typography String:</span>
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-2">
+              <span className="text-xs font-bold text-slate-900 dark:text-white block">Test Typography String:</span>
               <input
                 type="text"
                 value={sampleText}
                 onChange={(e) => setSampleText(e.target.value)}
                 placeholder="Type custom text to preview font..."
-                className="w-full px-3 py-2 bg-[#101010] border border-[#2a2a2a] rounded-xl text-xs text-white focus:border-teal-500 outline-none transition"
+                className="w-full px-3 py-2 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-teal-500 outline-none transition"
               />
-              <p className="text-[10px] text-neutral-500">
+              <p className="text-[10px] text-slate-500 dark:text-neutral-500">
                 Type here to see how your chosen font renders custom text
               </p>
             </div>
 
             {/* Card 2: Mock KPI Metric */}
-            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] flex flex-col justify-between">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Weekly Team Capacity</span>
-                <Clock className="w-4 h-4 text-teal-400" />
+                <span className="text-xs text-slate-500 dark:text-neutral-400">Weekly Team Capacity</span>
+                <Clock className="w-4 h-4 text-teal-600 dark:text-teal-400" />
               </div>
               <div className="my-2">
-                <span className="text-xl font-bold text-white">48h Target</span>
-                <div className="w-full bg-[#111111] h-2 rounded-full overflow-hidden mt-1.5 border border-[#282828]">
+                <span className="text-xl font-bold text-slate-900 dark:text-white">48h Target</span>
+                <div className="w-full bg-slate-200 dark:bg-[#151d2a] h-2 rounded-full overflow-hidden mt-1.5 border border-slate-300 dark:border-[#1e2a3c]">
                   <div
                     className="h-full rounded-full transition-all duration-300"
                     style={{ backgroundColor: currentTheme.accentColor, width: '75%' }}
                   />
                 </div>
               </div>
-              <span className="text-[10px] text-neutral-400">6 working days × 8h per day</span>
+              <span className="text-[10px] text-slate-500 dark:text-neutral-400">6 working days × 8h per day</span>
             </div>
 
             {/* Card 3: Mock Quick Action Button */}
-            <div className="p-4 rounded-2xl bg-[#161616] border border-[#262626] flex flex-col justify-between space-y-3">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex flex-col justify-between space-y-3">
               <div>
-                <span className="text-xs font-bold text-white block">Interactive Buttons</span>
-                <p className="text-[11px] text-neutral-400 mt-0.5">
+                <span className="text-xs font-bold text-slate-900 dark:text-white block">Interactive Buttons</span>
+                <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-0.5">
                   Styled with your active theme's primary accent
                 </p>
               </div>
@@ -396,7 +396,7 @@ export default function SettingsPage() {
                 </button>
                 <Link
                   href="/"
-                  className="px-3.5 py-2 rounded-xl bg-[#181818] hover:bg-[#202020] text-neutral-300 text-xs font-semibold border border-[#282828] flex items-center gap-1 transition"
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#151d2a] dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 text-xs font-semibold border border-slate-200 dark:border-[#1e2a3c] flex items-center gap-1 transition"
                 >
                   <span>Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />

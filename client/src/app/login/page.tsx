@@ -83,7 +83,7 @@ function LoginForm() {
 
       <div className="w-full max-w-md relative z-10">
         {/* Main Brand Card */}
-        <div className="bg-white/95 dark:bg-[#111111]/90 backdrop-blur-xl border border-slate-200 dark:border-[#222222] rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-black/80">
+        <div className="bg-white/95 dark:bg-[#151d2a]/90 backdrop-blur-xl border border-slate-200 dark:border-[#222e42] rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-black/80">
           {/* Header Brand Info */}
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-900 p-2.5 flex items-center justify-center shadow-lg shadow-teal-500/15 border border-slate-100 dark:border-neutral-800 mb-4 transition-transform hover:scale-105">
@@ -139,7 +139,7 @@ function LoginForm() {
                   placeholder="name@rhizan.com"
                   required
                   autoFocus={!isPreFilled}
-                  className="w-full bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
+                  className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
                 />
               </div>
             </div>
@@ -181,7 +181,7 @@ function LoginForm() {
                   }}
                   placeholder="Enter your password or temporary code"
                   required
-                  className="w-full bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition font-mono tracking-wide cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition font-mono tracking-wide cursor-pointer"
                   title={isPreFilled ? "Click to copy password" : undefined}
                 />
                 <button

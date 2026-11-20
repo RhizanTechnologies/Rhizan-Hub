@@ -503,7 +503,7 @@ export default function DashboardPage() {
     <div className="flex-1 flex flex-col min-h-screen">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#161616] border border-teal-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl shadow-black/80 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-6 right-6 z-50 bg-white dark:bg-[#151d2a] border border-teal-500/40 text-slate-900 dark:text-white px-4 py-3 rounded-2xl shadow-2xl shadow-black/80 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
           <Sparkles className="w-4 h-4 text-teal-400 shrink-0" />
           <span className="text-xs font-medium">{toastMessage}</span>
         </div>
@@ -592,7 +592,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setIsStandupFeedOpen(!isStandupFeedOpen)}
-                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#181818] dark:hover:bg-[#202020] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#282828] text-xs font-semibold flex items-center gap-1.5 transition"
+                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c] text-xs font-semibold flex items-center gap-1.5 transition"
               >
                 <Users className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                 <span>{isStandupFeedOpen ? 'Hide Standups' : `View Standups (${todayStandups.length})`}</span>
@@ -611,8 +611,8 @@ export default function DashboardPage() {
 
         {/* Standup Feed Drawer (when opened) */}
         {isStandupFeedOpen && todayStandups.length > 0 && (
-          <div className="p-4 bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#242424]">
+          <div className="p-4 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#1e2a3c]">
               <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                 <span>Today's Team Standup Check-ins ({todayStandups.length})</span>
@@ -621,7 +621,7 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {todayStandups.map((s) => (
-                <div key={s._id} className="p-3.5 rounded-xl bg-white dark:bg-[#181818] border border-slate-200 dark:border-[#2a2a2a] space-y-2.5 text-xs shadow-sm">
+                <div key={s._id} className="p-3.5 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] space-y-2.5 text-xs shadow-sm">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-[9px] flex items-center justify-center">
@@ -639,7 +639,7 @@ export default function DashboardPage() {
                     ) : null}
                   </div>
 
-                  <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-[#242424]">
+                  <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-[#1e2a3c]">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-neutral-400 tracking-wider block">
                         Completed Today:
@@ -686,7 +686,7 @@ export default function DashboardPage() {
           <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
 
           {/* Section Header */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100 dark:border-[#222222]">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100 dark:border-[#1e2a3c]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center">
                 <Clock className="w-5 h-5" />
@@ -958,7 +958,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Active Projects (7 columns) */}
           <div className="lg:col-span-7 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#222222]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#1e2a3c]">
               <div>
                 <h2 className="font-heading text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <FolderKanban className="w-4 h-4 text-teal-600 dark:text-teal-400" />

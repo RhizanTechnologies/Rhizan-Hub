@@ -49,7 +49,7 @@ export const Sidebar: React.FC = () => {
   const sidebarContent = (
     <div className="flex flex-col h-full">
       {/* Brand Header with Real Rhizan Tech Logo */}
-      <div className="p-4 border-b border-slate-200 dark:border-[#222222] flex items-center justify-between">
+      <div className="p-4 border-b border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between">
         <Link href="/" onClick={close} className="flex items-center gap-2.5 group">
           <div className="w-9 h-9 rounded-xl bg-white p-1.5 flex items-center justify-center shadow-md shadow-teal-900/10 border border-slate-100 dark:border-transparent transition-transform group-hover:scale-105">
             <Image
@@ -74,7 +74,7 @@ export const Sidebar: React.FC = () => {
         {/* Mobile Close Button */}
         <button
           onClick={close}
-          className="lg:hidden p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-[#1a1a1a] transition"
+          className="lg:hidden p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-[#151d2a] transition"
           aria-label="Close menu"
         >
           <X className="w-5 h-5" />
@@ -98,7 +98,7 @@ export const Sidebar: React.FC = () => {
               className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all group ${
                 isActive
                   ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30 font-semibold'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-[#181818]'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-[#151d2a]'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -128,7 +128,7 @@ export const Sidebar: React.FC = () => {
       </nav>
 
       {/* Internal Team Switcher */}
-      <div className="p-3.5 border-t border-slate-200 dark:border-[#222222] bg-slate-50 dark:bg-[#121212]">
+      <div className="p-3.5 border-t border-slate-200 dark:border-[#1e2a3c] bg-slate-50 dark:bg-[#101724]">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-medium text-slate-500 dark:text-neutral-400 flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-teal-500 dark:text-teal-400" /> Active Profile
@@ -148,7 +148,7 @@ export const Sidebar: React.FC = () => {
           </span>
         </div>
 
-        <div className="p-2.5 rounded-xl bg-white dark:bg-[#181818] border border-slate-200 dark:border-[#262626] mb-2 shadow-2xs">
+        <div className="p-2.5 rounded-xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] mb-2 shadow-2xs">
           <div className="text-xs font-semibold text-slate-900 dark:text-white">{user?.name || 'Rhizan Member'}</div>
           <div className="text-[11px] text-slate-500 dark:text-neutral-400 truncate">{user?.title || user?.email || 'Operations'}</div>
         </div>
@@ -159,7 +159,7 @@ export const Sidebar: React.FC = () => {
             close();
             logout();
           }}
-          className="w-full py-1.5 px-3 rounded-lg bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 dark:bg-[#161616] dark:hover:bg-[#202020] dark:text-neutral-400 dark:hover:text-rose-400 dark:border-[#262626] text-[11px] font-medium flex items-center justify-center gap-1.5 transition cursor-pointer"
+          className="w-full py-1.5 px-3 rounded-lg bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 dark:bg-[#151d2a] dark:hover:bg-[#1a2436] dark:text-neutral-400 dark:hover:text-rose-400 dark:border-[#1e2a3c] text-[11px] font-medium flex items-center justify-center gap-1.5 transition cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Sign Out</span>
@@ -181,7 +181,7 @@ export const Sidebar: React.FC = () => {
         )}
 
         {/* Footer System Status */}
-        <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-[#1f1f1f] flex items-center justify-between text-[10px] text-slate-400 dark:text-neutral-500">
+        <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between text-[10px] text-slate-400 dark:text-neutral-500">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
             v1.0.0 &bull; {isInstalled ? 'PWA Native' : 'PWA Ready'}
@@ -205,7 +205,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Mobile Drawer Slide-out */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-[#0d0d0d] text-slate-800 dark:text-neutral-200 border-r border-slate-200 dark:border-[#222222] flex flex-col h-screen select-none lg:hidden transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-[#101724] text-slate-800 dark:text-neutral-200 border-r border-slate-200 dark:border-[#1e2a3c] flex flex-col h-screen select-none lg:hidden transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0 shadow-2xl shadow-slate-900/20 dark:shadow-black/90' : '-translate-x-full'
         }`}
       >
@@ -213,7 +213,7 @@ export const Sidebar: React.FC = () => {
       </aside>
 
       {/* Desktop Persistent Sidebar (Fixed) */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-[#0d0d0d] text-slate-800 dark:text-neutral-200 border-r border-slate-200 dark:border-[#222222] flex-col h-screen select-none">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-[#101724] text-slate-800 dark:text-neutral-200 border-r border-slate-200 dark:border-[#1e2a3c] flex-col h-screen select-none">
         {sidebarContent}
       </aside>
     </>

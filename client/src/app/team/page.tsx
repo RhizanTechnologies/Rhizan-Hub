@@ -425,15 +425,15 @@ export default function TeamPage() {
         </div>
 
         {/* Search & Department Filters */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-[#121212] border border-[#222222] rounded-2xl">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl shadow-xs">
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 dark:text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search team members by name, email, or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#181818] border border-[#262626] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 transition"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 transition"
             />
           </div>
 
@@ -448,8 +448,8 @@ export default function TeamPage() {
                   onClick={() => setDepartmentFilter(dept)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${
                     active
-                      ? 'bg-teal-500/15 text-teal-400 border border-teal-500/30'
-                      : 'bg-[#181818] text-neutral-400 border border-[#262626] hover:text-white hover:bg-[#202020]'
+                      ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30'
+                      : 'bg-slate-100 dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c] hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1a2436]'
                   }`}
                 >
                   {dept === 'ALL' ? 'All Roles' : dept}
@@ -483,7 +483,7 @@ export default function TeamPage() {
             return (
               <div
                 key={member.id}
-                className="p-5 rounded-2xl bg-[#121212] border border-[#222222] hover:border-teal-500/30 transition-all flex flex-col justify-between shadow-sm group"
+                className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/30 transition-all flex flex-col justify-between shadow-sm group"
               >
                 <div>
                   {/* Member Profile Header */}
@@ -497,35 +497,35 @@ export default function TeamPage() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <h3 className="font-heading text-base font-bold text-white group-hover/profile:text-teal-300 transition-colors truncate">
+                          <h3 className="font-heading text-base font-bold text-slate-900 dark:text-white group-hover/profile:text-teal-600 dark:group-hover/profile:text-teal-300 transition-colors truncate">
                             {member.name}
                           </h3>
                           {member.role === 'CEO' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold shrink-0">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/30 font-bold shrink-0">
                               👑 CEO
                             </span>
                           )}
                           {member.role === 'CTO' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/30 font-bold shrink-0">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-300 border border-sky-500/30 font-bold shrink-0">
                               ⚡ CTO
                             </span>
                           )}
                           {member.role === 'COO' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold shrink-0">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 font-bold shrink-0">
                               📊 COO
                             </span>
                           )}
                           {member.role === 'ADMIN' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/30 font-medium shrink-0">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/30 font-medium shrink-0">
                               🛡️ Admin
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-neutral-400 font-medium truncate">{member.title}</p>
+                        <p className="text-xs text-slate-500 dark:text-neutral-400 font-medium truncate">{member.title}</p>
                       </div>
                     </Link>
 
-                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-start flex-wrap border-t border-[#1c1c1c] sm:border-0 pt-2 sm:pt-0">
+                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-start flex-wrap border-t border-slate-100 dark:border-[#1e2a3c] sm:border-0 pt-2 sm:pt-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         {member.id === currentUserId && (
                           <button
@@ -561,21 +561,21 @@ export default function TeamPage() {
                   </div>
 
                   {/* Summary Metric Stats */}
-                  <div className="grid grid-cols-2 gap-3 mb-4 p-3 rounded-xl bg-[#181818] border border-[#262626]">
+                  <div className="grid grid-cols-2 gap-3 mb-4 p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c]">
                     <div>
-                      <span className="text-[11px] text-neutral-400 flex items-center gap-1">
-                        <CheckSquare className="w-3 h-3 text-teal-400" /> Active Tasks
+                      <span className="text-[11px] text-slate-500 dark:text-neutral-400 flex items-center gap-1">
+                        <CheckSquare className="w-3 h-3 text-teal-600 dark:text-teal-400" /> Active Tasks
                       </span>
-                      <div className="font-heading text-base font-bold text-white mt-0.5">
+                      <div className="font-heading text-base font-bold text-slate-900 dark:text-white mt-0.5">
                         {tasksList.length}
                       </div>
                     </div>
 
                     <div>
-                      <span className="text-[11px] text-neutral-400 flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-emerald-400" /> This Week
+                      <span className="text-[11px] text-slate-500 dark:text-neutral-400 flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> This Week
                       </span>
-                      <div className="font-heading text-base font-bold text-teal-400 mt-0.5">
+                      <div className="font-heading text-base font-bold text-teal-600 dark:text-teal-400 mt-0.5">
                         {member.thisWeekHours ?? 0}h
                       </div>
                     </div>
@@ -583,11 +583,11 @@ export default function TeamPage() {
 
                   {/* Hours Capacity Bar (48h baseline) */}
                   <div className="space-y-1.5 mb-5">
-                    <div className="flex items-center justify-between text-[11px] text-neutral-400">
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-neutral-400">
                       <span>Weekly Capacity ({capacityLimit}h)</span>
-                      <span className="font-semibold text-neutral-200">{capacityPercent}%</span>
+                      <span className="font-semibold text-slate-700 dark:text-neutral-200">{capacityPercent}%</span>
                     </div>
-                    <div className="w-full bg-[#262626] h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-200 dark:bg-[#1e2a3c] h-2 rounded-full overflow-hidden">
                       <div
                         className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
                         style={{ width: `${capacityPercent}%` }}
@@ -597,7 +597,7 @@ export default function TeamPage() {
 
                   {/* Active Projects (Clickable links to each project) */}
                   <div className="mb-4">
-                    <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1.5">
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block mb-1.5">
                       Active Projects
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -609,7 +609,7 @@ export default function TeamPage() {
                               <Link
                                 key={idx}
                                 href={`/projects/${proj.id}`}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#181818] hover:bg-[#202020] border border-[#262626] hover:border-teal-500/50 text-xs text-neutral-300 hover:text-teal-300 font-medium transition group/p"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/50 text-xs text-slate-700 hover:text-teal-600 dark:text-neutral-300 dark:hover:text-teal-300 font-medium transition group/p"
                               >
                                 <span>{proj.name}</span>
                                 <ArrowUpRight className="w-3 h-3 opacity-50 group-hover/p:opacity-100 group-hover/p:translate-x-0.5 group-hover/p:-translate-y-0.5 transition" />
@@ -619,14 +619,14 @@ export default function TeamPage() {
                           return (
                             <span
                               key={idx}
-                              className="px-2.5 py-1 rounded-lg bg-[#181818] border border-[#262626] text-xs text-neutral-300 font-medium"
+                              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-xs text-slate-700 dark:text-neutral-300 font-medium"
                             >
                               {proj.name}
                             </span>
                           );
                         })
                       ) : (
-                        <span className="text-xs text-neutral-500 italic">No assigned projects</span>
+                        <span className="text-xs text-slate-400 dark:text-neutral-500 italic">No assigned projects</span>
                       )}
                     </div>
                   </div>
@@ -634,7 +634,7 @@ export default function TeamPage() {
                   {/* Assigned Work (Shows 2 tasks initially, then expandable) */}
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
+                      <span className="text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider">
                         Assigned Work ({tasksList.length})
                       </span>
                     </div>
@@ -645,17 +645,17 @@ export default function TeamPage() {
                           {visibleTasks.map((task) => (
                             <div
                               key={task.id}
-                              className="p-2.5 rounded-lg bg-[#181818] border border-[#262626] text-xs hover:border-[#333333] transition"
+                              className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-xs hover:border-slate-300 dark:hover:border-[#2a384e] transition"
                             >
                               <div className="flex items-center justify-between mb-1">
-                                <span className="font-medium text-neutral-200 truncate pr-2">
+                                <span className="font-medium text-slate-800 dark:text-neutral-200 truncate pr-2">
                                   {task.title}
                                 </span>
                                 <PriorityBadge priority={task.priority} />
                               </div>
-                              <div className="flex items-center justify-between text-[10px] text-neutral-500">
+                              <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-neutral-500">
                                 <span>{task.projectName}</span>
-                                <span className="uppercase text-[9px] px-1.5 py-0.5 rounded bg-[#202020] text-neutral-400">
+                                <span className="uppercase text-[9px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c]">
                                   {task.status.replace('_', ' ')}
                                 </span>
                               </div>
@@ -666,7 +666,7 @@ export default function TeamPage() {
                             <button
                               type="button"
                               onClick={() => toggleExpanded(member.id)}
-                              className="w-full py-1.5 px-3 rounded-lg bg-[#181818] hover:bg-[#202020] border border-[#262626] hover:border-teal-500/40 text-[11px] font-medium text-teal-400 hover:text-teal-300 flex items-center justify-center gap-1.5 transition"
+                              className="w-full py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/40 text-[11px] font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 flex items-center justify-center gap-1.5 transition"
                             >
                               <span>
                                 {isExpanded
@@ -682,7 +682,7 @@ export default function TeamPage() {
                           )}
                         </>
                       ) : (
-                        <div className="text-xs text-neutral-500 italic p-2.5 bg-[#181818] rounded-lg border border-[#262626]">
+                        <div className="text-xs text-slate-400 dark:text-neutral-500 italic p-2.5 bg-slate-50 dark:bg-[#101724] rounded-lg border border-slate-200 dark:border-[#1e2a3c]">
                           No pending tasks
                         </div>
                       )}
@@ -691,18 +691,18 @@ export default function TeamPage() {
                 </div>
 
                 {/* Footer with detail page link and email */}
-                <div className="pt-3.5 border-t border-[#222222] space-y-2.5">
+                <div className="pt-3.5 border-t border-slate-100 dark:border-[#1e2a3c] space-y-2.5">
                   {member.mustChangePassword && (
                     <div className="flex items-center justify-between p-2.5 rounded-xl bg-teal-500/5 border border-teal-500/20 text-xs">
-                      <span className="text-[11px] text-teal-300 font-medium flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                      <span className="text-[11px] text-teal-700 dark:text-teal-300 font-medium flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
                         <span>Invitation Pending</span>
                       </span>
                       <button
                         type="button"
                         disabled={resendingId === member.id}
                         onClick={() => handleResendInvite(member.id, member.email)}
-                        className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-600/90 hover:bg-teal-500 text-white font-medium flex items-center gap-1.5 transition shadow-sm disabled:opacity-50"
+                        className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-medium flex items-center gap-1.5 transition shadow-sm disabled:opacity-50"
                       >
                         {resendingId === member.id ? (
                           <>
@@ -722,7 +722,7 @@ export default function TeamPage() {
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/team/${member.id}`}
-                      className="flex-1 py-2 px-3 rounded-xl bg-[#181818] hover:bg-teal-500/10 border border-[#262626] hover:border-teal-500/40 text-xs font-medium text-neutral-300 hover:text-teal-300 flex items-center justify-center gap-1.5 transition group/btn"
+                      className="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/40 text-xs font-medium text-slate-700 hover:text-teal-600 dark:text-neutral-300 dark:hover:text-teal-300 flex items-center justify-center gap-1.5 transition group/btn"
                     >
                       <span>View Profile & Workload</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
@@ -736,7 +736,7 @@ export default function TeamPage() {
                           setDeleteTarget(member);
                         }}
                         title={`Delete ${member.name}`}
-                        className="py-2 px-2.5 rounded-xl bg-[#181818] hover:bg-rose-500/20 border border-[#262626] hover:border-rose-500/40 text-neutral-400 hover:text-rose-400 flex items-center justify-center transition"
+                        className="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-rose-500/10 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] hover:border-rose-500/40 text-slate-400 hover:text-rose-600 dark:text-neutral-400 dark:hover:text-rose-400 flex items-center justify-center transition"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -744,8 +744,8 @@ export default function TeamPage() {
                   </div>
 
                   <div className="text-center">
-                    <span className="text-[11px] text-neutral-500 flex items-center justify-center gap-1.5 hover:text-neutral-400 transition">
-                      <Mail className="w-3 h-3 text-neutral-500" /> {member.email}
+                    <span className="text-[11px] text-slate-500 dark:text-neutral-500 flex items-center justify-center gap-1.5 hover:text-slate-700 dark:hover:text-neutral-400 transition">
+                      <Mail className="w-3 h-3 text-slate-400 dark:text-neutral-500" /> {member.email}
                     </span>
                   </div>
                 </div>
@@ -755,10 +755,10 @@ export default function TeamPage() {
         </div>
 
         {filteredTeam.length === 0 && (
-          <div className="text-center py-16 bg-[#121212] border border-[#222222] rounded-2xl">
-            <Users className="w-10 h-10 text-neutral-600 mx-auto mb-3" />
-            <h3 className="text-sm font-semibold text-white">No team members match your filter</h3>
-            <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
+          <div className="text-center py-16 bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl shadow-xs">
+            <Users className="w-10 h-10 text-slate-400 dark:text-neutral-600 mx-auto mb-3" />
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">No team members match your filter</h3>
+            <p className="text-xs text-slate-500 dark:text-neutral-500 mt-1 max-w-sm mx-auto">
               Try adjusting your search query or clear the department filter to view all members.
             </p>
             <button
@@ -766,7 +766,7 @@ export default function TeamPage() {
                 setSearchQuery('');
                 setDepartmentFilter('ALL');
               }}
-              className="mt-4 px-4 py-1.5 rounded-xl bg-[#181818] border border-[#262626] text-xs text-teal-400 hover:text-teal-300 transition"
+              className="mt-4 px-4 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] text-xs text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition"
             >
               Reset Filters
             </button>
@@ -789,7 +789,7 @@ export default function TeamPage() {
           )}
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Full Name
             </label>
             <input
@@ -798,12 +798,12 @@ export default function TeamPage() {
               onChange={(e) => setInviteName(e.target.value)}
               placeholder="e.g. Ahmed Yasin"
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Work Email
             </label>
             <input
@@ -812,13 +812,13 @@ export default function TeamPage() {
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="e.g. ahmed@rhizan.com"
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Job Title / Position
               </label>
               <input
@@ -827,12 +827,12 @@ export default function TeamPage() {
                 onChange={(e) => setInviteTitle(e.target.value)}
                 placeholder="e.g. Founder & CEO"
                 required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Company Role
               </label>
               <CustomSelect
@@ -875,8 +875,8 @@ export default function TeamPage() {
                 }}
                 className={`text-[10px] px-2 py-0.5 rounded-lg border transition ${
                   inviteTitle === preset.titleVal
-                    ? 'bg-teal-500/20 text-teal-300 border-teal-500/30 font-semibold'
-                    : 'bg-[#181818] text-neutral-400 border-[#262626] hover:text-white hover:border-[#383838]'
+                    ? 'bg-teal-500/20 text-teal-600 dark:text-teal-300 border-teal-500/30 font-semibold'
+                    : 'bg-slate-100 dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border-slate-200 dark:border-[#1e2a3c] hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1a2436]'
                 }`}
               >
                 {preset.label}
@@ -886,10 +886,10 @@ export default function TeamPage() {
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-neutral-300">
+              <label className="text-xs font-medium text-slate-700 dark:text-neutral-300">
                 Weekly Capacity (Hours)
               </label>
-              <span className="text-[10px] text-teal-400">RHIZAN Standard: 48h (6d × 8h)</span>
+              <span className="text-[10px] text-teal-600 dark:text-teal-400">RHIZAN Standard: 48h (6d × 8h)</span>
             </div>
             <input
               type="number"
@@ -897,14 +897,14 @@ export default function TeamPage() {
               onChange={(e) => setInviteCapacity(e.target.value)}
               min="10"
               max="80"
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none transition"
             />
           </div>
 
           {/* Temporary Password Field */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-neutral-300">
+              <label className="text-xs font-medium text-slate-700 dark:text-neutral-300">
                 Temporary Password
               </label>
               <div className="flex items-center gap-2">
@@ -915,17 +915,17 @@ export default function TeamPage() {
                     setCopiedTemp(true);
                     setTimeout(() => setCopiedTemp(false), 2000);
                   }}
-                  className="text-[11px] text-teal-400 hover:text-teal-300 flex items-center gap-1 transition"
+                  className="text-[11px] text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1 transition"
                   title="Copy password"
                 >
                   {copiedTemp ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                   <span>{copiedTemp ? 'Copied' : 'Copy'}</span>
                 </button>
-                <span className="text-neutral-600">•</span>
+                <span className="text-slate-300 dark:text-neutral-600">•</span>
                 <button
                   type="button"
                   onClick={() => setTempoPassword(generateRandomPassword())}
-                  className="text-[11px] text-teal-400 hover:text-teal-300 flex items-center gap-1 transition"
+                  className="text-[11px] text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1 transition"
                 >
                   <RefreshCw className="w-3 h-3" />
                   <span>Regenerate</span>
@@ -944,11 +944,11 @@ export default function TeamPage() {
                   setTimeout(() => setCopiedTemp(false), 2000);
                 }}
                 required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-teal-300 font-mono tracking-wide outline-none transition cursor-pointer"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-teal-600 dark:text-teal-300 font-mono tracking-wide outline-none transition cursor-pointer"
                 title="Click to copy temporary password"
               />
             </div>
-            <p className="text-[11px] text-neutral-500 mt-1">
+            <p className="text-[11px] text-slate-500 dark:text-neutral-500 mt-1">
               The member will be strictly prompted to set their permanent password on their first login.
             </p>
           </div>
@@ -957,7 +957,7 @@ export default function TeamPage() {
             <button
               type="button"
               onClick={() => setIsInviteOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#1a1a1a] transition"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1a2436] transition"
             >
               Cancel
             </button>
@@ -1021,12 +1021,12 @@ export default function TeamPage() {
 
             {/* If email failed OR if user toggled backup details */}
             {(!createdInvite.emailSent || showBackupCreds) && (
-              <div className="p-4 rounded-xl bg-[#161616] border border-[#262626] space-y-3 font-mono text-xs">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-3 font-mono text-xs">
                 {/* Auto-Fill Login Link with Copy Button */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] uppercase font-sans text-neutral-400 font-semibold flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-teal-400" />
+                    <span className="text-[10px] uppercase font-sans text-slate-500 dark:text-neutral-400 font-semibold flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-teal-600 dark:text-teal-400" />
                       Auto-Fill Login URL
                     </span>
                     <button
@@ -1037,13 +1037,13 @@ export default function TeamPage() {
                         setCopiedLink(true);
                         setTimeout(() => setCopiedLink(false), 2000);
                       }}
-                      className="text-[11px] text-teal-400 hover:text-teal-300 font-sans flex items-center gap-1 transition"
+                      className="text-[11px] text-teal-600 dark:text-teal-400 hover:underline font-sans flex items-center gap-1 transition"
                     >
-                      {copiedLink ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      {copiedLink ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                       <span>{copiedLink ? 'Copied Link' : 'Copy Auto-fill Link'}</span>
                     </button>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#111111] border border-[#222222] text-neutral-300 text-[11px] truncate">
+                  <div className="p-2 rounded-lg bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] text-slate-700 dark:text-neutral-300 text-[11px] truncate">
                     {typeof window !== 'undefined'
                       ? `${window.location.origin}/login?email=${encodeURIComponent(createdInvite.email)}&temp=${encodeURIComponent(createdInvite.tempoPass)}`
                       : '/login'}
@@ -1053,8 +1053,8 @@ export default function TeamPage() {
                 {/* Work Email */}
                 <div className="flex items-center justify-between pt-1">
                   <div>
-                    <span className="text-[10px] uppercase font-sans text-neutral-500 block">Work Email</span>
-                    <span className="text-teal-400 text-xs font-semibold">{createdInvite.email}</span>
+                    <span className="text-[10px] uppercase font-sans text-slate-400 dark:text-neutral-500 block">Work Email</span>
+                    <span className="text-teal-600 dark:text-teal-400 text-xs font-semibold">{createdInvite.email}</span>
                   </div>
                   <button
                     type="button"
@@ -1063,7 +1063,7 @@ export default function TeamPage() {
                       setToastMessage({ type: 'success', text: 'Email copied to clipboard' });
                       setTimeout(() => setToastMessage(null), 2000);
                     }}
-                    className="p-1.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] border border-[#333333] text-neutral-400 hover:text-white transition"
+                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#151d2a] dark:hover:bg-[#1e2a3c] border border-slate-200 dark:border-[#1e2a3c] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white transition"
                     title="Copy Email"
                   >
                     <Copy className="w-3 h-3" />
@@ -1077,15 +1077,15 @@ export default function TeamPage() {
                     setCopiedPass(true);
                     setTimeout(() => setCopiedPass(false), 2000);
                   }}
-                  className="p-2.5 rounded-xl bg-[#111111] hover:bg-[#161616] border border-[#262626] hover:border-teal-500/50 flex items-center justify-between transition cursor-pointer group"
+                  className="p-2.5 rounded-xl bg-white hover:bg-slate-100/60 dark:bg-[#151d2a] dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/50 flex items-center justify-between transition cursor-pointer group"
                   title="Click to copy temporary password"
                 >
                   <div className="space-y-0.5">
-                    <span className="text-[10px] uppercase font-sans text-neutral-400 block font-semibold flex items-center gap-1">
+                    <span className="text-[10px] uppercase font-sans text-slate-500 dark:text-neutral-400 block font-semibold flex items-center gap-1">
                       <span>Temporary Password</span>
-                      <span className="text-[9px] text-teal-400 font-normal">({copiedPass ? 'Copied to clipboard!' : 'click to copy'})</span>
+                      <span className="text-[9px] text-teal-600 dark:text-teal-400 font-normal">({copiedPass ? 'Copied to clipboard!' : 'click to copy'})</span>
                     </span>
-                    <span className="text-emerald-400 text-sm font-bold font-mono tracking-wider group-hover:text-emerald-300 transition">
+                    <span className="text-emerald-600 dark:text-emerald-400 text-sm font-bold font-mono tracking-wider group-hover:text-emerald-500 transition">
                       {createdInvite.tempoPass}
                     </span>
                   </div>
@@ -1097,9 +1097,9 @@ export default function TeamPage() {
                       setCopiedPass(true);
                       setTimeout(() => setCopiedPass(false), 2000);
                     }}
-                    className="py-1 px-2.5 rounded-lg bg-[#222222] hover:bg-[#2c2c2c] border border-[#333333] text-[11px] text-teal-400 hover:text-teal-300 font-sans flex items-center gap-1.5 transition shrink-0"
+                    className="py-1 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] text-[11px] text-teal-600 dark:text-teal-400 font-sans flex items-center gap-1.5 transition shrink-0"
                   >
-                    {copiedPass ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedPass ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedPass ? 'Copied' : 'Copy Password'}</span>
                   </button>
                 </div>
@@ -1123,7 +1123,7 @@ export default function TeamPage() {
                     <button
                       type="button"
                       onClick={() => setShowBackupCreds(!showBackupCreds)}
-                      className="text-[11px] text-neutral-500 hover:text-neutral-400 transition"
+                      className="text-[11px] text-slate-400 hover:text-slate-600 dark:text-neutral-500 dark:hover:text-neutral-400 transition"
                     >
                       {showBackupCreds ? 'Hide backup credentials' : 'View temporary credentials (backup only)'}
                     </button>
@@ -1154,15 +1154,15 @@ export default function TeamPage() {
                   <button
                     type="button"
                     onClick={handleCopyCredentials}
-                    className="py-2.5 px-3 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#222222] text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
+                    className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-[#1e2a3c] bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copied ? 'Copied' : 'Copy'}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setCreatedInvite(null)}
-                    className="py-2.5 px-3 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#222222] text-neutral-300 text-xs font-medium transition"
+                    className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-[#1e2a3c] bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 text-xs font-medium transition"
                   >
                     Close
                   </button>
@@ -1191,11 +1191,11 @@ export default function TeamPage() {
                 <Trash2 className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-xs font-bold text-white">Permanently Remove Member</h4>
-                <p className="text-xs text-rose-200/90 leading-relaxed">
-                  Are you sure you want to remove <strong className="text-white">{deleteTarget.name}</strong> ({deleteTarget.email}) from Rhizan Hub?
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Permanently Remove Member</h4>
+                <p className="text-xs text-rose-600 dark:text-rose-200/90 leading-relaxed">
+                  Are you sure you want to remove <strong className="text-slate-900 dark:text-white">{deleteTarget.name}</strong> ({deleteTarget.email}) from Rhizan Hub?
                 </p>
-                <p className="text-[11px] text-neutral-400 pt-1">
+                <p className="text-[11px] text-slate-500 dark:text-neutral-400 pt-1">
                   This will revoke their access, unassign any open tasks, and remove them from project teams. This action cannot be undone.
                 </p>
               </div>
@@ -1216,7 +1216,7 @@ export default function TeamPage() {
                   setDeleteTarget(null);
                   setDeleteError(null);
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#1a1a1a] transition disabled:opacity-50"
+                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1a2436] transition disabled:opacity-50"
               >
                 Cancel
               </button>

@@ -1042,7 +1042,7 @@ export default function ApproachesPage() {
                                         ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
                                         : followUpStatus?.type === 'TODAY'
                                         ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                        : 'bg-[#181818] text-neutral-400 border-[#282828]'
+                                        : 'bg-slate-100 dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border-slate-200 dark:border-[#1e2a3c]'
                                     }`}
                                   >
                                     <Calendar className="w-2.5 h-2.5" />
@@ -1228,7 +1228,7 @@ export default function ApproachesPage() {
                         <>
                           <a
                             href={`tel:${cleanPhone}`}
-                            className="p-2 rounded-xl bg-slate-100 dark:bg-[#202020] hover:bg-slate-200 dark:hover:bg-[#282828] active:bg-slate-300 dark:active:bg-[#303030] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#2d2d2d] transition"
+                            className="p-2 rounded-xl bg-slate-100 dark:bg-[#101724] hover:bg-slate-200 dark:hover:bg-[#1a2436] active:bg-slate-300 dark:active:bg-[#222e42] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c] transition"
                             title="Call"
                             aria-label="Call business"
                           >
@@ -1252,7 +1252,7 @@ export default function ApproachesPage() {
                       {appr.email && (
                         <a
                           href={`mailto:${appr.email}`}
-                          className="p-2 rounded-xl bg-slate-100 dark:bg-[#202020] hover:bg-slate-200 dark:hover:bg-[#282828] active:bg-slate-300 dark:active:bg-[#303030] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#2d2d2d] transition"
+                          className="p-2 rounded-xl bg-slate-100 dark:bg-[#101724] hover:bg-slate-200 dark:hover:bg-[#1a2436] active:bg-slate-300 dark:active:bg-[#222e42] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c] transition"
                           title="Email"
                           aria-label="Email business"
                         >
@@ -1262,7 +1262,7 @@ export default function ApproachesPage() {
                       <button
                         type="button"
                         onClick={() => setApproachToDelete(appr)}
-                        className="p-2 rounded-xl bg-slate-100 dark:bg-[#202020] hover:bg-rose-500/10 text-slate-500 dark:text-neutral-400 hover:text-rose-400 border border-slate-200 dark:border-[#2d2d2d] transition cursor-pointer"
+                        className="p-2 rounded-xl bg-slate-100 dark:bg-[#101724] hover:bg-rose-500/10 text-slate-500 dark:text-neutral-400 hover:text-rose-500 dark:hover:text-rose-400 border border-slate-200 dark:border-[#1e2a3c] transition cursor-pointer"
                         title="Delete target"
                         aria-label="Delete target"
                       >
@@ -1275,7 +1275,7 @@ export default function ApproachesPage() {
             })}
 
             {filteredApproaches.length === 0 && (
-              <div className="py-10 text-center text-slate-400 dark:text-neutral-500 bg-white dark:bg-[#121212] rounded-2xl border border-slate-200 dark:border-[#222222] shadow-xs">
+              <div className="py-10 text-center text-slate-400 dark:text-neutral-500 bg-white dark:bg-[#151d2a] rounded-2xl border border-slate-200 dark:border-[#222e42] shadow-xs">
                 <Building2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
                 <p className="text-xs">No outreach targets found matching your filter.</p>
                 <button
@@ -1299,7 +1299,7 @@ export default function ApproachesPage() {
       >
         <form onSubmit={handleSaveApproach} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Business Name *
             </label>
             <input
@@ -1308,20 +1308,20 @@ export default function ApproachesPage() {
               placeholder="e.g. Mama Bakery & Pastry"
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-medium text-neutral-300">
+                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300">
                   Niche / Category *
                 </label>
                 <button
                   type="button"
                   onClick={() => setInlineNewNiche(!inlineNewNiche)}
-                  className="text-[10px] text-teal-400 hover:underline"
+                  className="text-[10px] text-teal-600 dark:text-teal-400 hover:underline"
                 >
                   {inlineNewNiche ? 'Select Existing' : '+ New Niche'}
                 </button>
@@ -1335,7 +1335,7 @@ export default function ApproachesPage() {
                     placeholder="Enter new niche..."
                     value={inlineNicheName}
                     onChange={(e) => setInlineNicheName(e.target.value)}
-                    className="flex-1 bg-[#181818] border border-teal-500/50 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    className="flex-1 bg-slate-50 dark:bg-[#101724] border border-teal-500/50 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500"
                   />
                   <button
                     type="button"
@@ -1362,7 +1362,7 @@ export default function ApproachesPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Outreach Status
               </label>
               <CustomSelect
@@ -1384,7 +1384,7 @@ export default function ApproachesPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Contact Person
               </label>
               <input
@@ -1392,12 +1392,12 @@ export default function ApproachesPage() {
                 placeholder="e.g. Ato Dawit (Manager)"
                 value={contactPerson}
                 onChange={(e) => setContactPerson(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Phone Number
               </label>
               <input
@@ -1405,14 +1405,14 @@ export default function ApproachesPage() {
                 placeholder="e.g. +251 911 234567"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Email Address
               </label>
               <input
@@ -1420,12 +1420,12 @@ export default function ApproachesPage() {
                 placeholder="e.g. info@business.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Location
               </label>
               <input
@@ -1433,42 +1433,42 @@ export default function ApproachesPage() {
                 placeholder="e.g. Bole, Addis Ababa"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Last Contact Date (optional)
               </label>
               <input
                 type="date"
                 value={lastContactDate}
                 onChange={(e) => setLastContactDate(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Next Follow-Up Date (optional)
               </label>
               <input
                 type="date"
                 value={nextFollowUpDate}
                 onChange={(e) => setNextFollowUpDate(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500"
               />
             </div>
           </div>
 
           {/* Responsible Person / Lead Follow-up Owner */}
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1 flex items-center justify-between">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1 flex items-center justify-between">
               <span>Responsible Person (Lead Follow-up)</span>
-              <span className="text-[10px] text-neutral-500 font-normal lowercase">(optional)</span>
+              <span className="text-[10px] text-slate-500 dark:text-neutral-500 font-normal lowercase">(optional)</span>
             </label>
             <CustomSelect
               value={assignedTo}
@@ -1484,13 +1484,13 @@ export default function ApproachesPage() {
               size="md"
               className="w-full"
             />
-            <p className="text-[10px] text-neutral-500 mt-1">
+            <p className="text-[10px] text-slate-500 dark:text-neutral-500 mt-1">
               Assign one person to manage follow-up calls and meetings, or leave open for the entire team.
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Notes & What to Remember
             </label>
             <textarea
@@ -1502,15 +1502,15 @@ export default function ApproachesPage() {
                 e.target.style.height = 'auto';
                 e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
               }}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white text-xs font-semibold border border-slate-200 dark:border-[#1e2a3c] transition"
             >
               Cancel
             </button>
@@ -1532,16 +1532,16 @@ export default function ApproachesPage() {
       >
         <div className="space-y-5">
           {/* Add / Edit Form */}
-          <form onSubmit={handleSaveNiche} className="bg-[#161616] border border-[#262626] rounded-2xl p-4 space-y-3">
+          <form onSubmit={handleSaveNiche} className="bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-white">
+              <span className="text-xs font-semibold text-slate-900 dark:text-white">
                 {editingNiche ? `Edit Niche: ${editingNiche.name}` : '+ Add New Niche'}
               </span>
               {editingNiche && (
                 <button
                   type="button"
                   onClick={cancelEditNiche}
-                  className="text-[11px] text-neutral-400 hover:text-white"
+                  className="text-[11px] text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white"
                 >
                   Cancel Edit
                 </button>
@@ -1550,7 +1550,7 @@ export default function ApproachesPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                <label className="block text-[11px] font-medium text-slate-600 dark:text-neutral-400 mb-1">
                   Niche Name *
                 </label>
                 <input
@@ -1559,12 +1559,12 @@ export default function ApproachesPage() {
                   placeholder="e.g. Pharmacy & Drugstore"
                   value={nicheNameInput}
                   onChange={(e) => setNicheNameInput(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-[#333333] rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+                  className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                <label className="block text-[11px] font-medium text-slate-600 dark:text-neutral-400 mb-1">
                   Description (optional)
                 </label>
                 <input
@@ -1572,7 +1572,7 @@ export default function ApproachesPage() {
                   placeholder="e.g. Retail pharmacies and medicine distributors"
                   value={nicheDescInput}
                   onChange={(e) => setNicheDescInput(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-[#333333] rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500"
+                  className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
                 />
               </div>
             </div>
@@ -1590,27 +1590,27 @@ export default function ApproachesPage() {
 
           {/* List of Niches */}
           <div className="space-y-2">
-            <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
               Current Niches ({niches.length})
             </span>
 
-            <div className="max-h-64 overflow-y-auto divide-y divide-[#1f1f1f] border border-[#222222] rounded-2xl bg-[#141414]">
+            <div className="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-[#1e2a3c] border border-slate-200 dark:border-[#1e2a3c] rounded-2xl bg-white dark:bg-[#151d2a]">
               {niches.map((n) => {
                 const targetCount = approaches.filter((a) => a.niche === n.name).length;
                 return (
                   <div
                     key={n._id}
-                    className="p-3 flex items-center justify-between hover:bg-[#181818] transition gap-3"
+                    className="p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-[#101724] transition gap-3"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-white">{n.name}</span>
-                        <span className="text-[10px] px-2 py-0.2 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-mono">
+                        <span className="text-xs font-semibold text-slate-900 dark:text-white">{n.name}</span>
+                        <span className="text-[10px] px-2 py-0.2 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 font-mono">
                           {targetCount} targets
                         </span>
                       </div>
                       {n.description && (
-                        <p className="text-[11px] text-neutral-400 mt-0.5">{n.description}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-0.5">{n.description}</p>
                       )}
                     </div>
 
@@ -1618,7 +1618,7 @@ export default function ApproachesPage() {
                       <button
                         type="button"
                         onClick={() => handleEditNicheClick(n)}
-                        className="p-1.5 rounded-lg hover:bg-[#262626] text-neutral-400 hover:text-white transition"
+                        className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a2436] text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white transition"
                         title="Edit Niche"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -1626,7 +1626,7 @@ export default function ApproachesPage() {
                       <button
                         type="button"
                         onClick={() => setNicheToDelete(n)}
-                        className="p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition"
+                        className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 dark:text-neutral-500 dark:hover:text-rose-400 transition"
                         title="Delete Niche"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1637,18 +1637,18 @@ export default function ApproachesPage() {
               })}
 
               {niches.length === 0 && (
-                <div className="p-6 text-center text-xs text-neutral-500">
+                <div className="p-6 text-center text-xs text-slate-400 dark:text-neutral-500">
                   No niches found. Add one above!
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex justify-end pt-2 border-t border-[#222222]">
+          <div className="flex justify-end pt-2 border-t border-slate-200 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setIsNicheModalOpen(false)}
-              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white text-xs font-semibold border border-slate-200 dark:border-[#1e2a3c] transition"
             >
               Done
             </button>
@@ -1663,15 +1663,15 @@ export default function ApproachesPage() {
         title="Delete Niche"
       >
         <div className="space-y-4">
-          <p className="text-xs text-neutral-300">
-            Are you sure you want to delete the niche <strong className="text-white">{nicheToDelete?.name}</strong>?
+          <p className="text-xs text-slate-600 dark:text-neutral-300">
+            Are you sure you want to delete the niche <strong className="text-slate-900 dark:text-white">{nicheToDelete?.name}</strong>?
             Any existing targets with this niche will remain unchanged.
           </p>
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setNicheToDelete(null)}
-              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white text-xs font-semibold border border-slate-200 dark:border-[#1e2a3c] transition"
             >
               Cancel
             </button>
@@ -1695,7 +1695,7 @@ export default function ApproachesPage() {
         <form onSubmit={handleSaveQuickLog} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Channel / Method
               </label>
               <CustomSelect
@@ -1714,7 +1714,7 @@ export default function ApproachesPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Contact Date
               </label>
               <input
@@ -1722,13 +1722,13 @@ export default function ApproachesPage() {
                 required
                 value={quickDate}
                 onChange={(e) => setQuickDate(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Notes / What the client mentioned to remember *
             </label>
             <textarea
@@ -1741,25 +1741,25 @@ export default function ApproachesPage() {
                 e.target.style.height = 'auto';
                 e.target.style.height = `${Math.max(68, e.target.scrollHeight)}px`;
               }}
-              className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500 resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Next Follow-up Date (optional)
               </label>
               <input
                 type="date"
                 value={quickNextFollowUp}
                 onChange={(e) => setQuickNextFollowUp(e.target.value)}
-                className="w-full bg-[#181818] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Update Status To
               </label>
               <CustomSelect
@@ -1780,11 +1780,11 @@ export default function ApproachesPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setQuickLogTarget(null)}
-              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white text-xs font-semibold border border-slate-200 dark:border-[#1e2a3c] transition"
             >
               Cancel
             </button>
@@ -1806,16 +1806,16 @@ export default function ApproachesPage() {
         title="Delete Outreach Target"
       >
         <div className="space-y-4">
-          <p className="text-xs text-neutral-300">
+          <p className="text-xs text-slate-600 dark:text-neutral-300">
             Are you sure you want to delete{' '}
-            <strong className="text-white">{approachToDelete?.businessName}</strong>?
+            <strong className="text-slate-900 dark:text-white">{approachToDelete?.businessName}</strong>?
             This will remove all associated interaction history.
           </p>
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#222222]">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setApproachToDelete(null)}
-              className="px-4 py-2 rounded-xl bg-[#1c1c1c] hover:bg-[#252525] text-neutral-300 text-xs font-semibold transition"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white text-xs font-semibold border border-slate-200 dark:border-[#1e2a3c] transition"
             >
               Cancel
             </button>

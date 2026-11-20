@@ -203,11 +203,11 @@ export const PwaProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       {hasUpdate && (
         <aside
           aria-label="App update available"
-          className="fixed bottom-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#141414] text-white border border-[#2a2a2a] shadow-2xl animate-in slide-in-from-bottom duration-300 text-xs"
+          className="fixed bottom-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white dark:bg-[#151d2a] text-slate-900 dark:text-white border border-slate-200 dark:border-[#222e42] shadow-2xl animate-in slide-in-from-bottom duration-300 text-xs"
         >
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-teal-400 animate-ping" />
-            <span className="font-medium text-neutral-200">A new version is ready</span>
+            <span className="w-2 h-2 rounded-full bg-teal-500 animate-ping" />
+            <span className="font-medium text-slate-700 dark:text-neutral-200">A new version is ready</span>
           </div>
           <button
             type="button"

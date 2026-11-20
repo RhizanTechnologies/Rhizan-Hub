@@ -712,9 +712,9 @@ export default function ClientDetailPage() {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(true)}
-                  className="px-3.5 py-1.5 rounded-xl border border-[#262626] bg-[#181818] hover:bg-[#222222] text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
+                  className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-[#222e42] bg-white dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 text-xs font-medium flex items-center gap-1.5 transition"
                 >
-                  <FolderKanban className="w-3.5 h-3.5 text-teal-400" />
+                  <FolderKanban className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                   <span>Link Existing</span>
                 </button>
                 <button
@@ -790,10 +790,10 @@ export default function ClientDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-8 rounded-2xl bg-[#121212] border border-dashed border-[#262626] text-center space-y-2">
-                <FolderKanban className="w-10 h-10 text-neutral-600 mx-auto" />
-                <h4 className="text-xs font-bold text-white">No Projects Connected</h4>
-                <p className="text-xs text-neutral-400">Create a new project with its own price or link an existing one.</p>
+              <div className="p-8 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-dashed border-slate-200 dark:border-[#1e2a3c] text-center space-y-2">
+                <FolderKanban className="w-10 h-10 text-slate-400 dark:text-neutral-600 mx-auto" />
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">No Projects Connected</h4>
+                <p className="text-xs text-slate-500 dark:text-neutral-400">Create a new project with its own price or link an existing one.</p>
                 <div className="flex items-center justify-center gap-3 pt-2">
                   <button
                     type="button"
@@ -838,8 +838,8 @@ export default function ClientDetailPage() {
             </div>
 
             {isAddingMeeting && (
-              <form onSubmit={handleAddMeeting} className="p-4 rounded-2xl bg-[#151515] border border-teal-500/30 space-y-3">
-                <h4 className="text-xs font-bold text-teal-300">Schedule New Client Meeting</h4>
+              <form onSubmit={handleAddMeeting} className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-teal-500/30 space-y-3">
+                <h4 className="text-xs font-bold text-teal-600 dark:text-teal-300">Schedule New Client Meeting</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
                     type="text"
@@ -847,34 +847,34 @@ export default function ClientDetailPage() {
                     value={meetingTitle}
                     onChange={(e) => setMeetingTitle(e.target.value)}
                     required
-                    className="md:col-span-2 w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    className="md:col-span-2 w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 placeholder-slate-400 dark:placeholder-neutral-500"
                   />
                   <input
                     type="date"
                     value={meetingDate}
                     onChange={(e) => setMeetingDate(e.target.value)}
                     required
-                    className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500"
                   />
                   <input
                     type="time"
                     value={meetingTime}
                     onChange={(e) => setMeetingTime(e.target.value)}
-                    className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500"
                   />
                   <input
                     type="text"
                     placeholder="Location or Video Link (Google Meet / Zoom / Office)"
                     value={meetingLocation}
                     onChange={(e) => setMeetingLocation(e.target.value)}
-                    className="md:col-span-2 w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    className="md:col-span-2 w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 placeholder-slate-400 dark:placeholder-neutral-500"
                   />
                 </div>
                 <div className="flex justify-end gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setIsAddingMeeting(false)}
-                    className="px-3.5 py-1.5 rounded-xl text-xs text-neutral-400 hover:text-white"
+                    className="px-3.5 py-1.5 rounded-xl text-xs text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
                   >
                     Cancel
                   </button>
@@ -893,18 +893,18 @@ export default function ClientDetailPage() {
                 {client.meetings!.map((m, idx) => (
                   <div
                     key={idx}
-                    className="group/m p-4 rounded-2xl bg-[#121212] border border-[#222222] flex items-center justify-between"
+                    className="group/m p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-heading text-xs font-bold text-white">{m.title}</span>
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                        <span className="font-heading text-xs font-bold text-slate-900 dark:text-white">{m.title}</span>
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
                           {m.status}
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-1">
-                        <span className="flex items-center gap-1 text-teal-400">
-                          <Calendar className="w-3.5 h-3.5 text-neutral-500" />
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-neutral-400 mt-1">
+                        <span className="flex items-center gap-1 text-teal-600 dark:text-teal-400">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500" />
                           {new Date(m.date).toLocaleDateString()} {m.time ? `@ ${m.time}` : ''}
                         </span>
                         {m.linkOrLocation && <span>• {m.linkOrLocation}</span>}
@@ -915,7 +915,7 @@ export default function ClientDetailPage() {
                       <button
                         type="button"
                         onClick={() => openEditMeeting(idx, m)}
-                        className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                        className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-teal-500/10 text-slate-400 hover:text-teal-600 dark:text-neutral-500 dark:hover:text-teal-400 transition cursor-pointer"
                         title="Edit meeting"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -923,7 +923,7 @@ export default function ClientDetailPage() {
                       <button
                         type="button"
                         onClick={() => handleDeleteMeeting(idx)}
-                        className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                        className="opacity-0 group-hover/m:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 dark:text-neutral-500 dark:hover:text-rose-400 transition cursor-pointer"
                         title="Delete meeting"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -933,7 +933,7 @@ export default function ClientDetailPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-neutral-500 italic p-8 text-center bg-[#121212] rounded-2xl border border-[#222222]">
+              <p className="text-xs text-slate-400 dark:text-neutral-500 italic p-8 text-center bg-slate-50 dark:bg-[#101724] rounded-2xl border border-slate-200 dark:border-[#1e2a3c]">
                 No meetings scheduled with this client yet.
               </p>
             )}
@@ -963,8 +963,8 @@ export default function ClientDetailPage() {
             </div>
 
             {isAddingPayment && (
-              <form onSubmit={handleAddPayment} className="p-4 rounded-2xl bg-[#151515] border border-teal-500/30 space-y-3">
-                <h4 className="text-xs font-bold text-teal-300">Add Payment Milestone</h4>
+              <form onSubmit={handleAddPayment} className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-teal-500/30 space-y-3">
+                <h4 className="text-xs font-bold text-teal-600 dark:text-teal-300">Add Payment Milestone</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
                     type="text"
@@ -972,10 +972,10 @@ export default function ClientDetailPage() {
                     value={paymentTitle}
                     onChange={(e) => setPaymentTitle(e.target.value)}
                     required
-                    className="md:col-span-2 w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    className="md:col-span-2 w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 placeholder-slate-400 dark:placeholder-neutral-500"
                   />
                   <div>
-                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                    <label className="block text-[11px] font-medium text-slate-500 dark:text-neutral-400 mb-1">
                       Select Project
                     </label>
                     <CustomSelect
@@ -994,7 +994,7 @@ export default function ClientDetailPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                    <label className="block text-[11px] font-medium text-slate-500 dark:text-neutral-400 mb-1">
                       Milestone Amount ({currencySymbol.trim()}) *
                     </label>
                     <input
@@ -1003,11 +1003,11 @@ export default function ClientDetailPage() {
                       value={paymentAmount}
                       onChange={(e) => setPaymentAmount(e.target.value)}
                       required
-                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                      className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 placeholder-slate-400 dark:placeholder-neutral-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                    <label className="block text-[11px] font-medium text-slate-500 dark:text-neutral-400 mb-1">
                       Invoice Number
                     </label>
                     <input
@@ -1015,11 +1015,11 @@ export default function ClientDetailPage() {
                       placeholder="e.g. INV-2026-001"
                       value={paymentInvoice}
                       onChange={(e) => setPaymentInvoice(e.target.value)}
-                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                      className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500 placeholder-slate-400 dark:placeholder-neutral-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                    <label className="block text-[11px] font-medium text-slate-500 dark:text-neutral-400 mb-1">
                       Payment Status
                     </label>
                     <CustomSelect
@@ -1035,14 +1035,14 @@ export default function ClientDetailPage() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                    <label className="block text-[11px] font-medium text-slate-500 dark:text-neutral-400 mb-1">
                       Target Due Date
                     </label>
                     <input
                       type="date"
                       value={paymentDueDate}
                       onChange={(e) => setPaymentDueDate(e.target.value)}
-                      className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                      className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-teal-500"
                     />
                   </div>
                 </div>
@@ -1050,7 +1050,7 @@ export default function ClientDetailPage() {
                   <button
                     type="button"
                     onClick={() => setIsAddingPayment(false)}
-                    className="px-3.5 py-1.5 rounded-xl text-xs text-neutral-400 hover:text-white"
+                    className="px-3.5 py-1.5 rounded-xl text-xs text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
                   >
                     Cancel
                   </button>
@@ -1069,43 +1069,43 @@ export default function ClientDetailPage() {
                 {client.payments!.map((p, idx) => (
                   <div
                     key={idx}
-                    className="group/p p-4 rounded-2xl bg-[#121212] border border-[#222222] flex items-center justify-between"
+                    className="group/p p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-heading text-xs font-bold text-white">{p.title}</span>
+                        <span className="font-heading text-xs font-bold text-slate-900 dark:text-white">{p.title}</span>
                         {p.projectName && (
-                          <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20 flex items-center gap-1">
-                            <FolderKanban className="w-3 h-3 text-teal-400" />
+                          <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 flex items-center gap-1">
+                            <FolderKanban className="w-3 h-3 text-teal-600 dark:text-teal-400" />
                             {p.projectName}
                           </span>
                         )}
                         {p.invoiceNumber && (
-                          <span className="text-[10px] text-neutral-500 font-mono">#{p.invoiceNumber}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-neutral-500 font-mono">#{p.invoiceNumber}</span>
                         )}
                       </div>
-                      <div className="text-xs text-neutral-400 mt-1">
+                      <div className="text-xs text-slate-500 dark:text-neutral-400 mt-1">
                         {p.dueDate ? `Due by ${new Date(p.dueDate).toLocaleDateString()}` : 'Scheduled milestone'}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className="font-mono text-sm font-bold text-white">
+                      <span className="font-mono text-sm font-bold text-slate-900 dark:text-white">
                         {currencySymbol}{(p.amount || 0).toLocaleString()}
                       </span>
                       <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
                         p.status === 'PAID'
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                           : p.status === 'OVERDUE'
-                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                          : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                       }`}>
                         {p.status}
                       </span>
                       <button
                         type="button"
                         onClick={() => openEditPayment(idx, p)}
-                        className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                        className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-teal-500/10 text-slate-400 hover:text-teal-600 dark:text-neutral-500 dark:hover:text-teal-400 transition cursor-pointer"
                         title="Edit payment milestone"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -1113,7 +1113,7 @@ export default function ClientDetailPage() {
                       <button
                         type="button"
                         onClick={() => handleDeletePayment(idx)}
-                        className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                        className="opacity-0 group-hover/p:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 dark:text-neutral-500 dark:hover:text-rose-400 transition cursor-pointer"
                         title="Delete payment milestone"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1123,7 +1123,7 @@ export default function ClientDetailPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-neutral-500 italic p-8 text-center bg-[#121212] rounded-2xl border border-[#222222]">
+              <p className="text-xs text-slate-400 dark:text-neutral-500 italic p-8 text-center bg-slate-50 dark:bg-[#101724] rounded-2xl border border-slate-200 dark:border-[#1e2a3c]">
                 No payment milestones recorded yet. Click &apos;Record Payment Milestone&apos; above.
               </p>
             )}
@@ -1153,8 +1153,8 @@ export default function ClientDetailPage() {
             </div>
 
             {isAddingLink && (
-              <form onSubmit={handleAddLink} className="p-4 rounded-2xl bg-[#151515] border border-teal-500/30 space-y-3">
-                <h4 className="text-xs font-bold text-teal-300">Add Agreement / Resource Link</h4>
+              <form onSubmit={handleAddLink} className="p-4 rounded-2xl bg-slate-50 dark:bg-[#101724] border border-teal-500/30 space-y-3">
+                <h4 className="text-xs font-bold text-teal-600 dark:text-teal-300">Add Agreement / Resource Link</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
                     type="text"
@@ -1162,7 +1162,7 @@ export default function ClientDetailPage() {
                     value={linkTitle}
                     onChange={(e) => setLinkTitle(e.target.value)}
                     required
-                    className="md:col-span-2 w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    className="md:col-span-2 w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
                   />
                   <input
                     type="text"
@@ -1170,7 +1170,7 @@ export default function ClientDetailPage() {
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
                     required
-                    className="w-full bg-[#101010] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-teal-500"
+                    className="w-full bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none focus:border-teal-500"
                   />
                   <CustomSelect
                     value={linkCategory}
@@ -1190,7 +1190,7 @@ export default function ClientDetailPage() {
                   <button
                     type="button"
                     onClick={() => setIsAddingLink(false)}
-                    className="px-3.5 py-1.5 rounded-xl text-xs text-neutral-400 hover:text-white"
+                    className="px-3.5 py-1.5 rounded-xl text-xs text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white"
                   >
                     Cancel
                   </button>
@@ -1209,20 +1209,20 @@ export default function ClientDetailPage() {
                 {client.links!.map((l, idx) => (
                   <div
                     key={idx}
-                    className="group/p p-4 rounded-2xl bg-[#121212] border border-[#222222] flex items-center justify-between"
+                    className="group/p p-4 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] flex items-center justify-between"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-[#1c1c1c] text-teal-400">
+                      <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-[#101724] text-teal-600 dark:text-teal-400">
                         <FileText className="w-4 h-4" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-heading text-xs font-bold text-white">{l.title}</span>
-                          <span className="text-[9px] uppercase px-2 py-0.5 rounded bg-neutral-800 text-neutral-400 font-semibold">
+                          <span className="font-heading text-xs font-bold text-slate-900 dark:text-white">{l.title}</span>
+                          <span className="text-[9px] uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c] font-semibold">
                             {l.category || 'DOCUMENT'}
                           </span>
                         </div>
-                        <span className="text-xs text-neutral-500 truncate block max-w-md mt-0.5">
+                        <span className="text-xs text-slate-500 dark:text-neutral-400 truncate block max-w-md mt-0.5">
                           {l.url}
                         </span>
                       </div>
@@ -1233,7 +1233,7 @@ export default function ClientDetailPage() {
                         href={l.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="p-2 rounded-xl bg-[#1c1c1c] hover:bg-[#262626] text-teal-400 transition"
+                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#101724] dark:hover:bg-[#1a2436] text-teal-600 dark:text-teal-400 transition"
                         title="Open external link"
                       >
                         <ExternalLink className="w-4 h-4" />
@@ -1241,7 +1241,7 @@ export default function ClientDetailPage() {
                       <button
                         type="button"
                         onClick={() => openEditLink(idx, l)}
-                        className="p-2 rounded-xl hover:bg-teal-500/10 text-neutral-500 hover:text-teal-400 transition cursor-pointer"
+                        className="p-2 rounded-xl hover:bg-teal-500/10 text-slate-400 hover:text-teal-600 dark:text-neutral-500 dark:hover:text-teal-400 transition cursor-pointer"
                         title="Edit link"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -1249,7 +1249,7 @@ export default function ClientDetailPage() {
                       <button
                         type="button"
                         onClick={() => handleDeleteLink(idx)}
-                        className="p-2 rounded-xl hover:bg-rose-500/10 text-neutral-500 hover:text-rose-400 transition cursor-pointer"
+                        className="p-2 rounded-xl hover:bg-rose-500/10 text-slate-400 hover:text-rose-600 dark:text-neutral-500 dark:hover:text-rose-400 transition cursor-pointer"
                         title="Delete link"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -1259,7 +1259,7 @@ export default function ClientDetailPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-neutral-500 italic p-8 text-center bg-[#121212] rounded-2xl border border-[#222222]">
+              <p className="text-xs text-slate-500 dark:text-neutral-400 italic p-8 text-center bg-white dark:bg-[#151d2a] rounded-2xl border border-slate-200 dark:border-[#222e42]">
                 No agreements or external document links added. Click &apos;Attach Link / Agreement&apos; above.
               </p>
             )}
@@ -1275,20 +1275,20 @@ export default function ClientDetailPage() {
       >
         <form onSubmit={handleCreateProject} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Project Name *</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Project Name *</label>
             <input
               type="text"
               placeholder="e.g. Mobile App V2, Loyalty Portal"
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Project Price / Budget ({currencySymbol.trim()}) *
               </label>
               <input
@@ -1297,11 +1297,11 @@ export default function ClientDetailPage() {
                 value={newProjectBudget}
                 onChange={(e) => setNewProjectBudget(e.target.value)}
                 required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Status</label>
               <CustomSelect
                 value={newProjectStatus}
                 onChange={(val) => setNewProjectStatus(val as any)}
@@ -1318,7 +1318,7 @@ export default function ClientDetailPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Project Lead (Lead Developer / Tech Lead)
             </label>
             <CustomSelect
@@ -1338,17 +1338,17 @@ export default function ClientDetailPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Target Deadline</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Target Deadline</label>
             <input
               type="date"
               value={newProjectDeadline}
               onChange={(e) => setNewProjectDeadline(e.target.value)}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Description / Deliverables Scope</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Description / Deliverables Scope</label>
             <textarea
               value={newProjectDescription}
               onChange={(e) => {
@@ -1358,7 +1358,7 @@ export default function ClientDetailPage() {
               }}
               rows={2}
               placeholder="Key project goals, specifications, or deliverables..."
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1366,7 +1366,7 @@ export default function ClientDetailPage() {
             <button
               type="button"
               onClick={() => setIsCreateProjectModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -1389,28 +1389,28 @@ export default function ClientDetailPage() {
       >
         <form onSubmit={handleUpdateClient} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Company / Client Name *</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Company / Client Name *</label>
             <input
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Contact Person</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Contact Person</label>
               <input
                 type="text"
                 value={formContactPerson}
                 onChange={(e) => setFormContactPerson(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Status</label>
               <CustomSelect
                 value={formStatus}
                 onChange={(val) => setFormStatus(val)}
@@ -1428,28 +1428,28 @@ export default function ClientDetailPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Email</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Email</label>
               <input
                 type="email"
                 value={formEmail}
                 onChange={(e) => setFormEmail(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Phone</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Phone</label>
               <input
                 type="text"
                 value={formPhone}
                 onChange={(e) => setFormPhone(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Currency</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Currency</label>
               <CustomSelect
                 value={formCurrency}
                 onChange={(val) => setFormCurrency(val)}
@@ -1465,12 +1465,12 @@ export default function ClientDetailPage() {
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-medium text-neutral-300">Deal Value</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-neutral-300">Deal Value</label>
                 {totalProjectsBudget > 0 && (
                   <button
                     type="button"
                     onClick={() => setFormDealValue(totalProjectsBudget.toString())}
-                    className="text-[10px] text-teal-400 hover:underline"
+                    className="text-[10px] text-teal-600 dark:text-teal-400 hover:underline"
                     title="Copy sum of all project budgets"
                   >
                     Sum ({totalProjectsBudget.toLocaleString()})
@@ -1482,30 +1482,30 @@ export default function ClientDetailPage() {
                 value={formDealValue}
                 onChange={(e) => setFormDealValue(e.target.value)}
                 placeholder={totalProjectsBudget > 0 ? `Projects: ${totalProjectsBudget}` : '0'}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Paid Amount</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Paid Amount</label>
               <input
                 type="number"
                 value={formPaidAmount}
                 onChange={(e) => setFormPaidAmount(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
           </div>
 
           {/* Link Projects */}
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Connected Projects (Can select multiple projects)
             </label>
-            <div className="max-h-36 overflow-y-auto p-2 rounded-xl bg-[#181818] border border-[#262626] space-y-1">
+            <div className="max-h-36 overflow-y-auto p-2 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-1">
               {availableProjects.map((p) => {
                 const isSelected = selectedProjectIds.includes(p._id);
                 return (
-                  <label key={p._id} className="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#202020] cursor-pointer text-xs">
+                  <label key={p._id} className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a2436] cursor-pointer text-xs">
                     <div className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -1519,11 +1519,11 @@ export default function ClientDetailPage() {
                         }}
                         className="accent-teal-500"
                       />
-                      <span className="text-white font-medium">{p.name}</span>
-                      <span className="text-[10px] text-neutral-500">({p.status})</span>
+                      <span className="text-slate-900 dark:text-white font-medium">{p.name}</span>
+                      <span className="text-[10px] text-slate-500 dark:text-neutral-500">({p.status})</span>
                     </div>
                     {p.budget ? (
-                      <span className="font-mono text-teal-400 text-[11px] font-semibold">
+                      <span className="font-mono text-teal-600 dark:text-teal-400 text-[11px] font-semibold">
                         {currencySymbol}{p.budget.toLocaleString()}
                       </span>
                     ) : null}
@@ -1534,7 +1534,7 @@ export default function ClientDetailPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Notes</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Notes</label>
             <textarea
               value={formNotes}
               onChange={(e) => {
@@ -1544,7 +1544,7 @@ export default function ClientDetailPage() {
               }}
               rows={2}
               placeholder="Notes on client requirements or account details..."
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none resize-none leading-relaxed overflow-hidden transition-[height]"
             />
           </div>
 
@@ -1552,7 +1552,7 @@ export default function ClientDetailPage() {
             <button
               type="button"
               onClick={() => setIsEditModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -1573,15 +1573,15 @@ export default function ClientDetailPage() {
         title="Delete Client Record"
       >
         <div className="space-y-4">
-          <p className="text-xs text-neutral-300 leading-relaxed">
-            Are you sure you want to permanently delete <strong className="text-white">{client.name}</strong>?
+          <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed">
+            Are you sure you want to permanently delete <strong className="text-slate-900 dark:text-white">{client.name}</strong>?
             This will remove all meetings, payment records, and unbind all connected projects.
           </p>
           <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -1604,41 +1604,41 @@ export default function ClientDetailPage() {
       >
         <form onSubmit={handleUpdateMeeting} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Meeting Title *</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Meeting Title *</label>
             <input
               type="text"
               value={editMeetingTitle}
               onChange={(e) => setEditMeetingTitle(e.target.value)}
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Date *</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Date *</label>
               <input
                 type="date"
                 value={editMeetingDate}
                 onChange={(e) => setEditMeetingDate(e.target.value)}
                 required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Time</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Time</label>
               <input
                 type="time"
                 value={editMeetingTime}
                 onChange={(e) => setEditMeetingTime(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Status</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Status</label>
               <CustomSelect
                 value={editMeetingStatus}
                 onChange={(val) => setEditMeetingStatus(val)}
@@ -1653,32 +1653,32 @@ export default function ClientDetailPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Location or Link</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Location or Link</label>
               <input
                 type="text"
                 placeholder="Google Meet or Office"
                 value={editMeetingLocation}
                 onChange={(e) => setEditMeetingLocation(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Notes / Agenda</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Notes / Agenda</label>
             <textarea
               rows={2}
               value={editMeetingNotes}
               onChange={(e) => setEditMeetingNotes(e.target.value)}
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none resize-none"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setEditingMeetingIndex(null)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -1700,18 +1700,18 @@ export default function ClientDetailPage() {
       >
         <form onSubmit={handleUpdatePayment} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Milestone Title *</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Milestone Title *</label>
             <input
               type="text"
               value={editPaymentTitle}
               onChange={(e) => setEditPaymentTitle(e.target.value)}
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Select Project</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Select Project</label>
             <CustomSelect
               value={editPaymentProjectId}
               onChange={(val) => setEditPaymentProjectId(val)}
@@ -1730,30 +1730,30 @@ export default function ClientDetailPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Amount ($) *</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Amount ($) *</label>
               <input
                 type="number"
                 value={editPaymentAmount}
                 onChange={(e) => setEditPaymentAmount(e.target.value)}
                 required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Invoice Number</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Invoice Number</label>
               <input
                 type="text"
                 placeholder="e.g. INV-2026-001"
                 value={editPaymentInvoice}
                 onChange={(e) => setEditPaymentInvoice(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Payment Status</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Payment Status</label>
               <CustomSelect
                 value={editPaymentStatus}
                 onChange={(val) => setEditPaymentStatus(val as any)}
@@ -1767,21 +1767,21 @@ export default function ClientDetailPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">Due Date</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Due Date</label>
               <input
                 type="date"
                 value={editPaymentDueDate}
                 onChange={(e) => setEditPaymentDueDate(e.target.value)}
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setEditingPaymentIndex(null)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white"
             >
               Cancel
             </button>
@@ -1803,30 +1803,30 @@ export default function ClientDetailPage() {
       >
         <form onSubmit={handleUpdateLink} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">Title *</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">Title *</label>
             <input
               type="text"
               value={editLinkTitle}
               onChange={(e) => setEditLinkTitle(e.target.value)}
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">URL *</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">URL *</label>
             <input
               type="url"
               value={editLinkUrl}
               onChange={(e) => setEditLinkUrl(e.target.value)}
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
             />
           </div>
-          <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-[#1e2a3c]">
             <button
               type="button"
               onClick={() => setEditingLinkIndex(null)}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white"
             >
               Cancel
             </button>

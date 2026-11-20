@@ -554,7 +554,7 @@ export default function TeamMemberDetailPage() {
         </div>
 
         {/* Member Profile Card & Hero Banner */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-[#121212] border border-[#222222] shadow-sm">
+        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white font-bold text-2xl flex items-center justify-center shadow-xl shadow-teal-900/30 font-heading shrink-0">
@@ -562,55 +562,55 @@ export default function TeamMemberDetailPage() {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-xl font-bold font-heading text-white">{user.name}</h2>
+                  <h2 className="text-xl font-bold font-heading text-slate-900 dark:text-white">{user.name}</h2>
                   {user.role === 'CEO' && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/30 font-bold">
                       👑 CEO
                     </span>
                   )}
                   {user.role === 'CTO' && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/30 font-bold">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-300 border border-sky-500/30 font-bold">
                       ⚡ CTO
                     </span>
                   )}
                   {user.role === 'COO' && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 font-bold">
                       📊 COO
                     </span>
                   )}
                   {user.role === 'ADMIN' && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 font-medium">
                       🛡️ Admin
                     </span>
                   )}
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
                       user.status === 'ACTIVE'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-neutral-500/10 text-neutral-400 border border-neutral-500/20'
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                        : 'bg-slate-100 text-slate-600 dark:bg-neutral-500/10 dark:text-neutral-400 border border-slate-200 dark:border-neutral-500/20'
                     }`}
                   >
                     {user.status}
                   </span>
                 </div>
-                <p className="text-xs text-teal-400 font-medium">{user.title || 'General Team Member'}</p>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 pt-1">
+                <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">{user.title || 'General Team Member'}</p>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-neutral-400 pt-1">
                   <span className="flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-neutral-500" />
-                    <a href={`mailto:${user.email}`} className="hover:text-white transition">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500" />
+                    <a href={`mailto:${user.email}`} className="text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white transition">
                       {user.email}
                     </a>
                   </span>
-                  <span className="text-neutral-600">•</span>
+                  <span className="text-slate-300 dark:text-neutral-600">•</span>
                   <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-neutral-500" />
-                    Target Capacity: <strong className="text-neutral-200">{capacityLimit}h/week</strong>
+                    <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500" />
+                    Target Capacity: <strong className="text-slate-800 dark:text-neutral-200">{capacityLimit}h/week</strong>
                   </span>
                   {user.createdAt && (
                     <>
-                      <span className="text-neutral-600">•</span>
-                      <span className="flex items-center gap-1.5 text-neutral-500">
-                        <Calendar className="w-3.5 h-3.5 text-neutral-600" />
+                      <span className="text-slate-300 dark:text-neutral-600">•</span>
+                      <span className="flex items-center gap-1.5 text-slate-500 dark:text-neutral-500">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-600" />
                         Joined {new Date(user.createdAt).toLocaleDateString()}
                       </span>
                     </>
@@ -619,14 +619,14 @@ export default function TeamMemberDetailPage() {
               </div>
             </div>
 
-            <div className="w-full sm:w-64 p-3.5 bg-[#181818] border border-[#262626] rounded-xl space-y-2">
+            <div className="w-full sm:w-64 p-3.5 bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] rounded-xl space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-neutral-400">Weekly Burn</span>
-                <span className="font-bold text-white">
+                <span className="text-slate-600 dark:text-neutral-400">Weekly Burn</span>
+                <span className="font-bold text-slate-900 dark:text-white">
                   {stats.thisWeekHours}h / {capacityLimit}h ({capacityPercent}%)
                 </span>
               </div>
-              <div className="w-full bg-[#262626] h-2.5 rounded-full overflow-hidden">
+              <div className="w-full bg-slate-200 dark:bg-[#1e2a3c] h-2.5 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     capacityPercent > 100
@@ -638,7 +638,7 @@ export default function TeamMemberDetailPage() {
                   style={{ width: `${Math.min(100, capacityPercent)}%` }}
                 />
               </div>
-              <div className="flex items-center justify-between text-[10px] text-neutral-500">
+              <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-neutral-400">
                 <span>Remaining: {Math.max(0, Math.round((capacityLimit - stats.thisWeekHours) * 10) / 10)}h</span>
                 <span>{capacityPercent > 100 ? 'Over capacity' : capacityPercent >= 80 ? 'Heavy' : 'On Track'}</span>
               </div>
@@ -679,13 +679,13 @@ export default function TeamMemberDetailPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-[#222222] pb-1 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#1e2a3c] pb-1 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'overview'
-                ? 'bg-teal-500/15 text-teal-400 border border-teal-500/30'
-                : 'text-neutral-400 hover:text-white hover:bg-[#181818]'
+                ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30'
+                : 'text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724]'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -696,8 +696,8 @@ export default function TeamMemberDetailPage() {
             onClick={() => setActiveTab('projects')}
             className={`px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'projects'
-                ? 'bg-teal-500/15 text-teal-400 border border-teal-500/30'
-                : 'text-neutral-400 hover:text-white hover:bg-[#181818]'
+                ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30'
+                : 'text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724]'
             }`}
           >
             <FolderKanban className="w-3.5 h-3.5" />
@@ -708,8 +708,8 @@ export default function TeamMemberDetailPage() {
             onClick={() => setActiveTab('tasks')}
             className={`px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'tasks'
-                ? 'bg-teal-500/15 text-teal-400 border border-teal-500/30'
-                : 'text-neutral-400 hover:text-white hover:bg-[#181818]'
+                ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30'
+                : 'text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724]'
             }`}
           >
             <CheckSquare className="w-3.5 h-3.5" />
@@ -720,8 +720,8 @@ export default function TeamMemberDetailPage() {
             onClick={() => setActiveTab('time')}
             className={`px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'time'
-                ? 'bg-teal-500/15 text-teal-400 border border-teal-500/30'
-                : 'text-neutral-400 hover:text-white hover:bg-[#181818]'
+                ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30'
+                : 'text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724]'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -732,8 +732,8 @@ export default function TeamMemberDetailPage() {
             onClick={() => setActiveTab('outreach')}
             className={`px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'outreach'
-                ? 'bg-teal-500/15 text-teal-400 border border-teal-500/30'
-                : 'text-neutral-400 hover:text-white hover:bg-[#181818]'
+                ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30'
+                : 'text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724]'
             }`}
           >
             <Target className="w-3.5 h-3.5" />
@@ -747,14 +747,14 @@ export default function TeamMemberDetailPage() {
             {/* Left 2 Cols: Active Work & Projects */}
             <div className="lg:col-span-2 space-y-6">
               {/* Active Projects Showcase */}
-              <div className="p-5 rounded-2xl bg-[#121212] border border-[#222222]">
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42]">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-heading text-sm font-bold text-white flex items-center gap-2">
-                    <FolderKanban className="w-4 h-4 text-teal-400" /> Active Projects
+                  <h3 className="font-heading text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <FolderKanban className="w-4 h-4 text-teal-600 dark:text-teal-400" /> Active Projects
                   </h3>
                   <button
                     onClick={() => setActiveTab('projects')}
-                    className="text-xs text-teal-400 hover:text-teal-300 font-medium"
+                    className="text-xs text-teal-600 dark:text-teal-400 hover:text-teal-500 font-medium"
                   >
                     View all ({projects.length})
                   </button>
@@ -766,22 +766,22 @@ export default function TeamMemberDetailPage() {
                       <Link
                         key={p._id}
                         href={`/projects/${p._id}`}
-                        className="p-4 rounded-xl bg-[#181818] border border-[#262626] hover:border-teal-500/50 transition flex flex-col justify-between group"
+                        className="p-4 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/50 transition flex flex-col justify-between group"
                       >
                         <div>
                           <div className="flex items-start justify-between mb-2">
-                            <span className="font-heading text-sm font-bold text-white group-hover:text-teal-300 transition-colors">
+                            <span className="font-heading text-sm font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">
                               {p.name}
                             </span>
-                            <ArrowUpRight className="w-3.5 h-3.5 text-neutral-500 group-hover:text-teal-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" />
+                            <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 group-hover:text-teal-600 dark:group-hover:text-teal-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" />
                           </div>
-                          <p className="text-xs text-neutral-400 line-clamp-2 mb-3">
+                          <p className="text-xs text-slate-600 dark:text-neutral-400 line-clamp-2 mb-3">
                             {p.description || 'No description provided.'}
                           </p>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] text-neutral-500 pt-2 border-t border-[#262626]">
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-neutral-400 pt-2 border-t border-slate-200 dark:border-[#1e2a3c]">
                           <span>{p.clientName || 'Internal'}</span>
-                          <span className="uppercase font-medium text-teal-400 text-[10px]">
+                          <span className="uppercase font-medium text-teal-600 dark:text-teal-400 text-[10px]">
                             {p.status.replace('_', ' ')}
                           </span>
                         </div>
@@ -789,21 +789,21 @@ export default function TeamMemberDetailPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-6 text-center text-xs text-neutral-500 bg-[#181818] rounded-xl border border-[#262626]">
+                  <div className="p-6 text-center text-xs text-slate-500 dark:text-neutral-400 bg-slate-50 dark:bg-[#101724] rounded-xl border border-slate-200 dark:border-[#1e2a3c]">
                     No active projects assigned.
                   </div>
                 )}
               </div>
 
               {/* Pending Priority Tasks */}
-              <div className="p-5 rounded-2xl bg-[#121212] border border-[#222222]">
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42]">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-heading text-sm font-bold text-white flex items-center gap-2">
-                    <CheckSquare className="w-4 h-4 text-emerald-400" /> Pending Workload
+                  <h3 className="font-heading text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <CheckSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Pending Workload
                   </h3>
                   <button
                     onClick={() => setActiveTab('tasks')}
-                    className="text-xs text-teal-400 hover:text-teal-300 font-medium"
+                    className="text-xs text-teal-600 dark:text-teal-400 hover:text-teal-500 font-medium"
                   >
                     All tasks ({tasks.length})
                   </button>
@@ -817,11 +817,11 @@ export default function TeamMemberDetailPage() {
                       .map((task) => (
                         <div
                           key={task._id}
-                          className="p-3 rounded-xl bg-[#181818] border border-[#262626] flex items-center justify-between gap-3 text-xs"
+                          className="p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between gap-3 text-xs"
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-white truncate">{task.title}</div>
-                            <div className="text-[11px] text-neutral-500 flex items-center gap-2 mt-0.5">
+                            <div className="font-medium text-slate-900 dark:text-white truncate">{task.title}</div>
+                            <div className="text-[11px] text-slate-500 dark:text-neutral-400 flex items-center gap-2 mt-0.5">
                               <span>{task.project?.name || 'General Task'}</span>
                               {task.dueDate && (
                                 <>
@@ -832,7 +832,7 @@ export default function TeamMemberDetailPage() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-[#202020] text-neutral-300 font-medium">
+                            <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1a2436] text-slate-700 dark:text-neutral-300 border border-slate-200 dark:border-transparent font-medium">
                               {task.status.replace('_', ' ')}
                             </span>
                             <PriorityBadge priority={task.priority as any} />
@@ -841,7 +841,7 @@ export default function TeamMemberDetailPage() {
                       ))}
                   </div>
                 ) : (
-                  <div className="p-6 text-center text-xs text-neutral-500 bg-[#181818] rounded-xl border border-[#262626]">
+                  <div className="p-6 text-center text-xs text-slate-500 dark:text-neutral-400 bg-slate-50 dark:bg-[#101724] rounded-xl border border-slate-200 dark:border-[#1e2a3c]">
                     No pending tasks! Workload clear.
                   </div>
                 )}
@@ -851,14 +851,14 @@ export default function TeamMemberDetailPage() {
             {/* Right 1 Col: Recent Time Logs & Outreach Highlights */}
             <div className="space-y-6">
               {/* Recent Time Logs */}
-              <div className="p-5 rounded-2xl bg-[#121212] border border-[#222222]">
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42]">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-heading text-sm font-bold text-white flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-emerald-400" /> Recent Time Logs
+                  <h3 className="font-heading text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Recent Time Logs
                   </h3>
                   <button
                     onClick={() => setActiveTab('time')}
-                    className="text-xs text-teal-400 hover:text-teal-300 font-medium"
+                    className="text-xs text-teal-600 dark:text-teal-400 hover:text-teal-500 font-medium"
                   >
                     View log
                   </button>
@@ -869,15 +869,15 @@ export default function TeamMemberDetailPage() {
                     {timeEntries.slice(0, 5).map((entry) => (
                       <div
                         key={entry._id}
-                        className="p-3 rounded-xl bg-[#181818] border border-[#262626] text-xs space-y-1"
+                        className="p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-xs space-y-1"
                       >
                         <div className="flex items-center justify-between font-medium">
-                          <span className="text-white truncate">{entry.description || 'Logged work'}</span>
-                          <span className="text-teal-400 font-bold shrink-0">
+                          <span className="text-slate-900 dark:text-white truncate">{entry.description || 'Logged work'}</span>
+                          <span className="text-teal-600 dark:text-teal-400 font-bold shrink-0">
                             {entry.hours}h {entry.minutes > 0 ? `${entry.minutes}m` : ''}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] text-neutral-500">
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-neutral-400">
                           <span>{entry.project?.name || 'General'}</span>
                           <span>{new Date(entry.date).toLocaleDateString()}</span>
                         </div>
@@ -885,21 +885,21 @@ export default function TeamMemberDetailPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-6 text-center text-xs text-neutral-500 bg-[#181818] rounded-xl border border-[#262626]">
+                  <div className="p-6 text-center text-xs text-slate-500 dark:text-neutral-400 bg-slate-50 dark:bg-[#101724] rounded-xl border border-slate-200 dark:border-[#1e2a3c]">
                     No logged hours recently.
                   </div>
                 )}
               </div>
 
               {/* Outreach Assigned Leads */}
-              <div className="p-5 rounded-2xl bg-[#121212] border border-[#222222]">
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42]">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-heading text-sm font-bold text-white flex items-center gap-2">
-                    <Target className="w-4 h-4 text-teal-400" /> Assigned Outreach
+                  <h3 className="font-heading text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Target className="w-4 h-4 text-teal-600 dark:text-teal-400" /> Assigned Outreach
                   </h3>
                   <button
                     onClick={() => setActiveTab('outreach')}
-                    className="text-xs text-teal-400 hover:text-teal-300 font-medium"
+                    className="text-xs text-teal-600 dark:text-teal-400 hover:text-teal-500 font-medium"
                   >
                     All ({approaches.length})
                   </button>
@@ -911,22 +911,22 @@ export default function TeamMemberDetailPage() {
                       <Link
                         key={appr._id}
                         href={`/approaches/${appr._id}`}
-                        className="p-3 rounded-xl bg-[#181818] border border-[#262626] hover:border-teal-500/40 transition flex items-center justify-between text-xs group"
+                        className="p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/40 transition flex items-center justify-between text-xs group"
                       >
                         <div>
-                          <div className="font-medium text-white group-hover:text-teal-300 transition-colors">
+                          <div className="font-medium text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">
                             {appr.businessName}
                           </div>
-                          <div className="text-[11px] text-neutral-500">{appr.contactPerson}</div>
+                          <div className="text-[11px] text-slate-500 dark:text-neutral-400">{appr.contactPerson}</div>
                         </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-[#202020] text-teal-400 font-medium">
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-teal-50 dark:bg-[#1a2436] text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-500/20 font-medium">
                           {appr.status}
                         </span>
                       </Link>
                     ))}
                   </div>
                 ) : (
-                  <div className="p-6 text-center text-xs text-neutral-500 bg-[#181818] rounded-xl border border-[#262626]">
+                  <div className="p-6 text-center text-xs text-slate-500 dark:text-neutral-400 bg-slate-50 dark:bg-[#101724] rounded-xl border border-slate-200 dark:border-[#1e2a3c]">
                     No outreach targets assigned.
                   </div>
                 )}
@@ -939,7 +939,7 @@ export default function TeamMemberDetailPage() {
         {activeTab === 'projects' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold font-heading text-white">
+              <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white">
                 All Projects Assigned ({projects.length})
               </h3>
             </div>
@@ -949,43 +949,43 @@ export default function TeamMemberDetailPage() {
                 {projects.map((p) => (
                   <div
                     key={p._id}
-                    className="p-5 rounded-2xl bg-[#121212] border border-[#222222] hover:border-teal-500/40 transition flex flex-col justify-between shadow-sm group"
+                    className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/40 transition flex flex-col justify-between shadow-sm group"
                   >
                     <div>
                       <div className="flex items-start justify-between mb-2">
                         <Link
                           href={`/projects/${p._id}`}
-                          className="font-heading text-base font-bold text-white group-hover:text-teal-300 transition-colors flex items-center gap-1.5"
+                          className="font-heading text-base font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors flex items-center gap-1.5"
                         >
                           <span>{p.name}</span>
-                          <ArrowUpRight className="w-4 h-4 text-neutral-500 group-hover:text-teal-300 transition-colors" />
+                          <ArrowUpRight className="w-4 h-4 text-slate-400 dark:text-neutral-500 group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors" />
                         </Link>
-                        <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">
+                        <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 font-medium">
                           {p.status.replace('_', ' ')}
                         </span>
                       </div>
 
-                      <p className="text-xs text-neutral-400 line-clamp-3 mb-4">
+                      <p className="text-xs text-slate-600 dark:text-neutral-400 line-clamp-3 mb-4">
                         {p.description || 'No description provided.'}
                       </p>
 
-                      <div className="space-y-1.5 text-xs text-neutral-400 mb-4 bg-[#181818] p-3 rounded-xl border border-[#262626]">
+                      <div className="space-y-1.5 text-xs text-slate-600 dark:text-neutral-400 mb-4 bg-slate-50 dark:bg-[#101724] p-3 rounded-xl border border-slate-200 dark:border-[#1e2a3c]">
                         <div className="flex justify-between">
-                          <span className="text-neutral-500">Client</span>
-                          <span className="text-white font-medium">{p.clientName || 'Internal RHIZAN'}</span>
+                          <span className="text-slate-500 dark:text-neutral-500">Client</span>
+                          <span className="text-slate-900 dark:text-white font-medium">{p.clientName || 'Internal RHIZAN'}</span>
                         </div>
                         {p.deadline && (
                           <div className="flex justify-between">
-                            <span className="text-neutral-500">Deadline</span>
-                            <span className="text-neutral-300">
+                            <span className="text-slate-500 dark:text-neutral-500">Deadline</span>
+                            <span className="text-slate-700 dark:text-neutral-300">
                               {new Date(p.deadline).toLocaleDateString()}
                             </span>
                           </div>
                         )}
                         {p.projectLead && (
                           <div className="flex justify-between">
-                            <span className="text-neutral-500">Project Lead</span>
-                            <span className="text-teal-400">{p.projectLead.name}</span>
+                            <span className="text-slate-500 dark:text-neutral-500">Project Lead</span>
+                            <span className="text-teal-600 dark:text-teal-400 font-medium">{p.projectLead.name}</span>
                           </div>
                         )}
                       </div>
@@ -993,7 +993,7 @@ export default function TeamMemberDetailPage() {
 
                     <Link
                       href={`/projects/${p._id}`}
-                      className="w-full py-2 px-3 rounded-xl bg-[#181818] hover:bg-teal-500/10 border border-[#262626] hover:border-teal-500/40 text-xs font-medium text-teal-400 flex items-center justify-center gap-1.5 transition"
+                      className="w-full py-2 px-3 rounded-xl bg-slate-50 dark:bg-[#101724] hover:bg-teal-500/10 border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/40 text-xs font-medium text-teal-600 dark:text-teal-400 flex items-center justify-center gap-1.5 transition"
                     >
                       <span>Open Project Workspace</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -1002,7 +1002,7 @@ export default function TeamMemberDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-12 text-center text-xs text-neutral-500 bg-[#121212] rounded-2xl border border-[#222222]">
+              <div className="p-12 text-center text-xs text-slate-500 dark:text-neutral-400 bg-white dark:bg-[#151d2a] rounded-2xl border border-slate-200 dark:border-[#222e42]">
                 This team member is not currently assigned to any projects.
               </div>
             )}
@@ -1013,7 +1013,7 @@ export default function TeamMemberDetailPage() {
         {activeTab === 'tasks' && (
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <h3 className="text-sm font-bold font-heading text-white">
+              <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white">
                 Assigned Tasks ({filteredTasks.length})
               </h3>
 
@@ -1025,8 +1025,8 @@ export default function TeamMemberDetailPage() {
                     onClick={() => setTaskFilter(st)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-medium transition ${
                       taskFilter === st
-                        ? 'bg-teal-500/15 text-teal-400 border border-teal-500/30'
-                        : 'bg-[#181818] text-neutral-400 border border-[#262626] hover:text-white hover:bg-[#202020]'
+                        ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30'
+                        : 'bg-slate-100 dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-[#1e2a3c] hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1a2436]'
                     }`}
                   >
                     {st === 'ALL' ? 'All Status' : st.replace('_', ' ')}
@@ -1036,22 +1036,22 @@ export default function TeamMemberDetailPage() {
             </div>
 
             {filteredTasks.length > 0 ? (
-              <div className="bg-[#121212] border border-[#222222] rounded-2xl overflow-hidden shadow-sm divide-y divide-[#222222]">
+              <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl overflow-hidden shadow-sm divide-y divide-slate-100 dark:divide-[#1e2a3c]">
                 {filteredTasks.map((task) => (
                   <div
                     key={task._id}
-                    className="p-4 hover:bg-[#161616] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    className="p-4 hover:bg-slate-50 dark:hover:bg-[#101724] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-white">{task.title}</span>
+                        <span className="font-semibold text-sm text-slate-900 dark:text-white">{task.title}</span>
                         <PriorityBadge priority={task.priority as any} />
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-neutral-500">
+                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-neutral-400">
                         {task.project && (
                           <Link
                             href={`/projects/${task.project._id}`}
-                            className="text-teal-400 hover:underline"
+                            className="text-teal-600 dark:text-teal-400 hover:underline"
                           >
                             {task.project.name}
                           </Link>
@@ -1068,7 +1068,7 @@ export default function TeamMemberDetailPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className="text-xs uppercase px-2.5 py-1 rounded-lg bg-[#181818] border border-[#262626] text-neutral-300 font-medium">
+                      <span className="text-xs uppercase px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-slate-700 dark:text-neutral-300 font-medium">
                         {task.status.replace('_', ' ')}
                       </span>
                     </div>
@@ -1076,7 +1076,7 @@ export default function TeamMemberDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-12 text-center text-xs text-neutral-500 bg-[#121212] rounded-2xl border border-[#222222]">
+              <div className="p-12 text-center text-xs text-slate-500 dark:text-neutral-400 bg-white dark:bg-[#151d2a] rounded-2xl border border-slate-200 dark:border-[#222e42]">
                 No tasks found matching the selected status.
               </div>
             )}
@@ -1088,25 +1088,25 @@ export default function TeamMemberDetailPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold font-heading text-white">Recent Time Entries</h3>
-                <p className="text-xs text-neutral-500">
+                <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white">Recent Time Entries</h3>
+                <p className="text-xs text-slate-500 dark:text-neutral-500">
                   {stats.thisWeekHours} hours tracked this week towards {capacityLimit}h capacity baseline
                 </p>
               </div>
               <Link
                 href="/time"
-                className="px-3 py-1.5 rounded-xl bg-[#181818] border border-[#262626] text-xs text-teal-400 hover:text-teal-300 transition"
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-xs text-teal-600 dark:text-teal-400 hover:text-teal-500 transition"
               >
                 Go to Time Tracker
               </Link>
             </div>
 
             {timeEntries.length > 0 ? (
-              <div className="bg-[#121212] border border-[#222222] rounded-2xl overflow-hidden shadow-sm">
+              <div className="bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-2xl overflow-hidden shadow-sm">
                 {/* DESKTOP TABLE VIEW */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-[#181818] border-b border-[#262626] text-neutral-400 uppercase text-[10px] tracking-wider">
+                    <thead className="bg-slate-50 dark:bg-[#101724] border-b border-slate-200 dark:border-[#1e2a3c] text-slate-500 dark:text-neutral-400 uppercase text-[10px] tracking-wider">
                       <tr>
                         <th className="px-4 py-3 font-semibold">Date</th>
                         <th className="px-4 py-3 font-semibold">Project</th>
@@ -1115,30 +1115,30 @@ export default function TeamMemberDetailPage() {
                         <th className="px-4 py-3 font-semibold text-right">Duration</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#222222]">
+                    <tbody className="divide-y divide-slate-100 dark:divide-[#1e2a3c]">
                       {timeEntries.map((entry) => (
-                        <tr key={entry._id} className="hover:bg-[#161616] transition">
-                          <td className="px-4 py-3 text-neutral-300 whitespace-nowrap">
+                        <tr key={entry._id} className="hover:bg-slate-50 dark:hover:bg-[#101724] transition">
+                          <td className="px-4 py-3 text-slate-600 dark:text-neutral-300 whitespace-nowrap">
                             {new Date(entry.date).toLocaleDateString()}
                           </td>
-                          <td className="px-4 py-3 font-medium text-white whitespace-nowrap">
+                          <td className="px-4 py-3 font-medium text-slate-900 dark:text-white whitespace-nowrap">
                             {entry.project?.name || 'General Work'}
                           </td>
-                          <td className="px-4 py-3 text-neutral-400 max-w-xs truncate">
+                          <td className="px-4 py-3 text-slate-500 dark:text-neutral-400 max-w-xs truncate">
                             {entry.description || entry.task?.title || 'Logged time'}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span
                               className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
                                 entry.billable
-                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                  : 'bg-neutral-500/10 text-neutral-400 border border-neutral-500/20'
+                                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                  : 'bg-slate-100 text-slate-600 dark:bg-neutral-500/10 dark:text-neutral-400 border border-slate-200 dark:border-neutral-500/20'
                               }`}
                             >
                               {entry.billable ? 'Client' : 'Internal'}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right font-bold text-teal-400 whitespace-nowrap">
+                          <td className="px-4 py-3 text-right font-bold text-teal-600 dark:text-teal-400 whitespace-nowrap">
                             {entry.hours}h {entry.minutes > 0 ? `${entry.minutes}m` : ''}
                           </td>
                         </tr>
@@ -1152,25 +1152,25 @@ export default function TeamMemberDetailPage() {
                   {timeEntries.map((entry) => (
                     <div
                       key={entry._id}
-                      className="p-3.5 rounded-xl bg-[#161616] border border-[#242424] space-y-2.5 shadow-sm"
+                      className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-2.5 shadow-sm"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <span className="font-semibold text-xs text-white block truncate">
+                          <span className="font-semibold text-xs text-slate-900 dark:text-white block truncate">
                             {entry.project?.name || 'General Work'}
                           </span>
-                          <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">
+                          <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-0.5 leading-snug">
                             {entry.description || entry.task?.title || 'Logged time'}
                           </p>
                         </div>
-                        <span className="text-xs font-bold text-teal-400 font-mono shrink-0 px-2 py-0.5 rounded-md bg-teal-500/10 border border-teal-500/20">
+                        <span className="text-xs font-bold text-teal-600 dark:text-teal-400 font-mono shrink-0 px-2 py-0.5 rounded-md bg-teal-50 dark:bg-[#1a2436] border border-teal-200 dark:border-teal-500/20">
                           {entry.hours}h {entry.minutes > 0 ? `${entry.minutes}m` : ''}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] pt-2 border-t border-[#202020]">
-                        <span className="text-neutral-400 flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-neutral-500" />
+                      <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-200 dark:border-[#1e2a3c]">
+                        <span className="text-slate-500 dark:text-neutral-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
                           {new Date(entry.date).toLocaleDateString(undefined, {
                             month: 'short',
                             day: 'numeric',
@@ -1180,8 +1180,8 @@ export default function TeamMemberDetailPage() {
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
                             entry.billable
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : 'bg-neutral-500/10 text-neutral-400 border border-neutral-500/20'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                              : 'bg-slate-100 text-slate-600 dark:bg-neutral-500/10 dark:text-neutral-400 border border-slate-200 dark:border-neutral-500/20'
                           }`}
                         >
                           {entry.billable ? 'Client' : 'Internal'}
@@ -1192,7 +1192,7 @@ export default function TeamMemberDetailPage() {
                 </div>
               </div>
             ) : (
-              <div className="p-12 text-center text-xs text-neutral-500 bg-[#121212] rounded-2xl border border-[#222222]">
+              <div className="p-12 text-center text-xs text-slate-500 dark:text-neutral-400 bg-white dark:bg-[#151d2a] rounded-2xl border border-slate-200 dark:border-[#222e42]">
                 No time entries have been recorded yet for this member.
               </div>
             )}
@@ -1204,16 +1204,16 @@ export default function TeamMemberDetailPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold font-heading text-white">
+                <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white">
                   Assigned Outreach Targets ({approaches.length})
                 </h3>
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-slate-500 dark:text-neutral-500">
                   Business acquisition targets and client leads assigned for follow-up
                 </p>
               </div>
               <Link
                 href="/approaches"
-                className="px-3 py-1.5 rounded-xl bg-[#181818] border border-[#262626] text-xs text-teal-400 hover:text-teal-300 transition"
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] text-xs text-teal-600 dark:text-teal-400 hover:text-teal-500 transition"
               >
                 Go to Outreach Board
               </Link>
@@ -1224,43 +1224,43 @@ export default function TeamMemberDetailPage() {
                 {approaches.map((appr) => (
                   <div
                     key={appr._id}
-                    className="p-5 rounded-2xl bg-[#121212] border border-[#222222] hover:border-teal-500/40 transition flex flex-col justify-between shadow-sm group"
+                    className="p-5 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] hover:border-teal-500/40 transition flex flex-col justify-between shadow-sm group"
                   >
                     <div>
                       <div className="flex items-start justify-between mb-2">
                         <Link
                           href={`/approaches/${appr._id}`}
-                          className="font-heading text-base font-bold text-white group-hover:text-teal-300 transition-colors flex items-center gap-1.5"
+                          className="font-heading text-base font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors flex items-center gap-1.5"
                         >
                           <span>{appr.businessName}</span>
-                          <ArrowUpRight className="w-4 h-4 text-neutral-500 group-hover:text-teal-300 transition-colors" />
+                          <ArrowUpRight className="w-4 h-4 text-slate-400 dark:text-neutral-500 group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors" />
                         </Link>
-                        <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">
+                        <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 font-medium">
                           {appr.status}
                         </span>
                       </div>
 
-                      <div className="space-y-1.5 text-xs text-neutral-400 mb-4 bg-[#181818] p-3 rounded-xl border border-[#262626]">
+                      <div className="space-y-1.5 text-xs text-slate-600 dark:text-neutral-400 mb-4 bg-slate-50 dark:bg-[#101724] p-3 rounded-xl border border-slate-200 dark:border-[#1e2a3c]">
                         <div className="flex justify-between">
-                          <span className="text-neutral-500">Contact</span>
-                          <span className="text-white font-medium">{appr.contactPerson}</span>
+                          <span className="text-slate-500 dark:text-neutral-500">Contact</span>
+                          <span className="text-slate-900 dark:text-white font-medium">{appr.contactPerson}</span>
                         </div>
                         {appr.email && (
                           <div className="flex justify-between">
-                            <span className="text-neutral-500">Email</span>
-                            <span className="text-neutral-300">{appr.email}</span>
+                            <span className="text-slate-500 dark:text-neutral-500">Email</span>
+                            <span className="text-slate-700 dark:text-neutral-300">{appr.email}</span>
                           </div>
                         )}
                         {appr.phone && (
                           <div className="flex justify-between">
-                            <span className="text-neutral-500">Phone</span>
-                            <span className="text-neutral-300">{appr.phone}</span>
+                            <span className="text-slate-500 dark:text-neutral-500">Phone</span>
+                            <span className="text-slate-700 dark:text-neutral-300">{appr.phone}</span>
                           </div>
                         )}
                         {appr.nextFollowUpDate && (
                           <div className="flex justify-between">
-                            <span className="text-neutral-500">Next Follow-up</span>
-                            <span className="text-amber-400 font-medium">
+                            <span className="text-slate-500 dark:text-neutral-500">Next Follow-up</span>
+                            <span className="text-amber-500 dark:text-amber-400 font-medium">
                               {new Date(appr.nextFollowUpDate).toLocaleDateString()}
                             </span>
                           </div>
@@ -1270,7 +1270,7 @@ export default function TeamMemberDetailPage() {
 
                     <Link
                       href={`/approaches/${appr._id}`}
-                      className="w-full py-2 px-3 rounded-xl bg-[#181818] hover:bg-teal-500/10 border border-[#262626] hover:border-teal-500/40 text-xs font-medium text-teal-400 flex items-center justify-center gap-1.5 transition"
+                      className="w-full py-2 px-3 rounded-xl bg-slate-50 dark:bg-[#101724] hover:bg-teal-500/10 border border-slate-200 dark:border-[#1e2a3c] hover:border-teal-500/40 text-xs font-medium text-teal-600 dark:text-teal-400 flex items-center justify-center gap-1.5 transition"
                     >
                       <span>Open Outreach Detail</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -1279,7 +1279,7 @@ export default function TeamMemberDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-12 text-center text-xs text-neutral-500 bg-[#121212] rounded-2xl border border-[#222222]">
+              <div className="p-12 text-center text-xs text-slate-500 dark:text-neutral-400 bg-white dark:bg-[#151d2a] rounded-2xl border border-slate-200 dark:border-[#222e42]">
                 No outreach targets currently assigned to this team member.
               </div>
             )}
@@ -1295,14 +1295,14 @@ export default function TeamMemberDetailPage() {
       >
         <form onSubmit={handleUpdate} className="space-y-4">
           {editError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-500 dark:text-rose-300 text-xs flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0" />
               <span>{editError}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1">
+            <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
               Full Name
             </label>
             <input
@@ -1310,13 +1310,13 @@ export default function TeamMemberDetailPage() {
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
               required
-              className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+              className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Job Title / Position
               </label>
               <input
@@ -1325,12 +1325,12 @@ export default function TeamMemberDetailPage() {
                 onChange={(e) => setEditTitle(e.target.value)}
                 placeholder="e.g. Founder & CEO"
                 required
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 outline-none transition"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Company Role
               </label>
               <CustomSelect
@@ -1373,8 +1373,8 @@ export default function TeamMemberDetailPage() {
                 }}
                 className={`text-[10px] px-2 py-0.5 rounded-lg border transition ${
                   editTitle === preset.titleVal
-                    ? 'bg-teal-500/20 text-teal-300 border-teal-500/30 font-semibold'
-                    : 'bg-[#181818] text-neutral-400 border-[#262626] hover:text-white hover:border-[#383838]'
+                    ? 'bg-teal-500/20 text-teal-600 dark:text-teal-300 border-teal-500/30 font-semibold'
+                    : 'bg-slate-100 dark:bg-[#101724] text-slate-600 dark:text-neutral-400 border-slate-200 dark:border-[#1e2a3c] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {preset.label}
@@ -1384,7 +1384,7 @@ export default function TeamMemberDetailPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Weekly Capacity (Hours)
               </label>
               <input
@@ -1393,13 +1393,13 @@ export default function TeamMemberDetailPage() {
                 onChange={(e) => setEditCapacity(e.target.value)}
                 min="10"
                 max="80"
-                className="w-full bg-[#181818] border border-[#262626] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
+                className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none transition"
               />
-              <span className="text-[10px] text-teal-400 mt-1 block">Baseline: 48h (6d × 8h)</span>
+              <span className="text-[10px] text-teal-600 dark:text-teal-400 mt-1 block">Baseline: 48h (6d × 8h)</span>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 Status
               </label>
               <CustomSelect
@@ -1424,7 +1424,7 @@ export default function TeamMemberDetailPage() {
                     setIsEditOpen(false);
                     setIsDeleteModalOpen(true);
                   }}
-                  className="px-3 py-2 rounded-xl text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 flex items-center gap-1.5 transition"
+                  className="px-3 py-2 rounded-xl text-xs font-medium text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 flex items-center gap-1.5 transition"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete Member</span>
@@ -1436,7 +1436,7 @@ export default function TeamMemberDetailPage() {
               <button
                 type="button"
                 onClick={() => setIsEditOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#1a1a1a] transition"
+                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724] transition"
               >
                 Cancel
               </button>
@@ -1475,23 +1475,23 @@ export default function TeamMemberDetailPage() {
       >
         <div className="space-y-4">
           <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-500 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
               <Trash2 className="w-5 h-5" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-xs font-bold text-white">Permanently Remove Member</h4>
-              <p className="text-xs text-rose-200/90 leading-relaxed">
-                Are you sure you want to remove <strong className="text-white">{user.name}</strong> ({user.email}) from Rhizan Hub?
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white">Permanently Remove Member</h4>
+              <p className="text-xs text-rose-700 dark:text-rose-200/90 leading-relaxed">
+                Are you sure you want to remove <strong className="text-slate-900 dark:text-white">{user.name}</strong> ({user.email}) from Rhizan Hub?
               </p>
-              <p className="text-[11px] text-neutral-400 pt-1">
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400 pt-1">
                 This will revoke their access immediately, unassign their pending tasks, and remove them from all project teams. This action cannot be undone.
               </p>
             </div>
           </div>
 
           {deleteError && (
-            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 shrink-0 text-rose-400" />
+            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-500 dark:text-rose-300 text-xs flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" />
               <span>{deleteError}</span>
             </div>
           )}
@@ -1504,7 +1504,7 @@ export default function TeamMemberDetailPage() {
                 setIsDeleteModalOpen(false);
                 setDeleteError(null);
               }}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#1a1a1a] transition disabled:opacity-50"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724] transition disabled:opacity-50"
             >
               Cancel
             </button>

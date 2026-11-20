@@ -74,7 +74,7 @@ export default function ChangePasswordPage() {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-teal-500/10 rounded-full blur-[130px] pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/95 dark:bg-[#111111]/90 backdrop-blur-xl border border-slate-200 dark:border-[#222222] rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-black/80">
+        <div className="bg-white/95 dark:bg-[#151d2a]/90 backdrop-blur-xl border border-slate-200 dark:border-[#222e42] rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-black/80">
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6">
             <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-600 dark:text-teal-400 flex items-center justify-center shadow-lg shadow-teal-500/15 mb-3">
@@ -152,7 +152,7 @@ export default function ChangePasswordPage() {
                   required
                   autoFocus={!isAutoFilled}
                   disabled={loading || success}
-                  className="w-full bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition disabled:opacity-50 font-mono tracking-wide cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition disabled:opacity-50 font-mono tracking-wide cursor-pointer"
                   title="Click to copy temporary password"
                 />
                 <button
@@ -186,7 +186,7 @@ export default function ChangePasswordPage() {
                   placeholder="Create a strong password (min 6 chars)"
                   required
                   disabled={loading || success}
-                  className="w-full bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition disabled:opacity-50 font-mono tracking-wide"
+                  className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition disabled:opacity-50 font-mono tracking-wide"
                 />
               </div>
             </div>
@@ -204,13 +204,13 @@ export default function ChangePasswordPage() {
                   placeholder="Re-type your new password"
                   required
                   disabled={loading || success}
-                  className="w-full bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#2a2a2a] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition disabled:opacity-50 font-mono tracking-wide"
+                  className="w-full bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] focus:border-teal-500 focus:ring-1 focus:ring-teal-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 outline-none transition disabled:opacity-50 font-mono tracking-wide"
                 />
               </div>
             </div>
 
             {/* Validation Checklist */}
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#171717] border border-slate-200 dark:border-[#262626] space-y-1.5 text-[11px]">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] space-y-1.5 text-[11px]">
               <div className={`flex items-center gap-2 ${hasMinLength ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-neutral-500'}`}>
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>At least 6 characters</span>

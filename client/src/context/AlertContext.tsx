@@ -237,7 +237,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#131313] border border-slate-200 dark:border-[#262626] rounded-3xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] sm:pb-6 overflow-hidden animate-scale-in text-slate-900 dark:text-white space-y-4"
+            className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] rounded-3xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] sm:pb-6 overflow-hidden animate-scale-in text-slate-900 dark:text-white space-y-4"
           >
             {/* Mobile Drag Indicator */}
             <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-neutral-700 mx-auto -mt-1 mb-1 sm:hidden" />
@@ -277,7 +277,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               <button
                 type="button"
                 onClick={closeAlert}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-[#202020] transition shrink-0"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-[#101724] transition shrink-0"
                 aria-label="Close dialog"
               >
                 <X className="w-4 h-4" />
@@ -285,7 +285,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             </div>
 
             {/* Message Body */}
-            <div className="text-xs sm:text-sm text-slate-700 dark:text-neutral-300 leading-relaxed max-h-60 overflow-y-auto custom-scrollbar pr-1 bg-slate-50 dark:bg-[#181818] p-3.5 rounded-2xl border border-slate-200 dark:border-[#232323]">
+            <div className="text-xs sm:text-sm text-slate-700 dark:text-neutral-300 leading-relaxed max-h-60 overflow-y-auto custom-scrollbar pr-1 bg-slate-50 dark:bg-[#101724] p-3.5 rounded-2xl border border-slate-200 dark:border-[#1e2a3c]">
               {state.message}
             </div>
 
@@ -296,7 +296,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   <button
                     type="button"
                     onClick={closeAlert}
-                    className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-[#202020] dark:hover:bg-[#282828] dark:active:bg-[#303030] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white text-xs font-semibold border border-slate-200 dark:border-[#2e2e2e] transition"
+                    className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-[#101724] dark:hover:bg-[#1a2436] dark:active:bg-[#1e2a3c] text-slate-700 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-white text-xs font-semibold border border-slate-200 dark:border-[#1e2a3c] transition"
                   >
                     {state.cancelText || 'Cancel'}
                   </button>

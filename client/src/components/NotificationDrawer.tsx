@@ -120,16 +120,16 @@ export const NotificationDrawer: React.FC = () => {
   };
 
   const getPriorityStyle = (priority: string, read: boolean) => {
-    if (read) return 'border-[#222222] bg-[#141414] hover:bg-[#181818]';
+    if (read) return 'border-slate-200 dark:border-[#1e2a3c] bg-white dark:bg-[#151d2a] hover:bg-slate-50 dark:hover:bg-[#1a2436]';
     switch (priority) {
       case 'urgent':
-        return 'border-rose-500/40 bg-gradient-to-r from-rose-950/20 to-[#181818] hover:border-rose-500/60';
+        return 'border-rose-500/40 bg-gradient-to-r from-rose-500/10 to-slate-50 dark:to-[#151d2a] hover:border-rose-500/60';
       case 'high':
-        return 'border-amber-500/35 bg-gradient-to-r from-amber-950/20 to-[#181818] hover:border-amber-500/50';
+        return 'border-amber-500/35 bg-gradient-to-r from-amber-500/10 to-slate-50 dark:to-[#151d2a] hover:border-amber-500/50';
       case 'medium':
-        return 'border-teal-500/30 bg-gradient-to-r from-teal-950/20 to-[#181818] hover:border-teal-500/50';
+        return 'border-teal-500/30 bg-gradient-to-r from-teal-500/10 to-slate-50 dark:to-[#151d2a] hover:border-teal-500/50';
       default:
-        return 'border-[#282828] bg-[#161616] hover:border-[#383838]';
+        return 'border-slate-200 dark:border-[#1e2a3c] bg-slate-50 dark:bg-[#151d2a] hover:border-teal-500/50';
     }
   };
 
@@ -173,29 +173,29 @@ export const NotificationDrawer: React.FC = () => {
       />
 
       {/* Drawer Panel */}
-      <div className="fixed inset-y-0 right-0 w-full sm:w-[440px] max-w-full bg-[#111111] border-l border-[#222222] shadow-2xl flex flex-col z-10 transition-transform transform translate-x-0">
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[440px] max-w-full bg-white dark:bg-[#101724] border-l border-slate-200 dark:border-[#1e2a3c] shadow-2xl flex flex-col z-10 transition-transform transform translate-x-0">
         {/* Drawer Header */}
-        <div className="p-4 sm:p-5 border-b border-[#222222] flex items-center justify-between shrink-0 bg-[#141414]">
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between shrink-0 bg-slate-50 dark:bg-[#151d2a]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400">
+            <div className="w-8 h-8 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-600 dark:text-teal-400">
               <Bell className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-heading text-sm font-bold text-white tracking-tight">Notifications</h3>
+                <h3 className="font-heading text-sm font-bold text-slate-900 dark:text-white tracking-tight">Notifications</h3>
                 {unreadCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500 text-black">
                     {unreadCount} new
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-neutral-400">Real-time alerts, follow-ups & workspace updates</p>
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400">Real-time alerts, follow-ups & workspace updates</p>
             </div>
           </div>
           <button
             type="button"
             onClick={closeDrawer}
-            className="w-8 h-8 rounded-xl bg-[#1e1e1e] hover:bg-[#282828] text-neutral-400 hover:text-white flex items-center justify-center transition"
+            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 dark:bg-[#1a2436] dark:hover:bg-[#222e42] dark:text-neutral-400 dark:hover:text-white flex items-center justify-center transition"
             aria-label="Close notifications"
           >
             <X className="w-4 h-4" />
@@ -203,13 +203,13 @@ export const NotificationDrawer: React.FC = () => {
         </div>
 
         {/* Global Controls Bar */}
-        <div className="px-4 py-2 bg-[#121212] border-b border-[#1f1f1f] flex items-center justify-between text-xs">
+        <div className="px-4 py-2 bg-slate-50 dark:bg-[#101724] border-b border-slate-200 dark:border-[#1e2a3c] flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={markAllAsRead}
-                className="flex items-center gap-1.5 text-[11px] text-teal-400 hover:text-teal-300 font-medium transition"
+                className="flex items-center gap-1.5 text-[11px] text-teal-600 dark:text-teal-400 hover:text-teal-500 font-medium transition"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
                 <span>Mark all read</span>
@@ -220,7 +220,7 @@ export const NotificationDrawer: React.FC = () => {
             <button
               type="button"
               onClick={clearAllRead}
-              className="flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-rose-400 font-medium transition"
+              className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 font-medium transition"
             >
               <Trash2 className="w-3 h-3" />
               <span>Clear read</span>
@@ -232,10 +232,10 @@ export const NotificationDrawer: React.FC = () => {
         {browserPermission === 'default' && (
           <div className="mx-4 my-2.5 p-3 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-2.5 min-w-0">
-              <Bell className="w-4 h-4 text-teal-400 shrink-0" />
+              <Bell className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
               <div className="text-[11px] leading-tight">
-                <span className="font-semibold text-white block">Desktop Push Alerts</span>
-                <span className="text-neutral-400 text-[10px]">Get real-time OS banner popups</span>
+                <span className="font-semibold text-slate-900 dark:text-white block">Desktop Push Alerts</span>
+                <span className="text-slate-500 dark:text-neutral-400 text-[10px]">Get real-time OS banner popups</span>
               </div>
             </div>
             <button
@@ -249,14 +249,14 @@ export const NotificationDrawer: React.FC = () => {
         )}
 
         {/* Tabs Filter */}
-        <div className="px-4 pt-2.5 pb-2 border-b border-[#1f1f1f] bg-[#121212] flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+        <div className="px-4 pt-2.5 pb-2 border-b border-slate-200 dark:border-[#1e2a3c] bg-slate-50 dark:bg-[#101724] flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('ALL')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
               activeTab === 'ALL'
                 ? 'bg-teal-600 text-white shadow-sm shadow-teal-900/40'
-                : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#242424]'
+                : 'bg-slate-100 dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c]'
             }`}
           >
             All ({notifications.length})
@@ -267,12 +267,12 @@ export const NotificationDrawer: React.FC = () => {
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
               activeTab === 'UNREAD'
                 ? 'bg-teal-600 text-white shadow-sm shadow-teal-900/40'
-                : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#242424]'
+                : 'bg-slate-100 dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c]'
             }`}
           >
             <span>Unread</span>
             {unreadCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-teal-400 text-black text-[10px] font-bold flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full bg-teal-500 text-black text-[10px] font-bold flex items-center justify-center">
                 {unreadCount}
               </span>
             )}
@@ -283,7 +283,7 @@ export const NotificationDrawer: React.FC = () => {
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
               activeTab === 'OUTREACH'
                 ? 'bg-teal-600 text-white shadow-sm shadow-teal-900/40'
-                : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#242424]'
+                : 'bg-slate-100 dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c]'
             }`}
           >
             Follow-ups & Leads
@@ -294,7 +294,7 @@ export const NotificationDrawer: React.FC = () => {
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
               activeTab === 'TASKS'
                 ? 'bg-teal-600 text-white shadow-sm shadow-teal-900/40'
-                : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#242424]'
+                : 'bg-slate-100 dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c]'
             }`}
           >
             Tasks & Projects
@@ -305,7 +305,7 @@ export const NotificationDrawer: React.FC = () => {
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
               activeTab === 'OPS'
                 ? 'bg-teal-600 text-white shadow-sm shadow-teal-900/40'
-                : 'bg-[#181818] text-neutral-400 hover:text-white border border-[#242424]'
+                : 'bg-slate-100 dark:bg-[#151d2a] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c]'
             }`}
           >
             Operations
@@ -316,12 +316,12 @@ export const NotificationDrawer: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] custom-scrollbar">
           {filteredNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center p-8 mt-12 space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#181818] border border-[#282828] flex items-center justify-center text-neutral-500">
+              <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-[#151d2a] border border-slate-200 dark:border-[#1e2a3c] flex items-center justify-center text-slate-400 dark:text-neutral-500">
                 <Bell className="w-5 h-5 opacity-40" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-neutral-300">No notifications here</p>
-                <p className="text-[11px] text-neutral-500 mt-0.5">
+                <p className="text-xs font-semibold text-slate-700 dark:text-neutral-300">No notifications here</p>
+                <p className="text-[11px] text-slate-500 dark:text-neutral-500 mt-0.5">
                   {activeTab === 'UNREAD'
                     ? "You're all caught up! No unread notifications."
                     : 'Activity, task assignments, and reminders will appear here.'}
@@ -340,29 +340,29 @@ export const NotificationDrawer: React.FC = () => {
               >
                 <div className="flex items-start gap-3">
                   {/* Category Icon */}
-                  <div className="w-8 h-8 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#101724] border border-slate-200 dark:border-[#1e2a3c] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                     {getNotificationIcon(notif.type)}
                   </div>
 
                   {/* Body */}
                   <div className="flex-1 min-w-0 pr-6">
                     <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                      <span className={`text-xs font-bold truncate ${notif.read ? 'text-neutral-300' : 'text-white'}`}>
+                      <span className={`text-xs font-bold truncate ${notif.read ? 'text-slate-700 dark:text-neutral-300' : 'text-slate-900 dark:text-white'}`}>
                         {notif.title}
                       </span>
                       {!notif.read && (
-                        <span className="w-2 h-2 rounded-full bg-teal-400 shrink-0" title="Unread" />
+                        <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0" title="Unread" />
                       )}
                     </div>
 
-                    <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-slate-600 dark:text-neutral-400 line-clamp-2 leading-relaxed">
                       {notif.message}
                     </p>
 
-                    <div className="flex items-center justify-between mt-2 text-[10px] text-neutral-500">
+                    <div className="flex items-center justify-between mt-2 text-[10px] text-slate-500 dark:text-neutral-500">
                       <span>{formatRelativeTime(notif.createdAt)}</span>
                       {notif.link && (
-                        <span className="text-teal-400/80 group-hover:text-teal-300 flex items-center gap-0.5 transition font-medium">
+                        <span className="text-teal-600 dark:text-teal-400/80 group-hover:text-teal-500 dark:group-hover:text-teal-300 flex items-center gap-0.5 transition font-medium">
                           <span>View details</span>
                           <ChevronRight className="w-3 h-3" />
                         </span>
@@ -379,7 +379,7 @@ export const NotificationDrawer: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => markAsRead(notif._id)}
-                        className="p-1 rounded-lg bg-[#202020] text-neutral-400 hover:text-teal-300 hover:bg-[#282828] transition"
+                        className="p-1 rounded-lg bg-slate-100 dark:bg-[#1a2436] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#1e2a3c] transition"
                         title="Mark as read"
                       >
                         <Check className="w-3 h-3" />
@@ -388,7 +388,7 @@ export const NotificationDrawer: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => deleteNotification(notif._id)}
-                      className="p-1 rounded-lg bg-[#202020] text-neutral-400 hover:text-rose-400 hover:bg-[#282828] transition"
+                      className="p-1 rounded-lg bg-slate-100 dark:bg-[#1a2436] text-slate-600 dark:text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-[#1e2a3c] transition"
                       title="Delete"
                     >
                       <Trash2 className="w-3 h-3" />

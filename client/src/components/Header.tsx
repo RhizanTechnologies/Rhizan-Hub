@@ -66,24 +66,24 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="min-h-16 border-b border-[#222222] bg-[#0d0d0d]/80 backdrop-blur-md px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 sticky top-0 z-30">
+      <header className="min-h-16 border-b border-slate-200 dark:border-[#1e2a3c] bg-white/80 dark:bg-[#101724]/80 backdrop-blur-md px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 sticky top-0 z-30">
       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
         {/* Mobile Hamburger Menu Toggle */}
         <button
           onClick={toggle}
           type="button"
-          className="lg:hidden min-w-[38px] min-h-[38px] p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-[#1a1a1a] active:bg-[#252525] border border-[#222222] transition shrink-0 flex items-center justify-center"
+          className="lg:hidden min-w-[38px] min-h-[38px] p-2 rounded-xl text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#151d2a] active:bg-slate-200 dark:active:bg-[#1a2436] border border-slate-200 dark:border-[#1e2a3c] transition shrink-0 flex items-center justify-center"
           aria-label="Open sidebar navigation"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         <div className="min-w-0 flex-1">
-          <h1 className="font-heading text-xs sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5 truncate">
+          <h1 className="font-heading text-xs sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5 truncate">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-[10px] sm:text-xs text-neutral-400 truncate hidden md:block">
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-neutral-400 truncate hidden md:block">
               {subtitle}
             </p>
           )}
@@ -95,10 +95,10 @@ export const Header: React.FC<HeaderProps> = ({
         {pathname !== '/time' && (
           <Link
             href="/time"
-            className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-xs font-medium text-neutral-300 transition"
+            className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#1e2a3c] bg-slate-50 dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1a2436] text-xs font-medium text-slate-700 dark:text-neutral-300 transition"
             title="Track & Log Time"
           >
-            <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
             <span className="hidden sm:inline">Log Time</span>
           </Link>
         )}
@@ -128,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={toggleDrawer}
           type="button"
-          className="relative p-1.5 sm:p-2 rounded-xl border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-neutral-300 hover:text-white transition flex items-center justify-center shrink-0 shadow-sm"
+          className="relative p-1.5 sm:p-2 rounded-xl border border-slate-200 dark:border-[#1e2a3c] bg-slate-50 dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center shrink-0 shadow-sm"
           title={unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'Notifications'}
           aria-label="Toggle notifications center"
         >
@@ -144,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={toggleColorMode}
           type="button"
-          className="p-1.5 sm:p-2 rounded-xl border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] text-neutral-300 hover:text-white transition flex items-center justify-center shrink-0 shadow-sm"
+          className="p-1.5 sm:p-2 rounded-xl border border-slate-200 dark:border-[#1e2a3c] bg-slate-50 dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1a2436] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center shrink-0 shadow-sm"
           title={isLight ? 'Switch to Dark Mode (Soft Slate)' : 'Switch to Clean Light Mode'}
           aria-label="Toggle theme color"
         >
@@ -160,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => installPwa()}
             type="button"
-            className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 hover:text-teal-300 text-xs font-medium transition shrink-0 cursor-pointer shadow-sm animate-pulse"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 text-xs font-medium transition shrink-0 cursor-pointer shadow-sm animate-pulse"
             title="Install RHIZAN Hub app on this device"
           >
             <Download className="w-3.5 h-3.5" />
@@ -169,10 +169,10 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {/* User Status Avatar & Dropdown */}
-        <div className="relative pl-1 sm:pl-2 border-l border-slate-200 dark:border-[#222222]" ref={menuRef}>
+        <div className="relative pl-1 sm:pl-2 border-l border-slate-200 dark:border-[#1e2a3c]" ref={menuRef}>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="flex items-center gap-2 sm:gap-2.5 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-[#181818] transition text-left"
+            className="flex items-center gap-2 sm:gap-2.5 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-[#151d2a] transition text-left"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
               {user?.name?.charAt(0) || 'A'}
@@ -191,8 +191,8 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Profile Dropdown Menu */}
           {menuOpen && (
-            <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#262626] shadow-2xl py-2 z-50 text-xs animate-fade-in">
-              <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-[#222222]">
+            <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-white dark:bg-[#151d2a] border border-slate-200 dark:border-[#222e42] shadow-2xl py-2 z-50 text-xs animate-fade-in">
+              <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-[#1e2a3c]">
                 <div className="font-semibold text-slate-900 dark:text-white truncate text-sm">{user?.name}</div>
                 <div className="text-[11px] text-slate-500 dark:text-neutral-400 truncate">{user?.email}</div>
                 <div className="mt-2 flex items-center gap-1.5 flex-wrap">
@@ -232,7 +232,7 @@ export const Header: React.FC<HeaderProps> = ({
                     toggleColorMode();
                     setMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724] transition text-left"
                 >
                   <div className="flex items-center gap-2">
                     {isLight ? (
@@ -251,7 +251,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <Link
                     href={`/team/${user.id}`}
                     onClick={() => setMenuOpen(false)}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724] transition text-left"
                   >
                     <UserIcon className="w-4 h-4 text-slate-400 dark:text-neutral-400" />
                     <span>My Profile & Stats</span>
@@ -261,7 +261,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <Link
                   href="/settings"
                   onClick={() => setMenuOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724] transition text-left"
                 >
                   <SlidersHorizontal className="w-4 h-4 text-slate-400 dark:text-neutral-400" />
                   <span>Settings & Appearance</span>
@@ -270,7 +270,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <Link
                   href="/docs"
                   onClick={() => setMenuOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724] transition text-left"
                 >
                   <BookOpen className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   <span>Hub Documentation</span>
@@ -279,7 +279,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <Link
                   href="/change-password"
                   onClick={() => setMenuOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c] transition text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#101724] transition text-left"
                 >
                   <KeyRound className="w-4 h-4 text-slate-400 dark:text-neutral-400" />
                   <span>Change Password</span>
@@ -316,16 +316,16 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 )}
 
-                <div className="h-px bg-slate-100 dark:bg-[#222222] my-1" />
+                <div className="h-px bg-slate-100 dark:bg-[#1e2a3c] my-1" />
 
                 <button
                   onClick={() => {
                     setMenuOpen(false);
                     logout();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-300 hover:text-rose-400 hover:bg-[#1c1c1c] transition text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-neutral-300 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-[#101724] transition text-left"
                 >
-                  <LogOut className="w-4 h-4 text-neutral-400" />
+                  <LogOut className="w-4 h-4 text-slate-400 dark:text-neutral-400" />
                   <span>Sign Out</span>
                 </button>
               </div>
@@ -362,12 +362,12 @@ export const Header: React.FC<HeaderProps> = ({
         {pathname !== '/time' && (
           <Link
             href="/time"
-            className={`flex items-center justify-center gap-1.5 py-2.5 px-3.5 rounded-2xl border border-[#262626] bg-[#141414] hover:bg-[#1f1f1f] active:bg-[#222222] text-xs font-medium text-neutral-300 transition shrink-0 ${
+            className={`flex items-center justify-center gap-1.5 py-2.5 px-3.5 rounded-2xl border border-slate-200 dark:border-[#1e2a3c] bg-slate-50 dark:bg-[#151d2a] hover:bg-slate-100 dark:hover:bg-[#1a2436] active:bg-slate-200 dark:active:bg-[#1e2a3c] text-xs font-medium text-slate-700 dark:text-neutral-300 transition shrink-0 ${
               !actionButton ? 'flex-1' : ''
             }`}
             title="Track & Log Time"
           >
-            <Clock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
             <span>Log Time</span>
           </Link>
         )}
